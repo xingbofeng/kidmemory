@@ -57,6 +57,7 @@ local-data/
 .vscode/
 .idea/
 *.iml
+.playwright-cli/
 
 # Supabase local development
 .supabase/

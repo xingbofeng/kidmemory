@@ -37,7 +37,8 @@ jobs:
       - run: npm run prisma:generate
 
       - name: Start Supabase local stack
-        run: supabase start
+        run: |
+          supabase start
 
       - name: Run all tests
         run: npm test
