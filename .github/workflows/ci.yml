@@ -44,6 +44,11 @@ jobs:
         run: |
           PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -c "CREATE DATABASE kidmemory_test;"
 
+      - name: Apply Prisma migrations to test database
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/kidmemory_test
+
       - name: Run all tests
         run: npm test
         env:
