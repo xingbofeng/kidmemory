@@ -1,0 +1,46 @@
+name: Deploy to Tencent Cloud
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: deploy to lighthouse
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.TENCENT_HOST }}
+          username: ${{ secrets.TENCENT_USER }}
+          key: ${{ secrets.TENCENT_SSH_KEY }}
+          port: ${{ secrets.TENCENT_PORT || 22 }}
+          script: |
+            set -e
+            PROJECT_PATH="${{ secrets.TENCENT_PROJECT_PATH || '/root/kidmemory' }}"
+
+            cd "$PROJECT_PATH"
+            git pull origin main
+
+            # Backend
+            cd "$PROJECT_PATH/packages/backend"
+            npm ci --omit=dev
+            npm run prisma:generate
+            set -a && source .env && set +a
+            DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
+            npm run build:prod
+
+            # Web
+            cd "$PROJECT_PATH/packages/web"
+            npm ci --omit=dev
+            npm run build
+
+            # Reload services
+            PROJECT_PATH="$PROJECT_PATH" pm2 reload all
+            pm2 save
