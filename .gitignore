@@ -1,0 +1,64 @@
+# macOS
+.DS_Store
+
+# Temporary/editor artifacts
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*~
+
+# Node
+node_modules/
+dist/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+.packages
+.pub-cache/
+.pub/
+.plugin_symlinks/
+
+# Xcode / SwiftPM
+DerivedData/
+.swiftpm/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# KidMemory local data
+.kidmemory/
+workspace/
+exports/
+local-data/
+!openspec/**/local-data/
+!openspec/**/local-data/**
+
+# Logs
+*.log
+
+# Local assistant and workspace config
+.agents/
+.claude/
+.codebuddy/
+.codex/
+.superpowers/
+.vercel/
+.vscode/
+.idea/
+*.iml
+
+# Supabase local development
+.supabase/
+**/supabase/.branches/
+**/supabase/.temp/

@@ -1,0 +1,339 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - generic [ref=e7]:
+      - banner "Global Navigation Menu" [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - button "Open menu" [ref=e12] [cursor=pointer]:
+              - img [ref=e13]
+            - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+              - /url: /
+              - img [ref=e16]
+          - generic [ref=e18]:
+            - navigation "Breadcrumbs" [ref=e19]:
+              - list [ref=e20]:
+                - listitem [ref=e21]:
+                  - link "xingbofeng" [ref=e22] [cursor=pointer]:
+                    - /url: /xingbofeng
+                    - generic [ref=e23]: xingbofeng
+                - listitem [ref=e24]:
+                  - link "kidmemory" [ref=e25] [cursor=pointer]:
+                    - /url: /xingbofeng/kidmemory
+                    - generic [ref=e26]: kidmemory
+            - button "Search or jump to…" [ref=e29] [cursor=pointer]:
+              - generic [ref=e30]:
+                - generic:
+                  - img
+                - generic [ref=e31]:
+                  - generic:
+                    - text: Type
+                    - generic: /
+                    - text: to search
+          - generic [ref=e32]:
+            - generic [ref=e33]:
+              - generic [ref=e36]:
+                - link "Chat with Copilot" [ref=e38] [cursor=pointer]:
+                  - /url: /copilot
+                  - img [ref=e39]
+                - button "Open Copilot…" [ref=e43] [cursor=pointer]:
+                  - generic:
+                    - img
+              - button "Create new..." [ref=e45] [cursor=pointer]:
+                - generic [ref=e46]:
+                  - generic:
+                    - img
+                - generic:
+                  - img
+              - generic [ref=e47]:
+                - link "All issues" [ref=e48] [cursor=pointer]:
+                  - /url: /issues
+                  - img [ref=e49]
+                - link "All pull requests" [ref=e52] [cursor=pointer]:
+                  - /url: /pulls
+                  - img [ref=e53]
+                - link "All repositories" [ref=e55] [cursor=pointer]:
+                  - /url: /repos
+                  - img [ref=e56]
+            - link "You have unread notifications (g then n)" [ref=e364] [cursor=pointer]:
+              - /url: /notifications
+              - img [ref=e59]
+            - button "Open user navigation menu" [ref=e62] [cursor=pointer]:
+              - img "Counterxing" [ref=e63]
+        - heading "Repository navigation" [level=2] [ref=e64]
+        - navigation "Repository" [ref=e65]:
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - link "Code" [ref=e68] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory
+                - img [ref=e70]
+                - generic [ref=e72]: Code
+            - listitem [ref=e73]:
+              - link "Issues" [ref=e74] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/issues
+                - img [ref=e76]
+                - generic [ref=e79]: Issues
+            - listitem [ref=e80]:
+              - link "Pull requests" [ref=e81] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/pulls
+                - img [ref=e83]
+                - generic [ref=e85]: Pull requests
+            - listitem [ref=e86]:
+              - link "Agents" [ref=e87] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/agents?author=xingbofeng
+                - img [ref=e89]
+                - generic [ref=e92]: Agents
+            - listitem [ref=e93]:
+              - link "Actions" [ref=e94] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/actions
+                - img [ref=e96]
+                - generic [ref=e98]: Actions
+            - listitem [ref=e99]:
+              - link "Projects" [ref=e100] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/projects
+                - img [ref=e102]
+                - generic [ref=e104]: Projects
+            - listitem [ref=e105]:
+              - link "Wiki" [ref=e106] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/wiki
+                - img [ref=e108]
+                - generic [ref=e110]: Wiki
+            - listitem [ref=e111]:
+              - link "Security and quality" [ref=e112] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/security
+                - img [ref=e114]
+                - generic [ref=e116]: Security and quality
+            - listitem [ref=e117]:
+              - link "Insights" [ref=e118] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/pulse
+                - img [ref=e120]
+                - generic [ref=e122]: Insights
+            - listitem [ref=e123]:
+              - link "Settings" [ref=e124] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/settings
+                - img [ref=e126]
+                - generic [ref=e128]: Settings
+      - region "Important update" [ref=e130]:
+        - img [ref=e132]
+        - generic [ref=e135]:
+          - heading "Important update" [level=2] [ref=e137]
+          - generic [ref=e139]:
+            - text: On April 24 we'll start using GitHub Copilot interaction data for AI model training unless you opt out.
+            - link "Review this update" [ref=e140] [cursor=pointer]:
+              - /url: https://gh.io/AAzfaht
+            - text: and manage your preferences in your
+            - link "GitHub account settings" [ref=e141] [cursor=pointer]:
+              - /url: https://github.com/settings/copilot/features
+            - text: .
+        - button "Dismiss banner" [ref=e142] [cursor=pointer]:
+          - img [ref=e143]
+  - main [ref=e147]:
+    - generic [ref=e148]:
+      - 'heading "Settings: xingbofeng/kidmemory" [level=1] [ref=e365]'
+      - generic [ref=e367]:
+        - navigation "General settings" [ref=e370]:
+          - list [ref=e372]:
+            - listitem [ref=e373]:
+              - link "General" [ref=e374] [cursor=pointer]:
+                - /url: /xingbofeng/kidmemory/settings
+                - generic:
+                  - img
+                - generic [ref=e375]: General
+            - listitem [ref=e376]
+            - listitem [ref=e377]:
+              - generic [ref=e380]:
+                - heading "Access" [level=2] [ref=e382]
+                - list "Access" [ref=e383]:
+                  - listitem [ref=e384]:
+                    - link "Collaborators" [ref=e385] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/access
+                      - generic:
+                        - img
+                      - generic [ref=e386]: Collaborators
+                  - listitem [ref=e387]:
+                    - button "Moderation options" [ref=e388] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e389]: Moderation options
+                      - generic:
+                        - img
+            - listitem [ref=e390]
+            - listitem [ref=e391]:
+              - generic [ref=e394]:
+                - heading "Code and automation" [level=2] [ref=e396]
+                - list "Code and automation" [ref=e397]:
+                  - listitem [ref=e398]:
+                    - link "Branches" [ref=e399] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/branches
+                      - generic:
+                        - img
+                      - generic [ref=e400]: Branches
+                  - listitem [ref=e401]:
+                    - link "Tags" [ref=e402] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/tag_protection
+                      - generic:
+                        - img
+                      - generic [ref=e403]: Tags
+                  - listitem [ref=e404]:
+                    - button "Rules" [ref=e405] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e406]: Rules
+                      - generic:
+                        - img
+                  - listitem [ref=e407]:
+                    - button "Actions" [ref=e408] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e409]: Actions
+                      - generic:
+                        - img
+                  - listitem [ref=e410]:
+                    - link "Models Preview feature" [ref=e411] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/models/access-policy
+                      - generic:
+                        - img
+                      - generic [ref=e412]: Models
+                      - generic:
+                        - generic "Preview feature": Preview
+                  - listitem [ref=e413]:
+                    - link "Webhooks" [ref=e414] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/hooks
+                      - generic:
+                        - img
+                      - generic [ref=e415]: Webhooks
+                  - listitem [ref=e416]:
+                    - button "Copilot" [ref=e417] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e418]: Copilot
+                      - generic:
+                        - img
+                  - listitem [ref=e419]:
+                    - link "Environments" [ref=e420] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/environments
+                      - generic:
+                        - img
+                      - generic [ref=e421]: Environments
+                  - listitem [ref=e422]:
+                    - link "Codespaces" [ref=e423] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/codespaces
+                      - generic:
+                        - img
+                      - generic [ref=e424]: Codespaces
+                  - listitem [ref=e425]:
+                    - link "Pages" [ref=e426] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/pages
+                      - generic:
+                        - img
+                      - generic [ref=e427]: Pages
+            - listitem [ref=e428]
+            - listitem [ref=e429]:
+              - generic [ref=e432]:
+                - heading "Security and quality" [level=2] [ref=e434]
+                - list "Security and quality" [ref=e435]:
+                  - listitem [ref=e436]:
+                    - link "Advanced Security" [ref=e437] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/security_analysis
+                      - generic:
+                        - img
+                      - generic [ref=e438]: Advanced Security
+                  - listitem [ref=e439]:
+                    - link "Deploy keys" [ref=e440] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/keys
+                      - generic:
+                        - img
+                      - generic [ref=e441]: Deploy keys
+                  - listitem [ref=e442]:
+                    - button "Secrets and variables" [expanded] [ref=e443] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e444]: Secrets and variables
+                      - generic:
+                        - img
+                    - list "Secrets and variables" [ref=e445]:
+                      - listitem [ref=e446]:
+                        - link "Actions" [ref=e447] [cursor=pointer]:
+                          - /url: /xingbofeng/kidmemory/settings/secrets/actions
+                          - generic [ref=e448]: Actions
+                      - listitem [ref=e449]:
+                        - link "Agents" [ref=e450] [cursor=pointer]:
+                          - /url: /xingbofeng/kidmemory/settings/secrets/agents
+                          - generic [ref=e451]: Agents
+                      - listitem [ref=e452]:
+                        - link "Codespaces" [ref=e453] [cursor=pointer]:
+                          - /url: /xingbofeng/kidmemory/settings/secrets/codespaces
+                          - generic [ref=e454]: Codespaces
+                      - listitem [ref=e455]:
+                        - link "Dependabot" [ref=e456] [cursor=pointer]:
+                          - /url: /xingbofeng/kidmemory/settings/secrets/dependabot
+                          - generic [ref=e457]: Dependabot
+            - listitem [ref=e458]
+            - listitem [ref=e459]:
+              - generic [ref=e462]:
+                - heading "Integrations" [level=2] [ref=e464]
+                - list "Integrations" [ref=e465]:
+                  - listitem [ref=e466]:
+                    - link "GitHub Apps" [ref=e467] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/installations
+                      - generic:
+                        - img
+                      - generic [ref=e468]: GitHub Apps
+                  - listitem [ref=e469]:
+                    - link "Email notifications" [ref=e470] [cursor=pointer]:
+                      - /url: /xingbofeng/kidmemory/settings/notifications
+                      - generic:
+                        - img
+                      - generic [ref=e471]: Email notifications
+        - generic [ref=e474]:
+          - heading "Actions secrets / New secret" [level=2] [ref=e476]:
+            - link "Actions secrets" [ref=e477] [cursor=pointer]:
+              - /url: /xingbofeng/kidmemory/settings/secrets/actions
+            - text: / New secret
+          - generic [ref=e479]:
+            - generic [ref=e481]:
+              - generic [ref=e482]: Name *
+              - textbox "Name" [ref=e484]:
+                - /placeholder: YOUR_SECRET_NAME
+            - generic [ref=e487]:
+              - generic [ref=e488]: Secret *
+              - textbox "Secret" [ref=e490]
+            - button "Add secret" [ref=e492] [cursor=pointer]:
+              - generic [ref=e494]: Add secret
+  - contentinfo [ref=e331]:
+    - heading "Footer" [level=2] [ref=e332]
+    - generic [ref=e333]:
+      - generic [ref=e334]:
+        - link "GitHub Homepage" [ref=e335] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e336]
+        - generic [ref=e338]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e339]:
+        - heading "Footer navigation" [level=3] [ref=e340]
+        - list "Footer navigation" [ref=e341]:
+          - listitem [ref=e342]:
+            - link "Terms" [ref=e343] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e344]:
+            - link "Privacy" [ref=e345] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e346]:
+            - link "Security" [ref=e347] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e348]:
+            - link "Status" [ref=e349] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e350]:
+            - link "Community" [ref=e351] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e352]:
+            - link "Docs" [ref=e353] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e354]:
+            - link "Contact" [ref=e355] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e356]:
+            - button "Manage cookies" [ref=e358] [cursor=pointer]
+          - listitem [ref=e359]:
+            - button "Do not share my personal information" [ref=e361] [cursor=pointer]

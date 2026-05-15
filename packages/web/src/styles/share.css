@@ -1,0 +1,653 @@
+/* Share Pages Styles */
+
+.share-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.share-page.loading,
+.share-page.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #666;
+}
+
+.loading-spinner svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-spinner p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-content {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.error-content svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  color: #e74c3c;
+}
+
+.error-content h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.error-content p {
+  color: #666;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.error-actions button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.error-actions button:hover {
+  background: #2980b9;
+}
+
+/* Share Header */
+.share-header {
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.share-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.share-brand svg {
+  width: 40px;
+  height: 40px;
+  color: #f39c12;
+}
+
+.share-brand h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.share-brand p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #666;
+}
+
+.share-info {
+  display: flex;
+  align-items: center;
+}
+
+.share-type {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ecf0f1;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+}
+
+.share-type svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Share Content */
+.share-content {
+  padding: 2rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.content-header h2 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.content-header p {
+  color: #666;
+  margin: 0;
+}
+
+/* Assets Grid (Browse Page) */
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.asset-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.asset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.asset-image {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+
+.asset-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.asset-info {
+  padding: 1rem;
+}
+
+.asset-info h3 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.asset-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.asset-date svg {
+  width: 14px;
+  height: 14px;
+}
+
+.asset-action {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.asset-action:hover {
+  background: white;
+}
+
+.asset-action svg {
+  width: 18px;
+  height: 18px;
+  color: #2c3e50;
+}
+
+/* Book Showcase (Book Page) */
+.book-showcase {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .book-showcase {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.book-cover-large {
+  position: relative;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.book-cover-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.book-cover-large:hover .book-overlay {
+  opacity: 1;
+}
+
+.play-button {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-button:hover {
+  transform: scale(1.05);
+}
+
+.play-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.book-details {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.book-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.book-header h2 {
+  font-size: 1.75rem;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #d5f4e6;
+  color: #27ae60;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-pill svg {
+  width: 16px;
+  height: 16px;
+}
+
+.book-description {
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.book-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.book-meta div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.book-meta dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.book-meta dt svg {
+  width: 16px;
+  height: 16px;
+}
+
+.book-meta dd {
+  color: #666;
+  margin: 0;
+}
+
+.book-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.book-tag {
+  background: #ecf0f1;
+  color: #2c3e50;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+/* Book Preview Section */
+.book-preview-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.book-preview-section h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.book-preview-section p {
+  color: #666;
+  margin: 0 0 1.5rem 0;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.preview-page {
+  position: relative;
+  aspect-ratio: 3/4;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-page img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.preview-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.preview-more svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  color: #bdc3c7;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* Share Footer */
+.share-footer {
+  background: white;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.action-button.primary {
+  background: #3498db;
+  color: white;
+}
+
+.action-button.primary:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.action-button.secondary {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.action-button.secondary:hover {
+  background: #d5dbdb;
+  transform: translateY(-1px);
+}
+
+.action-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.share-more {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.share-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid #bdc3c7;
+  color: #666;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.share-link-button:hover {
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.share-link-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.share-branding {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #ecf0f1;
+}
+
+.share-branding p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.share-branding svg {
+  width: 20px;
+  height: 20px;
+  color: #f39c12;
+}
+
+.share-branding strong {
+  color: #2c3e50;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .share-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .share-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .assets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .book-details {
+    padding: 1.5rem;
+  }
+
+  .book-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .book-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .share-actions {
+    flex-direction: column;
+  }
+
+  .action-button {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .share-footer {
+    padding: 1.5rem 1rem;
+  }
+}

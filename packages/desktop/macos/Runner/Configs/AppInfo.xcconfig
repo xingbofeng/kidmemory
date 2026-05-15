@@ -1,0 +1,3 @@
+PRODUCT_NAME = KidMemory
+PRODUCT_BUNDLE_IDENTIFIER = dev.kidmemory.desktop
+PRODUCT_COPYRIGHT = Copyright © 2026 KidMemory. All rights reserved.

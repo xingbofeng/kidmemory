@@ -1,0 +1,455 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Child {
+  id        String   @id
+  name      String
+  birthday  DateTime? @db.Date
+  notes     String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  assets         Asset[]
+  books          Book[]
+  uploadSessions UploadSession[]
+  shareTokens    ShareToken[]
+  agentRuns      AgentRun[]
+  candidatePoolItems CandidatePoolItem[]
+
+  @@map("children")
+}
+
+model Asset {
+  id                        String    @id
+  childId                   String?   @map("child_id")
+  type                      String
+  title                     String
+  description               String    @default("")
+  tags                      String[]  @default([])
+  imagePath                 String?   @map("image_path")
+  thumbnailPath             String?   @map("thumbnail_path")
+  sourceUrl                 String?   @map("source_url")
+  license                   String
+  hash                      String?
+  contentType               String?   @map("content_type")
+  sizeBytes                 BigInt?   @map("size_bytes")
+  originalFilename          String?   @map("original_filename")
+  originalPath              String?   @map("original_path")
+  storageProvider           String    @default("local") @map("storage_provider")
+  storageStatus             String    @default("local_only") @map("storage_status")
+  storagePath               String?   @map("storage_path")
+  remoteUrl                 String?   @map("remote_url")
+  metadata                  Json      @default("{}")
+  metadataEmbedding         Unsupported("vector(1536)")? @map("metadata_embedding")
+  embeddingStatus           String    @default("pending") @map("embedding_status")
+  embeddingVersion          Int       @default(0) @map("embedding_version")
+  searchable                Boolean   @default(false)
+  embeddingUpdatedAt        DateTime? @map("embedding_updated_at") @db.Timestamptz(6)
+  lastEmbeddingErrorCode    String?   @map("last_embedding_error_code")
+  lastEmbeddingErrorMessage String?   @map("last_embedding_error_message")
+  capturedAt                DateTime? @map("captured_at") @db.Timestamptz(6)
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  child              Child?              @relation(fields: [childId], references: [id])
+  assetEmbedding     AssetEmbedding?
+  bookPages          BookPage[]
+  embeddingJobs      EmbeddingJob[]
+  candidatePoolItems CandidatePoolItem[]
+  uploadItems        UploadItem[]
+
+  @@index([childId, embeddingStatus, searchable], map: "idx_assets_child_embedding_status")
+  @@index([childId, capturedAt], map: "idx_assets_child_captured_at")
+  @@index([childId], map: "idx_assets_child_id")
+  @@index([type], map: "idx_assets_type")
+  @@index([storageStatus], map: "idx_assets_storage_status")
+  @@index([embeddingStatus], map: "idx_assets_embedding_status")
+  @@index([updatedAt], map: "idx_assets_updated_at")
+  @@index([childId, type], map: "idx_assets_child_type")
+  @@map("assets")
+}
+
+model AssetEmbedding {
+  assetId   String    @id @map("asset_id")
+  embedding Unsupported("vector(1536)")?
+  embeddingData Json? @map("embedding_data")
+  model     String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("asset_embeddings")
+}
+
+model Book {
+  id        String   @id
+  childId   String?  @map("child_id")
+  title     String
+  status    String
+  htmlPath  String?  @map("html_path")
+  pdfPath   String?  @map("pdf_path")
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  child Child? @relation(fields: [childId], references: [id])
+  pages BookPage[]
+  agentJobs AgentJob[]
+
+  @@map("books")
+}
+
+model BookPage {
+  id        String @id
+  bookId    String @map("book_id")
+  pageIndex Int    @map("page_index")
+  kind      String
+  assetId   String? @map("asset_id")
+  title     String
+  body      String @default("")
+  metadata  Json   @default("{}")
+
+  book  Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  asset Asset? @relation(fields: [assetId], references: [id])
+
+  @@map("book_pages")
+}
+
+model AgentJob {
+  id               String   @id
+  childId          String?  @map("child_id")
+  status           String
+  runner           String
+  workspacePath    String?  @map("workspace_path")
+  selectedAssetIds String[] @default([]) @map("selected_asset_ids")
+  errorMessage     String?  @map("error_message")
+  bookId           String?  @map("book_id")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  book Book? @relation(fields: [bookId], references: [id])
+
+  @@map("agent_jobs")
+}
+
+model EmbeddingJob {
+  id               String   @id
+  assetId          String   @map("asset_id")
+  metadataVersion  Int      @map("metadata_version")
+  status           String
+  attempt          Int      @default(0)
+  maxAttempts      Int      @default(5) @map("max_attempts")
+  runAfter         DateTime @default(now()) @map("run_after") @db.Timestamptz(6)
+  lockedBy         String?  @map("locked_by")
+  lockedAt         DateTime? @map("locked_at") @db.Timestamptz(6)
+  sourceQuery      String?  @map("source_query")
+  lastErrorCode    String?  @map("last_error_code")
+  lastErrorMessage String?  @map("last_error_message")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, metadataVersion])
+  @@index([status, runAfter], map: "idx_embedding_jobs_status_run_after")
+  @@index([lockedAt], map: "idx_embedding_jobs_locked_at")
+  @@index([assetId], map: "idx_embedding_jobs_asset_id")
+  @@index([status], map: "idx_embedding_jobs_status")
+  @@index([createdAt], map: "idx_embedding_jobs_created_at")
+  @@map("embedding_jobs")
+}
+
+model CandidatePoolItem {
+  childId     String   @map("child_id")
+  assetId     String   @map("asset_id")
+  sourceQuery String?  @map("source_query")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@id([childId, assetId])
+  @@map("candidate_pool_items")
+}
+
+model StorageSyncJob {
+  id               String   @id
+  targetType       String   @map("target_type")
+  targetId         String   @map("target_id")
+  provider         String   @default("supabase")
+  objectPath       String   @map("object_path")
+  status           String   @default("pending")
+  attempt          Int      @default(0)
+  maxAttempts      Int      @default(5) @map("max_attempts")
+  runAfter         DateTime @default(now()) @map("run_after") @db.Timestamptz(6)
+  lockedBy         String?  @map("locked_by")
+  lockedAt         DateTime? @map("locked_at") @db.Timestamptz(6)
+  lastErrorCode    String?  @map("last_error_code")
+  lastErrorMessage String?  @map("last_error_message")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([targetType, targetId, provider, objectPath])
+  @@index([status, runAfter], map: "idx_storage_sync_jobs_status_run_after")
+  @@index([lockedAt], map: "idx_storage_sync_jobs_locked_at")
+  @@index([targetType, targetId], map: "idx_storage_sync_jobs_target_type_id")
+  @@index([status], map: "idx_storage_sync_jobs_status")
+  @@index([createdAt], map: "idx_storage_sync_jobs_created_at")
+  @@map("storage_sync_jobs")
+}
+
+model ExportArtifact {
+  id              String   @id
+  jobId           String   @map("job_id")
+  kind            String
+  localPath       String   @map("local_path")
+  storageProvider String   @default("local") @map("storage_provider")
+  storageStatus   String   @default("local_only") @map("storage_status")
+  storagePath     String?  @map("storage_path")
+  remoteUrl       String?  @map("remote_url")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([jobId], map: "idx_export_artifacts_job_id")
+  @@index([kind], map: "idx_export_artifacts_kind")
+  @@map("export_artifacts")
+}
+
+model UploadSession {
+  id          String   @id
+  childId     String   @map("child_id")
+  tokenHash   String   @map("token_hash")
+  status      String
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
+  maxItems    Int      @default(200) @map("max_items")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  closedAt    DateTime? @map("closed_at") @db.Timestamptz(6)
+  lastSeenAt  DateTime? @map("last_seen_at") @db.Timestamptz(6)
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  items UploadItem[]
+  shareTokens ShareToken[]
+
+  @@map("web_companion_upload_sessions")
+}
+
+model UploadItem {
+  id               String   @id
+  sessionId        String   @map("session_id")
+  assetId          String   @map("asset_id")
+  clientFileId     String?  @map("client_file_id")
+  originalFilename String   @map("original_filename")
+  safeFilename     String   @map("safe_filename")
+  contentType      String   @map("content_type")
+  sizeBytes        BigInt   @map("size_bytes")
+  provider         String
+  bucket           String?
+  objectKey        String   @map("object_key")
+  status           String
+  remoteEtag       String?  @map("remote_etag")
+  localPath        String?  @map("local_path")
+  hashSha256       String?  @map("hash_sha256")
+  errorCode        String?  @map("error_code")
+  errorMessage     String?  @map("error_message")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  committedAt      DateTime? @map("committed_at") @db.Timestamptz(6)
+  readyAt          DateTime? @map("ready_at") @db.Timestamptz(6)
+
+  session UploadSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  asset   Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, clientFileId])
+  @@index([sessionId, status], map: "idx_upload_items_session_status")
+  @@index([assetId], map: "idx_upload_items_asset_id")
+  @@map("web_companion_upload_items")
+}
+
+model ShareToken {
+  id             String   @id
+  tokenHash      String   @unique @map("token_hash")
+  childId        String   @map("child_id")
+  createdBySession String? @map("created_by_session")
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(6)
+  accessType     String   @map("access_type")
+  resourceType   String   @map("resource_type")
+  resourceId     String?  @map("resource_id")
+  accessCount    Int      @default(0) @map("access_count")
+  maxAccessCount Int?     @map("max_access_count")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastAccessedAt DateTime? @map("last_accessed_at") @db.Timestamptz(6)
+  status         String   @default("active")
+  metadata       Json     @default("{}")
+
+  child   Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+  session UploadSession? @relation(fields: [createdBySession], references: [id], onDelete: SetNull)
+  accessLogs ShareAccessLog[]
+
+  @@index([tokenHash], map: "idx_share_tokens_token_hash")
+  @@index([childId], map: "idx_share_tokens_child_id")
+  @@index([expiresAt], map: "idx_share_tokens_expires_at")
+  @@index([status], map: "idx_share_tokens_status")
+  @@map("share_tokens")
+}
+
+model ShareAccessLog {
+  id               String   @id
+  shareTokenId     String   @map("share_token_id")
+  clientIp         String?  @map("client_ip") @db.Inet
+  userAgent        String?  @map("user_agent")
+  accessResult     String   @map("access_result")
+  resourceAccessed String?  @map("resource_accessed")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  metadata         Json     @default("{}")
+
+  shareToken ShareToken @relation(fields: [shareTokenId], references: [id], onDelete: Cascade)
+
+  @@index([shareTokenId], map: "idx_share_access_logs_share_token_id")
+  @@index([createdAt], map: "idx_share_access_logs_created_at")
+  @@map("share_access_logs")
+}
+
+model DirectUploadPullback {
+  id                 String    @id
+  sessionId          String    @map("session_id")
+  childId            String    @map("child_id")
+  objectKey          String    @map("object_key")
+  remoteSizeBytes    BigInt?   @map("remote_size_bytes")
+  remoteContentType  String?   @map("remote_content_type")
+  remoteLastModified DateTime? @map("remote_last_modified") @db.Timestamptz(6)
+  assetId            String?   @map("asset_id")
+  localPath          String?   @map("local_path")
+  status             String
+  errorCode          String?   @map("error_code")
+  errorMessage       String?   @map("error_message")
+  pulledAt           DateTime? @map("pulled_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([sessionId, objectKey])
+  @@index([sessionId], map: "idx_direct_upload_pullbacks_session_id")
+  @@index([childId], map: "idx_direct_upload_pullbacks_child_id")
+  @@index([status], map: "idx_direct_upload_pullbacks_status")
+  @@index([updatedAt], map: "idx_direct_upload_pullbacks_updated_at")
+  @@map("direct_upload_pullbacks")
+}
+
+model LanSession {
+  id                   String   @id
+  deviceId             String   @map("device_id")
+  childId              String   @map("child_id")
+  tokenHash            String   @map("token_hash")
+  expiresAt            DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastSeenAt           DateTime? @map("last_seen_at") @db.Timestamptz(6)
+  maxConcurrentUploads Int      @default(3) @map("max_concurrent_uploads")
+  currentUploads       Int      @default(0) @map("current_uploads")
+
+  uploads LanUpload[]
+
+  @@index([deviceId], map: "idx_lan_sessions_device_id")
+  @@index([childId], map: "idx_lan_sessions_child_id")
+  @@index([expiresAt], map: "idx_lan_sessions_expires_at")
+  @@index([createdAt], map: "idx_lan_sessions_created_at")
+  @@map("lan_sessions")
+}
+
+model LanUpload {
+  id           String   @id
+  sessionId    String   @map("session_id")
+  assetId      String?  @map("asset_id")
+  filename     String
+  contentType  String   @map("content_type")
+  sizeBytes    BigInt   @map("size_bytes")
+  status       String   @default("processing")
+  localPath    String?  @map("local_path")
+  hashSha256   String?  @map("hash_sha256")
+  errorCode    String?  @map("error_code")
+  errorMessage String?  @map("error_message")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  completedAt  DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  session LanSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], map: "idx_lan_uploads_session_id")
+  @@index([status], map: "idx_lan_uploads_status")
+  @@index([createdAt], map: "idx_lan_uploads_created_at")
+  @@index([assetId], map: "idx_lan_uploads_asset_id")
+  @@map("lan_uploads")
+}
+
+model AgentConfig {
+  id              String   @id
+  name            String
+  description     String?
+  provider        String
+  model           String
+  baseUrl         String?  @map("base_url")
+  apiKeyEncrypted String   @map("api_key_encrypted")
+  temperature     Decimal  @default(0.7) @db.Decimal(3, 2)
+  maxTokens       Int      @default(4000) @map("max_tokens")
+  systemPrompt    String?  @map("system_prompt")
+  toolsEnabled    String[] @default([]) @map("tools_enabled")
+  workspaceConfig Json     @default("{}") @map("workspace_config")
+  isDefault       Boolean  @default(false) @map("is_default")
+  isActive        Boolean  @default(true) @map("is_active")
+  lastTestedAt    DateTime? @map("last_tested_at") @db.Timestamptz(6)
+  testResult      String?  @map("test_result")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  metadata        Json     @default("{}")
+
+  runs AgentRun[]
+
+  @@index([provider], map: "idx_agent_configs_provider")
+  @@index([isActive], map: "idx_agent_configs_is_active")
+  @@map("agent_configs")
+}
+
+model AgentRun {
+  id             String   @id
+  agentConfigId  String   @map("agent_config_id")
+  childId        String   @map("child_id")
+  bookId         String?  @map("book_id")
+  inputAssets    String[] @default([]) @map("input_assets")
+  instructions   String?
+  status         String   @default("pending")
+  startedAt      DateTime? @map("started_at") @db.Timestamptz(6)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  errorMessage   String?  @map("error_message")
+  outputBookJson Json?    @map("output_book_json")
+  outputBookHtml String?  @map("output_book_html")
+  tokensUsed     Int?     @map("tokens_used")
+  durationMs     Int?     @map("duration_ms")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  metadata       Json     @default("{}")
+
+  agentConfig AgentConfig @relation(fields: [agentConfigId], references: [id], onDelete: Cascade)
+  child       Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([agentConfigId], map: "idx_agent_runs_agent_config_id")
+  @@index([childId], map: "idx_agent_runs_child_id")
+  @@index([status], map: "idx_agent_runs_status")
+  @@index([createdAt], map: "idx_agent_runs_created_at")
+  @@map("agent_runs")
+}
+
+model BackupSnapshot {
+  id          String   @id
+  manifest   Json
+  archivePath String?  @map("archive_path")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  metadata    Json     @default("{}")
+
+  @@map("backup_snapshots")
+}

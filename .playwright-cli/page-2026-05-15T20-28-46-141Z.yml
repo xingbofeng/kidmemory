@@ -1,0 +1,115 @@
+- generic [ref=e1]:
+  - generic [ref=e5]:
+    - generic [ref=e10]:
+      - generic [ref=e12]:
+        - list [ref=e15]:
+          - listitem [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: 1CentOS-rSX5
+            - img [ref=e19]
+        - generic [ref=e22]:
+          - img [ref=e25] [cursor=pointer]
+          - img [ref=e29] [cursor=pointer]
+          - img [ref=e33] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e39] [cursor=pointer]: OrcaTerm客户端火热公测中，立即前往
+        - button "OrcaTerm AI" [ref=e40] [cursor=pointer]: OrcaTerm AI
+    - generic [ref=e42]:
+      - list [ref=e46]:
+        - listitem [ref=e47] [cursor=pointer]:
+          - img [ref=e49]
+        - listitem [ref=e52] [cursor=pointer]:
+          - img [ref=e54]
+        - listitem [ref=e57] [cursor=pointer]:
+          - img [ref=e59]
+        - listitem [ref=e62] [cursor=pointer]:
+          - img [ref=e64]
+        - listitem [ref=e72] [cursor=pointer]:
+          - img [ref=e74]
+      - generic [ref=e83]:
+        - generic [ref=e84]: 文件管理器
+        - generic [ref=e85]:
+          - button [ref=e87] [cursor=pointer]:
+            - img [ref=e88]
+          - button [ref=e93] [cursor=pointer]:
+            - img [ref=e94]
+          - generic [ref=e97]:
+            - button [disabled]:
+              - img
+          - button [ref=e99] [cursor=pointer]:
+            - img [ref=e100]
+      - generic [ref=e103]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - img [ref=e109] [cursor=pointer]
+              - img [ref=e121]
+              - img [ref=e129]
+              - img [ref=e136]
+              - img [ref=e142] [cursor=pointer]
+              - button "开启协作" [ref=e150] [cursor=pointer]: 开启协作
+            - generic [ref=e152]:
+              - button [ref=e153] [cursor=pointer]:
+                - img [ref=e154]
+              - button [ref=e157] [cursor=pointer]:
+                - img [ref=e158]
+          - textbox "Terminal input" [active] [ref=e175]
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - button "脚本库" [ref=e181] [cursor=pointer]:
+              - generic [ref=e182]:
+                - img [ref=e183]
+                - text: 脚本库
+            - button "清空" [ref=e187] [cursor=pointer]:
+              - generic [ref=e188]:
+                - img [ref=e189]
+                - text: 清空
+            - generic [ref=e191]: "发送给:"
+            - generic [ref=e193] [cursor=pointer]:
+              - generic [ref=e194]: 当前会话
+              - img "arrowdown" [ref=e195]
+            - generic [ref=e196]: 1 个会话已连接
+            - button [ref=e197] [cursor=pointer]:
+              - img [ref=e198]
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - generic [ref=e203]:
+                - code [ref=e205]:
+                  - textbox "编辑器内容;按 Alt+F1 可打开辅助功能选项。" [ref=e212]
+                - generic: 输入命令，Enter 换行，⌘+Enter 执行命令
+              - button "执行 ⌘ Enter" [ref=e214] [cursor=pointer]:
+                - text: 执行
+                - generic [ref=e215]: ⌘
+                - generic [ref=e216]: Enter
+            - generic [ref=e218] [cursor=pointer]:
+              - generic [ref=e219]:
+                - generic [ref=e220]: 高效运维 推荐批量发送命令
+                - list [ref=e221]:
+                  - listitem [ref=e222]:
+                    - img [ref=e223]
+                    - text: 批量服务器任选
+                  - listitem [ref=e225]:
+                    - img [ref=e226]
+                    - text: 一键发送命令并执行
+                  - listitem [ref=e228]:
+                    - img [ref=e229]
+                    - text: 可视化结果展示
+              - generic [ref=e231]:
+                - button "立即体验" [ref=e232]:
+                  - text: 立即体验
+                  - img [ref=e233]
+                - button "不再提醒" [ref=e235]
+        - generic [ref=e236]:
+          - generic [ref=e237]:
+            - button "快捷命令" [ref=e238] [cursor=pointer]:
+              - img [ref=e239]
+              - text: 快捷命令
+              - img [ref=e243]
+            - generic [ref=e247] [cursor=pointer]:
+              - img [ref=e248]
+              - generic [ref=e251]: openclaw
+            - img [ref=e255] [cursor=pointer]
+            - img [ref=e259]
+          - img [ref=e266] [cursor=pointer]
+  - generic [ref=e269]:
+    - alert
+    - alert

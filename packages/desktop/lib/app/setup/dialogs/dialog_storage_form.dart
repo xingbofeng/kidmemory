@@ -1,0 +1,74 @@
+part of '../../desktop_shell.dart';
+
+extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
+  Future<bool?> _showSupabaseStorageDialog({
+    required TextEditingController urlController,
+    required TextEditingController bucketController,
+    required TextEditingController publicBaseUrlController,
+    required TextEditingController ttlController,
+    required TextEditingController serviceRoleKeyController,
+    required TextEditingController s3EndpointController,
+    required TextEditingController s3RegionController,
+    required TextEditingController s3AccessKeyController,
+    required TextEditingController s3SecretKeyController,
+  }) {
+    var showServiceRoleKey = false;
+    var showS3AccessKey = false;
+    var showS3SecretKey = false;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('配置 Supabase Storage'),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _buildSupabaseStorageDialogFields(
+                      urlController: urlController,
+                      bucketController: bucketController,
+                      publicBaseUrlController: publicBaseUrlController,
+                      ttlController: ttlController,
+                      serviceRoleKeyController: serviceRoleKeyController,
+                      s3EndpointController: s3EndpointController,
+                      s3RegionController: s3RegionController,
+                      s3AccessKeyController: s3AccessKeyController,
+                      s3SecretKeyController: s3SecretKeyController,
+                      showServiceRoleKey: showServiceRoleKey,
+                      showS3AccessKey: showS3AccessKey,
+                      showS3SecretKey: showS3SecretKey,
+                      onToggleServiceRoleKey: () => setDialogState(
+                        () => showServiceRoleKey = !showServiceRoleKey,
+                      ),
+                      onToggleS3AccessKey: () => setDialogState(
+                        () => showS3AccessKey = !showS3AccessKey,
+                      ),
+                      onToggleS3SecretKey: () => setDialogState(
+                        () => showS3SecretKey = !showS3SecretKey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('取消'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}

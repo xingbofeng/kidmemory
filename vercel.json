@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd packages/web && npm run build",
+  "outputDirectory": "packages/web/dist",
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

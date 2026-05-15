@@ -1,0 +1,46 @@
+import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
+import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
+import { FileJobStoreService } from "../../infrastructure/jobs/file-job-store.service.ts";
+import { registerInjectable } from "../../infrastructure/nest/register-injectable.ts";
+import { AgentConfigApplicationService } from "../agent-config/application/agent-config-application.service.ts";
+import { createBooksService } from "./providers/books.domain.ts";
+import { OpenAISDKAgentRunner } from "./providers/openai-sdk-agent-runner.ts";
+
+export class BooksService {
+  private readonly config: AppConfigService;
+  private readonly datasetState: DatasetStateService;
+  private readonly jobStore: FileJobStoreService;
+  private readonly agentConfigService: AgentConfigApplicationService;
+  private readonly agentRunner: OpenAISDKAgentRunner;
+
+  constructor(config: AppConfigService, datasetState: DatasetStateService, jobStore: FileJobStoreService, agentConfigService: AgentConfigApplicationService) {
+    this.config = config;
+    this.datasetState = datasetState;
+    this.jobStore = jobStore;
+    this.agentConfigService = agentConfigService;
+    this.agentRunner = new OpenAISDKAgentRunner({
+      model: 'gpt-4',
+      temperature: 0.7,
+      maxTokens: 4000
+    });
+  }
+
+  private get delegate() {
+    return createBooksService({
+      config: this.config.config,
+      datasetState: this.datasetState,
+      jobStore: this.jobStore,
+      agentConfigService: this.agentConfigService,
+      agentRunner: this.agentRunner,
+    });
+  }
+
+  // 原有方法
+  createJob(body: Record<string, unknown>) { return this.delegate.createJob(body); }
+  getJob(id: string) { return this.delegate.getJob(id); }
+  getPreviewHtml(id: string) { return this.delegate.getPreviewHtml(id); }
+  exportPdf(id: string, body: Record<string, unknown> = {}) { return this.delegate.exportPdf(id, body); }
+  exportLongImage(id: string, body: Record<string, unknown> = {}) { return this.delegate.exportLongImage(id, body); }
+}
+
+registerInjectable(BooksService, [AppConfigService, DatasetStateService, FileJobStoreService, AgentConfigApplicationService]);

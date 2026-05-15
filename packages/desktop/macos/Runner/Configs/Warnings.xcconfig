@@ -1,0 +1,3 @@
+WARNING_CFLAGS = -Wall -Wconditional-uninitialized -Wnullable-to-nonnull-conversion -Wmissing-method-return-type
+GCC_WARN_UNDECLARED_SELECTOR = YES
+CLANG_WARN_DOCUMENTATION_COMMENTS = YES

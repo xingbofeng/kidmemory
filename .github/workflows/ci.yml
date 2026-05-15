@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sidecar:
+    name: sidecar build and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/backend/package-lock.json
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: npm ci
+      - run: npm run prisma:generate
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Run all tests
+        run: npm test
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 54322
+          POSTGRES_DATABASE: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+      - run: npm run build
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
+  web_companion:
+    name: web companion type-check, lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/web/package-lock.json
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm test -- --run
+      - run: npm run build
+
+  desktop_flutter:
+    name: desktop flutter analyze and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # Visual regression goldens (test/visual_golden_test.dart and goldens/*.png)
+      # are captured on macOS with PingFang SC and will diff against Linux font
+      # rendering, so the CI run skips them. Other test files cover routing,
+      # widget contracts, and architecture invariants.
+      - name: Run unit and widget tests (excluding visual goldens)
+        run: |
+          set -euo pipefail
+          mapfile -t TEST_FILES < <(find test -name '*_test.dart' -not -name 'visual_golden_test.dart')
+          flutter test "${TEST_FILES[@]}"
+        shell: bash
