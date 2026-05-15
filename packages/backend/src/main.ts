@@ -8,6 +8,9 @@ import { loadConfigFromEnv } from "./infrastructure/config/app-config.service.ts
 import { HttpRuntimeConfigService } from "./infrastructure/http/http-runtime-config.service.ts";
 import { GlobalExceptionFilter } from "./infrastructure/http/global-exception.filter.ts";
 import { RequestLoggingMiddleware } from "./infrastructure/http/request-logging.middleware.ts";
+import { RateLimitMiddleware } from "./infrastructure/security/rate-limit.middleware.ts";
+import { SessionQuotaMiddleware } from "./infrastructure/security/session-quota.middleware.ts";
+import { InputValidationMiddleware } from "./infrastructure/security/input-validation.middleware.ts";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -52,6 +55,23 @@ async function bootstrap() {
 
   // Configure global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Configure security middlewares (按顺序执行)
+  const inputValidationMiddleware = app.get(InputValidationMiddleware);
+  const rateLimitMiddleware = app.get(RateLimitMiddleware);
+  const sessionQuotaMiddleware = app.get(SessionQuotaMiddleware);
+
+  // 1. 输入验证（最快，阻止明显的恶意请求）
+  app.use(inputValidationMiddleware.use.bind(inputValidationMiddleware));
+
+  // 2. 速率限制（阻止高频攻击）
+  app.use(rateLimitMiddleware.use.bind(rateLimitMiddleware));
+
+  // 3. 会话配额限制（针对创建会话的特定保护）
+  app.use(sessionQuotaMiddleware.use.bind(sessionQuotaMiddleware));
+
+  // 将 sessionQuotaMiddleware 暴露给全局，供 WebCompanionService 使用
+  (global as any).sessionQuotaMiddleware = sessionQuotaMiddleware;
 
   // Configure request logging
   if (httpConfig.getConfig().logging.enableRequestLogging) {

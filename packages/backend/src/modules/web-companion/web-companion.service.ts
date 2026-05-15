@@ -303,6 +303,12 @@ export class WebCompanionService {
     // 更新会话状态
     await this.updateSessionStatus(sessionId, UploadSessionStatus.CLOSED, new Date());
 
+    // 通知 SessionQuotaMiddleware 释放配额
+    const sessionQuotaMiddleware = (global as any).sessionQuotaMiddleware;
+    if (sessionQuotaMiddleware && session.childId) {
+      sessionQuotaMiddleware.recordSessionClosure(session.childId, sessionId);
+    }
+
     console.log(`[WebCompanionService] Session closed: ${sessionId}`);
   }
 

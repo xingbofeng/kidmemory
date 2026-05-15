@@ -6,10 +6,35 @@ import { PrismaDatasetDbService } from "./dataset-state/prisma-dataset-db.servic
 import { PrismaMigrationService } from "./database/prisma-migration.service.ts";
 import { PrismaService } from "./database/prisma.service.ts";
 import { FileJobStoreService } from "./jobs/file-job-store.service.ts";
+import { SecurityMonitorController } from "./security/security-monitor.controller.ts";
+import { RateLimitMiddleware } from "./security/rate-limit.middleware.ts";
+import { SessionQuotaMiddleware } from "./security/session-quota.middleware.ts";
+import { InputValidationMiddleware } from "./security/input-validation.middleware.ts";
 
 export class InfrastructureModule {}
 
 Module({
-  providers: [AppConfigService, PrismaService, PrismaMigrationService, PrismaDatasetDbService, FileJobStoreService, DatasetStateService],
-  exports: [AppConfigService, PrismaService, PrismaMigrationService, PrismaDatasetDbService, FileJobStoreService, DatasetStateService],
+  controllers: [SecurityMonitorController],
+  providers: [
+    AppConfigService,
+    PrismaService,
+    PrismaMigrationService,
+    PrismaDatasetDbService,
+    FileJobStoreService,
+    DatasetStateService,
+    RateLimitMiddleware,
+    SessionQuotaMiddleware,
+    InputValidationMiddleware,
+  ],
+  exports: [
+    AppConfigService,
+    PrismaService,
+    PrismaMigrationService,
+    PrismaDatasetDbService,
+    FileJobStoreService,
+    DatasetStateService,
+    RateLimitMiddleware,
+    SessionQuotaMiddleware,
+    InputValidationMiddleware,
+  ],
 })(InfrastructureModule);
