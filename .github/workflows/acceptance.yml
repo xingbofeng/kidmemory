@@ -33,7 +33,7 @@ jobs:
       - run: npm test
       - run: npm run gen:ts
       - run: npm run gen:dart
-      - run: git diff --exit-code packages/protocol/generated
+      - run: git diff --exit-code -- generated
 
   sidecar:
     name: sidecar lint/test/build
