@@ -37,6 +37,29 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'no-unused-vars': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'axios',
+              message: 'Please use httpClient from \'@/lib/http-client\' or API modules from \'@/api\' instead of importing axios directly.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Allow axios import in specific files
+    files: [
+      '**/lib/http-client.ts',
+      '**/lib/http-client.test.ts',
+      '**/__mocks__/axios.ts',
+      '**/*.test.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   {

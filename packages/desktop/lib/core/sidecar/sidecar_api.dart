@@ -4,18 +4,48 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class SidecarApiException implements Exception {
-  const SidecarApiException(this.message, {this.statusCode, this.path});
+  const SidecarApiException(
+    this.message, {
+    this.statusCode,
+    this.path,
+    this.code,
+  });
 
   final String message;
   final int? statusCode;
   final String? path;
+  final int? code;
 
   @override
   String toString() {
-    final code = statusCode == null ? '' : ' (HTTP $statusCode)';
+    final httpCode = statusCode == null ? '' : ' (HTTP $statusCode)';
+    final apiCode = code == null ? '' : ' [API Code: $code]';
     final target = path == null ? '' : ' [$path]';
-    return '$message$code$target';
+    return '$message$httpCode$apiCode$target';
   }
+}
+
+/// Unified API response format: { code, msg, data }
+class ApiResponse {
+  const ApiResponse({
+    required this.code,
+    required this.msg,
+    required this.data,
+  });
+
+  final int code;
+  final String msg;
+  final Object? data;
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    return ApiResponse(
+      code: json['code'] as int? ?? 0,
+      msg: json['msg'] as String? ?? '',
+      data: json['data'],
+    );
+  }
+
+  bool get isSuccess => code == 0;
 }
 
 class SidecarApi {
@@ -113,7 +143,7 @@ class SidecarApi {
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {
         final json = await _sendOnce(method, path, body);
-        return json is Map<String, dynamic> ? json : {};
+        return _unwrapApiResponse(json);
       } catch (error) {
         lastError = error;
         if (attempt < retries) {
@@ -124,8 +154,15 @@ class SidecarApi {
         }
       }
     }
-    debugPrint('Sidecar $method $path failed: $lastError');
-    return {};
+    debugPrint('Sidecar $method $path failed after ${retries + 1} attempts: $lastError');
+    // Throw the last error instead of returning empty object
+    if (lastError is SidecarApiException) {
+      throw lastError;
+    }
+    throw SidecarApiException(
+      'Sidecar request failed after ${retries + 1} attempts',
+      path: path,
+    );
   }
 
   Future<List<dynamic>> _sendList(String method, String path) async {
@@ -133,7 +170,11 @@ class SidecarApi {
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {
         final json = await _sendOnce(method, path);
-        return json is List<dynamic> ? json : const [];
+        final unwrapped = _unwrapApiResponse(json);
+        // If the unwrapped data is a list, return it
+        if (unwrapped is List<dynamic>) return unwrapped;
+        // Otherwise return empty list
+        return const [];
       } catch (error) {
         lastError = error;
         if (attempt < retries) {
@@ -144,8 +185,46 @@ class SidecarApi {
         }
       }
     }
-    debugPrint('Sidecar $method $path failed: $lastError');
-    return const [];
+    debugPrint('Sidecar $method $path failed after ${retries + 1} attempts: $lastError');
+    // Throw the last error instead of returning empty list
+    if (lastError is SidecarApiException) {
+      throw lastError;
+    }
+    throw SidecarApiException(
+      'Sidecar request failed after ${retries + 1} attempts',
+      path: path,
+    );
+  }
+
+  /// Unwraps unified API response format { code, msg, data }
+  /// Returns the data field if code == 0, otherwise throws SidecarApiException
+  dynamic _unwrapApiResponse(Object? json) {
+    // Check if response is in unified API format
+    if (json is Map<String, dynamic> &&
+        json.containsKey('code') &&
+        json.containsKey('msg') &&
+        json.containsKey('data')) {
+      final apiResponse = ApiResponse.fromJson(json);
+      
+      if (!apiResponse.isSuccess) {
+        throw SidecarApiException(
+          apiResponse.msg,
+          code: apiResponse.code,
+        );
+      }
+      
+      // Return unwrapped data
+      final data = apiResponse.data;
+      if (data is Map<String, dynamic>) return data;
+      if (data is List<dynamic>) return data;
+      // For null or other types, return empty map
+      return data ?? {};
+    }
+    
+    // Fallback for non-API format responses (e.g., file downloads)
+    if (json is Map<String, dynamic>) return json;
+    if (json is List<dynamic>) return json;
+    return {};
   }
 
   Future<Object?> _sendOnce(
@@ -173,6 +252,26 @@ class SidecarApi {
           .join()
           .timeout(timeout);
       if (response.statusCode >= 400) {
+        // Try to parse error response in unified format
+        if (text.isNotEmpty) {
+          try {
+            final json = jsonDecode(text);
+            if (json is Map<String, dynamic> &&
+                json.containsKey('code') &&
+                json.containsKey('msg')) {
+              throw SidecarApiException(
+                json['msg'] as String,
+                statusCode: response.statusCode,
+                path: path,
+                code: json['code'] as int?,
+              );
+            }
+          } catch (e) {
+            // If parsing fails, fall through to generic error
+            if (e is SidecarApiException) rethrow;
+          }
+        }
+        
         throw SidecarApiException(
           text.isEmpty
               ? 'Sidecar request failed'

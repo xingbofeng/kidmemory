@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'kidmemory-backend',
-      script: './packages/backend/dist/main.js',
+      script: './packages/sidecar/dist/main.js',
       cwd: process.env.PROJECT_PATH || '/home/ubuntu/kidmemory',
       env: {
         NODE_ENV: 'production',

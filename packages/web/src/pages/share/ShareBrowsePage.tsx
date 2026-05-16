@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { ApiError } from '../../api/errors'
+import { validateShareToken, getSharedAssets } from '../../api/shareApi'
 import type { SharedAsset, ShareTokenValidation } from '../../types/shareBrowse'
 import { ShareLoading } from '../../components/share/ShareLoading'
 import { ShareError } from '../../components/share/ShareError'
@@ -23,8 +24,7 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
       setError(null)
 
       // Validate share token
-      const validationResponse = await axios.get(`/api/web-companion/share/${shareToken}/access`)
-      const validationData: ShareTokenValidation = validationResponse.data
+      const validationData = await validateShareToken(shareToken)
 
       if (!validationData.isValid) {
         setError(validationData.error || '分享链接无效或已过期')
@@ -34,13 +34,13 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
       setValidation(validationData)
 
       // Load shared content using browse API with share token context
-      const assetsResponse = await axios.get(`/api/web-companion/share/${shareToken}/assets`)
-      const assetsData: SharedAsset[] = assetsResponse.data
+      const assetsData = await getSharedAssets(shareToken)
       setAssets(assetsData)
 
     } catch (err) {
       console.error('Failed to load shared content:', err)
-      setError(err instanceof Error ? err.message : '加载分享内容失败')
+      const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载分享内容失败')
+      setError(message)
     } finally {
       setLoading(false)
     }

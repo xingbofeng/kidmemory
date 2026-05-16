@@ -1,0 +1,29 @@
+{
+  "name": "@kidmemory/protocol",
+  "version": "0.1.0",
+  "description": "KidMemory unified protocol layer - API types, error codes, and response formats",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./sidecar": "./src/sidecar/index.ts",
+    "./cloud-api": "./src/cloud-api/index.ts"
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "build": "tsc --noEmit",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "keywords": [
+    "protocol",
+    "api",
+    "types"
+  ],
+  "author": "KidMemory Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "back": "Back"
+  },
+  "upload": {
+    "title": "Upload Assets",
+    "selectFiles": "Select Files",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Upload Successful",
+    "uploadFailed": "Upload Failed"
+  },
+  "share": {
+    "title": "Share",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link Copied"
+  }
+}

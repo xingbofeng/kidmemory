@@ -1,59 +1,117 @@
-# Repository Guidelines
+# AGETNS.md
 
-## 项目结构与模块组织
+本文件为 Claude Code（claude.ai/code）在此仓库中工作时提供指导。
 
-KidMemory 是一个本地优先的多应用仓库。当前 MVP 主要包括 `packages/desktop` 的 macOS Flutter 桌面端，以及 `packages/backend` 的 Node.js sidecar API 与任务编排服务。Flutter 代码位于 `lib/app`、`lib/core`、`lib/data`、`lib/features`、`lib/shared`，测试位于 `packages/desktop/test`。Sidecar 运行时代码位于 `packages/backend/src`，其中业务模块在 `src/modules`，基础设施代码在 `src/infrastructure`，测试位于 `packages/backend/tests`。产品说明、发布报告在 `docs/`，示例输入在 `examples/sample-dataset/`，模板资源在 `templates/`。
+## 构建与测试命令
 
-## 构建、测试与开发命令
+### Sidecar（Node.js NestJS）
+```bash
+cd packages/sidecar && npm install              # 安装依赖（需要 Node 22+）
+cd packages/sidecar && npm run dev              # 启动开发服务器（src/main.ts）
+cd packages/sidecar && npm test                 # 运行所有测试：find tests -name '*.test.ts' | xargs tsx --test
+cd packages/sidecar && npm run build            # 完整构建检查
 
-- `cd packages/backend && npm install`：安装 sidecar 依赖，要求 Node 22+。
-- `cd packages/backend && npm run dev`：运行 `src/main.ts` 启动 sidecar。
-- `cd packages/backend && npm test`：执行 `tests/**/*.test.ts` 下的 Node 测试。
-- `cd packages/backend && npm run build`：对 sidecar 做语法级构建检查。
-- `cd packages/backend && npx prisma migrate deploy`：按迁移历史应用数据库迁移（基线迁移目录：`prisma/migrations/init`）。
-- `cd packages/desktop && flutter pub get`：安装 Flutter 依赖。
-- `cd packages/desktop && flutter analyze`：执行 Dart/Flutter 静态检查。
-- `cd packages/desktop && flutter test`：运行单元测试和组件测试。
-- `cd packages/desktop && flutter run -d macos`：本地启动桌面端 MVP。
+# 运行单个测试文件：
+cd packages/sidecar && tsx --test tests/unit/asset-import.test.ts
 
-## 编码风格与命名约定
+# 测试需要 PostgreSQL + pgvector，可以使用 Docker：
+docker run -d --name postgres-dev -e POSTGRES_PASSWORD=postgres -p 5432:5432 pgvector/pgvector:pg16
+cd packages/sidecar && npm test
+docker stop postgres-dev && docker rm postgres-dev
+```
 
-遵循现有目录分层，新增功能应明确归属对应应用。Flutter 侧使用 `flutter_lints`，优先使用 `const` 构造和不可变字面量。Dart 文件使用 `snake_case.dart`，类型使用 `PascalCase`，成员使用 lowerCamelCase。Sidecar 的 TypeScript 文件名保持 kebab-case，并带职责后缀，例如 `books.service.ts`、`config.controller.ts`。尽量保持模块小而清晰，避免打破 `modules/` 与 `infrastructure/` 的边界。
+### 桌面端 Flutter（macOS）
+```bash
+cd packages/desktop && flutter pub get       # 安装依赖
+cd packages/desktop && flutter analyze        # 静态分析
+cd packages/desktop && flutter test           # 所有测试
+cd packages/desktop && flutter run -d macos   # 启动桌面端
 
-## 测试指南
+# 运行单个测试文件：
+cd packages/desktop && flutter test test/sidecar_api_test.dart
+cd packages/desktop && flutter test test/asset_library_test.dart
+cd packages/desktop && flutter test test/widget_test.dart
 
-提交 PR 前为相关改动补齐测试。Flutter 测试放在 `packages/desktop/test`，文件名使用 `_test.dart` 后缀。Sidecar 使用 Node 内置测试运行器，测试文件放在 `packages/backend/tests/unit` 或 `packages/backend/tests/architecture`，文件名使用 `.test.ts` 后缀。涉及跨端流程时，至少同时运行桌面端和 sidecar 的对应测试命令。
+# 运行视觉/界面回归测试（需要 macOS）：
+cd packages/desktop && flutter test test/design_capture_test.dart
+```
 
-## 提交与 Pull Request 规范
+### Sidecar 架构测试
+```bash
+cd packages/sidecar && tsx --test tests/architecture/architecture.test.ts
+```
 
-提交信息使用 Conventional Commits：`type(scope): summary`，例如 `feat(sidecar): add dataset readiness endpoint`。标题使用祈使语气，保持简洁。Pull Request 需要说明变更范围、影响的应用、关联 issue 或 spec、本地验证步骤；若涉及 UI，请附截图，并尽量对照 `docs/design` 中的设计稿说明差异。
+## 项目架构
 
-## 配置与 Agent 说明
+### Monorepo 结构
+- `packages/desktop/` — macOS Flutter 桌面端（Dart）
+- `packages/sidecar/` — NestJS HTTP API + 任务编排（TypeScript，Node.js 运行时）
+- `packages/cloud-api/` — 云端 API（上传/分享/设备同步）
+- `packages/web/` — 手机网页端（扫码上传、轻量浏览与分享）
+- `packages/protocol/` — 共享类型定义和 OpenAPI 规范
+- `docs/` — 统一产品说明、发布报告、架构文档和设计资源
+- `templates/` — 书稿输出模板（例如 `warm-artwork-book/template.html`）
+- `examples/sample-dataset/` — 示例素材数据集
+- `scripts/` — 运维与验证脚本（见 README 的 scripts 清单）
 
-本地配置从 `.env.example` 开始，禁止把密钥或环境配置提交进仓库。接入 PostgreSQL、pgvector、Claude、对象存储或导出路径前，先阅读 `README.md` 与 `docs/README.md`。如需浏览器自动化验证，优先使用 Codex Browser 路径，不要默认切到 Playwright。
+### 产品流程
+Capture → Curate → Search → Compose → Generate → Review → Publish → Archive
 
-## scripts 约定
+### 桌面端 Flutter 架构
+入口：`lib/main.dart` → `KidMemoryApp` → `DesktopShell`
 
-- `scripts/check-sidecar-runtime-imports.mjs`、`scripts/verify-environment.mjs`、`scripts/verify-asset-workflow.mjs`：用于本地/CI 验证，修改 sidecar 核心链路后优先运行。
-- `scripts/run-all-tests.sh`、`scripts/pre-release-check.sh`、`scripts/security-check.sh`：用于发布前与安全基线检查。
-- `scripts/setup-dev-env.sh`：仅用于新环境初始化，不要在 CI 中直接依赖其副作用。
-- `scripts/dashboard.sh`、`scripts/health-check.sh`：用于人工巡检，不作为发布阻断条件。
+5 步向导（`AppStep` 枚举）：
+- `setup` — 环境检测（PostgreSQL, pgvector, OpenAI, Claude）
+- `sample` — 导入示例数据集
+- `child` — 孩子档案管理
+- `assets` — 素材库（CRUD、批量删除、文件导入、拖拽导入）
+- `generate` — Agent 书稿生成 + PDF 导出
 
-### 子 Agent 模型策略（Token 优先）
+关键模式：
+- `lib/core/sidecar/sidecar_api.dart` — 通过 HttpClient 调用 sidecar API（GET/POST/DELETE，支持重试）
+- `lib/features/*/` — 每个页面一个目录，导出一个 StatelessWidget
+- `lib/shared/widgets/` — `chrome.dart`（Sidebar, NavItem）、`layout.dart`、`content.dart`、`status.dart`
+- 无状态管理库 — 全部状态在 `DesktopShell` 中通过 `setState` 管理
+- Sidecar API 通过构造参数注入（便于测试）
+- 视觉回归测试文件在 `test/design_capture_test.dart`
 
-为降低 token 消耗并保持执行速度，默认采用“主控 + 执行”模式：
+### Sidecar（NestJS）架构
+入口：`src/main.ts` → NestFactory.create(AppModule)
 
-- 主控 Agent（当前会话主模型）负责：任务拆分、风险判断、结果验收、最终收口。
-- 子 Agent 负责：小范围实现、检索、测试修复、文档改动。
+业务模块（`src/modules/`）：
+- `config/` — 环境检测（PostgreSQL, pgvector, OpenAI, Claude）和就绪状态端点
+- `dataset/` — 孩子 CRUD、素材导入/更新/删除、示例数据集
+- `books/` — 书稿生成任务生命周期（创建 → 预览 → PDF 导出），Claude Agent SDK 集成
 
-模型分配约定：
+基础设施（`src/infrastructure/`）：
+- `config/app-config.service.ts` — 基于环境变量的配置（`.env`）
+- `database/` — PostgreSQL + pgvector 连接与迁移服务（Prisma，baseline 在 `prisma/migrations/init`）
+- `dataset-state/` — 内存 + 持久化 DB 两层切换（`DatasetStateService`）
+- `jobs/file-job-store.service.ts` — 基于文件系统的任务存储
 
-- 子 Agent 默认模型：`gpt-5.3-codex-spark`。
-- 仅当任务涉及跨模块架构决策、疑难 bug 根因定位、或高风险最终审查时，才升级到更强模型。
+关键模式：
+- 领域逻辑在 `providers/*.domain.ts` 纯函数中，由 NestJS 服务类包装
+- 不使用 DI 框架装饰器 — 通过 `registerInjectable()` 辅助函数手动注册
+- 测试使用 Node 内置 `node:test` 和 `node:assert/strict`
 
-执行约定：
+### Agent Workspace
+- OpenAI Agents SDK 在受控 workspace 中运行（input/ templates/ rules/ → 输出 book.json + book.html）
+- Agent 不直接访问数据库、密钥或对象存储
+- 系统校验输出后才通过 Playwright 导出 PDF
 
-- 每个子任务必须限制可改文件范围，避免重复读取全仓库。
-- 并行只允许在不重叠文件集上执行，避免冲突与返工。
-- 子任务返回内容保持精简：改动文件、关键原因、验证结果。
-- 每个阶段完成后立即小步提交（Conventional Commits），再进入下一阶段，避免上下文滚大。
+## 提交规范
+遵循 Conventional Commits：`type(scope): summary`
+类型：feat, fix, docs, test, refactor, chore
+范围：desktop, sidecar, web, docs
+示例：`feat(desktop): support bulk delete for selected assets`
+
+## 测试模式
+- Flutter：`flutter_test` + `WidgetTester`，偏好 `find.text()` 和 `tester.tap()`
+- Sidecar：`node:test` + `node:assert/strict`，领域 provider 单元测试在 `tests/unit/`
+- 架构测试：`tests/architecture/` 检查模块边界和导入规则
+
+## 本地启动
+1. 复制 `.env.example` 为 `.env`，配置 PostgreSQL/pgvector、Claude API key、workspace/export 路径
+2. 启动 PostgreSQL：`docker run -d --name postgres-dev -e POSTGRES_PASSWORD=postgres -p 5432:5432 pgvector/pgvector:pg16`
+3. 启动 sidecar：`cd packages/sidecar && npm run dev`
+4. 启动 Flutter 桌面端：`cd packages/desktop && flutter run -d macos`

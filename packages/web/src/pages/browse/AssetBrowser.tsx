@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { httpClient, ApiError } from '../../lib/http-client'
 import { Asset, AssetFilter } from '../../types/asset'
 import { filterAssets, getFilterLabel } from '../../utils/assetUtils'
 import { Icon } from '../../components/ui/Icon'
@@ -21,11 +21,12 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
       setError(null)
 
       try {
-        const response = await axios.get(`/api/web-companion/children/${childId}/assets`)
-        setAssets(response.data.assets || [])
+        const data = await httpClient.get<{ assets: Asset[] }>(`/api/web-companion/children/${childId}/assets`)
+        setAssets(data.assets || [])
       } catch (err) {
         console.error('Failed to load assets:', err)
-        setError(err instanceof Error ? err.message : '加载失败')
+        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载失败')
+        setError(message)
       } finally {
         setLoading(false)
       }

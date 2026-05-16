@@ -1,0 +1,233 @@
+# KidMemory API 错误码定义
+# 此文件记录所有错误码的定义和说明
+
+# 成功
+0:
+  code: 0
+  name: SUCCESS
+  category: success
+  description: API 调用成功
+
+# 通用错误 (10000-10999)
+10000:
+  code: 10000
+  name: UNKNOWN_ERROR
+  category: general
+  description: 未知错误
+
+10001:
+  code: 10001
+  name: NOT_FOUND
+  category: general
+  description: 资源不存在
+
+10002:
+  code: 10002
+  name: METHOD_NOT_ALLOWED
+  category: general
+  description: HTTP 方法不允许
+
+10003:
+  code: 10003
+  name: SERVICE_UNAVAILABLE
+  category: general
+  description: 服务不可用
+
+# 鉴权 (11000-11999)
+11000:
+  code: 11000
+  name: UNAUTHORIZED
+  category: auth
+  description: 未授权
+
+11001:
+  code: 11001
+  name: FORBIDDEN
+  category: auth
+  description: 禁止访问
+
+11002:
+  code: 11002
+  name: TOKEN_EXPIRED
+  category: auth
+  description: Token 已过期
+
+11003:
+  code: 11003
+  name: TOKEN_INVALID
+  category: auth
+  description: Token 无效
+
+# 参数校验 (12000-12999)
+12000:
+  code: 12000
+  name: INVALID_PARAMS
+  category: validation
+  description: 参数校验失败
+
+12001:
+  code: 12001
+  name: MISSING_REQUIRED_FIELD
+  category: validation
+  description: 缺少必填字段
+
+12002:
+  code: 12002
+  name: INVALID_FORMAT
+  category: validation
+  description: 格式不正确
+
+12003:
+  code: 12003
+  name: VALUE_OUT_OF_RANGE
+  category: validation
+  description: 值超出范围
+
+# 素材/书稿 (13000-13999)
+13000:
+  code: 13000
+  name: ASSET_NOT_FOUND
+  category: asset
+  description: 素材不存在
+
+13001:
+  code: 13001
+  name: ASSET_ALREADY_EXISTS
+  category: asset
+  description: 素材已存在
+
+13002:
+  code: 13002
+  name: CHILD_NOT_FOUND
+  category: asset
+  description: 孩子档案不存在
+
+13003:
+  code: 13003
+  name: BOOK_NOT_FOUND
+  category: book
+  description: 书稿不存在
+
+13004:
+  code: 13004
+  name: BOOK_GENERATION_FAILED
+  category: book
+  description: 书稿生成失败
+
+# 分享 (14000-14999)
+14000:
+  code: 14000
+  name: SHARE_TOKEN_INVALID
+  category: share
+  description: 分享 Token 无效
+
+14001:
+  code: 14001
+  name: SHARE_TOKEN_EXPIRED
+  category: share
+  description: 分享 Token 已过期
+
+14002:
+  code: 14002
+  name: SHARE_TOKEN_NOT_FOUND
+  category: share
+  description: 分享 Token 不存在
+
+14003:
+  code: 14003
+  name: SHARE_ACCESS_DENIED
+  category: share
+  description: 分享访问被拒绝
+
+14004:
+  code: 14004
+  name: SHARE_ACCESS_COUNT_EXCEEDED
+  category: share
+  description: 分享访问次数已用尽
+
+# 上传/存储 (15000-15999)
+15000:
+  code: 15000
+  name: UPLOAD_SESSION_NOT_FOUND
+  category: upload
+  description: 上传会话不存在
+
+15001:
+  code: 15001
+  name: UPLOAD_SESSION_EXPIRED
+  category: upload
+  description: 上传会话已过期
+
+15002:
+  code: 15002
+  name: UPLOAD_ITEM_NOT_FOUND
+  category: upload
+  description: 上传项不存在
+
+15003:
+  code: 15003
+  name: UPLOAD_FAILED
+  category: upload
+  description: 上传失败
+
+15004:
+  code: 15004
+  name: STORAGE_QUOTA_EXCEEDED
+  category: storage
+  description: 存储配额已超限
+
+15005:
+  code: 15005
+  name: UPLOAD_ITEM_ALREADY_COMMITTED
+  category: upload
+  description: 上传项已提交
+
+15006:
+  code: 15006
+  name: PULLBACK_ALREADY_COMPLETED
+  category: upload
+  description: 回拉任务已完成
+
+# 限流/安全 (16000-16999)
+16001:
+  code: 16001
+  name: RATE_LIMIT_EXCEEDED
+  category: security
+  description: 请求频率超限
+
+16002:
+  code: 16002
+  name: TOO_MANY_REQUESTS
+  category: security
+  description: 请求过多
+
+16003:
+  code: 16003
+  name: SESSION_QUOTA_EXCEEDED
+  category: security
+  description: 会话配额已超限
+
+16004:
+  code: 16004
+  name: DAILY_SESSION_QUOTA_EXCEEDED
+  category: security
+  description: 每日会话配额已超限
+
+# 服务端内部错误 (50000+)
+50000:
+  code: 50000
+  name: INTERNAL_ERROR
+  category: internal
+  description: 服务器内部错误
+
+50001:
+  code: 50001
+  name: DATABASE_ERROR
+  category: internal
+  description: 数据库错误
+
+50002:
+  code: 50002
+  name: EXTERNAL_SERVICE_ERROR
+  category: internal
+  description: 外部服务错误

@@ -1,0 +1,133 @@
+// Cloud API Database Schema
+// This schema contains cloud-only tables for device sync, uploads, and sharing
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Device registration and sync
+model Device {
+  id           String   @id @default(cuid())
+  machineId    String   @unique
+  deviceName   String?
+  platform     String?  // "macos", "windows", "linux"
+  lastHeartbeat DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  uploadItems  UploadItem[]
+  jobs         Job[]
+
+  @@index([machineId])
+  @@index([lastHeartbeat])
+  @@map("devices")
+}
+
+// Upload sessions (cloud-only)
+model UploadSession {
+  id          String   @id @default(cuid())
+  childId     String
+  status      String   // "active", "closed", "expired"
+  expiresAt   DateTime
+  maxItems    Int      @default(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       UploadItem[]
+
+  @@index([childId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("upload_sessions")
+}
+
+// Upload items (cloud-only)
+model UploadItem {
+  id              String   @id @default(cuid())
+  sessionId       String
+  deviceId        String?
+  objectKey       String
+  fileName        String
+  fileSize        BigInt?
+  mimeType        String?
+  status          String   // "pending", "uploaded", "synced", "failed"
+  uploadedAt      DateTime?
+  syncedAt        DateTime?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  session         UploadSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  device          Device?       @relation(fields: [deviceId], references: [id])
+
+  @@index([sessionId])
+  @@index([deviceId])
+  @@index([status])
+  @@index([uploadedAt])
+  @@map("upload_items")
+}
+
+// Share tokens (cloud-only)
+model ShareToken {
+  id            String   @id @default(cuid())
+  token         String   @unique
+  childId       String
+  bookId        String?
+  accessLimit   Int?
+  accessCount   Int      @default(0)
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+  createdBy     String   // sessionId or deviceId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accessLogs    ShareAccessLog[]
+
+  @@index([token])
+  @@index([childId])
+  @@index([expiresAt])
+  @@map("share_tokens")
+}
+
+// Share access logs (cloud-only)
+model ShareAccessLog {
+  id          String   @id @default(cuid())
+  tokenId     String
+  ipAddress   String
+  userAgent   String?
+  accessedAt  DateTime @default(now())
+
+  token       ShareToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@index([tokenId])
+  @@index([accessedAt])
+  @@map("share_access_logs")
+}
+
+// Jobs (cloud-only, for distributed task execution)
+model Job {
+  id          String   @id @default(cuid())
+  deviceId    String?
+  type        String   // "book_generation", "asset_processing", etc.
+  payload     Json
+  status      String   // "pending", "claimed", "processing", "completed", "failed"
+  priority    Int      @default(0)
+  claimedAt   DateTime?
+  completedAt DateTime?
+  errorMessage String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  device      Device?  @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("jobs")
+}

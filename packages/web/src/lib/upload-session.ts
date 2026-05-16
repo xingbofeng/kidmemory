@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { httpClient, ApiError } from './http-client'
 import { UploadResponse, UploadSession } from '../types/api'
 
 export function formatRemainingTime(expiresAt: string): string {
@@ -21,8 +21,14 @@ export function getUploadStatus(uploadCount: number, maxUploads: number) {
 }
 
 export async function fetchUploadSession(sessionId: string): Promise<UploadSession> {
-  const response = await axios.get(`/api/web-companion/sessions/${sessionId}`)
-  return response.data
+  try {
+    return await httpClient.get<UploadSession>(`/api/web-companion/sessions/${sessionId}`)
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw new Error(error.message)
+    }
+    throw error
+  }
 }
 
 export async function uploadSessionFile(session: UploadSession, file: File): Promise<UploadResponse> {
@@ -33,21 +39,14 @@ export async function uploadSessionFile(session: UploadSession, file: File): Pro
   body.append('file', file)
 
   try {
-    const response = await axios.post('/api/web-companion/upload', body, {
+    return await httpClient.post<UploadResponse>('/api/web-companion/upload', body, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
-    return response.data as UploadResponse
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.data) {
-      const payload = error.response.data
-      const message = typeof payload?.error === 'string'
-        ? payload.error
-        : typeof payload?.message === 'string'
-          ? payload.message
-          : 'Upload failed'
-      throw new Error(message)
+    if (error instanceof ApiError) {
+      throw new Error(error.message)
     }
     throw new Error('Upload failed')
   }

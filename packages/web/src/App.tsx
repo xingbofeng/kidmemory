@@ -6,6 +6,7 @@ import { ShareBrowsePage } from './pages/share/ShareBrowsePage'
 import { ShareBookPage } from './pages/share/ShareBookPage'
 import { WebCompanionApp, Book } from './components/web-companion/WebCompanionApp'
 import LandingPage from './pages/landing/LandingPage'
+import './i18n' // 初始化 i18next
 import './App.css'
 import './styles/share.css'
 import './styles/landing.css'

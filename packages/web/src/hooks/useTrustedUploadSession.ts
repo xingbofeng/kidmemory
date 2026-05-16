@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
+import { ApiError } from '../api/errors'
+import { getUploadSession, createUploadItems, commitUploadItem } from '../api/uploadApi'
 import type { SessionSummary, UploadProvider, UploadItem, FileTask } from '../types/trustedUpload'
 import { nextTaskId, formatRemaining } from '../utils/trustedUploadUtils'
 
@@ -23,16 +24,17 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
     setLoading(true)
     setError(null)
 
-    axios.get(`/api/web-companion/sessions/${sessionId}?token=${encodeURIComponent(token)}`)
-      .then((response) => {
+    getUploadSession(sessionId, token)
+      .then((data) => {
         if (cancelled) return
-        setSession(response.data)
-        setSelectedProvider(response.data.providers?.lan?.available ? 'lan' : 'supabase')
+        setSession(data)
+        setSelectedProvider(data.providers?.lan?.available ? 'lan' : 'supabase')
         setLoading(false)
       })
       .catch((err) => {
         if (cancelled) return
-        setError(err instanceof Error ? err.message : String(err))
+        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+        setError(message)
         setLoading(false)
       })
 
@@ -77,7 +79,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
         const provider = selectedProvider === 'lan' && session.providers?.lan?.available
           ? 'lan'
           : 'supabase'
-        const response = await axios.post(`/api/web-companion/sessions/${sessionId}/items`, {
+        const data = await createUploadItems(sessionId, {
           token,
           provider,
           files: files.map((file, i) => ({
@@ -87,8 +89,6 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
             sizeBytes: file.size,
           })),
         })
-
-        const data = response.data as { items: UploadItem[] }
 
         for (let i = 0; i < data.items.length; i++) {
           const item = data.items[i]
@@ -129,7 +129,12 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
               prev.map((t) => (t.id === task.id ? { ...t, status: 'committing' } : t)),
             )
 
-            await commitUploadItem(sessionId, token, item.uploadItemId, item.objectKey, task.file)
+            await commitUploadItem(sessionId, item.uploadItemId, {
+              token,
+              objectKey: item.objectKey,
+              sizeBytes: task.file.size,
+              contentType: task.file.type || 'application/octet-stream',
+            })
 
             setTasks((prev) =>
               prev.map((t) =>
@@ -151,7 +156,8 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : String(err))
+        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+        setError(message)
       }
     },
     [selectedProvider, session, sessionId, tasks.length, token],
@@ -202,22 +208,4 @@ async function uploadFileWithSignedUrl(
     })
     xhr.send(file)
   })
-}
-
-async function commitUploadItem(
-  sessionId: string,
-  token: string,
-  uploadItemId: string,
-  objectKey: string,
-  file: File,
-): Promise<void> {
-  await axios.put(
-    `/api/web-companion/sessions/${sessionId}/items/${uploadItemId}/commit`,
-    {
-      token,
-      objectKey,
-      sizeBytes: file.size,
-      contentType: file.type || 'application/octet-stream',
-    }
-  )
 }

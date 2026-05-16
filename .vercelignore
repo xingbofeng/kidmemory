@@ -8,7 +8,7 @@
 apps
 examples
 node_modules
-packages/backend
+packages/sidecar
 packages/desktop
 scripts
 templates

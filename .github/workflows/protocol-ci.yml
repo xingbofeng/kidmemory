@@ -1,0 +1,45 @@
+name: Protocol CI
+
+on:
+  pull_request:
+    paths:
+      - 'packages/protocol/**'
+      - '.github/workflows/protocol-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/protocol/**'
+      - '.github/workflows/protocol-ci.yml'
+
+jobs:
+  protocol-check:
+    name: Protocol Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'packages/protocol/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: packages/protocol
+        run: npm ci
+
+      - name: Run protocol check
+        working-directory: packages/protocol
+        run: npm run check
+
+      - name: Run TypeScript build
+        working-directory: packages/protocol
+        run: npm run build
+
+      - name: Run tests
+        working-directory: packages/protocol
+        run: npm test

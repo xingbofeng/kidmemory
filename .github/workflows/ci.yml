@@ -19,51 +19,50 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/backend
+        working-directory: packages/sidecar
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/backend/package-lock.json
+          cache-dependency-path: packages/sidecar/package-lock.json
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
+      - name: Start PostgreSQL with pgvector
+        run: |
+          docker run -d \
+            --name postgres-test \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=kidmemory_test \
+            -p 5432:5432 \
+            pgvector/pgvector:pg16
+          
+          # Wait for PostgreSQL to be ready
+          timeout 30 bash -c 'until docker exec postgres-test pg_isready -U postgres; do sleep 1; done'
 
       - run: npm ci
       - run: npm run prisma:generate
 
-      - name: Start Supabase local stack
-        run: |
-          supabase start
-
-      - name: Create isolated test database for Prisma
-        run: |
-          PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -c "CREATE DATABASE kidmemory_test;"
-
       - name: Apply Prisma migrations to test database
         run: npx prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/kidmemory_test
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
 
       - name: Run all tests
         run: npm test
         env:
           POSTGRES_HOST: 127.0.0.1
-          POSTGRES_PORT: 54322
+          POSTGRES_PORT: 5432
           POSTGRES_DATABASE: kidmemory_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/kidmemory_test
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
 
       - run: npm run build
 
-      - name: Stop Supabase
+      - name: Stop PostgreSQL
         if: always()
-        run: supabase stop
+        run: docker stop postgres-test && docker rm postgres-test
 
   web_companion:
     name: web companion type-check, lint, test, build

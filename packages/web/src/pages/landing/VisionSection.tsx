@@ -9,16 +9,16 @@ const VisionSection: React.FC = () => {
       </div>
       <div className="cards">
         <article className="card">
-          <h3 data-i18n="v1Title">Curated, not piled up</h3>
-          <p data-i18n="v1Desc">孩子的画作、照片、手工和早期表达不应该只堆在相册里。它们需要被重新挑选、排序、连接成故事。</p>
+          <h3 data-i18n="visionCuratedTitle">Curated, not piled up</h3>
+          <p data-i18n="visionCuratedDesc">孩子的画作、照片、手工和早期表达不应该只堆在相册里。它们需要被重新挑选、排序、连接成故事。</p>
         </article>
         <article className="card">
-          <h3 data-i18n="v2Title">AI as an editor</h3>
-          <p data-i18n="v2Desc">Agent 像编辑助理一样整理素材、生成结构、修复输出，但家庭的判断和叙事权始终留在用户手里。</p>
+          <h3 data-i18n="visionAiEditorTitle">AI as an editor</h3>
+          <p data-i18n="visionAiEditorDesc">Agent 像编辑助理一样整理素材、生成结构、修复输出，但家庭的判断和叙事权始终留在用户手里。</p>
         </article>
         <article className="card">
-          <h3 data-i18n="v3Title">Private by design</h3>
-          <p data-i18n="v3Desc">开源版从 macOS 桌面、本地文件、PostgreSQL + pgvector 和隔离 workspace 开始，把隐私和可迁移放在底层。</p>
+          <h3 data-i18n="visionPrivateTitle">Private by design</h3>
+          <p data-i18n="visionPrivateDesc">开源版从 macOS 桌面、本地文件、PostgreSQL + pgvector 和隔离 workspace 开始，把隐私和可迁移放在底层。</p>
         </article>
       </div>
     </section>

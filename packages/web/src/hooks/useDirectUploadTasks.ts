@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
+import { ApiError } from '../api/errors'
+import { getDirectUploadConfig } from '../api/uploadApi'
 import {
   createDirectUploadClient,
   validateAddFiles,
@@ -98,12 +99,15 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
     if (!parsed.ok) return
     let cancelled = false
     const { sessionId } = parsed.partial
-    axios.get(`/api/web-companion/direct-upload/sessions/${encodeURIComponent(sessionId)}/config`)
-      .then((response) => {
-        if (!cancelled) setAnonKey(response.data.anonKey)
+    getDirectUploadConfig(sessionId)
+      .then((data) => {
+        if (!cancelled) setAnonKey(data.anonKey)
       })
       .catch((err) => {
-        if (!cancelled) setAnonKeyError(err instanceof Error ? err.message : String(err))
+        if (!cancelled) {
+          const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+          setAnonKeyError(message)
+        }
       })
     return () => { cancelled = true }
   }, [parsed])

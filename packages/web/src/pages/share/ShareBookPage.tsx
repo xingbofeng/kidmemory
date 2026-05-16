@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { ApiError } from '../../api/errors'
+import { validateShareToken, getSharedBook } from '../../api/shareApi'
 import type { SharedBook, ShareTokenValidation } from '../../types/shareBook'
 import { ShareLoading } from '../../components/share/ShareLoading'
 import { ShareError } from '../../components/share/ShareError'
@@ -25,8 +26,7 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
       setError(null)
 
       // Validate share token
-      const validationResponse = await axios.get(`/api/web-companion/share/${shareToken}/access`)
-      const validationData: ShareTokenValidation = validationResponse.data
+      const validationData = await validateShareToken(shareToken)
 
       if (!validationData.isValid) {
         setError(validationData.error || '分享链接无效或已过期')
@@ -58,13 +58,13 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
       }
 
       // Fetch shared book data from backend
-      const bookResponse = await axios.get(`/api/web-companion/share/${shareToken}/book?bookId=${targetBookId}`)
-      const bookData: SharedBook = bookResponse.data;
+      const bookData = await getSharedBook(shareToken, targetBookId)
       setBook(bookData);
 
     } catch (err) {
       console.error('Failed to load shared book:', err)
-      setError(err instanceof Error ? err.message : '加载分享作品集失败')
+      const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载分享作品集失败')
+      setError(message)
     } finally {
       setLoading(false)
     }

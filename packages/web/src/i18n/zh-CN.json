@@ -1,0 +1,23 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "confirm": "确认",
+    "submit": "提交",
+    "back": "返回"
+  },
+  "upload": {
+    "title": "上传素材",
+    "selectFiles": "选择文件",
+    "uploading": "上传中...",
+    "uploadSuccess": "上传成功",
+    "uploadFailed": "上传失败"
+  },
+  "share": {
+    "title": "分享",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制"
+  }
+}
