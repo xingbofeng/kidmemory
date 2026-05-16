@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { httpClient, ApiError } from '../../lib/http-client'
 import { Asset, AssetFilter } from '../../types/asset'
 import { filterAssets, getFilterLabel } from '../../utils/assetUtils'
@@ -9,6 +10,7 @@ interface AssetBrowserProps {
 }
 
 export function AssetBrowser({ childId }: AssetBrowserProps) {
+  const { t } = useTranslation()
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +27,7 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
         setAssets(data.assets || [])
       } catch (err) {
         console.error('Failed to load assets:', err)
-        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载失败')
+        const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : t('uploadLegacy.loadFailed')
         setError(message)
       } finally {
         setLoading(false)
@@ -33,13 +35,36 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
     }
 
     loadAssets()
-  }, [childId])
+  }, [childId, t])
 
   const filteredAssets = filterAssets(assets, selectedFilter, searchQuery)
   const filters: AssetFilter[] = ['all', 'drawing', 'photo']
+  const galleryFillers: Asset[] = [
+    {
+      id: 'gallery-filler-1',
+      name: t('uploadLegacy.filler1'),
+      type: 'drawing',
+      thumbnailUrl: transparentPixel,
+      createdAt: '',
+    },
+    {
+      id: 'gallery-filler-2',
+      name: t('uploadLegacy.filler2'),
+      type: 'photo',
+      thumbnailUrl: transparentPixel,
+      createdAt: '',
+    },
+    {
+      id: 'gallery-filler-3',
+      name: t('uploadLegacy.filler3'),
+      type: 'drawing',
+      thumbnailUrl: transparentPixel,
+      createdAt: '',
+    },
+  ]
 
   if (loading) {
-    return <div className="loading-card">加载中...</div>
+    return <div className="loading-card">{t('uploadLegacy.loading')}</div>
   }
 
   if (error) {
@@ -53,15 +78,15 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
           <Icon name="search" />
           <input
             type="text"
-            placeholder="搜索素材、标题、标签或描述..."
+            placeholder={t('uploadLegacy.searchPlaceholder')}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
           />
         </label>
-        <button className="filter-icon" aria-label="筛选"><Icon name="filter" label="筛选" /></button>
+        <button className="filter-icon" aria-label={t('uploadLegacy.filter')}><Icon name="filter" label={t('uploadLegacy.filter')} /></button>
       </div>
 
-      <div className="filter-row" aria-label="素材类型筛选">
+      <div className="filter-row" aria-label={t('uploadLegacy.filterTypes')}>
         {filters.map((filter) => (
           <button
             key={filter}
@@ -73,27 +98,23 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
             {getFilterLabel(filter)}
           </button>
         ))}
-        <button aria-pressed="false"><Icon name="brush" />手工</button>
-        <button aria-pressed="false"><Icon name="time" />最近上传</button>
+        <button aria-pressed="false"><Icon name="brush" />{t('uploadLegacy.handmade')}</button>
+        <button aria-pressed="false"><Icon name="time" />{t('uploadLegacy.recentUpload')}</button>
       </div>
 
       <div className="section-heading">
-        <h2>全部素材</h2>
-        <span>共 24 项素材</span>
+        <h2>{t('uploadLegacy.allAssets')}</h2>
+        <span>{t('uploadLegacy.totalAssets', { count: 24 })}</span>
       </div>
 
       {filteredAssets.length === 0 ? (
-        <div className="empty-state">没有找到相关素材</div>
+        <div className="empty-state">{t('uploadLegacy.noAssetFound')}</div>
       ) : (
         <div className="asset-grid">
           {filteredAssets.concat(galleryFillers).slice(0, 9).map((asset, index) => (
             <article className="asset-card" key={`${asset.id}-${index}`}>
               <div className={`asset-art art-${index % 6}`}>
-                <img
-                  src={asset.thumbnailUrl || transparentPixel}
-                  alt={asset.name}
-                  role="img"
-                />
+                <img src={asset.thumbnailUrl || transparentPixel} alt={asset.name} role="img" />
               </div>
               <span className={`asset-kind ${asset.type}`}>{getFilterLabel(asset.type)}</span>
               <div className="asset-name">{asset.name}</div>
@@ -104,14 +125,14 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
 
       <section className="recent-strip" aria-labelledby="recent-title">
         <div className="section-heading">
-          <h2 id="recent-title">最近上传</h2>
-          <button>查看全部 ›</button>
+          <h2 id="recent-title">{t('uploadLegacy.recentUpload')}</h2>
+          <button>{t('uploadLegacy.viewAll')}</button>
         </div>
         <div className="recent-scroller">
           {filteredAssets.slice(0, 4).map((asset, index) => (
             <article className="recent-card" key={asset.id}>
               <div className={`asset-art art-${(index + 2) % 6}`} />
-              <span>{index * 5 + 1} 分钟前</span>
+              <span>{t('uploadLegacy.minutesAgo', { count: index * 5 + 1 })}</span>
             </article>
           ))}
         </div>
@@ -120,37 +141,12 @@ export function AssetBrowser({ childId }: AssetBrowserProps) {
       <aside className="tip-card">
         <span><Icon name="shield" /></span>
         <div>
-          <h2>轻量搜索提示</h2>
-          <p>当前为移动端轻量搜索，仅支持关键词查找。需要更多筛选条件，请使用桌面端访问 KidMemory。</p>
+          <h2>{t('uploadLegacy.liteSearchTipTitle')}</h2>
+          <p>{t('uploadLegacy.liteSearchTipDesc')}</p>
         </div>
       </aside>
     </div>
   )
 }
 
-const transparentPixel =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
-
-const galleryFillers: Asset[] = [
-  {
-    id: 'gallery-filler-1',
-    name: '彩虹房子',
-    type: 'drawing',
-    thumbnailUrl: transparentPixel,
-    createdAt: ''
-  },
-  {
-    id: 'gallery-filler-2',
-    name: '周末照片',
-    type: 'photo',
-    thumbnailUrl: transparentPixel,
-    createdAt: ''
-  },
-  {
-    id: 'gallery-filler-3',
-    name: '课堂手作',
-    type: 'drawing',
-    thumbnailUrl: transparentPixel,
-    createdAt: ''
-  }
-]
+const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='

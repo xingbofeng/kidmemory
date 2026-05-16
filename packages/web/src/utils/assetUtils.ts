@@ -1,10 +1,7 @@
+import i18n from '../i18n'
 import { Asset, AssetFilter, AssetType } from '../types/asset'
 
-export const filterAssets = (
-  assets: Asset[],
-  filter: AssetFilter,
-  searchQuery: string,
-): Asset[] => {
+export const filterAssets = (assets: Asset[], filter: AssetFilter, searchQuery: string): Asset[] => {
   let filtered = assets
 
   if (filter !== 'all') {
@@ -19,15 +16,15 @@ export const filterAssets = (
   return filtered
 }
 
-const ASSET_TYPE_LABELS: Record<AssetType, string> = {
-  drawing: '绘画',
-  photo: '照片',
-  video: '视频',
+const ASSET_TYPE_LABEL_KEYS: Record<AssetType, string> = {
+  drawing: 'assetType.drawing',
+  photo: 'assetType.photo',
+  video: 'assetType.video',
 }
 
-export const getAssetTypeLabel = (type: AssetType): string => ASSET_TYPE_LABELS[type]
+export const getAssetTypeLabel = (type: AssetType): string => i18n.t(ASSET_TYPE_LABEL_KEYS[type])
 
 export const getFilterLabel = (filter: AssetFilter): string => {
-  if (filter === 'all') return '全部'
+  if (filter === 'all') return i18n.t('assetType.all')
   return getAssetTypeLabel(filter)
 }

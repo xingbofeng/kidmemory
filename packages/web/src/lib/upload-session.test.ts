@@ -1,11 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import axios from 'axios'
 import { fetchUploadSession, uploadSessionFile } from './upload-session'
 import { UploadSession } from '../types/api'
+import { httpClient, ApiError } from './http-client'
 
-// Mock axios
-vi.mock('axios')
-const mockAxios = vi.mocked(axios)
+vi.mock('./http-client', () => ({
+  ApiError: class ApiError extends Error {
+    code: number
+    data?: unknown
+
+    constructor(code: number, message: string, data?: unknown) {
+      super(message)
+      this.name = 'ApiError'
+      this.code = code
+      this.data = data
+    }
+  },
+  httpClient: {
+    get: vi.fn(),
+    post: vi.fn(),
+  },
+}))
+
+const mockHttpClient = vi.mocked(httpClient)
 
 describe('upload-session', () => {
   beforeEach(() => {
@@ -24,18 +40,16 @@ describe('upload-session', () => {
         maxUploads: 50
       }
 
-      mockAxios.get.mockResolvedValueOnce({
-        data: mockSession
-      })
+      mockHttpClient.get.mockResolvedValueOnce(mockSession)
 
       const result = await fetchUploadSession('test-session')
 
-      expect(mockAxios.get).toHaveBeenCalledWith('/api/web-companion/sessions/test-session')
+      expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/sessions/test-session')
       expect(result).toEqual(mockSession)
     })
 
     it('throws error when session fetch fails', async () => {
-      mockAxios.get.mockRejectedValueOnce(new Error('Session not found'))
+      mockHttpClient.get.mockRejectedValueOnce(new Error('Session not found'))
 
       await expect(fetchUploadSession('invalid-session')).rejects.toThrow('Session not found')
     })
@@ -61,13 +75,11 @@ describe('upload-session', () => {
         message: 'Upload successful'
       }
 
-      mockAxios.post.mockResolvedValueOnce({
-        data: mockResponse
-      })
+      mockHttpClient.post.mockResolvedValueOnce(mockResponse)
 
       const result = await uploadSessionFile(mockSession, mockFile)
 
-      expect(mockAxios.post).toHaveBeenCalledWith(
+      expect(mockHttpClient.post).toHaveBeenCalledWith(
         '/api/web-companion/upload',
         expect.any(FormData),
         {
@@ -80,34 +92,24 @@ describe('upload-session', () => {
     })
 
     it('throws error with custom message when upload fails', async () => {
-      const errorResponse = {
-        response: {
-          data: {
-            error: 'File too large'
-          }
-        }
-      }
-
-      mockAxios.isAxiosError.mockReturnValue(true)
-      mockAxios.post.mockRejectedValueOnce(errorResponse)
+      mockHttpClient.post.mockRejectedValueOnce(new ApiError(400, 'File too large'))
 
       await expect(uploadSessionFile(mockSession, mockFile)).rejects.toThrow('File too large')
     })
 
     it('throws generic error when upload fails without specific message', async () => {
-      mockAxios.isAxiosError.mockReturnValue(false)
-      mockAxios.post.mockRejectedValueOnce(new Error('Network error'))
+      mockHttpClient.post.mockRejectedValueOnce(new Error('Network error'))
 
       await expect(uploadSessionFile(mockSession, mockFile)).rejects.toThrow('Upload failed')
     })
 
     it('creates FormData with correct fields', async () => {
       const mockResponse = { status: 'success' }
-      mockAxios.post.mockResolvedValueOnce({ data: mockResponse })
+      mockHttpClient.post.mockResolvedValueOnce(mockResponse)
 
       await uploadSessionFile(mockSession, mockFile)
 
-      const formDataCall = mockAxios.post.mock.calls[0]
+      const formDataCall = mockHttpClient.post.mock.calls[0]
       const formData = formDataCall[1] as FormData
 
       expect(formData.get('sessionId')).toBe('test-session')

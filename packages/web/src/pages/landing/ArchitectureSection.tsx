@@ -1,11 +1,13 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next'
 
-const ArchitectureSection: React.FC = () => {
+export default function ArchitectureSection() {
+  const { t } = useTranslation()
+
   return (
     <section id="architecture">
       <div className="head">
-        <h2 data-i18n="archTitle">让 Agent 有创造力，也有边界。</h2>
-        <p data-i18n="archDesc">系统先准备独立 workspace，Agent 只读输入、模板与规则，只写结构化输出。数据库、密钥、对象存储、导出和恢复都由系统掌控。</p>
+        <h2>{t('landing.archTitle')}</h2>
+        <p>{t('landing.archDesc')}</p>
       </div>
       <div className="arch">
         <div className="agent-map" aria-label="KidMemory architecture illustration">
@@ -17,52 +19,50 @@ const ArchitectureSection: React.FC = () => {
           </svg>
           <article className="agent-card desktop-node">
             <div className="agent-icon">🖥️</div>
-            <b data-i18n="mapDesktopTitle">Desktop Studio</b>
-            <span data-i18n="mapDesktopDesc">素材整理、搜图、预览和导出入口。</span>
+            <b>{t('landing.mapDesktopTitle')}</b>
+            <span>{t('landing.mapDesktopDesc')}</span>
           </article>
           <article className="agent-card sidecar-node">
             <div className="agent-icon">🧩</div>
-            <b data-i18n="mapSidecarTitle">Node Sidecar</b>
-            <span data-i18n="mapSidecarDesc">连接配置、workspace、渲染与校验。</span>
+            <b>{t('landing.mapSidecarTitle')}</b>
+            <span>{t('landing.mapSidecarDesc')}</span>
           </article>
           <article className="agent-card export-node">
             <div className="agent-icon">💛</div>
-            <b data-i18n="mapOutputTitle">Memory Book</b>
-            <span data-i18n="mapOutputDesc">结构化书稿、HTML 预览、PDF 和长图。</span>
+            <b>{t('landing.mapOutputTitle')}</b>
+            <span>{t('landing.mapOutputDesc')}</span>
           </article>
           <article className="agent-card data-node">
             <div className="agent-icon">🗂️</div>
-            <b data-i18n="mapDataTitle">Private Library</b>
-            <span data-i18n="mapDataDesc">PostgreSQL + pgvector 与本地文件。</span>
+            <b>{t('landing.mapDataTitle')}</b>
+            <span>{t('landing.mapDataDesc')}</span>
           </article>
           <article className="agent-card agent-node">
             <div className="agent-icon">✨</div>
-            <b data-i18n="mapAgentTitle">Agent Runner</b>
-            <span data-i18n="mapAgentDesc">只读输入和规则，写出可校验结果。</span>
+            <b>{t('landing.mapAgentTitle')}</b>
+            <span>{t('landing.mapAgentDesc')}</span>
           </article>
-          <div className="agent-badge" data-i18n="mapBadge">local-first · safe workspace · publishable output</div>
+          <div className="agent-badge">{t('landing.mapBadge')}</div>
         </div>
         <div className="principles">
           <article className="mini">
-            <h3 data-i18n="p1Title">Workspace first</h3>
-            <p data-i18n="p1Desc">每次生成先创建独立 job workspace，包含 input、templates、rules 和 output。</p>
+            <h3>{t('landing.p1Title')}</h3>
+            <p>{t('landing.p1Desc')}</p>
           </article>
           <article className="mini">
-            <h3 data-i18n="p2Title">No secret access</h3>
-            <p data-i18n="p2Desc">Agent 不直接访问数据库连接、API Key、对象存储凭据或本地敏感配置。</p>
+            <h3>{t('landing.p2Title')}</h3>
+            <p>{t('landing.p2Desc')}</p>
           </article>
           <article className="mini">
-            <h3 data-i18n="p3Title">Schema-valid output</h3>
-            <p data-i18n="p3Desc">`book.json` 必须可校验，`book.html` 必须可预览，生成结果可追踪。</p>
+            <h3>{t('landing.p3Title')}</h3>
+            <p>{t('landing.p3Desc')}</p>
           </article>
           <article className="mini">
-            <h3 data-i18n="p4Title">System-owned export</h3>
-            <p data-i18n="p4Desc">PDF、长图、备份恢复和失败重试由系统负责，保证作品稳定可打开。</p>
+            <h3>{t('landing.p4Title')}</h3>
+            <p>{t('landing.p4Desc')}</p>
           </article>
         </div>
       </div>
     </section>
-  );
-};
-
-export default ArchitectureSection;
+  )
+}

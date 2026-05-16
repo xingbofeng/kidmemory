@@ -1,13 +1,12 @@
-export interface SessionSummary {
-  sessionId: string
-  status: string
+import type { components } from '@kidmemory/protocol/generated/cloud-api/ts'
+
+type SessionSummarySchema = components['schemas']['SessionSummaryResponseDto']
+
+export type SessionSummary = Omit<SessionSummarySchema, 'child' | 'providers'> & {
   child: {
     id: string
     displayName: string
   }
-  expiresAt: string
-  maxItems: number
-  usedItems: number
   providers?: {
     lan?: { available: boolean }
     supabase?: { available: boolean }
@@ -16,12 +15,7 @@ export interface SessionSummary {
 
 export type UploadProvider = 'lan' | 'supabase'
 
-export interface UploadItem {
-  clientFileId: string
-  uploadItemId: string
-  assetId: string
-  objectKey: string
-  status: string
+export type UploadItem = components['schemas']['CreatedUploadItemDto'] & {
   signedUpload?: {
     method: string
     url: string

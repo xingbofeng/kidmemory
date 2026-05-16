@@ -10,7 +10,7 @@
 ## 应用结构
 
 - `packages/desktop`：macOS Flutter 桌面端。
-- `packages/backend`：Node.js sidecar API 与任务编排。
+- `packages/sidecar`：Node.js sidecar API 与任务编排。
 - `packages/web`：手机 Web Companion。
 
 ## 数据库

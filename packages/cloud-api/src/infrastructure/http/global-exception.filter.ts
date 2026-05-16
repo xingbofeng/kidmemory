@@ -16,14 +16,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = 10000; // Generic error code
     let message = 'Internal server error';
-    let data: any = null;
+    let data: unknown = null;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       
       if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        const resp = exceptionResponse as any;
+        const resp = exceptionResponse as {
+          message?: string;
+          code?: number;
+          data?: unknown;
+        };
         message = resp.message || exception.message;
         code = resp.code || this.getCodeFromStatus(status);
         data = resp.data || null;

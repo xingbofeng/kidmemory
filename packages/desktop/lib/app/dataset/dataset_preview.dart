@@ -24,7 +24,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Claude Agent 日志详情'),
+          title: const Text('生成日志详情'),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(

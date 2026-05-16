@@ -57,7 +57,7 @@ echo -e "${BLUE}📁 代码库结构检查${NC}"
 echo "----------------------------------------"
 
 # 检查关键目录
-for dir in "packages/backend" "packages/desktop" "packages/web" "docs" "scripts"; do
+for dir in "packages/sidecar" "packages/desktop" "packages/web" "docs" "scripts"; do
     if [ -d "$dir" ]; then
         check_status "目录存在: $dir" "PASS"
     else
@@ -111,8 +111,8 @@ echo -e "${BLUE}🔍 代码质量检查${NC}"
 echo "----------------------------------------"
 
 # 后端代码检查
-if [ -d "packages/backend" ]; then
-    cd packages/backend
+if [ -d "packages/sidecar" ]; then
+    cd packages/sidecar
 
     # 检查 package.json
     if [ -f "package.json" ]; then
@@ -187,8 +187,8 @@ echo -e "${BLUE}🧪 测试覆盖率检查${NC}"
 echo "----------------------------------------"
 
 # 后端测试
-if [ -d "packages/backend" ]; then
-    cd packages/backend
+if [ -d "packages/sidecar" ]; then
+    cd packages/sidecar
 
     if [ -f "package.json" ] && grep -q '"test"' package.json; then
         check_status "后端测试脚本配置" "PASS"
@@ -341,7 +341,7 @@ else
 fi
 
 # 检查数据库配置
-if [ -f "packages/backend/.env" ] || [ -f "packages/backend/.env.example" ]; then
+if [ -f "packages/sidecar/.env" ] || [ -f "packages/sidecar/.env.example" ]; then
     check_status "后端环境配置" "PASS"
 else
     check_status "后端环境配置" "WARN" "后端环境配置文件不存在"
@@ -354,8 +354,8 @@ echo -e "${BLUE}🔨 构建检查${NC}"
 echo "----------------------------------------"
 
 # 后端构建检查
-if [ -d "packages/backend" ]; then
-    cd packages/backend
+if [ -d "packages/sidecar" ]; then
+    cd packages/sidecar
 
     if [ -f "package.json" ] && grep -q '"build"' package.json; then
         check_status "后端构建脚本" "PASS"

@@ -178,6 +178,27 @@ class QueryBackedWebCompanionRepository implements WebCompanionRepository {
     return this.getUploadItemById(input.uploadItemId);
   }
 
+  async commitUploadItemIfNotCommitted(input: { uploadItemId: string; status: any; updates: UpdateUploadItemInput }): Promise<UploadItem | null> {
+    const result = await this.db.query(
+      `UPDATE web_companion_upload_items
+       SET status = $1, size_bytes = $2, content_type = $3, remote_etag = $4, committed_at = $5, updated_at = now()
+       WHERE id = $6 AND committed_at IS NULL AND status = 'uploading'`,
+      [
+        input.status,
+        input.updates.sizeBytes ?? null,
+        input.updates.contentType ?? null,
+        input.updates.remoteEtag ?? null,
+        input.updates.committedAt ?? null,
+        input.uploadItemId,
+      ],
+    );
+
+    if ((result.rowCount ?? 0) === 0) {
+      return null;
+    }
+    return this.getUploadItemById(input.uploadItemId);
+  }
+
   private mapSession(row: any): UploadSession {
     return {
       id: row.id,
@@ -302,6 +323,7 @@ describe("WebCompanionService", () => {
     });
 
     test("should throw error if child does not exist", async () => {
+      mockDataset.getChild = mock.fn(async () => null);
       mockDataset.getChildById = mock.fn(async () => null);
 
       const request: CreateSessionRequest = {
@@ -679,7 +701,7 @@ describe("WebCompanionService", () => {
           };
         }
         if (sql.includes("UPDATE web_companion_upload_items")) {
-          return { rows: [] };
+          return { rows: [], rowCount: 1 };
         }
         return { rows: [] };
       });

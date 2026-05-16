@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Query, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Query, Param, Body, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { UploadItemsService } from './upload-items.service.ts';
 import { UploadItemResponseDto, UpdateSyncStatusDto, PendingSyncQueryDto } from './upload-items.dto.ts';
@@ -6,7 +6,7 @@ import { UploadItemResponseDto, UpdateSyncStatusDto, PendingSyncQueryDto } from 
 @ApiTags('upload-items')
 @Controller('/upload-items')
 export class UploadItemsController {
-  constructor(private readonly uploadItemsService: UploadItemsService) {}
+  constructor(@Inject(UploadItemsService) private readonly uploadItemsService: UploadItemsService) {}
 
   @Get('/pending-sync')
   @ApiOperation({ summary: 'Get pending sync upload items' })

@@ -92,9 +92,9 @@ print_section_end
 print_section "📈 代码统计"
 
 # 后端代码统计
-if [ -d "packages/backend/src" ]; then
-    TS_FILES=$(get_file_count "*.ts" "packages/backend/src")
-    TS_LINES=$(get_line_count "*.ts" "packages/backend/src")
+if [ -d "packages/sidecar/src" ]; then
+    TS_FILES=$(get_file_count "*.ts" "packages/sidecar/src")
+    TS_LINES=$(get_line_count "*.ts" "packages/sidecar/src")
     print_status "INFO" "后端 TypeScript 文件" "$TS_FILES 个文件, $TS_LINES 行代码"
 fi
 
@@ -114,8 +114,8 @@ fi
 
 # 测试文件统计
 TEST_FILES=0
-if [ -d "packages/backend/tests" ]; then
-    TEST_FILES=$((TEST_FILES + $(get_file_count "*.test.ts" "packages/backend/tests")))
+if [ -d "packages/sidecar/tests" ]; then
+    TEST_FILES=$((TEST_FILES + $(get_file_count "*.test.ts" "packages/sidecar/tests")))
 fi
 if [ -d "packages/desktop/test" ]; then
     TEST_FILES=$((TEST_FILES + $(get_file_count "*.dart" "packages/desktop/test")))
@@ -161,8 +161,8 @@ print_section_end
 print_section "📦 依赖状态"
 
 # 后端依赖
-if [ -d "packages/backend" ]; then
-    cd packages/backend
+if [ -d "packages/sidecar" ]; then
+    cd packages/sidecar
 
     if [ -d "node_modules" ]; then
         DEPS_COUNT=$(ls node_modules | wc -l | tr -d ' ')
@@ -322,7 +322,7 @@ echo -e "    ${GREEN}./scripts/run-all-tests.sh${NC}       - 运行所有测试"
 echo -e "    ${GREEN}./scripts/setup-dev-env.sh${NC}       - 设置开发环境"
 echo ""
 echo -e "  ${BLUE}开发服务:${NC}"
-echo -e "    ${GREEN}cd packages/backend && npm run dev${NC}     - 启动后端服务"
+echo -e "    ${GREEN}cd packages/sidecar && npm run dev${NC}     - 启动后端服务"
 echo -e "    ${GREEN}cd packages/web && npm run dev${NC}         - 启动 Web 前端"
 echo -e "    ${GREEN}cd packages/desktop && flutter run${NC}     - 启动 Flutter 应用"
 
@@ -365,7 +365,7 @@ if [ -d ".git" ]; then
 fi
 
 # 检查是否需要更新依赖
-if [ -d "packages/backend" ] && [ "$OUTDATED_COUNT" -gt 5 ]; then
+if [ -d "packages/sidecar" ] && [ "$OUTDATED_COUNT" -gt 5 ]; then
     SUGGESTIONS+=("后端有多个过时依赖，建议更新")
 fi
 

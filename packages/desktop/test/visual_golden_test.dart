@@ -129,6 +129,7 @@ void main() {
           generating: false,
           exported: true,
           statusMessage: '长图 JPG 已导出：/tmp/kidmemory/job_123456.jpg',
+          requestId: 'req_123456',
           logLines: const [
             '10:21:03  生成完成，已获得 jobId: job_123456',
             '10:21:16  长图 JPG 导出成功',
@@ -155,6 +156,7 @@ void main() {
                 'KidMemory 作品集：https://project.supabase.co/signed/job_123456.jpg\n链接有效期：3600 秒',
           ),
           onGenerate: () {},
+          onGenerateSkipCover: () {},
           onExport: () {},
           onExportTargetChanged: (_) {},
           onOpenExportFolder: () {},

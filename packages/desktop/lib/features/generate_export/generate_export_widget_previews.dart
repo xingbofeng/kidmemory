@@ -72,11 +72,7 @@ Widget supabaseStorageSetupPreview() {
   );
 }
 
-@Preview(
-  group: 'Supabase Storage',
-  name: 'JPG 长图已同步',
-  size: Size(1440, 900),
-)
+@Preview(group: 'Supabase Storage', name: 'JPG 长图已同步', size: Size(1440, 900))
 Widget longImageExportPreview() {
   return MaterialApp(
     home: Scaffold(
@@ -86,6 +82,7 @@ Widget longImageExportPreview() {
         generating: false,
         exported: true,
         statusMessage: '长图 JPG 已导出：/tmp/kidmemory/job_123456.jpg',
+        requestId: 'req_123456',
         logLines: const [
           '10:21:03  生成完成，已获得 jobId: job_123456',
           '10:21:16  长图 JPG 导出成功：/tmp/kidmemory/job_123456.jpg',
@@ -112,6 +109,7 @@ Widget longImageExportPreview() {
               'KidMemory 作品集：https://project.supabase.co/signed/job_123456.jpg\n链接有效期：3600 秒',
         ),
         onGenerate: _previewNoop,
+        onGenerateSkipCover: _previewNoop,
         onExport: _previewNoop,
         onExportTargetChanged: _previewStringNoop,
         onOpenExportFolder: _previewNoop,

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { UploadSession as UploadSessionType } from '../../types/api'
 import { PhoneShell } from './PhoneShell'
 import { AppNavigation, TabType } from './AppNavigation'
@@ -22,12 +23,8 @@ interface WebCompanionAppProps {
   onResetSession: () => void
 }
 
-export function WebCompanionApp({
-  sessionId,
-  defaultChildId,
-  recentBooks,
-  onResetSession
-}: WebCompanionAppProps) {
+export function WebCompanionApp({ sessionId, defaultChildId, recentBooks, onResetSession }: WebCompanionAppProps) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabType>('connect')
   const [activeSession, setActiveSession] = useState<UploadSessionType | null>(null)
 
@@ -55,12 +52,7 @@ export function WebCompanionApp({
           />
         )
       case 'upload':
-        return (
-          <UploadView
-            activeSession={activeSession}
-            onBack={handleBackToConnect}
-          />
-        )
+        return <UploadView activeSession={activeSession} onBack={handleBackToConnect} />
       case 'browse':
         return <BrowseView childId={defaultChildId} />
       case 'books':
@@ -74,14 +66,11 @@ export function WebCompanionApp({
     <div className="app">
       <PhoneShell activeTab={activeTab}>
         {renderCurrentView()}
-        <AppNavigation
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        <AppNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </PhoneShell>
 
       <button className="reset-session" onClick={onResetSession}>
-        重置会话
+        {t('webCompanion.resetSession')}
       </button>
     </div>
   )

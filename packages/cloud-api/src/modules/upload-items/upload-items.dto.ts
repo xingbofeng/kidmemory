@@ -7,6 +7,9 @@ export class UploadItemResponseDto {
   @ApiProperty({ type: String })
   sessionId: string;
 
+  @ApiProperty({ type: String })
+  childId: string;
+
   @ApiProperty({ type: String, required: false })
   deviceId?: string;
 

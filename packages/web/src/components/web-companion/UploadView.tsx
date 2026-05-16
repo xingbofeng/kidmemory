@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import { FileUpload } from '../../pages/upload/FileUpload'
 import { UploadSession as UploadSessionType } from '../../types/api'
@@ -8,22 +9,20 @@ interface UploadViewProps {
 }
 
 export function UploadView({ activeSession, onBack }: UploadViewProps) {
+  const { t } = useTranslation()
+
   return (
     <section className="upload-view" aria-labelledby="upload-title">
       <div className="top-bar">
-        <button className="icon-button" onClick={onBack} aria-label="返回">
-          <Icon name="arrow-left" label="返回" />
+        <button className="icon-button" onClick={onBack} aria-label={t('webCompanion.uploadBack')}>
+          <Icon name="arrow-left" label={t('webCompanion.uploadBack')} />
         </button>
-        <button className="icon-button" aria-label="上传设置">
-          <Icon name="settings" label="上传设置" />
+        <button className="icon-button" aria-label={t('webCompanion.uploadSettings')}>
+          <Icon name="settings" label={t('webCompanion.uploadSettings')} />
         </button>
       </div>
-      <h1 id="upload-title">选择并上传照片</h1>
-      {activeSession ? (
-        <FileUpload session={activeSession} />
-      ) : (
-        <div className="inline-alert danger">请先返回连接页，获取有效上传会话</div>
-      )}
+      <h1 id="upload-title">{t('webCompanion.uploadTitle')}</h1>
+      {activeSession ? <FileUpload session={activeSession} /> : <div className="inline-alert danger">{t('webCompanion.uploadNeedSession')}</div>}
     </section>
   )
 }

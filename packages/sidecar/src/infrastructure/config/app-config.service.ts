@@ -68,6 +68,10 @@ export type AppConfig = {
     host: string;
     webCompanionBaseUrl: string;
   };
+  mcp: {
+    enabled: boolean;
+    path: string;
+  };
 };
 
 export type AppPathConfig = AppConfig["paths"];
@@ -181,6 +185,10 @@ export function loadConfigFromEnv(
       host: env.KIDMEMORY_SIDECAR_HOST || "127.0.0.1",
       webCompanionBaseUrl: env.WEB_COMPANION_BASE_URL || "http://localhost:3001",
     },
+    mcp: {
+      enabled: parseBoolean(env.KIDMEMORY_MCP_ENABLED, false),
+      path: env.KIDMEMORY_MCP_PATH?.trim() || "/mcp",
+    },
   };
 }
 
@@ -274,6 +282,7 @@ export function redactConfig(config: AppConfig) {
     webCompanionDirectUpload: redactWebCompanionDirectUpload(config),
     paths: config.paths,
     sidecar: config.sidecar,
+    mcp: config.mcp,
   };
 }
 

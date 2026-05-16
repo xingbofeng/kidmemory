@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { FileTask } from '../../types/trustedUpload'
 
 interface UploadFooterProps {
@@ -6,6 +7,7 @@ interface UploadFooterProps {
 }
 
 export function UploadFooter({ tasks, onContinueUpload }: UploadFooterProps) {
+  const { t } = useTranslation()
   const successCount = tasks.filter((t) => t.status === 'success').length
   const failedCount = tasks.filter((t) => t.status === 'failed').length
   const activeCount = tasks.filter((t) => t.status === 'uploading' || t.status === 'committing').length
@@ -14,13 +16,13 @@ export function UploadFooter({ tasks, onContinueUpload }: UploadFooterProps) {
   return (
     <footer className="trusted-footer">
       <div className="batch-progress">
-        <span>正在上传 {activeCount} 个文件 · 成功 {successCount} · 失败 {failedCount}</span>
+        <span>{t('trustedUpload.footerProgress', { active: activeCount, success: successCount, failed: failedCount })}</span>
         <div><i style={{ width: `${progressPercent}%` }} /></div>
       </div>
       <button className="primary-action" type="button" onClick={onContinueUpload}>
-        ☁ 继续上传
+        {t('trustedUpload.continueUpload')}
       </button>
-      <p className="privacy-note">🔒 仅允许上传到本次会话，过期自动失效</p>
+      <p className="privacy-note">{t('trustedUpload.privacy')}</p>
     </footer>
   )
 }

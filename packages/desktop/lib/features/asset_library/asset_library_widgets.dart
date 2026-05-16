@@ -97,6 +97,7 @@ class _LibraryToolbar extends StatelessWidget {
     required this.onRefreshSearchIndexing,
     required this.onImportFiles,
     required this.onImportFolder,
+    required this.onSmartPick,
     this.onOpenDirectUpload,
     this.sidecarApi,
     this.onTrustedUploadFinished,
@@ -117,6 +118,7 @@ class _LibraryToolbar extends StatelessWidget {
   final Future<void> Function() onRefreshSearchIndexing;
   final Future<void> Function() onImportFiles;
   final Future<void> Function() onImportFolder;
+  final Future<void> Function() onSmartPick;
   final VoidCallback? onOpenDirectUpload;
   final SidecarApi? sidecarApi;
   final Future<void> Function()? onTrustedUploadFinished;
@@ -239,6 +241,12 @@ class _LibraryToolbar extends StatelessWidget {
                   iconAsset: folderIconAsset,
                   label: '导入文件夹',
                   onPressed: onImportFolder,
+                ),
+                _ToolbarButton(
+                  icon: Icons.auto_awesome_rounded,
+                  iconAsset: starIconAsset,
+                  label: '帮我挑素材',
+                  onPressed: onSmartPick,
                 ),
               ],
             ),

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { DirectUploadService } from '../../../src/modules/web-companion/direct-upload.service';
+import { DirectUploadService } from '../../../../src/modules/web-companion/direct-upload.service.ts';
 
 // 最小化 mock 依赖
 function makeMinimalDeps(overrides: Record<string, unknown> = {}) {

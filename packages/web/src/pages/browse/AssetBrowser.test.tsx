@@ -1,42 +1,51 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import axios from 'axios'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AssetBrowser } from './AssetBrowser'
+import { httpClient } from '../../lib/http-client'
 
-// Mock axios
-vi.mock('axios')
-const mockAxios = vi.mocked(axios)
+vi.mock('../../lib/http-client', () => ({
+  ApiError: class ApiError extends Error {
+    code: number
+
+    constructor(code: number, message: string) {
+      super(message)
+      this.name = 'ApiError'
+      this.code = code
+    }
+  },
+  httpClient: {
+    get: vi.fn(),
+  },
+}))
+
+const mockHttpClient = vi.mocked(httpClient)
 
 describe('AssetBrowser', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockAxios.get.mockResolvedValue({
-      data: {
-        assets: [
-          {
-            id: 'asset-1',
-            name: '我的画作',
-            type: 'drawing',
-            thumbnailUrl: '/sample-assets/sun-garden.png',
-            createdAt: '2024-01-15'
-          },
-          {
-            id: 'asset-2',
-            name: '生日照片',
-            type: 'photo',
-            thumbnailUrl: '/sample-assets/birthday-boy.png',
-            createdAt: '2024-01-14'
-          }
-        ]
-      }
+    mockHttpClient.get.mockResolvedValue({
+      assets: [
+        {
+          id: 'asset-1',
+          name: '我的画作',
+          type: 'drawing',
+          thumbnailUrl: '/sample-assets/sun-garden.png',
+          createdAt: '2024-01-15'
+        },
+        {
+          id: 'asset-2',
+          name: '生日照片',
+          type: 'photo',
+          thumbnailUrl: '/sample-assets/birthday-boy.png',
+          createdAt: '2024-01-14'
+        }
+      ]
     })
   })
 
   it('displays assets in grid layout', async () => {
     // Mock API response
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
+    mockHttpClient.get.mockResolvedValueOnce({
         assets: [
           {
             id: 'asset-1',
@@ -53,7 +62,6 @@ describe('AssetBrowser', () => {
             createdAt: '2024-01-14'
           }
         ]
-      }
     })
 
     render(<AssetBrowser childId="child-123" />)
@@ -63,15 +71,12 @@ describe('AssetBrowser', () => {
       expect(screen.getByText('生日照片')).toBeInTheDocument()
     })
 
-    expect(mockAxios.get).toHaveBeenCalledWith('/api/web-companion/children/child-123/assets')
+    expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/children/child-123/assets')
   })
 
   it('filters assets by type', async () => {
-    const user = userEvent.setup()
-
     // Mock API response with multiple asset types
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
+    mockHttpClient.get.mockResolvedValueOnce({
         assets: [
           {
             id: 'asset-1',
@@ -88,7 +93,6 @@ describe('AssetBrowser', () => {
             createdAt: '2024-01-14'
           }
         ]
-      }
     })
 
     render(<AssetBrowser childId="child-123" />)
@@ -100,7 +104,7 @@ describe('AssetBrowser', () => {
 
     // Click on drawing filter
     const drawingFilter = screen.getByRole('button', { name: /绘画/ })
-    await user.click(drawingFilter)
+    fireEvent.click(drawingFilter)
 
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
@@ -110,11 +114,8 @@ describe('AssetBrowser', () => {
   })
 
   it('searches assets by keyword', async () => {
-    const user = userEvent.setup()
-
     // Mock API response
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
+    mockHttpClient.get.mockResolvedValueOnce({
         assets: [
           {
             id: 'asset-1',
@@ -131,7 +132,6 @@ describe('AssetBrowser', () => {
             createdAt: '2024-01-14'
           }
         ]
-      }
     })
 
     render(<AssetBrowser childId="child-123" />)
@@ -142,7 +142,7 @@ describe('AssetBrowser', () => {
     })
 
     const searchInput = screen.getByPlaceholderText(/搜索素材/)
-    await user.type(searchInput, '画作')
+    fireEvent.change(searchInput, { target: { value: '画作' } })
 
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
@@ -151,7 +151,6 @@ describe('AssetBrowser', () => {
   })
 
   it('shows empty state when no assets found', async () => {
-    const user = userEvent.setup()
     render(<AssetBrowser childId="child-123" />)
 
     // Wait for loading to complete first
@@ -160,7 +159,7 @@ describe('AssetBrowser', () => {
     })
 
     const searchInput = screen.getByPlaceholderText(/搜索素材/)
-    await user.type(searchInput, '不存在的内容')
+    fireEvent.change(searchInput, { target: { value: '不存在的内容' } })
 
     await waitFor(() => {
       expect(screen.getByText(/没有找到相关素材/)).toBeInTheDocument()
@@ -185,7 +184,7 @@ describe('AssetBrowser', () => {
   })
 
   it('handles loading and error states', async () => {
-    mockAxios.get.mockRejectedValueOnce(new Error('加载失败'))
+    mockHttpClient.get.mockRejectedValueOnce(new Error('加载失败'))
 
     render(<AssetBrowser childId="invalid-child" />)
 

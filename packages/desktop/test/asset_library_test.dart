@@ -421,25 +421,26 @@ void main() {
     expect(find.text('成功 2 · 重复 1 · 跳过 0 · 失败 0'), findsOneWidget);
   });
 
-  testWidgets('asset import toast shows empty result message on empty reports', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1440, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      _assetLibraryHarness(
-        assets: const [],
-        onImportFiles: () async => _importReport(),
-      ),
-    );
+  testWidgets(
+    'asset import toast shows empty result message on empty reports',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1440, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        _assetLibraryHarness(
+          assets: const [],
+          onImportFiles: () async => _importReport(),
+        ),
+      );
 
-    await tester.tap(find.text('导入图片').last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 220));
+      await tester.tap(find.text('导入图片').last);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 220));
 
-    expect(find.text('未导入素材'), findsOneWidget);
-    expect(find.textContaining('导入 0'), findsNothing);
-  });
+      expect(find.text('未导入素材'), findsOneWidget);
+      expect(find.textContaining('导入 0'), findsNothing);
+    },
+  );
 
   testWidgets('asset library paginates real assets', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
@@ -502,6 +503,71 @@ void main() {
 
     expect(toggledId, 'asset-birthday-cake');
   });
+
+  testWidgets('asset library supports smart pick flow', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    Set<String>? replaced;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AssetLibraryPage(
+            children: const [ChildVm(id: 'child-1', name: '澄澄')],
+            selectedChildId: 'child-1',
+            assets: const [
+              AssetVm(
+                id: 'asset-1',
+                title: '太阳',
+                type: 'artwork',
+                description: 'desc',
+                tags: ['tag'],
+                capturedAt: '2026-05-12',
+                icon: Icons.palette,
+              ),
+              AssetVm(
+                id: 'asset-2',
+                title: '大海',
+                type: 'photo',
+                description: 'desc',
+                tags: ['tag'],
+                capturedAt: '2026-05-10',
+                icon: Icons.photo,
+              ),
+            ],
+            selectedAssets: const {},
+            onChildChanged: (_) {},
+            onToggle: (_) {},
+            onReplaceSelectedAssets: (ids) => replaced = ids,
+            onUpdateAsset: (_, _) async => true,
+            onDeleteAsset: (_) async => true,
+            onDeleteSelected: () async => 0,
+            typeOptions: const [
+              {'value': 'all', 'label': '全部'},
+              {'value': 'artwork', 'label': '绘画'},
+              {'value': 'photo', 'label': '照片'},
+              {'value': 'craft', 'label': '手工'},
+            ],
+            onImportFiles: () async => _okImportReport,
+            onImportFolder: () async => _okImportReport,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('帮我挑素材').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('适合做绘本'), findsOneWidget);
+    expect(find.text('适合做成长纪念册'), findsOneWidget);
+    expect(find.text('适合做回忆录视频'), findsOneWidget);
+
+    await tester.tap(find.text('确认使用'));
+    await tester.pumpAndSettle();
+
+    expect(replaced, isNotNull);
+    expect(replaced!.isNotEmpty, isTrue);
+  });
 }
 
 Widget _assetLibraryHarness({
@@ -522,9 +588,7 @@ Widget _assetLibraryHarness({
         onUpdateAsset: (_, _) async => true,
         onDeleteAsset: (_) async => true,
         onDeleteSelected: () async => 0,
-        onImportFiles:
-            onImportFiles ??
-            () async => _okImportReport,
+        onImportFiles: onImportFiles ?? () async => _okImportReport,
         onImportFolder: () async => _okImportReport,
         onImportDroppedPaths: (_) async => _okImportReport,
         typeOptions: const [

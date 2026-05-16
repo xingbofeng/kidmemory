@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
@@ -16,10 +16,10 @@ export class BooksService {
   private readonly agentRunner: OpenAISDKAgentRunner;
 
   constructor(
-    config: AppConfigService,
-    datasetState: DatasetStateService,
-    jobStore: FileJobStoreService,
-    agentConfigService: AgentConfigApplicationService,
+    @Inject(AppConfigService) config: AppConfigService,
+    @Inject(DatasetStateService) datasetState: DatasetStateService,
+    @Inject(FileJobStoreService) jobStore: FileJobStoreService,
+    @Inject(AgentConfigApplicationService) agentConfigService: AgentConfigApplicationService,
   ) {
     this.config = config;
     this.datasetState = datasetState;

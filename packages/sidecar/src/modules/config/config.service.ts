@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { PrismaMigrationService } from "../../infrastructure/database/prisma-migration.service.ts";
@@ -7,6 +7,7 @@ import { createSupabaseStorageProvider } from "../storage/providers/supabase-sto
 import { createConfigReadinessService } from "./providers/config.domain.ts";
 
 type ConfigReadinessDelegate = ReturnType<typeof createConfigReadinessService>;
+export const CONFIG_STORAGE_FETCH = Symbol("CONFIG_STORAGE_FETCH");
 
 @Injectable()
 export class ConfigService {
@@ -17,10 +18,10 @@ export class ConfigService {
   private readinessDelegate?: ConfigReadinessDelegate;
 
   constructor(
-    config: AppConfigService,
-    prisma: PrismaService,
-    migrations?: PrismaMigrationService,
-    storageFetch?: typeof fetch,
+    @Inject(AppConfigService) config: AppConfigService,
+    @Inject(PrismaService) prisma: PrismaService,
+    @Optional() @Inject(PrismaMigrationService) migrations?: PrismaMigrationService,
+    @Optional() @Inject(CONFIG_STORAGE_FETCH) storageFetch?: typeof fetch,
   ) {
     this.config = config;
     this.prisma = prisma;

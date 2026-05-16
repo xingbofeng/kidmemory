@@ -140,7 +140,7 @@ class SidecarLauncher {
         return root;
       }
       for (final rel in const [
-        'packages/backend',
+        'packages/sidecar',
         'sidecar',
         'resources/sidecar',
         'Resources/sidecar',

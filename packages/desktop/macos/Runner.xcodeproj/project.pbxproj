@@ -377,10 +377,10 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Scripts/bundle-sidecar-for-release.sh",
-				"${SRCROOT}/../../backend/package.json",
-				"${SRCROOT}/../../backend/package-lock.json",
-				"${SRCROOT}/../../backend/src",
-				"${SRCROOT}/../../backend/prisma",
+				"${SRCROOT}/../../sidecar/package.json",
+				"${SRCROOT}/../../sidecar/package-lock.json",
+				"${SRCROOT}/../../sidecar/src",
+				"${SRCROOT}/../../sidecar/prisma",
 				"${SRCROOT}/../../../examples/sample-dataset",
 			);
 			name = "Bundle Sidecar";

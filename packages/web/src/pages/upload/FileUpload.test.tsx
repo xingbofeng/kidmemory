@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { FileUpload } from './FileUpload'
 import * as uploadSession from '../../lib/upload-session'
 
@@ -32,33 +31,36 @@ describe('FileUpload', () => {
   })
 
   it('allows selecting multiple files', async () => {
-    const user = userEvent.setup()
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file1 = new File(['image1'], 'image1.jpg', { type: 'image/jpeg' })
     const file2 = new File(['image2'], 'image2.png', { type: 'image/png' })
 
-    await user.upload(fileInput, [file1, file2])
+    fireEvent.change(fileInput, { target: { files: [file1, file2] } })
 
     expect(screen.getByText('image1.jpg')).toBeInTheDocument()
     expect(screen.getByText('image2.png')).toBeInTheDocument()
   })
 
   it('shows upload progress for each file', async () => {
-    const user = userEvent.setup()
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file = new File(['image'], 'test.jpg', { type: 'image/jpeg' })
 
-    await user.upload(fileInput, file)
+    fireEvent.change(fileInput, { target: { files: [file] } })
 
     const uploadButton = screen.getByRole('button', { name: /开始上传/ })
-    await user.click(uploadButton)
+    fireEvent.click(uploadButton)
 
     await waitFor(() => {
       expect(screen.getByText(/上传中/)).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/上传成功/)).toBeInTheDocument()
+      expect(uploadButton).not.toBeDisabled()
     })
   })
 
@@ -72,7 +74,6 @@ describe('FileUpload', () => {
 
   it('prevents selecting more than remaining upload slots', async () => {
     const nearLimitSession = { ...mockSession, uploadCount: 198 }
-    const user = userEvent.setup()
     render(<FileUpload session={nearLimitSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
@@ -80,7 +81,7 @@ describe('FileUpload', () => {
       new File([`image${i}`], `image${i}.jpg`, { type: 'image/jpeg' })
     )
 
-    await user.upload(fileInput, files)
+    fireEvent.change(fileInput, { target: { files } })
 
     // Should only show 2 files (remaining slots)
     expect(screen.getByText('image0.jpg')).toBeInTheDocument()
@@ -102,47 +103,45 @@ describe('FileUpload', () => {
   })
 
   it('allows removing selected files before upload', async () => {
-    const user = userEvent.setup()
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file = new File(['image'], 'test.jpg', { type: 'image/jpeg' })
 
-    await user.upload(fileInput, file)
+    fireEvent.change(fileInput, { target: { files: [file] } })
     expect(screen.getByText('test.jpg')).toBeInTheDocument()
 
     const removeButton = screen.getByRole('button', { name: /删除/ })
-    await user.click(removeButton)
+    fireEvent.click(removeButton)
 
     expect(screen.queryByText('test.jpg')).not.toBeInTheDocument()
   })
 
   it('shows upload success and failure states', async () => {
-    const user = userEvent.setup()
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file = new File(['image'], 'success.jpg', { type: 'image/jpeg' })
 
-    await user.upload(fileInput, file)
+    fireEvent.change(fileInput, { target: { files: [file] } })
 
     const uploadButton = screen.getByRole('button', { name: /开始上传/ })
-    await user.click(uploadButton)
+    fireEvent.click(uploadButton)
 
     await waitFor(() => {
       expect(screen.getByText(/上传成功/)).toBeInTheDocument()
+      expect(uploadButton).not.toBeDisabled()
     }, { timeout: 3000 })
   })
 
   it('allows clearing all selected files', async () => {
-    const user = userEvent.setup()
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file1 = new File(['image1'], 'image1.jpg', { type: 'image/jpeg' })
     const file2 = new File(['image2'], 'image2.png', { type: 'image/png' })
 
-    await user.upload(fileInput, [file1, file2])
+    fireEvent.change(fileInput, { target: { files: [file1, file2] } })
 
     expect(screen.getByText('image1.jpg')).toBeInTheDocument()
     expect(screen.getByText('image2.png')).toBeInTheDocument()
@@ -151,7 +150,7 @@ describe('FileUpload', () => {
     const clearButton = screen.getByRole('button', { name: /清空队列/ })
     expect(clearButton).not.toBeDisabled()
 
-    await user.click(clearButton)
+    fireEvent.click(clearButton)
 
     expect(screen.queryByText('image1.jpg')).not.toBeInTheDocument()
     expect(screen.queryByText('image2.png')).not.toBeInTheDocument()

@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import { JobResponseDto, UpdateJobStatusDto, PendingJobsQueryDto } from './jobs.dto.ts';
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Get pending jobs (status = 'pending')
@@ -13,7 +13,10 @@ export class JobsService {
   async getPendingJobs(query: PendingJobsQueryDto): Promise<JobResponseDto[]> {
     const limit = query.limit || 5;
 
-    const where: any = {
+    const where: {
+      status: string;
+      OR?: Array<{ deviceId: string | null }>;
+    } = {
       status: 'pending',
     };
 
@@ -25,7 +28,7 @@ export class JobsService {
       ];
     }
 
-    return this.prisma.job.findMany({
+    const jobs = await this.prisma.job.findMany({
       where,
       take: limit,
       orderBy: [
@@ -33,6 +36,8 @@ export class JobsService {
         { createdAt: 'asc' },  // Older first
       ],
     });
+
+    return jobs.map((job) => this.toJobResponse(job));
   }
 
   /**
@@ -56,7 +61,12 @@ export class JobsService {
     }
 
     // Update status
-    const updateData: any = {
+    const updateData: {
+      status: UpdateJobStatusDto['status'];
+      claimedAt?: Date;
+      completedAt?: Date;
+      errorMessage?: string;
+    } = {
       status: dto.status,
     };
 
@@ -69,10 +79,12 @@ export class JobsService {
       }
     }
 
-    return this.prisma.job.update({
+    const updated = await this.prisma.job.update({
       where: { id: jobId },
       data: updateData,
     });
+
+    return this.toJobResponse(updated);
   }
 
   /**
@@ -88,5 +100,35 @@ export class JobsService {
     };
 
     return validTransitions[from]?.includes(to) || false;
+  }
+
+  private toJobResponse(job: {
+    id: string;
+    deviceId: string | null;
+    type: string;
+    payload: unknown;
+    status: string;
+    priority: number;
+    claimedAt: Date | null;
+    completedAt: Date | null;
+    errorMessage: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }): JobResponseDto {
+    const payload =
+      job.payload !== null &&
+      typeof job.payload === 'object' &&
+      !Array.isArray(job.payload)
+        ? (job.payload as Record<string, unknown>)
+        : null;
+
+    return {
+      ...job,
+      deviceId: job.deviceId ?? undefined,
+      claimedAt: job.claimedAt ?? undefined,
+      completedAt: job.completedAt ?? undefined,
+      errorMessage: job.errorMessage ?? undefined,
+      payload,
+    };
   }
 }

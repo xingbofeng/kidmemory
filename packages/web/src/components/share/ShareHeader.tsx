@@ -1,19 +1,22 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 
 export function ShareHeader() {
+  const { t } = useTranslation()
+
   return (
     <header className="share-header">
       <div className="share-brand">
         <Icon name="bear-avatar" />
         <div>
-          <h1>KidMemory 分享</h1>
-          <p>来自家庭的珍贵回忆</p>
+          <h1>{t('share.headerTitle')}</h1>
+          <p>{t('share.headerSubtitle')}</p>
         </div>
       </div>
       <div className="share-info">
         <span className="share-type">
           <Icon name="book" />
-          作品集分享
+          {t('share.headerBookType')}
         </span>
       </div>
     </header>

@@ -1,3 +1,4 @@
+import i18n from '../i18n'
 import { httpClient, ApiError } from './http-client'
 import { UploadResponse, UploadSession } from '../types/api'
 
@@ -6,7 +7,7 @@ export function formatRemainingTime(expiresAt: string): string {
   const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60))
   const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60))
 
-  return `${remainingHours}小时${remainingMinutes}分钟`
+  return i18n.t('time.hoursMinutes', { hours: remainingHours, minutes: remainingMinutes })
 }
 
 export function getUploadStatus(uploadCount: number, maxUploads: number) {

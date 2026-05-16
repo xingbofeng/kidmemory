@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 
 type TabType = 'connect' | 'upload' | 'browse' | 'books'
@@ -8,35 +9,25 @@ interface AppNavigationProps {
 }
 
 export function AppNavigation({ activeTab, onTabChange }: AppNavigationProps) {
+  const { t } = useTranslation()
+
   return (
-    <nav className="app-nav" aria-label="Web Companion 主要导航">
-      <button
-        className={activeTab === 'connect' ? 'active' : ''}
-        onClick={() => onTabChange('connect')}
-      >
+    <nav className="app-nav" aria-label={t('webCompanion.navAria')}>
+      <button className={activeTab === 'connect' ? 'active' : ''} onClick={() => onTabChange('connect')}>
         <Icon name="link" />
-        连接
+        {t('webCompanion.navConnect')}
       </button>
-      <button
-        className={activeTab === 'upload' ? 'active' : ''}
-        onClick={() => onTabChange('upload')}
-      >
+      <button className={activeTab === 'upload' ? 'active' : ''} onClick={() => onTabChange('upload')}>
         <Icon name="upload" />
-        上传
+        {t('webCompanion.navUpload')}
       </button>
-      <button
-        className={activeTab === 'browse' ? 'active' : ''}
-        onClick={() => onTabChange('browse')}
-      >
+      <button className={activeTab === 'browse' ? 'active' : ''} onClick={() => onTabChange('browse')}>
         <Icon name="search" />
-        浏览
+        {t('webCompanion.navBrowse')}
       </button>
-      <button
-        className={activeTab === 'books' ? 'active' : ''}
-        onClick={() => onTabChange('books')}
-      >
+      <button className={activeTab === 'books' ? 'active' : ''} onClick={() => onTabChange('books')}>
         <Icon name="book" />
-        作品集
+        {t('webCompanion.navBooks')}
       </button>
     </nav>
   )

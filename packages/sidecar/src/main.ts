@@ -100,6 +100,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document, {
     customSiteTitle: 'KidMemory Sidecar API',
     customCss: '.swagger-ui .topbar { display: none }',
+    jsonDocumentUrl: 'docs/openapi.json',
   });
 
   // Graceful shutdown handling

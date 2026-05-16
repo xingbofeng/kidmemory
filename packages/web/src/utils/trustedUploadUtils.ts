@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 export function nextTaskId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -7,12 +9,12 @@ export function nextTaskId(): string {
 
 export function formatRemaining(expiresAt: string): string {
   const remainingMs = new Date(expiresAt).getTime() - Date.now()
-  if (!Number.isFinite(remainingMs) || remainingMs <= 0) return '已过期'
+  if (!Number.isFinite(remainingMs) || remainingMs <= 0) return i18n.t('trustedUploadStatus.expired')
   const minutes = Math.floor(remainingMs / 60000)
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
-  if (hours <= 0) return `${rest} 分钟`
-  return `${hours}小时${rest}分`
+  if (hours <= 0) return i18n.t('trustedUploadStatus.minutes', { count: rest })
+  return i18n.t('trustedUploadStatus.hoursMinutes', { hours, minutes: rest })
 }
 
 export function formatSize(size: number): string {
@@ -23,14 +25,14 @@ export function formatSize(size: number): string {
 export function statusLabel(status: 'pending' | 'uploading' | 'committing' | 'success' | 'failed'): string {
   switch (status) {
     case 'pending':
-      return '等待上传'
+      return i18n.t('trustedUploadStatus.pending')
     case 'uploading':
-      return '上传中'
+      return i18n.t('trustedUploadStatus.uploading')
     case 'committing':
-      return '等待电脑同步'
+      return i18n.t('trustedUploadStatus.committing')
     case 'success':
-      return '已入库'
+      return i18n.t('trustedUploadStatus.success')
     case 'failed':
-      return '失败'
+      return i18n.t('trustedUploadStatus.failed')
   }
 }

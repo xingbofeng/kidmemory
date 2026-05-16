@@ -25,6 +25,19 @@ type RouteCheck = {
   assertJson?: (payload: unknown) => void;
 };
 
+function unwrapApiData(payload: unknown) {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "code" in payload &&
+    "msg" in payload &&
+    "data" in payload
+  ) {
+    return (payload as { data: unknown }).data;
+  }
+  return payload;
+}
+
 const ROUTES: RouteCheck[] = [
   {
     name: "GET /health is reachable and returns JSON",
@@ -32,7 +45,8 @@ const ROUTES: RouteCheck[] = [
     path: "/health",
     expectStatuses: [200],
     assertJson: (payload) => {
-      assert.equal(typeof payload, "object", "health payload should be an object");
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object", "health payload should be an object");
     },
   },
   {
@@ -41,8 +55,9 @@ const ROUTES: RouteCheck[] = [
     path: "/config/status",
     expectStatuses: [200, 201],
     assertJson: (payload) => {
-      assert.equal(typeof payload, "object");
-      const redacted = payload as Record<string, any>;
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object");
+      const redacted = data as Record<string, unknown>;
       assert.ok(redacted.postgres, "status should include postgres section");
       assert.ok(redacted.supabaseStorage, "status should include supabaseStorage section");
       // The redacted shape must not leak the service role key value.
@@ -55,7 +70,8 @@ const ROUTES: RouteCheck[] = [
     path: "/config/ui",
     expectStatuses: [200, 201],
     assertJson: (payload) => {
-      assert.equal(typeof payload, "object");
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object");
     },
   },
   {
@@ -64,8 +80,9 @@ const ROUTES: RouteCheck[] = [
     path: "/children",
     expectStatuses: [200],
     assertJson: (payload) => {
-      const body = payload as Record<string, unknown>;
-      assert.ok(Array.isArray(body.children) || Array.isArray(payload), "children payload should be array-like");
+      const data = unwrapApiData(payload);
+      const body = data as Record<string, unknown>;
+      assert.ok(Array.isArray(body.children) || Array.isArray(data), "children payload should be array-like");
     },
   },
   {
@@ -74,7 +91,8 @@ const ROUTES: RouteCheck[] = [
     path: "/assets",
     expectStatuses: [200],
     assertJson: (payload) => {
-      assert.equal(typeof payload, "object");
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object");
     },
   },
   {
@@ -84,7 +102,8 @@ const ROUTES: RouteCheck[] = [
     body: { persist: false },
     expectStatuses: [200, 201],
     assertJson: (payload) => {
-      assert.equal(typeof payload, "object");
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object");
     },
   },
   {

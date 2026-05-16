@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/errors'
 import { validateShareToken, getSharedAssets } from '../../api/shareApi'
 import type { SharedAsset, ShareTokenValidation } from '../../types/shareBrowse'
@@ -13,6 +14,7 @@ interface ShareBrowsePageProps {
 }
 
 export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
+  const { t } = useTranslation()
   const [, setValidation] = useState<ShareTokenValidation | null>(null)
   const [assets, setAssets] = useState<SharedAsset[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,23 +25,19 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
       setLoading(true)
       setError(null)
 
-      // Validate share token
       const validationData = await validateShareToken(shareToken)
 
       if (!validationData.isValid) {
-        setError(validationData.error || '分享链接无效或已过期')
+        setError(validationData.error || t('share.invalidOrExpired'))
         return
       }
 
       setValidation(validationData)
-
-      // Load shared content using browse API with share token context
       const assetsData = await getSharedAssets(shareToken)
       setAssets(assetsData)
-
     } catch (err) {
       console.error('Failed to load shared content:', err)
-      const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载分享内容失败')
+      const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : t('share.loadBookFailed')
       setError(message)
     } finally {
       setLoading(false)
@@ -56,13 +54,7 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
   }
 
   if (error) {
-    return (
-      <ShareError
-        title="分享链接无效"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    )
+    return <ShareError title={t('share.invalidTitle')} message={error} onRetry={() => window.location.reload()} />
   }
 
   return (
@@ -71,8 +63,8 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
 
       <main className="share-content">
         <div className="content-header">
-          <h2>分享的素材</h2>
-          <p>共 {assets.length} 张照片</p>
+          <h2>{t('share.contentTitle')}</h2>
+          <p>{t('share.photoCount', { count: assets.length })}</p>
         </div>
 
         <AssetsGrid assets={assets} />

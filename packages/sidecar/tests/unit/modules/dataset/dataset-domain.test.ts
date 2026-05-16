@@ -111,7 +111,7 @@ test("dataset domain resets sample assets and related indexes", async () => {
   const service = createDatasetService({
     datasetState: datasetState as any,
   });
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
   assert.equal((await db.getAssets({ childId: "sample-child-001" })).length > 0, true);
 
   const beforeResetStatus = await service.getSearchIndexingStatus("sample-child-001");

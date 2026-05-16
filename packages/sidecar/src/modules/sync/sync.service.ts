@@ -2,7 +2,7 @@ import { hostname, platform } from 'node:os';
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigService } from '../../infrastructure/config/app-config.service.ts';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import { DatasetService } from '../dataset/dataset.service.ts';
@@ -37,34 +37,37 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private readonly heartbeatIntervalMs: number;
 
   constructor(
-    private readonly cloudApiClient: CloudApiClient,
-    private readonly machineIdService: MachineIdService,
-    private readonly configService: AppConfigService,
-    private readonly prisma: PrismaService,
-    private readonly datasetService: DatasetService,
-    private readonly booksService: BooksService
+    @Inject(CloudApiClient) private readonly cloudApiClient: CloudApiClient,
+    @Inject(MachineIdService) private readonly machineIdService: MachineIdService,
+    @Inject(AppConfigService) private readonly configService: AppConfigService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(DatasetService) private readonly datasetService: DatasetService,
+    @Inject(BooksService) private readonly booksService: BooksService
   ) {
     // 从环境变量读取同步间隔，默认 30 秒
     this.heartbeatIntervalMs = Number(process.env.SYNC_INTERVAL_MS) || 30000;
   }
 
-  async onModuleInit() {
+  onModuleInit() {
     this.logger.log('SyncService initializing...');
-
-    // 启动时注册设备
-    await this.registerDevice();
-
-    // 启动心跳循环
-    if (this.deviceId) {
-      this.startHeartbeat();
-      this.startUploadSync();
-      this.startJobSync();
-    }
+    void this.initializeSync();
   }
 
   onModuleDestroy() {
     this.logger.log('SyncService shutting down...');
     this.stopAllIntervals();
+  }
+
+  private async initializeSync() {
+    // 启动时注册设备（失败不阻塞应用启动）
+    await this.registerDevice();
+
+    // 注册成功后再启动同步循环
+    if (this.deviceId) {
+      this.startHeartbeat();
+      this.startUploadSync();
+      this.startJobSync();
+    }
   }
 
   /**
@@ -78,6 +81,11 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
    * 注册设备
    */
   private async registerDevice() {
+    if (!this.machineIdService || typeof this.machineIdService.getMachineId !== 'function') {
+      this.logger.warn('MachineIdService is unavailable, continuing in offline mode');
+      return;
+    }
+
     const machineId = this.machineIdService.getMachineId();
     const hostName = hostname();
     const platformName = platform();
@@ -362,8 +370,13 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
    * 导入 asset
    */
   private async importAsset(item: UploadItemResponseDto, tempFilePath: string): Promise<string> {
+    const childId = (item as UploadItemResponseDto & { childId?: string }).childId;
+    if (!childId || childId.trim().length === 0) {
+      throw new Error('Upload item missing childId');
+    }
+
     const result = await this.datasetService.importAssets({
-      childId: item.childId,
+      childId,
       paths: [tempFilePath],
     });
 
@@ -469,7 +482,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
    */
   private async syncJob(job: JobResponseDto) {
     try {
-      this.logger.log(`Syncing job ${job.id}: ${job.jobType}`);
+      this.logger.log(`Syncing job ${job.id}: ${job.type}`);
 
       // 1. 更新云端状态为 processing
       await this.cloudApiClient.updateJobStatus(job.id, {
@@ -477,13 +490,12 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       });
 
       // 2. 根据任务类型执行任务
-      const result = await this.executeJob(job);
+      await this.executeJob(job);
 
       // 3. 更新云端状态为 completed
       await this.cloudApiClient.updateJobStatus(job.id, {
         status: 'completed',
         completedAt: new Date().toISOString(),
-        result,
       });
 
       this.logger.log(`Successfully completed job ${job.id}`);
@@ -509,7 +521,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
    */
   private async executeJob(job: JobResponseDto): Promise<Record<string, unknown>> {
     // 根据任务类型执行不同的逻辑
-    switch (job.jobType) {
+    switch (job.type) {
       case 'book_generation':
         return await this.executeBookGenerationJob(job);
       case 'asset_processing':
@@ -519,7 +531,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       case 'export_long_image':
         return await this.executeExportLongImageJob(job);
       default:
-        throw new Error(`Unknown job type: ${job.jobType}`);
+        throw new Error(`Unknown job type: ${job.type}`);
     }
   }
 
@@ -529,6 +541,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private async executeBookGenerationJob(job: JobResponseDto): Promise<Record<string, unknown>> {
     // 调用 BooksService.createJob 创建书稿
     const payload = job.payload;
+    if (!payload) {
+      throw new Error('Invalid book generation job payload');
+    }
 
     // 确保 payload 包含必要字段
     if (!payload.childId || !Array.isArray(payload.assetIds)) {
@@ -558,6 +573,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private async executeAssetProcessingJob(job: JobResponseDto): Promise<Record<string, unknown>> {
     // 资产处理任务（例如：向量生成）
     const payload = job.payload;
+    if (!payload) {
+      throw new Error('Invalid asset processing job payload');
+    }
 
     if (!payload.assetId) {
       throw new Error('Invalid asset processing job payload');
@@ -578,6 +596,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private async executeExportPdfJob(job: JobResponseDto): Promise<Record<string, unknown>> {
     // PDF 导出任务
     const payload = job.payload;
+    if (!payload) {
+      throw new Error('Invalid export PDF job payload');
+    }
 
     if (!payload.jobId) {
       throw new Error('Invalid export PDF job payload');
@@ -606,6 +627,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private async executeExportLongImageJob(job: JobResponseDto): Promise<Record<string, unknown>> {
     // 长图导出任务
     const payload = job.payload;
+    if (!payload) {
+      throw new Error('Invalid export long image job payload');
+    }
 
     if (!payload.jobId) {
       throw new Error('Invalid export long image job payload');

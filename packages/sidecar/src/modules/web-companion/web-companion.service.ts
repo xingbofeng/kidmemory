@@ -91,6 +91,11 @@ export interface WebCompanionRepository {
     status: UploadItemStatusType;
     updates: UpdateUploadItemInput;
   }): Promise<UploadItem | null>;
+  commitUploadItemIfNotCommitted(input: {
+    uploadItemId: string;
+    status: UploadItemStatusType;
+    updates: UpdateUploadItemInput;
+  }): Promise<UploadItem | null>;
 }
 
 /**
@@ -428,7 +433,7 @@ export class WebCompanionService {
       console.log(`[WebCompanionService] Upload item ${uploadItemId} already committed, returning idempotent result`);
       return {
         uploadItemId: item.id,
-        status: item.status,
+        status: UploadItemStatus.UPLOADED_REMOTE,
         idempotent: true,
       };
     }
@@ -443,24 +448,38 @@ export class WebCompanionService {
       throw this.createError(WebCompanionErrorCode.COMMIT_CONFLICT, "Invalid status transition");
     }
 
-    // 更新上传项状态
-    const updatedItem = await this.updateUploadItemStatus(
+    // 并发保护：只允许一个请求把 committedAt 从 null 原子更新为已提交。
+    const updatedItem = await this.repository.commitUploadItemIfNotCommitted({
       uploadItemId,
-      UploadItemStatus.UPLOADED_REMOTE,
-      {
+      status: UploadItemStatus.UPLOADED_REMOTE,
+      updates: {
         sizeBytes: request.sizeBytes,
         contentType: request.contentType,
         remoteEtag: request.remoteEtag,
         committedAt: new Date(),
       },
-    );
-
-    console.log(`[WebCompanionService] Upload item committed: ${uploadItemId}, starting pullback`);
-
-    // 启动回拉流程（异步）
-    this.startPullbackProcess(updatedItem).catch(error => {
-      console.error(`[WebCompanionService] Pullback failed for item ${uploadItemId}:`, error);
     });
+    if (!updatedItem) {
+      const latest = await this.getUploadItemById(uploadItemId);
+      if (latest.committedAt) {
+        console.log(`[WebCompanionService] Upload item ${uploadItemId} concurrently committed, returning idempotent result`);
+        return {
+          uploadItemId: latest.id,
+          status: UploadItemStatus.UPLOADED_REMOTE,
+          idempotent: true,
+        };
+      }
+      throw this.createError(WebCompanionErrorCode.COMMIT_CONFLICT, "Invalid status transition");
+    }
+
+    console.log(`[WebCompanionService] Upload item committed: ${uploadItemId}`);
+
+    // 仅 Supabase 直传需要 sidecar 回拉入库；LAN 直传不进入 pullback 状态机。
+    if (updatedItem.provider === StorageProvider.SUPABASE) {
+      this.startPullbackProcess(updatedItem).catch(error => {
+        console.error(`[WebCompanionService] Pullback failed for item ${uploadItemId}:`, error);
+      });
+    }
 
     return {
       uploadItemId: updatedItem.id,

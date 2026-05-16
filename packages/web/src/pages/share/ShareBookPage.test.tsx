@@ -1,31 +1,49 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { ShareBookPage } from './ShareBookPage'
-import { server } from '../../test/setup'
-import axios from 'axios'
+import { getSharedBook, validateShareToken } from '../../api/shareApi'
 
-// Mock axios
-vi.mock('axios')
-const mockAxios = vi.mocked(axios)
+vi.mock('../../api/shareApi', () => ({
+  validateShareToken: vi.fn(),
+  getSharedBook: vi.fn(),
+}))
+
+const mockValidateShareToken = vi.mocked(validateShareToken)
+const mockGetSharedBook = vi.mocked(getSharedBook)
+
+function mockValidToken(resourceType: 'specific_book' | 'child_assets' = 'specific_book', resourceId = 'book_1') {
+  mockValidateShareToken.mockResolvedValueOnce({
+    isValid: true,
+    shareToken: {
+      id: 'share_123',
+      childId: 'child_456',
+      resourceType,
+      resourceId,
+      accessType: 'read_only',
+    },
+  })
+}
+
+function mockBook() {
+  mockGetSharedBook.mockResolvedValueOnce({
+    id: 'book_1',
+    title: '阳光的一天',
+    childId: 'child_456',
+    createdAt: '2024-01-15T10:00:00Z',
+    status: 'completed',
+    description: '记录孩子在阳光下玩耍、探索和成长的美好时光。每一个笑容都是最珍贵的回忆。',
+    previewUrl: '/preview/book_1.jpg',
+    pageCount: 12,
+  })
+}
 
 describe('ShareBookPage', () => {
-  beforeAll(() => {
-    // Disable MSW for these tests since we're mocking axios directly
-    server.close()
-  })
-
-  afterAll(() => {
-    // Restart MSW for other tests
-    server.listen({ onUnhandledRequest: 'error' })
-  })
-
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('should show loading state initially', () => {
-    // Mock pending axios request
-    mockAxios.get.mockImplementation(() => new Promise(() => {}))
+    mockValidateShareToken.mockImplementation(() => new Promise(() => {}))
 
     render(<ShareBookPage shareToken="test-token" bookId="book_1" />)
 
@@ -33,12 +51,9 @@ describe('ShareBookPage', () => {
   })
 
   it('should show error for invalid share token', async () => {
-    // Mock failed validation
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        isValid: false,
-        error: '分享链接已过期'
-      }
+    mockValidateShareToken.mockResolvedValueOnce({
+      isValid: false,
+      error: '分享链接已过期',
     })
 
     render(<ShareBookPage shareToken="invalid-token" bookId="book_1" />)
@@ -50,19 +65,7 @@ describe('ShareBookPage', () => {
   })
 
   it('should show error for mismatched book ID', async () => {
-    // Mock validation with different book ID
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        isValid: true,
-        shareToken: {
-          id: 'share_123',
-          childId: 'child_456',
-          resourceType: 'specific_book',
-          resourceId: 'book_2', // Different book ID
-          accessType: 'read_only'
-        }
-      }
-    })
+    mockValidToken('specific_book', 'book_2')
 
     render(<ShareBookPage shareToken="valid-token" bookId="book_1" />)
 
@@ -73,33 +76,8 @@ describe('ShareBookPage', () => {
   })
 
   it('should show shared book for valid token', async () => {
-    // Mock successful validation
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        isValid: true,
-        shareToken: {
-          id: 'share_123',
-          childId: 'child_456',
-          resourceType: 'specific_book',
-          resourceId: 'book_1',
-          accessType: 'read_only'
-        }
-      }
-    })
-
-    // Mock book data fetch
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        id: 'book_1',
-        title: '阳光的一天',
-        childId: 'child_456',
-        createdAt: '2024-01-15T10:00:00Z',
-        status: 'completed',
-        description: '记录孩子在阳光下玩耍、探索和成长的美好时光。每一个笑容都是最珍贵的回忆。',
-        previewUrl: '/preview/book_1.jpg',
-        pageCount: 12
-      }
-    })
+    mockValidToken('specific_book', 'book_1')
+    mockBook()
 
     render(<ShareBookPage shareToken="valid-token" bookId="book_1" />)
 
@@ -112,33 +90,8 @@ describe('ShareBookPage', () => {
   })
 
   it('should show preview pages', async () => {
-    // Mock successful validation
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        isValid: true,
-        shareToken: {
-          id: 'share_123',
-          childId: 'child_456',
-          resourceType: 'specific_book',
-          resourceId: 'book_1',
-          accessType: 'read_only'
-        }
-      }
-    })
-
-    // Mock book data fetch
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        id: 'book_1',
-        title: '阳光的一天',
-        childId: 'child_456',
-        createdAt: '2024-01-15T10:00:00Z',
-        status: 'completed',
-        description: '记录孩子在阳光下玩耍、探索和成长的美好时光。每一个笑容都是最珍贵的回忆。',
-        previewUrl: '/preview/book_1.jpg',
-        pageCount: 12
-      }
-    })
+    mockValidToken('specific_book', 'book_1')
+    mockBook()
 
     render(<ShareBookPage shareToken="valid-token" bookId="book_1" />)
 
@@ -154,8 +107,7 @@ describe('ShareBookPage', () => {
   })
 
   it('should handle network errors gracefully', async () => {
-    // Mock network error
-    mockAxios.get.mockRejectedValueOnce(new Error('Network error'))
+    mockValidateShareToken.mockRejectedValueOnce(new Error('Network error'))
 
     render(<ShareBookPage shareToken="test-token" bookId="book_1" />)
 
@@ -166,33 +118,8 @@ describe('ShareBookPage', () => {
   })
 
   it('should show book tags', async () => {
-    // Mock successful validation
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        isValid: true,
-        shareToken: {
-          id: 'share_123',
-          childId: 'child_456',
-          resourceType: 'specific_book',
-          resourceId: 'book_1',
-          accessType: 'read_only'
-        }
-      }
-    })
-
-    // Mock book data fetch
-    mockAxios.get.mockResolvedValueOnce({
-      data: {
-        id: 'book_1',
-        title: '阳光的一天',
-        childId: 'child_456',
-        createdAt: '2024-01-15T10:00:00Z',
-        status: 'completed',
-        description: '记录孩子在阳光下玩耍、探索和成长的美好时光。每一个笑容都是最珍贵的回忆。',
-        previewUrl: '/preview/book_1.jpg',
-        pageCount: 12
-      }
-    })
+    mockValidToken('specific_book', 'book_1')
+    mockBook()
 
     render(<ShareBookPage shareToken="valid-token" bookId="book_1" />)
 

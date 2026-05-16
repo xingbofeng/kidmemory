@@ -88,7 +88,10 @@ export interface ShareTokenRepository {
   createShareToken(input: CreateShareTokenRecordInput): Promise<ShareTokenRecord>;
   findShareTokenByHash(tokenHash: string): Promise<ShareTokenRecord | null>;
   markShareTokenExpired(id: string): Promise<void>;
-  incrementShareTokenAccess(id: string): Promise<void>;
+  incrementShareTokenAccessIfAllowed(input: {
+    id: string;
+    maxAccessCount?: number | null;
+  }): Promise<boolean>;
   logShareAccess(input: LogShareAccessInput): Promise<void>;
   revokeShareTokenForSession(input: { shareTokenId: string; childId: string; sessionId: string }): Promise<boolean>;
 }
@@ -189,12 +192,15 @@ export class ShareTokenService {
         return { isValid: false, error: "Share token has expired" };
       }
 
-      if (shareToken.maxAccessCount && shareToken.accessCount >= shareToken.maxAccessCount) {
+      const incremented = await this.repository.incrementShareTokenAccessIfAllowed({
+        id: shareToken.id,
+        maxAccessCount: shareToken.maxAccessCount,
+      });
+      if (!incremented) {
         await this.logAccess(shareToken.id, "rate_limited", clientIp, userAgent);
         return { isValid: false, error: "Share token access limit exceeded" };
       }
 
-      await this.repository.incrementShareTokenAccess(shareToken.id);
       await this.logAccess(shareToken.id, "success", clientIp, userAgent);
 
       return {

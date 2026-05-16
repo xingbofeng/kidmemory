@@ -1,7 +1,7 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { BrowseService } from '../../../src/modules/web-companion/browse.service';
-import type { BrowseRepository } from '../../../src/modules/web-companion/browse.service';
+import { BrowseService } from '../../../../src/modules/web-companion/browse.service.ts';
+import type { BrowseRepository } from '../../../../src/modules/web-companion/browse.service.ts';
 
 class FakeBrowseRepository implements BrowseRepository {
   session: any = {

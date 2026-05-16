@@ -9,6 +9,9 @@ import 'package:flutter/services.dart';
 import '../core/sidecar/sidecar_api.dart';
 import '../core/sidecar/desktop_sidecar_gateway.dart';
 import '../core/sidecar/sidecar_launcher.dart';
+import '../core/logging/desktop_log_cleanup_worker.dart';
+import '../core/logging/desktop_logger.dart';
+import '../core/logging/desktop_trace_context.dart';
 import '../features/asset_library/asset_library_page.dart';
 import '../features/child_profile/child_profile_page.dart';
 import '../features/generate_export/generate_export_page.dart';
@@ -137,6 +140,8 @@ class _DesktopShellState extends State<DesktopShell> {
   bool generating = false;
   bool exported = false;
   String? jobId;
+  String traceId = '';
+  String requestId = '';
   String statusMessage = '等待生成';
   String readinessMessage = _sidecarDisconnectedMessage;
   List<SetupCheckVm> readinessChecks = _disconnectedSetupChecks();
@@ -171,6 +176,9 @@ class _DesktopShellState extends State<DesktopShell> {
   late final _DesktopShellControllers controllers;
   late final SidecarLauncher sidecarLauncher;
   late final DesktopSidecarGateway gateway;
+  late final DesktopTraceContext desktopTraceContext;
+  late final DesktopLogger desktopLogger;
+  late final DesktopLogCleanupWorker desktopLogCleanupWorker;
   bool _startupConfigurationGateChecked = false;
   bool _startupConfigurationRequired = true;
 
@@ -190,6 +198,11 @@ class _DesktopShellState extends State<DesktopShell> {
     openExternalTarget =
         widget.openExternalTarget ?? _openExternalTargetDefault;
     copyToClipboard = widget.copyToClipboard ?? _copyTextToClipboardDefault;
+    desktopTraceContext = DesktopTraceContext();
+    desktopLogger = DesktopLogger();
+    desktopLogCleanupWorker = DesktopLogCleanupWorker(
+      logsDirectoryPath: desktopLogger.logsDirectoryPath,
+    );
     controllers = _DesktopShellControllers(api: api);
     gateway = DesktopSidecarGateway(api);
     sidecarLauncher = SidecarLauncher(
@@ -201,6 +214,14 @@ class _DesktopShellState extends State<DesktopShell> {
       onReadinessMessage: (message) {
         if (mounted) _setShellState(() => readinessMessage = message);
       },
+    );
+    unawaited(desktopLogCleanupWorker.cleanup(retainDays: 14));
+    unawaited(
+      desktopLogger.append(
+        level: DesktopLogLevel.info,
+        event: 'desktop.app.started',
+        data: const {'source': 'desktop_shell.initState'},
+      ),
     );
     unawaited(_bootstrapSidecarAndRefresh());
   }

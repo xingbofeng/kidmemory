@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package kidmemory.v1;
+
+message RegisterDeviceRequest {
+  string machine_id = 1;
+  string device_name = 2;
+  string platform = 3;
+}
+
+message Device {
+  string device_id = 1;
+  string machine_id = 2;
+  string device_name = 3;
+  string platform = 4;
+  string device_token = 5;
+  int64 last_heartbeat_at = 6;
+}
+
+message RegisterDeviceResponse {
+  Device device = 1;
+}
+
+message HeartbeatRequest {
+  string device_id = 1;
+  int64 heartbeat_at = 2;
+}

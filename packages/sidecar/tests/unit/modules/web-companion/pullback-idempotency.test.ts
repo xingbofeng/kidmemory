@@ -11,12 +11,12 @@
 import { describe, it, mock } from 'node:test';
 import assert from 'node:assert';
 import crypto from 'node:crypto';
-import { WebCompanionService } from '../../../src/modules/web-companion/web-companion.service';
-import { UploadItemStatus } from '../../../src/modules/web-companion/constants';
+import { WebCompanionService } from '../../../../src/modules/web-companion/web-companion.service.ts';
+import { UploadItemStatus } from '../../../../src/modules/web-companion/constants.ts';
 import type {
   UploadItem,
   UploadSession,
-} from '../../../src/modules/web-companion/types';
+} from '../../../../src/modules/web-companion/types.ts';
 
 // Helper to hash token (same as service)
 function hashToken(token: string): string {

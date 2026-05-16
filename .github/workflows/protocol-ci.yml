@@ -12,21 +12,27 @@ on:
       - 'packages/protocol/**'
       - '.github/workflows/protocol-ci.yml'
 
+permissions:
+  contents: read
+
 jobs:
   protocol-check:
-    name: Protocol Check
+    name: protocol check/build/test/codegen
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: 'packages/protocol/package-lock.json'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
 
       - name: Install dependencies
         working-directory: packages/protocol
@@ -43,3 +49,14 @@ jobs:
       - name: Run tests
         working-directory: packages/protocol
         run: npm test
+
+      - name: Generate TS clients
+        working-directory: packages/protocol
+        run: npm run gen:ts
+
+      - name: Generate Dart clients
+        working-directory: packages/protocol
+        run: npm run gen:dart
+
+      - name: Ensure generated clients are up to date
+        run: git diff --exit-code packages/protocol/generated

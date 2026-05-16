@@ -10,9 +10,20 @@ import { ApiCode } from '@kidmemory/protocol';
 vi.mock('axios');
 
 describe('HttpClient', () => {
-  let mockAxiosInstance: any;
-  let responseInterceptor: any;
-  let errorInterceptor: any;
+  let mockAxiosInstance: ReturnType<typeof vi.fn> extends never ? never : {
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+    put: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+    patch: ReturnType<typeof vi.fn>;
+    interceptors: {
+      response: {
+        use: ReturnType<typeof vi.fn>;
+      };
+    };
+  };
+  let responseInterceptor: ((input: unknown) => unknown) | undefined;
+  let errorInterceptor: ((input: unknown) => unknown) | undefined;
 
   beforeEach(() => {
     // Create mock axios instance
@@ -33,8 +44,8 @@ describe('HttpClient', () => {
     };
 
     // Mock axios.create to return our mock instance
-    (axios.create as any) = vi.fn(() => mockAxiosInstance);
-    (axios.isAxiosError as any) = vi.fn();
+    vi.mocked(axios.create).mockImplementation(() => mockAxiosInstance as never);
+    vi.mocked(axios.isAxiosError).mockImplementation(() => false);
   });
 
   describe('API format handling', () => {
@@ -77,7 +88,7 @@ describe('HttpClient', () => {
       };
 
       // The interceptor would unwrap this
-      const result = responseInterceptor(apiResponse);
+      const result = responseInterceptor!(apiResponse);
 
       expect(result).toEqual({ id: 1, name: 'test' });
     });
@@ -94,8 +105,8 @@ describe('HttpClient', () => {
         },
       };
 
-      expect(() => responseInterceptor(apiResponse)).toThrow(ApiError);
-      expect(() => responseInterceptor(apiResponse)).toThrow('Resource not found');
+      expect(() => responseInterceptor!(apiResponse)).toThrow(ApiError);
+      expect(() => responseInterceptor!(apiResponse)).toThrow('Resource not found');
     });
 
     it('should handle API error response', () => {
@@ -112,10 +123,10 @@ describe('HttpClient', () => {
         },
       };
 
-      (axios.isAxiosError as any).mockReturnValue(true);
+      vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
-      expect(() => errorInterceptor(error)).toThrow(ApiError);
-      expect(() => errorInterceptor(error)).toThrow('Invalid parameters');
+      expect(() => errorInterceptor!(error)).toThrow(ApiError);
+      expect(() => errorInterceptor!(error)).toThrow('Invalid parameters');
     });
 
     it('should handle network error', () => {
@@ -124,10 +135,10 @@ describe('HttpClient', () => {
 
       const error = new Error('Network error');
 
-      (axios.isAxiosError as any).mockReturnValue(false);
+      vi.mocked(axios.isAxiosError).mockReturnValue(false);
 
-      expect(() => errorInterceptor(error)).toThrow(ApiError);
-      expect(() => errorInterceptor(error)).toThrow('Network error');
+      expect(() => errorInterceptor!(error)).toThrow(ApiError);
+      expect(() => errorInterceptor!(error)).toThrow('Network error');
     });
 
     it('should pass through non-API format responses', () => {
@@ -139,7 +150,7 @@ describe('HttpClient', () => {
         data: new Blob(['file content']),
       };
 
-      const result = responseInterceptor(rawResponse);
+      const result = responseInterceptor!(rawResponse);
 
       expect(result).toEqual(rawResponse.data);
     });
@@ -173,7 +184,7 @@ describe('HttpClient', () => {
         },
       };
 
-      (axios.isAxiosError as any).mockReturnValue(true);
+      vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
       // First two calls fail with 503, third succeeds
       mockAxiosInstance.get
@@ -201,7 +212,7 @@ describe('HttpClient', () => {
         },
       };
 
-      (axios.isAxiosError as any).mockReturnValue(true);
+      vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
       mockAxiosInstance.get.mockRejectedValueOnce(clientError);
 

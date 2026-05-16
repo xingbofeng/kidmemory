@@ -1,0 +1,41 @@
+name: Cloud API CI
+
+on:
+  pull_request:
+    paths:
+      - 'packages/cloud-api/**'
+      - '.github/workflows/cloud-api-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/cloud-api/**'
+      - '.github/workflows/cloud-api-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cloud-api-check:
+    name: cloud-api lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cloud-api
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/cloud-api/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm run test
+      - run: npm run build
+      - run: npm run gen:openapi
+      - name: Ensure cloud-api OpenAPI artifacts are up to date
+        run: git diff --exit-code -- ../protocol/openapi/cloud-api.openapi.json ../protocol/openapi/cloud-api.openapi.yaml

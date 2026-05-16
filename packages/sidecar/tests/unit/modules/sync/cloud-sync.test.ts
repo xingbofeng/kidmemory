@@ -1,209 +1,159 @@
-/**
- * Cloud Sync Service Tests
- * 
- * Tests sidecar synchronization with cloud-api
- */
+import assert from 'node:assert/strict';
+import { afterEach, beforeEach, describe, test } from 'node:test';
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
+import { SyncService } from '../../../../src/modules/sync/sync.service.ts';
 
-describe('Cloud Sync Service', () => {
-  describe('Device Registration', () => {
-    it('should register device on startup', () => {
-      const machineId = 'test-machine-123';
-      const deviceName = 'Test MacBook';
-      const platform = 'macos';
+function createService(options?: {
+  registerDevice?: () => Promise<{ id: string }>;
+  machineIdService?: { getMachineId?: () => string };
+  heartbeat?: (deviceId: string) => Promise<void>;
+  syncIntervalMs?: number;
+}) {
+  const cloudApiClient = {
+    registerDevice: options?.registerDevice ?? (async () => ({ id: 'device-1' })),
+    heartbeat: options?.heartbeat ?? (async () => undefined),
+    getPendingUploadItems: async () => [],
+    updateUploadItemSyncStatus: async () => ({}),
+    getPendingJobs: async () => [],
+    updateJobStatus: async () => ({}),
+  };
 
-      assert.ok(machineId, 'machineId should be provided');
-      assert.ok(deviceName, 'deviceName should be provided');
-      assert.ok(platform, 'platform should be provided');
-    });
+  const machineIdService = options?.machineIdService ?? {
+    getMachineId: () => 'machine-123',
+  };
 
-    it('should be idempotent - reuse existing device', () => {
-      const machineId = 'test-machine-123';
-      
-      // First registration
-      const firstRegistration = { machineId, deviceId: 'device-1' };
-      
-      // Second registration (should return same deviceId)
-      const secondRegistration = { machineId, deviceId: 'device-1' };
+  const configService = {
+    config: {
+      supabaseStorage: {
+        url: 'http://localhost',
+        bucket: 'bucket',
+        anonKey: 'anon',
+      },
+    },
+  };
 
-      assert.strictEqual(firstRegistration.deviceId, secondRegistration.deviceId);
-    });
+  const prisma = {
+    asset: {
+      findFirst: async () => null,
+      findUnique: async () => ({ metadata: {} }),
+      update: async () => ({}),
+    },
+  };
 
-    it('should handle registration failure gracefully', () => {
-      const registrationFailed = true;
-      const shouldContinueOffline = true;
+  const datasetService = {
+    importAssets: async () => ({ ok: true, imported: [{ id: 'asset-1' }] }),
+  };
 
-      assert.ok(registrationFailed);
-      assert.ok(shouldContinueOffline, 'Should continue offline if registration fails');
-    });
+  const booksService = {};
+
+  if (options?.syncIntervalMs != null) {
+    process.env.SYNC_INTERVAL_MS = String(options.syncIntervalMs);
+  } else {
+    delete process.env.SYNC_INTERVAL_MS;
+  }
+
+  return new SyncService(
+    cloudApiClient as any,
+    machineIdService as any,
+    configService as any,
+    prisma as any,
+    datasetService as any,
+    booksService as any,
+  );
+}
+
+describe('SyncService', () => {
+  const originalSyncInterval = process.env.SYNC_INTERVAL_MS;
+
+  beforeEach(() => {
+    delete process.env.SYNC_INTERVAL_MS;
   });
 
-  describe('Heartbeat', () => {
-    it('should send heartbeat every 30 seconds', () => {
-      const heartbeatInterval = 30000; // 30 seconds
-      
-      assert.strictEqual(heartbeatInterval, 30000);
-    });
-
-    it('should handle heartbeat failure gracefully', () => {
-      const heartbeatFailed = true;
-      const shouldContinueOffline = true;
-
-      assert.ok(heartbeatFailed);
-      assert.ok(shouldContinueOffline, 'Should continue offline if heartbeat fails');
-    });
+  afterEach(() => {
+    if (originalSyncInterval == null) {
+      delete process.env.SYNC_INTERVAL_MS;
+    } else {
+      process.env.SYNC_INTERVAL_MS = originalSyncInterval;
+    }
   });
 
-  describe('Upload Item Sync', () => {
-    it('should poll for pending items every 30 seconds', () => {
-      const pollInterval = 30000; // 30 seconds
-      
-      assert.strictEqual(pollInterval, 30000);
+  test('onModuleInit should not block startup while registration runs in background', async () => {
+    let resolveRegistration: ((value: { id: string }) => void) | null = null;
+    const service = createService({
+      registerDevice: () =>
+        new Promise((resolve) => {
+          resolveRegistration = resolve;
+        }),
+      syncIntervalMs: 10,
     });
 
-    it('should download and import pending items', () => {
-      const pendingItem = {
-        id: 'item-1',
-        objectKey: 'uploads/file1.jpg',
-        fileName: 'file1.jpg',
-      };
+    const startedAt = Date.now();
+    service.onModuleInit();
+    const elapsed = Date.now() - startedAt;
+    assert.ok(elapsed < 50, `onModuleInit should return quickly, elapsed=${elapsed}ms`);
 
-      assert.ok(pendingItem.id);
-      assert.ok(pendingItem.objectKey);
-      assert.ok(pendingItem.fileName);
-    });
+    assert.equal(service.getDeviceId(), null);
+    resolveRegistration?.({ id: 'device-bg' });
 
-    it('should deduplicate by cloudUploadItemId', () => {
-      const existingCloudIds = ['item-1', 'item-2'];
-      const newItem = { id: 'item-1' };
-      const isDuplicate = existingCloudIds.includes(newItem.id);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(service.getDeviceId(), 'device-bg');
 
-      assert.ok(isDuplicate, 'Should detect duplicate');
-    });
-
-    it('should report sync success', () => {
-      const syncResult = {
-        itemId: 'item-1',
-        status: 'synced',
-        localAssetId: 'asset-123',
-      };
-
-      assert.strictEqual(syncResult.status, 'synced');
-      assert.ok(syncResult.localAssetId);
-    });
-
-    it('should report sync failure', () => {
-      const syncResult = {
-        itemId: 'item-1',
-        status: 'failed',
-        errorMessage: 'Download failed',
-      };
-
-      assert.strictEqual(syncResult.status, 'failed');
-      assert.ok(syncResult.errorMessage);
-    });
+    service.onModuleDestroy();
   });
 
-  describe('Job Sync', () => {
-    it('should poll for pending jobs every 30 seconds', () => {
-      const pollInterval = 30000; // 30 seconds
-      
-      assert.strictEqual(pollInterval, 30000);
+  test('registration failure should not crash service and should keep deviceId null', async () => {
+    const service = createService({
+      registerDevice: async () => {
+        throw new Error('cloud unavailable');
+      },
+      syncIntervalMs: 10,
     });
 
-    it('should claim and execute jobs', () => {
-      const pendingJob = {
-        id: 'job-1',
-        type: 'book_generation',
-        payload: { bookId: 'book-1' },
-      };
+    // Speed up retry loop for test determinism.
+    (service as any).sleep = async () => undefined;
 
-      assert.ok(pendingJob.id);
-      assert.ok(pendingJob.type);
-      assert.ok(pendingJob.payload);
-    });
+    await (service as any).initializeSync();
 
-    it('should deduplicate by cloudJobId', () => {
-      const existingCloudJobIds = ['job-1', 'job-2'];
-      const newJob = { id: 'job-1' };
-      const isDuplicate = existingCloudJobIds.includes(newJob.id);
-
-      assert.ok(isDuplicate, 'Should detect duplicate');
-    });
-
-    it('should report job completion', () => {
-      const jobResult = {
-        jobId: 'job-1',
-        status: 'completed',
-      };
-
-      assert.strictEqual(jobResult.status, 'completed');
-    });
-
-    it('should report job failure', () => {
-      const jobResult = {
-        jobId: 'job-1',
-        status: 'failed',
-        errorMessage: 'Execution failed',
-      };
-
-      assert.strictEqual(jobResult.status, 'failed');
-      assert.ok(jobResult.errorMessage);
-    });
+    assert.equal(service.getDeviceId(), null);
+    service.onModuleDestroy();
   });
 
-  describe('Offline Mode', () => {
-    it('should detect when cloud-api is unreachable', () => {
-      const cloudApiReachable = false;
-      const isOfflineMode = !cloudApiReachable;
-
-      assert.ok(isOfflineMode, 'Should enter offline mode');
+  test('missing machine id service should fall back to offline mode', async () => {
+    const service = createService({
+      machineIdService: {},
+      syncIntervalMs: 10,
     });
 
-    it('should continue local operations when offline', () => {
-      const isOffline = true;
-      const canCreateBooks = true;
-      const canImportAssets = true;
+    await (service as any).initializeSync();
+    assert.equal(service.getDeviceId(), null);
 
-      assert.ok(isOffline);
-      assert.ok(canCreateBooks, 'Should still create books offline');
-      assert.ok(canImportAssets, 'Should still import assets offline');
-    });
-
-    it('should resume sync when cloud-api becomes reachable', () => {
-      const wasOffline = true;
-      const nowOnline = true;
-      const shouldResume = wasOffline && nowOnline;
-
-      assert.ok(shouldResume, 'Should resume sync when back online');
-    });
-
-    it('should not block startup if cloud-api is unreachable', () => {
-      const cloudApiUnreachable = true;
-      const startupBlocked = false;
-
-      assert.ok(cloudApiUnreachable);
-      assert.strictEqual(startupBlocked, false, 'Startup should not be blocked');
-    });
+    service.onModuleDestroy();
   });
 
-  describe('Sync Configuration', () => {
-    it('should support disabling cloud sync', () => {
-      const cloudSyncEnabled = false;
-      const shouldSync = cloudSyncEnabled;
-
-      assert.strictEqual(shouldSync, false, 'Sync should be disabled');
+  test('successful registration should start heartbeat and stop it on destroy', async () => {
+    let heartbeatCalls = 0;
+    const service = createService({
+      registerDevice: async () => ({ id: 'device-heartbeat' }),
+      heartbeat: async (deviceId: string) => {
+        heartbeatCalls += 1;
+        assert.equal(deviceId, 'device-heartbeat');
+      },
+      syncIntervalMs: 15,
     });
 
-    it('should use configurable intervals', () => {
-      const defaultInterval = 30000;
-      const customInterval = 60000;
+    service.onModuleInit();
 
-      assert.ok(defaultInterval > 0);
-      assert.ok(customInterval > 0);
-      assert.notStrictEqual(defaultInterval, customInterval);
-    });
+    await new Promise((resolve) => setTimeout(resolve, 70));
+    assert.ok(heartbeatCalls > 0, 'heartbeat should run after registration');
+
+    const callsBeforeDestroy = heartbeatCalls;
+    service.onModuleDestroy();
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    assert.equal(
+      heartbeatCalls,
+      callsBeforeDestroy,
+      'heartbeat should stop after onModuleDestroy',
+    );
   });
 });

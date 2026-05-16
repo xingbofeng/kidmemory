@@ -1,33 +1,35 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
+import 'dart:convert';
+import 'dart:io';
 
 void main() {
-  test(
-    'SidecarApi logs request failures instead of silently swallowing them',
-    () async {
-      final messages = <String>[];
-      final previousDebugPrint = debugPrint;
-      debugPrint = (String? message, {int? wrapWidth}) {
-        if (message != null) messages.add(message);
-      };
-      addTearDown(() => debugPrint = previousDebugPrint);
+  test('SidecarApi logs and throws request failures', () async {
+    final messages = <String>[];
+    final previousDebugPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {
+      if (message != null) messages.add(message);
+    };
+    addTearDown(() => debugPrint = previousDebugPrint);
 
-      final api = SidecarApi(
-        baseUrl: 'http://127.0.0.1:9',
-        timeout: const Duration(milliseconds: 100),
-      );
-      final result = await api.get('/config/status');
-
-      expect(result, isEmpty);
-      expect(
-        messages.any(
-          (message) => message.contains('Sidecar GET /config/status failed'),
+    final api = SidecarApi(
+      baseUrl: 'http://127.0.0.1:9',
+      timeout: const Duration(milliseconds: 100),
+    );
+    await expectLater(
+      api.get('/config/status'),
+      throwsA(isA<SidecarApiException>()),
+    );
+    expect(
+      messages.any(
+        (message) => message.contains(
+          'Sidecar GET /config/status failed after 2 attempts',
         ),
-        isTrue,
-      );
-    },
-  );
+      ),
+      isTrue,
+    );
+  });
 
   group('SidecarApi.resolveBaseUrl', () {
     test('uses KIDMEMORY_SIDECAR_HOST and PORT when both are present', () {
@@ -66,4 +68,41 @@ void main() {
       expect(baseUrl, 'http://127.0.0.1:4317');
     });
   });
+
+  test(
+    'SidecarApi attaches X-KidMemory-Trace-Id header when trace context exists',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() async => server.close(force: true));
+
+      String? receivedTraceHeader;
+      server.listen((request) async {
+        receivedTraceHeader = request.headers.value('x-kidmemory-trace-id');
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(
+            jsonEncode({
+              'code': 0,
+              'msg': 'ok',
+              'data': {'ok': true},
+            }),
+          );
+        await request.response.close();
+      });
+
+      final api = SidecarApi(
+        baseUrl: 'http://${server.address.host}:${server.port}',
+        retries: 0,
+      );
+      api.setRequestContext(
+        traceId: 'trc_desktop_trace_header',
+        requestId: 'req_desktop_request_header',
+      );
+
+      final response = await api.get('/health');
+      expect(response['ok'], isTrue);
+      expect(receivedTraceHeader, 'trc_desktop_trace_header');
+    },
+  );
 }

@@ -23,22 +23,29 @@ class DesktopSidecarGateway {
     );
   }
 
-  Future<DatasetSnapshotDto> loadDataset({required String? selectedChildId}) async {
+  Future<DatasetSnapshotDto> loadDataset({
+    required String? selectedChildId,
+  }) async {
     final childrenResponse = await _api.getStrict('/children');
-    final childrenRows = _mapListAt(childrenResponse, 'children')
-        .map(ChildRecordDto.fromJson)
-        .toList();
+    final childrenRows = _mapListAt(
+      childrenResponse,
+      'children',
+    ).map(ChildRecordDto.fromJson).toList();
     final children = childrenRows
         .map((row) => ChildVm(id: row.id, name: row.name))
         .toList();
 
-    final activeChildId = selectedChildId ?? (children.isNotEmpty ? children.first.id : null);
+    final activeChildId =
+        selectedChildId ?? (children.isNotEmpty ? children.first.id : null);
     final assetsResponse = activeChildId == null
         ? const <String, dynamic>{'assets': <dynamic>[]}
-        : await _api.getStrict('/assets?childId=${Uri.encodeComponent(activeChildId)}');
-    final assetRows = _mapListAt(assetsResponse, 'assets')
-        .map(AssetRecordDto.fromJson)
-        .toList();
+        : await _api.getStrict(
+            '/assets?childId=${Uri.encodeComponent(activeChildId)}',
+          );
+    final assetRows = _mapListAt(
+      assetsResponse,
+      'assets',
+    ).map(AssetRecordDto.fromJson).toList();
 
     return DatasetSnapshotDto(
       children: children,
@@ -61,20 +68,17 @@ class DesktopSidecarGateway {
         ? await _api.postStrict('/books/jobs/${payload.jobId}/export/pdf', {
             'targetPath': payload.targetPath,
           })
-        : await _api.postStrict('/books/jobs/${payload.jobId}/export/long-image', {
-            'targetPath': payload.targetPath,
-            'format': payload.format,
-          });
+        : await _api.postStrict(
+            '/books/jobs/${payload.jobId}/export/long-image',
+            {'targetPath': payload.targetPath, 'format': payload.format},
+          );
     return BookExportResultDto.fromJson(raw);
   }
 
   Future<AssetSearchResultDto> searchAssetsDto({
     required AssetSearchRequestPayload payload,
   }) async {
-    final raw = await _api.post(
-      '/search/query',
-      payload.toPayload(),
-    );
+    final raw = await _api.post('/search/query', payload.toPayload());
     return AssetSearchResultDto.fromJson(raw);
   }
 
@@ -125,12 +129,16 @@ class DesktopSidecarGateway {
     return OperationResultDto.fromJson(raw);
   }
 
-  Future<EnqueueResultDto> enqueueAssetSyncDto({required String assetId}) async {
+  Future<EnqueueResultDto> enqueueAssetSyncDto({
+    required String assetId,
+  }) async {
     final raw = await _api.post('/storage/assets/$assetId/sync');
     return EnqueueResultDto.fromJson(raw);
   }
 
-  Future<StorageSyncRunResultDto> runStorageSyncDto({required int limit}) async {
+  Future<StorageSyncRunResultDto> runStorageSyncDto({
+    required int limit,
+  }) async {
     final raw = await _api.post('/storage/sync/run', {'limit': limit});
     return StorageSyncRunResultDto.fromJson(raw);
   }
@@ -201,7 +209,10 @@ class DesktopSidecarGateway {
   Future<ConfigureSupabaseStorageResultDto> configureSupabaseStorageDto({
     required SupabaseStorageConfigRequest payload,
   }) async {
-    final raw = await _api.post('/config/supabase-storage', payload.toPayload());
+    final raw = await _api.post(
+      '/config/supabase-storage',
+      payload.toPayload(),
+    );
     return ConfigureSupabaseStorageResultDto.fromJson(raw);
   }
 
@@ -345,13 +356,22 @@ class UpdateAssetRequest {
 }
 
 class CreateBookJobRequest {
-  const CreateBookJobRequest({required this.assetIds, required this.childId});
+  const CreateBookJobRequest({
+    required this.assetIds,
+    required this.childId,
+    this.coverPolicy = 'auto',
+  });
 
   final List<String> assetIds;
   final String? childId;
+  final String coverPolicy;
 
   Map<String, dynamic> toPayload() {
-    return {'assetIds': assetIds, 'childId': childId};
+    return {
+      'assetIds': assetIds,
+      'childId': childId,
+      'coverPolicy': coverPolicy,
+    };
   }
 }
 
@@ -510,10 +530,7 @@ class PathConfigDto {
 }
 
 class OpenAiConfigDto {
-  const OpenAiConfigDto({
-    required this.baseUrl,
-    required this.model,
-  });
+  const OpenAiConfigDto({required this.baseUrl, required this.model});
 
   factory OpenAiConfigDto.fromJson(Map<String, dynamic> raw) {
     return OpenAiConfigDto(
@@ -629,8 +646,7 @@ class ReadinessCheckDto {
   bool get isEmpty => raw.isEmpty;
   bool? get okOrNull => isEmpty ? null : isOk;
   bool get isOk => _boolAt(raw, 'ok') || _boolAt(raw, 'ready');
-  bool get needsConfiguration =>
-      raw['ok'] == false || raw['ready'] == false;
+  bool get needsConfiguration => raw['ok'] == false || raw['ready'] == false;
   bool get blocksGeneration => _boolAt(raw, 'blocksGeneration');
   String get service => _stringAt(raw, 'service').toLowerCase();
   String get message => _stringAt(raw, 'message');
@@ -958,10 +974,7 @@ class AssetSearchResultDto extends OperationResultDto {
 }
 
 class AssetSearchItemDto {
-  const AssetSearchItemDto({
-    required this.asset,
-    required this.reasons,
-  });
+  const AssetSearchItemDto({required this.asset, required this.reasons});
 
   factory AssetSearchItemDto.fromJson(Map<String, dynamic> raw) {
     final assetMap = _asMap(raw['asset']);
@@ -969,7 +982,10 @@ class AssetSearchItemDto {
         .map((reason) => '$reason')
         .where((reason) => reason.trim().isNotEmpty)
         .toList();
-    return AssetSearchItemDto(asset: AssetRecordDto.fromJson(assetMap), reasons: reasons);
+    return AssetSearchItemDto(
+      asset: AssetRecordDto.fromJson(assetMap),
+      reasons: reasons,
+    );
   }
 
   final AssetRecordDto asset;
@@ -992,9 +1008,7 @@ class AssetRecordDto {
   });
 
   factory AssetRecordDto.fromJson(Map<String, dynamic> row) {
-    final tags = _listAt(row, 'tags')
-        .map((v) => '$v')
-        .toList();
+    final tags = _listAt(row, 'tags').map((v) => '$v').toList();
     final imagePath = '${row['imagePath'] ?? row['image_path'] ?? ''}';
     return AssetRecordDto(
       id: '${row['id'] ?? ''}',

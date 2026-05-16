@@ -18,7 +18,7 @@ export class JobResponseDto {
     type: Object,
     description: 'Job payload (JSON)',
   })
-  payload: any;
+  payload: Record<string, unknown> | null;
 
   @ApiProperty({
     type: String,

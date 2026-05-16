@@ -17,6 +17,14 @@ extension _DesktopShellAssetActions on _DesktopShellState {
     });
   }
 
+  void _replaceSelectedAssets(Set<String> ids) {
+    _setShellState(() {
+      selectedAssets
+        ..clear()
+        ..addAll(ids);
+    });
+  }
+
   Future<bool> _updateAssetFromLibrary(
     String id,
     AssetMetadataUpdate payload,

@@ -1,17 +1,17 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next'
 
-const LandingFooter: React.FC = () => {
+export default function LandingFooter() {
+  const { t } = useTranslation()
+
   return (
     <footer className="footer page">
       <h2>KidMemory</h2>
       <p>
-        <span data-i18n="footer">A local-first AI publishing system for family memory.</span>{' '}
+        <span>{t('landing.footer')}</span>{' '}
         <a href="https://github.com/xingbofeng/kidmemory" target="_blank" rel="noreferrer">
           GitHub
         </a>
       </p>
     </footer>
-  );
-};
-
-export default LandingFooter;
+  )
+}

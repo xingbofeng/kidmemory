@@ -3,16 +3,34 @@
   "version": "0.1.0",
   "description": "KidMemory unified protocol layer - API types, error codes, and response formats",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./sidecar": "./src/sidecar/index.ts",
-    "./cloud-api": "./src/cloud-api/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./sidecar": {
+      "types": "./dist/sidecar/index.d.ts",
+      "default": "./dist/sidecar/index.js"
+    },
+    "./cloud-api": {
+      "types": "./dist/cloud-api/index.d.ts",
+      "default": "./dist/cloud-api/index.js"
+    },
+    "./generated/cloud-api/ts": "./generated/cloud-api/ts/index.d.ts",
+    "./generated/sidecar/ts": "./generated/sidecar/ts/index.d.ts"
   },
   "scripts": {
     "check": "node scripts/check.mjs",
-    "build": "tsc --noEmit",
-    "test": "node --import tsx --test tests/**/*.test.ts"
+    "type-check": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "gen:ts": "node scripts/generate-ts-client.mjs",
+    "gen:ts:cloud-api": "node scripts/generate-ts-client.mjs",
+    "gen:dart": "node scripts/generate-dart-client.mjs",
+    "gen:dart:sidecar": "node scripts/generate-dart-client.mjs",
+    "proto:lint": "buf lint proto"
   },
   "keywords": [
     "protocol",
@@ -22,7 +40,10 @@
   "author": "KidMemory Team",
   "license": "MIT",
   "devDependencies": {
+    "@bufbuild/buf": "^1.69.0",
+    "@openapitools/openapi-generator-cli": "^2.22.0",
     "@types/node": "^22.0.0",
+    "openapi-typescript": "^7.10.1",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0"
   }

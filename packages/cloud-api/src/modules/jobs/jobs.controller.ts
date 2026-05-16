@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Query, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Query, Param, Body, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { JobsService } from './jobs.service.ts';
 import { JobResponseDto, UpdateJobStatusDto, PendingJobsQueryDto } from './jobs.dto.ts';
@@ -6,7 +6,7 @@ import { JobResponseDto, UpdateJobStatusDto, PendingJobsQueryDto } from './jobs.
 @ApiTags('jobs')
 @Controller('/jobs')
 export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(@Inject(JobsService) private readonly jobsService: JobsService) {}
 
   @Get('/pending')
   @ApiOperation({ summary: 'Get pending jobs for device' })

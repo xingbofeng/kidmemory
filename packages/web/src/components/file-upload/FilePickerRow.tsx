@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 
 interface FilePickerRowProps {
@@ -8,12 +9,13 @@ interface FilePickerRowProps {
 }
 
 export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: FilePickerRowProps) {
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div className="picker-row">
       <label className="picker-tile">
-        <Icon name="camera" /> 拍照
+        <Icon name="camera" /> {t('uploadLegacy.photo')}
         <input
           ref={fileInputRef}
           className="file-input"
@@ -22,11 +24,11 @@ export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: File
           accept="image/*"
           onChange={onFileSelect}
           disabled={!canSelectMore || isUploading}
-          aria-label="选择图片"
+          aria-label={t('uploadLegacy.chooseImageAria')}
         />
       </label>
       <label className="picker-tile">
-        <Icon name="image" /> 从相册选择
+        <Icon name="image" /> {t('uploadLegacy.chooseFromAlbum')}
         <input
           className="file-input"
           type="file"
@@ -34,7 +36,7 @@ export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: File
           accept="image/*"
           onChange={onFileSelect}
           disabled={!canSelectMore || isUploading}
-          aria-label="相册导入"
+          aria-label={t('uploadLegacy.importFromAlbumAria')}
         />
       </label>
     </div>

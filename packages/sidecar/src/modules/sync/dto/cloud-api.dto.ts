@@ -1,7 +1,10 @@
+import type { components } from '@kidmemory/protocol/generated/cloud-api/ts';
+
 /**
- * Cloud-API DTOs
+ * Cloud-API DTOs for sidecar sync.
  *
- * 定义与 Cloud-API 交互的数据传输对象。
+ * 响应类型直接绑定 protocol/generated，避免与 OpenAPI 漂移。
+ * 请求类型暂保留本地定义（当前 OpenAPI 未生成请求体 schema）。
  */
 
 // ============================================================================
@@ -14,34 +17,13 @@ export interface RegisterDeviceDto {
   hostname: string;
 }
 
-export interface DeviceResponseDto {
-  id: string;
-  machineId: string;
-  platform: string;
-  hostname: string;
-  lastSeenAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type DeviceResponseDto = components['schemas']['DeviceResponseDto'];
 
 // ============================================================================
 // Upload Items
 // ============================================================================
 
-export interface UploadItemResponseDto {
-  id: string;
-  sessionId: string;
-  childId: string;
-  fileName: string;
-  fileSize: number;
-  mimeType: string;
-  objectKey: string;
-  status: 'pending' | 'synced' | 'failed';
-  syncedAt: string | null;
-  errorMessage: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type UploadItemResponseDto = components['schemas']['UploadItemResponseDto'];
 
 export interface UpdateSyncStatusDto {
   status: 'synced' | 'failed';
@@ -53,21 +35,11 @@ export interface UpdateSyncStatusDto {
 // Jobs
 // ============================================================================
 
-export interface JobResponseDto {
-  id: string;
-  deviceId: string;
-  jobType: string;
-  payload: Record<string, unknown>;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  result: Record<string, unknown> | null;
-  errorMessage: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type JobResponseDto = components['schemas']['JobResponseDto'];
 
 export interface UpdateJobStatusDto {
-  status: 'processing' | 'completed' | 'failed';
-  result?: Record<string, unknown>;
+  status: 'claimed' | 'processing' | 'completed' | 'failed' | 'pending';
+  claimedAt?: string;
   errorMessage?: string;
   completedAt?: string;
 }

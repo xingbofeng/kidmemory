@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
@@ -20,6 +20,7 @@ type DatasetServiceFactories = {
     provider: StorageProviderForSync;
   }) => ReturnType<typeof createStorageSyncService>;
 };
+export const DATASET_SERVICE_FACTORIES = Symbol("DATASET_SERVICE_FACTORIES");
 
 @Injectable()
 export class DatasetService {
@@ -30,9 +31,9 @@ export class DatasetService {
   private storageSync?: ReturnType<typeof createStorageSyncService>;
 
   constructor(
-    datasetState: DatasetStateService,
-    config: AppConfigService,
-    factories: DatasetServiceFactories = {},
+    @Inject(DatasetStateService) datasetState: DatasetStateService,
+    @Inject(AppConfigService) config: AppConfigService,
+    @Inject(DATASET_SERVICE_FACTORIES) factories: DatasetServiceFactories = {},
   ) {
     this.datasetState = datasetState;
     this.config = config;

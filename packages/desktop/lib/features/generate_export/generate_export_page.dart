@@ -42,6 +42,7 @@ class GenerateExportPage extends StatelessWidget {
     required this.generating,
     required this.exported,
     required this.statusMessage,
+    required this.requestId,
     required this.logLines,
     required this.templateOptions,
     required this.pageSizeOptions,
@@ -52,6 +53,7 @@ class GenerateExportPage extends StatelessWidget {
     required this.selectedStyle,
     required this.selectedExportTarget,
     required this.onGenerate,
+    required this.onGenerateSkipCover,
     required this.onExport,
     required this.onExportTargetChanged,
     this.exportResult,
@@ -69,6 +71,7 @@ class GenerateExportPage extends StatelessWidget {
   final bool generating;
   final bool exported;
   final String statusMessage;
+  final String requestId;
   final List<String> logLines;
   final List<String> templateOptions;
   final List<String> pageSizeOptions;
@@ -79,6 +82,7 @@ class GenerateExportPage extends StatelessWidget {
   final String selectedStyle;
   final String selectedExportTarget;
   final VoidCallback onGenerate;
+  final VoidCallback onGenerateSkipCover;
   final VoidCallback onExport;
   final ValueChanged<String> onExportTargetChanged;
   final ExportResultVm? exportResult;
@@ -111,6 +115,7 @@ class GenerateExportPage extends StatelessWidget {
     final generationState = exported
         ? '$exportLabel 已导出'
         : (generated ? '已生成' : (generating ? '生成中' : '等待生成'));
+    final showCoverFailureActions = _showCoverFailureActions(statusMessage);
     return PageFrame(
       title: '生成 / 预览 / 导出',
       subtitle: '确认素材、模板和风格后开始生成，生成完成后可导出 PDF、PNG 长图或 JPG 长图。',
@@ -125,6 +130,21 @@ class GenerateExportPage extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  SmartGenerateActions(
+                    generating: generating,
+                    onGeneratePictureBook: () => _showCoverConfirmDialog(
+                      context: context,
+                      onContinue: onGenerate,
+                      onSkipCover: onGenerateSkipCover,
+                    ),
+                    onGenerateMemoryAlbum: () => _showCoverConfirmDialog(
+                      context: context,
+                      onContinue: onGenerate,
+                      onSkipCover: onGenerateSkipCover,
+                    ),
+                    onGenerateMemoryVideo: onGenerate,
+                  ),
+                  const SizedBox(height: 16),
                   generated
                       ? GeneratedWorkSummary(
                           selectedCount: selectedCount,
@@ -167,14 +187,40 @@ class GenerateExportPage extends StatelessWidget {
                     selectedCount: selectedCount,
                     generated: generated,
                   ),
+                  if (showCoverFailureActions) ...[
+                    const SizedBox(height: 16),
+                    CoverFailureActionPanel(
+                      requestId: requestId,
+                      onRetry: onGenerate,
+                      onSkipAndContinue: onGenerateSkipCover,
+                      onViewLog: onViewLogDetails,
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   generated
                       ? AgentLogPanel(
                           statusMessage: statusMessage,
+                          requestId: requestId,
                           logLines: logLines,
                           onViewDetails: onViewLogDetails,
                         )
-                      : GenerationEntryLog(statusMessage: statusMessage),
+                      : Column(
+                          children: [
+                            if (!showCoverFailureActions &&
+                                _shouldShowGenerationError(statusMessage))
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: GenerationErrorActionsPanel(
+                                  statusMessage: statusMessage,
+                                  requestId: requestId,
+                                  onRetry: onGenerate,
+                                  onSkipCover: onGenerateSkipCover,
+                                  onViewLogs: onViewLogDetails,
+                                ),
+                              ),
+                            GenerationEntryLog(statusMessage: statusMessage),
+                          ],
+                        ),
                 ],
               ),
             ),
@@ -207,6 +253,111 @@ class GenerateExportPage extends StatelessWidget {
     final trimmedFallback = fallback.trim();
     if (trimmedFallback.isNotEmpty) return trimmedFallback;
     return options.isNotEmpty ? options.first : '';
+  }
+
+  void _showCoverConfirmDialog({
+    required BuildContext context,
+    required VoidCallback onContinue,
+    required VoidCallback onSkipCover,
+  }) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('确认：调用免费生图'),
+        content: const Text('将使用免费生图服务生成封面图。\n不会上传孩子照片，只会发送文字描述。'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              onContinue();
+            },
+            child: const Text('继续生成'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              onSkipCover();
+            },
+            child: const Text('跳过封面'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _showCoverFailureActions(String message) {
+    final normalized = message.trim();
+    if (normalized.isEmpty) return false;
+    return normalized.contains('封面') && normalized.contains('失败');
+  }
+}
+
+bool _shouldShowGenerationError(String statusMessage) {
+  final message = statusMessage.trim();
+  if (message.isEmpty) return false;
+  if (message == '等待生成') return false;
+  if (message == '正在生成作品集') return false;
+  if (message.contains('生成完成')) return false;
+  return message.contains('失败') ||
+      message.contains('异常') ||
+      message.contains('不可用') ||
+      message.contains('超时');
+}
+
+class SmartGenerateActions extends StatelessWidget {
+  const SmartGenerateActions({
+    required this.generating,
+    required this.onGeneratePictureBook,
+    required this.onGenerateMemoryAlbum,
+    required this.onGenerateMemoryVideo,
+    super.key,
+  });
+
+  final bool generating;
+  final VoidCallback onGeneratePictureBook;
+  final VoidCallback onGenerateMemoryAlbum;
+  final VoidCallback onGenerateMemoryVideo;
+
+  @override
+  Widget build(BuildContext context) {
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '智能动作',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '选择你要生成的内容，系统会自动组织素材和流程。',
+            style: TextStyle(color: Color(0xff6f6258)),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              SecondaryButton(
+                label: '生成儿童绘本',
+                iconAsset: bookIconAsset,
+                onPressed: generating ? null : onGeneratePictureBook,
+              ),
+              SecondaryButton(
+                label: '生成成长纪念册',
+                iconAsset: bearDocumentIconAsset,
+                onPressed: generating ? null : onGenerateMemoryAlbum,
+              ),
+              SecondaryButton(
+                label: '生成回忆录视频',
+                iconAsset: timelineIconAsset,
+                onPressed: generating ? null : onGenerateMemoryVideo,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -534,7 +685,7 @@ class GenerationFlowProgress extends StatelessWidget {
             body: generated
                 ? '已生成作品集内容'
                 : generating
-                ? '正在生成作品集'
+                ? '正在生成封面图'
                 : '等待用户确认',
             active: generated || generating,
             complete: generated,
@@ -546,7 +697,11 @@ class GenerationFlowProgress extends StatelessWidget {
             icon: exported ? Icons.check_rounded : Icons.article_outlined,
             iconAsset: exported ? completeIconAsset : pdfIconAsset,
             title: '预览 / 导出',
-            body: generated ? '可预览并导出 $exportLabel' : '生成后解锁',
+            body: exported
+                ? '$exportLabel 已导出'
+                : generated
+                ? '等待导出 PDF'
+                : '生成后解锁',
             active: generated,
             complete: exported,
           ),
@@ -661,6 +816,163 @@ class GenerationEntryLog extends StatelessWidget {
           iconAsset: timelineIconAsset,
           onPressed: null,
         ),
+      ],
+    ),
+  );
+}
+
+class GenerationErrorActionsPanel extends StatelessWidget {
+  const GenerationErrorActionsPanel({
+    required this.statusMessage,
+    required this.requestId,
+    required this.onRetry,
+    required this.onSkipCover,
+    required this.onViewLogs,
+    super.key,
+  });
+
+  final String statusMessage;
+  final String requestId;
+  final VoidCallback onRetry;
+  final VoidCallback onSkipCover;
+  final VoidCallback onViewLogs;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = statusMessage.contains('封面') ? '封面图生成失败' : '生成失败';
+    final reason = _extractReason(statusMessage);
+    return SurfaceCard(
+      backgroundColor: const Color(0xfffff4f3),
+      borderColor: const Color(0xffefc8c4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              color: Color(0xff8f3226),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '原因：$reason',
+            style: const TextStyle(color: Color(0xff6f6258), height: 1.45),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              SecondaryButton(
+                label: '重试',
+                iconAsset: refreshIconAsset,
+                onPressed: onRetry,
+              ),
+              SecondaryButton(
+                label: '跳过封面继续导出',
+                iconAsset: pdfIconAsset,
+                onPressed: onSkipCover,
+              ),
+              SecondaryButton(
+                label: '查看日志',
+                iconAsset: timelineIconAsset,
+                onPressed: onViewLogs,
+              ),
+            ],
+          ),
+          if (requestId.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Request ID: $requestId',
+              style: const TextStyle(
+                color: Color(0xff8c7663),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _extractReason(String message) {
+    final normalized = message.trim();
+    if (normalized.isEmpty) return '任务执行失败';
+    final colonIndex = normalized.indexOf('：');
+    if (colonIndex >= 0 && colonIndex + 1 < normalized.length) {
+      return normalized.substring(colonIndex + 1).trim();
+    }
+    return normalized;
+  }
+}
+
+class CoverFailureActionPanel extends StatelessWidget {
+  const CoverFailureActionPanel({
+    required this.requestId,
+    required this.onRetry,
+    required this.onSkipAndContinue,
+    required this.onViewLog,
+    super.key,
+  });
+
+  final String requestId;
+  final VoidCallback onRetry;
+  final VoidCallback onSkipAndContinue;
+  final VoidCallback onViewLog;
+
+  @override
+  Widget build(BuildContext context) => SurfaceCard(
+    backgroundColor: const Color(0xfffff4f1),
+    borderColor: const Color(0xffffd5cd),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '封面图生成失败',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: Color(0xff9b3a2b),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          '原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。',
+          style: TextStyle(color: Color(0xff6f6258), height: 1.45),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            SecondaryButton(
+              label: '重试',
+              iconAsset: refreshIconAsset,
+              onPressed: onRetry,
+            ),
+            SecondaryButton(
+              label: '跳过封面继续导出',
+              iconAsset: pdfIconAsset,
+              onPressed: onSkipAndContinue,
+            ),
+            SecondaryButton(
+              label: '查看日志',
+              iconAsset: timelineIconAsset,
+              onPressed: onViewLog,
+            ),
+          ],
+        ),
+        if (requestId.trim().isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Request ID: $requestId',
+            style: const TextStyle(
+              color: Color(0xff8c7663),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ],
     ),
   );

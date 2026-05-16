@@ -9,6 +9,15 @@ extension _DesktopShellFeedback on _DesktopShellState {
       activityLog.removeRange(12, activityLog.length);
     }
     debugPrint(line);
+    unawaited(
+      desktopLogger.append(
+        level: DesktopLogLevel.info,
+        event: 'desktop.ui.log',
+        traceId: traceId.isEmpty ? null : traceId,
+        requestId: requestId.isEmpty ? null : requestId,
+        data: {'message': message},
+      ),
+    );
   }
 
   String _clockStamp(DateTime time) {

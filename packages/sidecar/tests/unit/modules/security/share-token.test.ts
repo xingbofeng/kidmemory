@@ -98,8 +98,21 @@ class MockShareTokenRepository implements ShareTokenRepository {
     await this.query("UPDATE share_tokens SET status = 'expired' WHERE id = $1", [id]);
   }
 
-  async incrementShareTokenAccess(id: string) {
-    await this.query("UPDATE share_tokens SET access_count = access_count + 1, last_accessed_at = NOW() WHERE id = $1", [id]);
+  async incrementShareTokenAccessIfAllowed(input: { id: string; maxAccessCount?: number | null }) {
+    const maxAccessCount = input.maxAccessCount ?? null;
+    if (maxAccessCount === null) {
+      const result = await this.query(
+        "UPDATE share_tokens SET access_count = access_count + 1, last_accessed_at = NOW() WHERE id = $1 AND status = 'active' AND expires_at > NOW()",
+        [input.id],
+      );
+      return (result.rowCount ?? 0) > 0;
+    }
+
+    const result = await this.query(
+      "UPDATE share_tokens SET access_count = access_count + 1, last_accessed_at = NOW() WHERE id = $1 AND status = 'active' AND expires_at > NOW() AND access_count < $2",
+      [input.id, maxAccessCount],
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   async logShareAccess(input: LogShareAccessInput) {

@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import { RegisterDeviceDto, DeviceResponseDto } from './devices.dto.ts';
 
 @Injectable()
 export class DevicesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Register a device (idempotent by machineId)
@@ -47,7 +47,7 @@ export class DevicesService {
       });
 
       return device;
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Device ${deviceId} not found`);
     }
   }

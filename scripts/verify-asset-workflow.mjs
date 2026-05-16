@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import AdmZip from "../packages/backend/node_modules/adm-zip/adm-zip.js";
+import AdmZip from "../packages/sidecar/node_modules/adm-zip/adm-zip.js";
 
-import { DatasetState } from "../packages/backend/src/infrastructure/dataset-state/dataset-state.service.ts";
-import { MemoryDatasetDb } from "../packages/backend/src/infrastructure/dataset-state/memory-dataset-db.ts";
-import { FileJobStoreService } from "../packages/backend/src/infrastructure/jobs/file-job-store.service.ts";
-import { createBooksService } from "../packages/backend/src/modules/books/providers/books.domain.ts";
-import { importLocalAssets } from "../packages/backend/src/modules/dataset/providers/asset-import.ts";
+import { DatasetState } from "../packages/sidecar/src/infrastructure/dataset-state/dataset-state.service.ts";
+import { MemoryDatasetDb } from "../packages/sidecar/src/infrastructure/dataset-state/memory-dataset-db.ts";
+import { FileJobStoreService } from "../packages/sidecar/src/infrastructure/jobs/file-job-store.service.ts";
+import { createBooksService } from "../packages/sidecar/src/modules/books/providers/books.domain.ts";
+import { importLocalAssets } from "../packages/sidecar/src/modules/dataset/providers/asset-import.ts";
 
 async function main() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-asset-workflow-verify-"));

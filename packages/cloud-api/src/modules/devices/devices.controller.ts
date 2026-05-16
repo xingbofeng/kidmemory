@@ -1,4 +1,4 @@
-import { Controller, Post, Put, Get, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Put, Get, Body, Param, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DevicesService } from './devices.service.ts';
 import { RegisterDeviceDto, DeviceResponseDto } from './devices.dto.ts';
@@ -6,7 +6,7 @@ import { RegisterDeviceDto, DeviceResponseDto } from './devices.dto.ts';
 @ApiTags('devices')
 @Controller('/devices')
 export class DevicesController {
-  constructor(private readonly devicesService: DevicesService) {}
+  constructor(@Inject(DevicesService) private readonly devicesService: DevicesService) {}
 
   @Post('/register')
   @HttpCode(HttpStatus.OK)

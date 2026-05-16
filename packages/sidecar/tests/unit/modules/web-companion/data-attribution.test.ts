@@ -41,7 +41,7 @@ describe("Web Companion Data Attribution Issues", () => {
 
   test("should detect Web Companion service calling non-existent importAsset method", () => {
     // 读取 Web Companion 服务源码
-    const servicePath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.service.ts');
+    const servicePath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.service.ts');
     const serviceSource = fs.readFileSync(servicePath, 'utf8');
 
     // 检查是否调用了不存在的 importAsset 方法

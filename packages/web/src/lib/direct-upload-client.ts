@@ -14,6 +14,7 @@
  */
 
 import { buildDirectUploadObjectKey } from './direct-upload-naming'
+import i18n from '../i18n'
 import type {
   DirectUploadConfig,
   DirectUploadResult,
@@ -75,7 +76,7 @@ export function validateAddFiles({
       ok: false,
       code: 'limit_exceeded',
       limit: recommendedClientLimit,
-      message: `单次最多上传 ${recommendedClientLimit} 张（体验约束，非安全约束）`,
+      message: i18n.t('directUpload.limitExceeded', { limit: recommendedClientLimit }),
     }
   }
 
@@ -85,7 +86,9 @@ export function validateAddFiles({
       return {
         ok: false,
         code: 'unsupported_mime',
-        message: `仅支持图片文件（JPEG/PNG/WebP/HEIC/HEIF/GIF），收到：${mime || '未知类型'}`,
+        message: i18n.t('directUpload.unsupportedMime', {
+          mime: mime || i18n.t('directUpload.unknownMime'),
+        }),
         offendingFile: file,
       }
     }
@@ -165,7 +168,7 @@ export function createDirectUploadClient(
         if (error || !data) {
           return {
             ok: false,
-            errorMessage: error?.message ?? '上传失败：未知错误',
+            errorMessage: error?.message ?? i18n.t('directUpload.uploadUnknownError'),
           }
         }
         return { ok: true, objectKey }

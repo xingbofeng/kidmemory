@@ -11,6 +11,7 @@
     "emitDecoratorMetadata": true,
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
+    "noEmit": false,
     "noEmitOnError": true
   },
   "include": ["src/main.ts"],

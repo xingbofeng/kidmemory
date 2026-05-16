@@ -73,6 +73,7 @@ class AssetLibraryPage extends StatefulWidget {
     required this.selectedAssets,
     required this.onChildChanged,
     required this.onToggle,
+    this.onReplaceSelectedAssets,
     required this.onUpdateAsset,
     required this.onDeleteAsset,
     required this.onDeleteSelected,
@@ -96,6 +97,7 @@ class AssetLibraryPage extends StatefulWidget {
   final Set<String> selectedAssets;
   final ValueChanged<String> onChildChanged;
   final ValueChanged<String> onToggle;
+  final ValueChanged<Set<String>>? onReplaceSelectedAssets;
   final Future<bool> Function(String id, AssetMetadataUpdate payload)
   onUpdateAsset;
   final Future<bool> Function(String id) onDeleteAsset;
@@ -300,6 +302,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   onRefreshSearchIndexing: _refreshSearchIndexingStatus,
                   onImportFiles: _importFilesWithMessage,
                   onImportFolder: _importFolderWithMessage,
+                  onSmartPick: _showSmartPickDialog,
                   onOpenDirectUpload: widget.onOpenDirectUpload,
                   sidecarApi: widget.sidecarApi,
                   onTrustedUploadFinished: widget.onTrustedUploadFinished,
@@ -545,6 +548,203 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       searchStatusMessage = '已回到素材库浏览';
       _syncEditor();
     });
+  }
+
+  Future<void> _showSmartPickDialog() async {
+    if (displayedAssets.isEmpty) {
+      AppToast.show(
+        context,
+        title: '暂时无法挑选',
+        message: '当前没有可用素材，请先导入素材后再试。',
+        tone: AppToastTone.info,
+      );
+      return;
+    }
+
+    var target = 'picture_book';
+    var seed = DateTime.now().millisecondsSinceEpoch;
+    List<AssetVm> suggested = _buildSmartSuggestion(
+      assets: displayedAssets,
+      target: target,
+      seed: seed,
+    );
+
+    final action = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('帮我挑素材'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('请选择本次目标：'),
+                  const SizedBox(height: 8),
+                  RadioGroup<String>(
+                    groupValue: target,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setDialogState(() {
+                        target = value;
+                        seed = DateTime.now().millisecondsSinceEpoch;
+                        suggested = _buildSmartSuggestion(
+                          assets: displayedAssets,
+                          target: target,
+                          seed: seed,
+                        );
+                      });
+                    },
+                    child: Column(
+                      children: const [
+                        RadioListTile<String>(
+                          value: 'picture_book',
+                          title: Text('适合做绘本'),
+                          dense: true,
+                        ),
+                        RadioListTile<String>(
+                          value: 'memory_album',
+                          title: Text('适合做成长纪念册'),
+                          dense: true,
+                        ),
+                        RadioListTile<String>(
+                          value: 'memory_video',
+                          title: Text('适合做回忆录视频'),
+                          dense: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text('智能助手已为你挑选 ${suggested.length} 张素材'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop('manual'),
+                  child: const Text('手动调整'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setDialogState(() {
+                      seed = DateTime.now().millisecondsSinceEpoch;
+                      suggested = _buildSmartSuggestion(
+                        assets: displayedAssets,
+                        target: target,
+                        seed: seed,
+                      );
+                    });
+                  },
+                  child: const Text('重新挑选'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop('confirm'),
+                  child: const Text('确认使用'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || action == null) return;
+
+    if (action == 'confirm') {
+      final next = suggested.map((asset) => asset.id).toSet();
+      final replace = widget.onReplaceSelectedAssets;
+      if (replace != null) {
+        replace(next);
+      } else {
+        for (final id in widget.selectedAssets.toList()) {
+          if (!next.contains(id)) {
+            widget.onToggle(id);
+          }
+        }
+        for (final id in next) {
+          if (!widget.selectedAssets.contains(id)) {
+            widget.onToggle(id);
+          }
+        }
+      }
+      setState(() {
+        selectedAssetId = next.isEmpty ? null : next.first;
+      });
+      _syncEditor();
+      AppToast.show(
+        context,
+        title: '智能挑选已应用',
+        message: '已选 ${next.length} 张素材，可继续手动微调。',
+        tone: AppToastTone.success,
+      );
+      return;
+    }
+
+    if (action == 'manual') {
+      AppToast.show(
+        context,
+        title: '已保留当前选择',
+        message: '你可以继续手动勾选素材。',
+        tone: AppToastTone.info,
+      );
+    }
+  }
+
+  List<AssetVm> _buildSmartSuggestion({
+    required List<AssetVm> assets,
+    required String target,
+    required int seed,
+  }) {
+    final sorted = [...assets];
+
+    switch (target) {
+      case 'memory_video':
+        sorted.sort((a, b) {
+          final scoreA = _smartAssetScore(a, preferPhoto: true);
+          final scoreB = _smartAssetScore(b, preferPhoto: true);
+          return scoreB.compareTo(scoreA);
+        });
+        break;
+      case 'memory_album':
+        sorted.sort((a, b) {
+          final scoreA = _smartAssetScore(a, preferCraft: true);
+          final scoreB = _smartAssetScore(b, preferCraft: true);
+          return scoreB.compareTo(scoreA);
+        });
+        break;
+      case 'picture_book':
+      default:
+        sorted.sort((a, b) {
+          final scoreA = _smartAssetScore(a, preferArtwork: true);
+          final scoreB = _smartAssetScore(b, preferArtwork: true);
+          return scoreB.compareTo(scoreA);
+        });
+        break;
+    }
+
+    if (sorted.length > 1) {
+      final shift = seed % sorted.length;
+      final rotated = [...sorted.skip(shift), ...sorted.take(shift)];
+      return rotated.take(12).toList();
+    }
+    return sorted.take(12).toList();
+  }
+
+  int _smartAssetScore(
+    AssetVm asset, {
+    bool preferArtwork = false,
+    bool preferPhoto = false,
+    bool preferCraft = false,
+  }) {
+    var score = 0;
+    if (preferArtwork && asset.type == 'artwork') score += 4;
+    if (preferPhoto && asset.type == 'photo') score += 4;
+    if (preferCraft && asset.type == 'craft') score += 4;
+    if (asset.tags.isNotEmpty) score += 2;
+    if (asset.description.trim().isNotEmpty) score += 1;
+    if (asset.capturedAt.trim().isNotEmpty) score += 1;
+    return score;
   }
 
   Future<void> _importFilesWithMessage() async {
@@ -858,7 +1058,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                       .map((v) => v.trim())
                       .where((v) => v.isNotEmpty)
                       .toList(),
-                  capturedAt: capturedAt.trim().isEmpty ? null : capturedAt.trim(),
+                  capturedAt: capturedAt.trim().isEmpty
+                      ? null
+                      : capturedAt.trim(),
                   type: typeValue,
                 ),
               );

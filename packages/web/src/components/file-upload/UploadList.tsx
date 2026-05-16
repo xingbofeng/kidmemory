@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SelectedFile } from '../../types/fileUpload'
 
@@ -8,21 +9,19 @@ interface UploadListProps {
 }
 
 export function UploadList({ selectedFiles, onRemoveFile, onClearAll }: UploadListProps) {
+  const { t } = useTranslation()
+
   return (
     <>
       <div className="queue-heading">
-        <h2>上传队列（{selectedFiles.length}）</h2>
-        <button
-          type="button"
-          onClick={onClearAll}
-          disabled={selectedFiles.length === 0}
-        >
-          清空队列
+        <h2>{t('uploadLegacy.queueTitle', { count: selectedFiles.length })}</h2>
+        <button type="button" onClick={onClearAll} disabled={selectedFiles.length === 0}>
+          {t('uploadLegacy.clearQueue')}
         </button>
       </div>
 
       <div className="upload-list">
-        {selectedFiles.map(selectedFile => (
+        {selectedFiles.map((selectedFile) => (
           <div className="upload-item" key={selectedFile.id}>
             <div className="upload-thumb drawing-thumb" />
             <div className="upload-copy">
@@ -31,32 +30,20 @@ export function UploadList({ selectedFiles, onRemoveFile, onClearAll }: UploadLi
             </div>
 
             {selectedFile.status === 'pending' && (
-              <button
-                className="remove-file"
-                onClick={() => onRemoveFile(selectedFile.id)}
-                aria-label="删除"
-              >
-                <Icon name="delete" label="删除" />
+              <button className="remove-file" onClick={() => onRemoveFile(selectedFile.id)} aria-label={t('uploadLegacy.delete')}>
+                <Icon name="delete" label={t('uploadLegacy.delete')} />
               </button>
             )}
 
-            {selectedFile.status === 'uploading' && (
-              <span className="item-status uploading">上传中</span>
-            )}
-
-            {selectedFile.status === 'success' && (
-              <span className="item-status success">上传成功</span>
-            )}
-
+            {selectedFile.status === 'uploading' && <span className="item-status uploading">{t('uploadLegacy.uploading')}</span>}
+            {selectedFile.status === 'success' && <span className="item-status success">{t('uploadLegacy.uploadSuccess')}</span>}
             {selectedFile.status === 'error' && (
-              <span className="item-status danger">{selectedFile.error || '上传失败'}</span>
+              <span className="item-status danger">{selectedFile.error || t('uploadLegacy.uploadFailed')}</span>
             )}
           </div>
         ))}
 
-        {selectedFiles.length === 0 && (
-          <div className="empty-upload-list">选择图片后会出现在这里</div>
-        )}
+        {selectedFiles.length === 0 && <div className="empty-upload-list">{t('uploadLegacy.emptyUploadList')}</div>}
       </div>
     </>
   )

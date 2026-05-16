@@ -160,6 +160,43 @@ export class PrismaWebCompanionRepository implements WebCompanionRepository {
       throw error;
     }
   }
+
+  async commitUploadItemIfNotCommitted(input: {
+    uploadItemId: string;
+    status: UploadItemStatusType;
+    updates: UpdateUploadItemInput;
+  }): Promise<UploadItem | null> {
+    const updateData: {
+      status: UploadItemStatusType;
+      sizeBytes?: bigint;
+      contentType?: string;
+      remoteEtag?: string | null;
+      committedAt?: Date;
+    } = { status: input.status };
+
+    if (input.updates.sizeBytes !== undefined) updateData.sizeBytes = BigInt(input.updates.sizeBytes);
+    if (input.updates.contentType !== undefined) updateData.contentType = input.updates.contentType;
+    if (input.updates.remoteEtag !== undefined) updateData.remoteEtag = input.updates.remoteEtag;
+    if (input.updates.committedAt !== undefined) updateData.committedAt = input.updates.committedAt;
+
+    const result = await this.prisma.uploadItem.updateMany({
+      where: {
+        id: input.uploadItemId,
+        committedAt: null,
+        status: "uploading",
+      },
+      data: updateData,
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    const committed = await this.prisma.uploadItem.findUnique({
+      where: { id: input.uploadItemId },
+    });
+    return committed ? mapUploadItem(committed) : null;
+  }
 }
 
 function mapSession(session: {

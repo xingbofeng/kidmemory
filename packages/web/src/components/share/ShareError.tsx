@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 
 interface ShareErrorProps {
@@ -8,6 +9,8 @@ interface ShareErrorProps {
 }
 
 export function ShareError({ title, message, onRetry, icon = 'shield' }: ShareErrorProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="share-page error">
       <div className="error-content">
@@ -16,9 +19,7 @@ export function ShareError({ title, message, onRetry, icon = 'shield' }: ShareEr
         <p>{message}</p>
         {onRetry && (
           <div className="error-actions">
-            <button onClick={onRetry}>
-              重试
-            </button>
+            <button onClick={onRetry}>{t('common.retry')}</button>
           </div>
         )}
       </div>

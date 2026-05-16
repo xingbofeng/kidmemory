@@ -67,8 +67,8 @@ brew services start postgresql@16
 createdb kidmemory
 psql kidmemory -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
-# 4. Start backend service
-cd packages/backend
+# 4. Start sidecar service
+cd packages/sidecar
 npm install && npm run dev
 
 # 5. Start desktop app (new terminal window)
@@ -139,7 +139,9 @@ HTML/PDF Rendering & Export
 kidmemory/
 ├── packages/
 │   ├── desktop/          # Flutter macOS desktop app
-│   ├── backend/          # NestJS API service
+│   ├── sidecar/          # NestJS local orchestration API
+│   ├── cloud-api/        # NestJS cloud collaboration API
+│   ├── protocol/         # Shared types/OpenAPI/clients
 │   └── web/              # Web Companion (mobile)
 ├── docs/                 # Product documentation and design assets
 ├── templates/            # Book templates
@@ -152,21 +154,21 @@ kidmemory/
 ### Running Tests
 
 ```bash
-# Backend tests
-cd packages/backend && npm test
+# Sidecar tests
+cd packages/sidecar && npm test
 
 # Desktop tests
 cd packages/desktop && flutter test
 
 # Architecture tests
-cd packages/backend && node --test tests/architecture/architecture.test.ts
+cd packages/sidecar && npx tsx --test tests/architecture/architecture.test.ts
 ```
 
 ### Development Mode
 
 ```bash
-# Backend development server
-cd packages/backend && npm run dev
+# Sidecar development server
+cd packages/sidecar && npm run dev
 
 # Desktop hot reload
 cd packages/desktop && flutter run -d macos
@@ -183,16 +185,16 @@ Suitable for personal and family use:
 
 1. Complete environment configuration following the "Quick Start" section
 2. Ensure PostgreSQL service is running properly
-3. Start backend service and desktop application
+3. Start sidecar service and desktop application
 
 ### Self-hosted Deployment
 
 Suitable for technical users and small teams:
 
 ```bash
-# Use PM2 to manage backend service
+# Use PM2 to manage sidecar service
 npm install -g pm2
-cd packages/backend
+cd packages/cloud-api
 pm2 start ecosystem.config.js
 
 # Configure reverse proxy (Nginx)
@@ -207,7 +209,11 @@ Supports major cloud service providers:
 - **Storage**: Supabase Storage, AWS S3, local filesystem
 - **Compute**: Supports Docker containerized deployment
 
-For detailed deployment guide, please refer to [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+For detailed deployment guide, please refer to:
+
+- [CI/CD Guide](docs/deployment/ci-cd.md)
+- [Tencent Cloud Deployment](docs/deployment/tencent-cloud.md)
+- [Vercel Deployment](docs/deployment/vercel.md)
 
 ## 🗺️ Roadmap
 
@@ -229,7 +235,7 @@ For detailed roadmap, see [docs/product/roadmap.md](docs/product/roadmap.md)
 
 ### Developer Documentation
 - [Development Guide](CLAUDE.md) - Claude Code working instructions
-- [API Documentation](docs/api/README.md) - Backend API interface documentation
+- [API Documentation](docs/api/README.md) - Sidecar & Cloud API interface documentation
 - [Architecture Documentation](docs/product/architecture.md) - Technical architecture details
 
 ### Release Documentation

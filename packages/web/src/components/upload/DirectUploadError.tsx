@@ -18,9 +18,7 @@ export function DirectUploadError({ title, message, description }: DirectUploadE
             <div className="inline-alert danger" role="alert">
               {message}
             </div>
-            {description && (
-              <p className="privacy-note">{description}</p>
-            )}
+            {description && <p className="privacy-note">{description}</p>}
           </section>
         </main>
       </div>

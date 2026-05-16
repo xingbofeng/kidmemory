@@ -174,6 +174,12 @@ class MockSidecarApi implements SidecarApi {
   @override
   final int retries = 3;
 
+  @override
+  final String? Function()? traceIdProvider = null;
+
+  @override
+  final String? Function()? requestIdProvider = null;
+
   void mockPost(String path, Map<String, dynamic> response) {
     _mockResponses['POST:$path'] = response;
   }
@@ -240,4 +246,10 @@ class MockSidecarApi implements SidecarApi {
 
   @override
   Future<Map<String, dynamic>> deleteStrict(String path) => delete(path);
+
+  @override
+  void setRequestContext({String? traceId, String? requestId}) {}
+
+  @override
+  void clearRequestContext() {}
 }

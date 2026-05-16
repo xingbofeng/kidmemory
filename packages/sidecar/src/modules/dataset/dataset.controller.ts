@@ -31,7 +31,7 @@ import { UpdateAssetDtoSchema, type UpdateAssetDto } from "./dto/update-asset.dt
 
 @Controller()
 export class DatasetController {
-  constructor(private readonly datasetService: DatasetService) {}
+  constructor(@Inject(DatasetService) private readonly datasetService: DatasetService) {}
 
   @Post("sample/import")
   importSample(@Body() body: unknown) {

@@ -1,0 +1,7 @@
+tunnel: kidmemory-cloud-api
+credentials-file: /etc/cloudflared/kidmemory-cloud-api.json
+
+ingress:
+  - hostname: api.kidmemory.baby
+    service: http://127.0.0.1:3001
+  - service: http_status:404

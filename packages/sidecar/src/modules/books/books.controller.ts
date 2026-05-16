@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Res } from "@nestjs/common";
 import type { Response } from "express";
 
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
@@ -8,7 +8,7 @@ import { ApiCode } from "@kidmemory/protocol";
 
 @Controller("books")
 export class BooksController {
-  constructor(private readonly booksService: BooksService) {}
+  constructor(@Inject(BooksService) private readonly booksService: BooksService) {}
 
   @Post("jobs")
   async createJob(@Body() body: unknown) {

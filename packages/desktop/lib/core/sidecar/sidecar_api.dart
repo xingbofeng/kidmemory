@@ -53,6 +53,8 @@ class SidecarApi {
     String? baseUrl,
     this.timeout = const Duration(seconds: 8),
     this.retries = 1,
+    this.traceIdProvider,
+    this.requestIdProvider,
   }) : baseUrl = baseUrl ?? resolveBaseUrl(Platform.environment);
 
   /// Resolves the base URL the desktop client should use to reach the local
@@ -77,6 +79,32 @@ class SidecarApi {
   final String baseUrl;
   final Duration timeout;
   final int retries;
+  final String? Function()? traceIdProvider;
+  final String? Function()? requestIdProvider;
+  String? _activeTraceId;
+  String? _activeRequestId;
+
+  static String newTraceId() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final entropy = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+    return 'trace_${now}_$entropy';
+  }
+
+  static String newRequestId() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final entropy = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+    return 'req_${now}_$entropy';
+  }
+
+  void setRequestContext({String? traceId, String? requestId}) {
+    _activeTraceId = _normalizeHeaderValue(traceId);
+    _activeRequestId = _normalizeHeaderValue(requestId);
+  }
+
+  void clearRequestContext() {
+    _activeTraceId = null;
+    _activeRequestId = null;
+  }
 
   Future<Map<String, dynamic>> get(String path) async {
     return _send('GET', path);
@@ -107,7 +135,10 @@ class SidecarApi {
   Future<Map<String, dynamic>> getStrict(String path) async {
     final response = await get(path);
     if (response.isNotEmpty) return response;
-    throw SidecarApiException('Sidecar request returned empty payload', path: path);
+    throw SidecarApiException(
+      'Sidecar request returned empty payload',
+      path: path,
+    );
   }
 
   Future<Map<String, dynamic>> postStrict(
@@ -116,7 +147,10 @@ class SidecarApi {
   ]) async {
     final response = await post(path, body);
     if (response.isNotEmpty) return response;
-    throw SidecarApiException('Sidecar request returned empty payload', path: path);
+    throw SidecarApiException(
+      'Sidecar request returned empty payload',
+      path: path,
+    );
   }
 
   Future<Map<String, dynamic>> putStrict(
@@ -125,13 +159,19 @@ class SidecarApi {
   ]) async {
     final response = await put(path, body);
     if (response.isNotEmpty) return response;
-    throw SidecarApiException('Sidecar request returned empty payload', path: path);
+    throw SidecarApiException(
+      'Sidecar request returned empty payload',
+      path: path,
+    );
   }
 
   Future<Map<String, dynamic>> deleteStrict(String path) async {
     final response = await delete(path);
     if (response.isNotEmpty) return response;
-    throw SidecarApiException('Sidecar request returned empty payload', path: path);
+    throw SidecarApiException(
+      'Sidecar request returned empty payload',
+      path: path,
+    );
   }
 
   Future<Map<String, dynamic>> _send(
@@ -139,10 +179,11 @@ class SidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
+    final context = _resolveRequestContext();
     Object? lastError;
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {
-        final json = await _sendOnce(method, path, body);
+        final json = await _sendOnce(method, path, body, context);
         return _unwrapApiResponse(json);
       } catch (error) {
         lastError = error;
@@ -154,7 +195,9 @@ class SidecarApi {
         }
       }
     }
-    debugPrint('Sidecar $method $path failed after ${retries + 1} attempts: $lastError');
+    debugPrint(
+      'Sidecar $method $path failed after ${retries + 1} attempts: $lastError',
+    );
     // Throw the last error instead of returning empty object
     if (lastError is SidecarApiException) {
       throw lastError;
@@ -166,10 +209,11 @@ class SidecarApi {
   }
 
   Future<List<dynamic>> _sendList(String method, String path) async {
+    final context = _resolveRequestContext();
     Object? lastError;
     for (var attempt = 0; attempt <= retries; attempt++) {
       try {
-        final json = await _sendOnce(method, path);
+        final json = await _sendOnce(method, path, const {}, context);
         final unwrapped = _unwrapApiResponse(json);
         // If the unwrapped data is a list, return it
         if (unwrapped is List<dynamic>) return unwrapped;
@@ -185,7 +229,9 @@ class SidecarApi {
         }
       }
     }
-    debugPrint('Sidecar $method $path failed after ${retries + 1} attempts: $lastError');
+    debugPrint(
+      'Sidecar $method $path failed after ${retries + 1} attempts: $lastError',
+    );
     // Throw the last error instead of returning empty list
     if (lastError is SidecarApiException) {
       throw lastError;
@@ -205,14 +251,11 @@ class SidecarApi {
         json.containsKey('msg') &&
         json.containsKey('data')) {
       final apiResponse = ApiResponse.fromJson(json);
-      
+
       if (!apiResponse.isSuccess) {
-        throw SidecarApiException(
-          apiResponse.msg,
-          code: apiResponse.code,
-        );
+        throw SidecarApiException(apiResponse.msg, code: apiResponse.code);
       }
-      
+
       // Return unwrapped data
       final data = apiResponse.data;
       if (data is Map<String, dynamic>) return data;
@@ -220,7 +263,7 @@ class SidecarApi {
       // For null or other types, return empty map
       return data ?? {};
     }
-    
+
     // Fallback for non-API format responses (e.g., file downloads)
     if (json is Map<String, dynamic>) return json;
     if (json is List<dynamic>) return json;
@@ -231,6 +274,7 @@ class SidecarApi {
     String method,
     String path, [
     Map<String, dynamic> body = const {},
+    _SidecarRequestContext? context,
   ]) async {
     final client = HttpClient();
     client.connectionTimeout = timeout;
@@ -242,6 +286,9 @@ class SidecarApi {
         'DELETE' => await client.deleteUrl(uri).timeout(timeout),
         _ => await client.getUrl(uri).timeout(timeout),
       };
+      final effectiveContext = context ?? _resolveRequestContext();
+      request.headers.set('X-KidMemory-Trace-Id', effectiveContext.traceId);
+      request.headers.set('X-KidMemory-Request-Id', effectiveContext.requestId);
       if (method == 'POST' || method == 'PUT') {
         request.headers.contentType = ContentType.json;
         request.write(jsonEncode(body));
@@ -271,7 +318,7 @@ class SidecarApi {
             if (e is SidecarApiException) rethrow;
           }
         }
-        
+
         throw SidecarApiException(
           text.isEmpty
               ? 'Sidecar request failed'
@@ -286,4 +333,27 @@ class SidecarApi {
     }
   }
 
+  _SidecarRequestContext _resolveRequestContext() {
+    final providedTraceId = _normalizeHeaderValue(traceIdProvider?.call());
+    final providedRequestId = _normalizeHeaderValue(requestIdProvider?.call());
+    return _SidecarRequestContext(
+      traceId: _activeTraceId ?? providedTraceId ?? newTraceId(),
+      requestId: _activeRequestId ?? providedRequestId ?? newRequestId(),
+    );
+  }
+
+  String? _normalizeHeaderValue(String? value) {
+    final normalized = value?.trim() ?? '';
+    return normalized.isEmpty ? null : normalized;
+  }
+}
+
+class _SidecarRequestContext {
+  const _SidecarRequestContext({
+    required this.traceId,
+    required this.requestId,
+  });
+
+  final String traceId;
+  final String requestId;
 }

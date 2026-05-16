@@ -58,23 +58,24 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document, {
     customSiteTitle: 'KidMemory Cloud API',
     customCss: '.swagger-ui .topbar { display: none }',
+    jsonDocumentUrl: 'docs/openapi.json',
   });
   // Graceful shutdown handling
   process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    console.warn('SIGTERM received, shutting down gracefully');
     await app.close();
     process.exit(0);
   });
 
   process.on('SIGINT', async () => {
-    console.log('SIGINT received, shutting down gracefully');
+    console.warn('SIGINT received, shutting down gracefully');
     await app.close();
     process.exit(0);
   });
 
   await app.listen(port, host);
-  console.log(`Cloud API server listening on ${host}:${port}`);
-  console.log(`API Documentation: http://${host}:${port}/docs`);
+  console.warn(`Cloud API server listening on ${host}:${port}`);
+  console.warn(`API Documentation: http://${host}:${port}/docs`);
 }
 
 void bootstrap();

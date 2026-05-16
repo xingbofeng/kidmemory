@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { createServer } from "node:net";
-import { summarizeEnvironmentChecks } from "../packages/backend/src/modules/config/providers/environment-check.ts";
+import { summarizeEnvironmentChecks } from "../packages/sidecar/src/modules/config/providers/environment-check.ts";
 
 const checks = [];
 

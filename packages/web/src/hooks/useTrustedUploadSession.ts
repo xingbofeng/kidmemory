@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../api/errors'
 import { getUploadSession, createUploadItems, commitUploadItem } from '../api/uploadApi'
 import type { SessionSummary, UploadProvider, UploadItem, FileTask } from '../types/trustedUpload'
@@ -12,13 +13,13 @@ interface UseTrustedUploadSessionProps {
 const ACCEPTED_IMAGE_TYPE_SET = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
 
 export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSessionProps) {
+  const { t } = useTranslation()
   const [session, setSession] = useState<SessionSummary | null>(null)
   const [tasks, setTasks] = useState<FileTask[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedProvider, setSelectedProvider] = useState<UploadProvider>('supabase')
 
-  // Load session data
   useEffect(() => {
     let cancelled = false
     setLoading(true)
@@ -33,7 +34,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
       })
       .catch((err) => {
         if (cancelled) return
-        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+        const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : String(err)
         setError(message)
         setLoading(false)
       })
@@ -43,10 +44,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
     }
   }, [sessionId, token])
 
-  const remainingText = useMemo(
-    () => (session ? formatRemaining(session.expiresAt) : '加载中'),
-    [session],
-  )
+  const remainingText = useMemo(() => (session ? formatRemaining(session.expiresAt) : t('common.loading')), [session, t])
 
   const usedCount = (session?.usedItems ?? 0) + tasks.length
 
@@ -56,13 +54,13 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
 
       setError(null)
       if (session.usedItems + tasks.length + files.length > session.maxItems) {
-        setError(`最多只能上传 ${session.maxItems} 个文件`)
+        setError(t('trustedUpload.maxFiles', { max: session.maxItems }))
         return
       }
 
       const unsupported = files.find((file) => !ACCEPTED_IMAGE_TYPE_SET.has(file.type))
       if (unsupported) {
-        setError(`仅支持 JPG、PNG、WebP、HEIC/HEIF 图片：${unsupported.name}`)
+        setError(t('trustedUpload.unsupportedType', { name: unsupported.name }))
         return
       }
 
@@ -76,9 +74,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
       setTasks((prev) => [...prev, ...newTasks])
 
       try {
-        const provider = selectedProvider === 'lan' && session.providers?.lan?.available
-          ? 'lan'
-          : 'supabase'
+        const provider = selectedProvider === 'lan' && session.providers?.lan?.available ? 'lan' : 'supabase'
         const data = await createUploadItems(sessionId, {
           token,
           provider,
@@ -96,37 +92,35 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
 
           if (!item.signedUpload) {
             setTasks((prev) =>
-              prev.map((t) =>
-                t.id === task.id
-                  ? { ...t, status: 'failed', errorMessage: '当前上传路线暂不可用，请切换公网直传' }
-                  : t,
+              prev.map((taskItem) =>
+                taskItem.id === task.id
+                  ? { ...taskItem, status: 'failed', errorMessage: t('trustedUpload.routeUnavailable') }
+                  : taskItem,
               ),
             )
             continue
           }
 
           setTasks((prev) =>
-            prev.map((t) =>
-              t.id === task.id
+            prev.map((taskItem) =>
+              taskItem.id === task.id
                 ? {
-                    ...t,
+                    ...taskItem,
                     uploadItemId: item.uploadItemId,
                     objectKey: item.objectKey,
                     status: 'uploading',
                   }
-                : t,
+                : taskItem,
             ),
           )
 
           try {
             await uploadFileWithSignedUrl(task.file, item.signedUpload, (progress) => {
-              setTasks((prev) =>
-                prev.map((t) => (t.id === task.id ? { ...t, progress } : t)),
-              )
+              setTasks((prev) => prev.map((taskItem) => (taskItem.id === task.id ? { ...taskItem, progress } : taskItem)))
             })
 
             setTasks((prev) =>
-              prev.map((t) => (t.id === task.id ? { ...t, status: 'committing' } : t)),
+              prev.map((taskItem) => (taskItem.id === task.id ? { ...taskItem, status: 'committing' } : taskItem)),
             )
 
             await commitUploadItem(sessionId, item.uploadItemId, {
@@ -137,30 +131,28 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
             })
 
             setTasks((prev) =>
-              prev.map((t) =>
-                t.id === task.id ? { ...t, status: 'success', progress: 100 } : t,
-              ),
+              prev.map((taskItem) => (taskItem.id === task.id ? { ...taskItem, status: 'success', progress: 100 } : taskItem)),
             )
           } catch (err) {
             setTasks((prev) =>
-              prev.map((t) =>
-                t.id === task.id
+              prev.map((taskItem) =>
+                taskItem.id === task.id
                   ? {
-                      ...t,
+                      ...taskItem,
                       status: 'failed',
                       errorMessage: err instanceof Error ? err.message : String(err),
                     }
-                  : t,
+                  : taskItem,
               ),
             )
           }
         }
       } catch (err) {
-        const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+        const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : String(err)
         setError(message)
       }
     },
-    [selectedProvider, session, sessionId, tasks.length, token],
+    [selectedProvider, session, sessionId, tasks.length, token, t],
   )
 
   const handleClearTasks = useCallback(() => {
@@ -198,9 +190,9 @@ async function uploadFileWithSignedUrl(
 
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300) resolve()
-      else reject(new Error(`上传失败 (${xhr.status})`))
+      else reject(new Error(`Upload failed (${xhr.status})`))
     })
-    xhr.addEventListener('error', () => reject(new Error('上传失败：网络错误')))
+    xhr.addEventListener('error', () => reject(new Error('Upload failed: network error')))
 
     xhr.open(signedUpload.method, signedUpload.url)
     Object.entries(signedUpload.headers).forEach(([key, value]) => {

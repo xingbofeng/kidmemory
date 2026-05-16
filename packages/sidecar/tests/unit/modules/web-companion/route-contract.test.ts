@@ -31,7 +31,7 @@ describe("Web Companion Route Contract", () => {
   test("should have consistent route paths", () => {
     // 由于 NestJS 装饰器是手动注册的，我们需要检查实际的装饰器调用
     // 读取控制器源码来验证路由路径注册
-    const controllerPath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.controller.ts');
+    const controllerPath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.controller.ts');
     const controllerSource = fs.readFileSync(controllerPath, 'utf8');
 
     // 检查控制器基础路径

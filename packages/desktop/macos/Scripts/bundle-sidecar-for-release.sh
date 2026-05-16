@@ -14,7 +14,7 @@ fi
 # ---- Resolve paths ----
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MONOREPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
-SIDECAR_SRC="$MONOREPO_ROOT/packages/backend"
+SIDECAR_SRC="$MONOREPO_ROOT/packages/sidecar"
 RESOURCES_DIR="$BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH/Resources"
 SIDECAR_BUNDLE_DIR="$RESOURCES_DIR/sidecar"
 BUILD_TEMP_DIR="$(mktemp -d)"
@@ -154,7 +154,14 @@ else
   echo "warning: lipo not found; runtime will select architecture-specific Node binary."
 fi
 cp -R "$SIDECAR_SRC/src" "$SIDECAR_BUNDLE_DIR/src"
-cp -R "$SIDECAR_SRC/sql" "$SIDECAR_BUNDLE_DIR/sql"
+# Prisma schema/migrations are the canonical runtime DB assets.
+if [ -d "$SIDECAR_SRC/prisma" ]; then
+  cp -R "$SIDECAR_SRC/prisma" "$SIDECAR_BUNDLE_DIR/prisma"
+fi
+# Keep backward compatibility with older sidecar layouts that still use sql/.
+if [ -d "$SIDECAR_SRC/sql" ]; then
+  cp -R "$SIDECAR_SRC/sql" "$SIDECAR_BUNDLE_DIR/sql"
+fi
 cp -R "$BUILD_TEMP_DIR/sidecar/node_modules" "$SIDECAR_BUNDLE_DIR/node_modules"
 cp "$BUILD_TEMP_DIR/sidecar/package.json" "$SIDECAR_BUNDLE_DIR/package.json"
 mkdir -p "$SIDECAR_BUNDLE_DIR/examples"

@@ -576,12 +576,14 @@ class DashedBorderPainter extends CustomPainter {
 class AgentLogPanel extends StatelessWidget {
   const AgentLogPanel({
     required this.statusMessage,
+    required this.requestId,
     required this.logLines,
     this.onViewDetails,
     super.key,
   });
 
   final String statusMessage;
+  final String requestId;
   final List<String> logLines;
   final VoidCallback? onViewDetails;
 
@@ -594,20 +596,28 @@ class AgentLogPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Claude Agent SDK 日志',
+                '任务进度日志',
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 8),
               Text('●  $statusMessage\n${logLines.join('\n')}'),
+              if (requestId.trim().isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Request ID: $requestId',
+                  style: const TextStyle(
+                    color: Color(0xff8c7663),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text(
-              '模型：claude-3-5-sonnet-20241022\n耗时：实时记录\nRunner：sidecar',
-            ),
+            const Text('阶段：实时记录\n来源：本地任务中心'),
             const SizedBox(height: 12),
             SecondaryButton(label: '查看详细日志', onPressed: onViewDetails ?? () {}),
           ],

@@ -1,13 +1,35 @@
 part of '../desktop_shell.dart';
 
 extension _DesktopShellExportFlow on _DesktopShellState {
-  Future<void> generateBook() async {
+  Future<void> generateBook({bool skipCover = false}) async {
+    desktopTraceContext.beginAction();
+    final nextTraceId = desktopTraceContext.traceId;
+    final nextRequestId = desktopTraceContext.nextRequestId();
+    api.setRequestContext(traceId: nextTraceId, requestId: nextRequestId);
+    _setShellState(() {
+      traceId = nextTraceId;
+      requestId = nextRequestId;
+    });
+    unawaited(
+      desktopLogger.append(
+        level: DesktopLogLevel.info,
+        event: 'desktop.action.generate_book',
+        traceId: nextTraceId,
+        requestId: nextRequestId,
+        data: {
+          'selectedCount': selectedAssets.length,
+          'childId': selectedChildId,
+          'coverPolicy': skipCover ? 'skip' : 'auto',
+        },
+      ),
+    );
     _markGenerationStarted();
     try {
       final result = await gateway.createBookJobDto(
         payload: CreateBookJobRequest(
           assetIds: selectedAssets.toList(),
           childId: selectedChildId,
+          coverPolicy: skipCover ? 'skip' : 'auto',
         ),
       );
       if (!mounted) return;
@@ -15,13 +37,33 @@ extension _DesktopShellExportFlow on _DesktopShellState {
     } catch (error) {
       if (!mounted) return;
       _applyGenerationError(error);
+    } finally {
+      api.clearRequestContext();
     }
   }
 
   Future<void> exportPdf() async {
+    desktopTraceContext.beginAction();
+    final nextTraceId = desktopTraceContext.traceId;
+    final nextRequestId = desktopTraceContext.nextRequestId();
+    api.setRequestContext(traceId: nextTraceId, requestId: nextRequestId);
+    _setShellState(() {
+      traceId = nextTraceId;
+      requestId = nextRequestId;
+    });
+    unawaited(
+      desktopLogger.append(
+        level: DesktopLogLevel.info,
+        event: 'desktop.action.export_pdf',
+        traceId: nextTraceId,
+        requestId: nextRequestId,
+        data: {'jobId': jobId, 'target': generationExportTarget},
+      ),
+    );
     if (jobId == null) {
       _setShellState(() => statusMessage = '请先完成生成，再导出');
       _appendLog('导出失败：缺少 jobId');
+      api.clearRequestContext();
       return;
     }
     final target = _exportTargetFromLabel(generationExportTarget);
@@ -76,19 +118,15 @@ extension _DesktopShellExportFlow on _DesktopShellState {
         exportedMessage: result.exported.message,
       );
       _appendLog(
-        exportedOk
-            ? '$exportLabel 导出成功：$actualPath'
-            : '$exportLabel 导出失败',
+        exportedOk ? '$exportLabel 导出成功：$actualPath' : '$exportLabel 导出失败',
       );
     } catch (error) {
       if (!mounted) return;
       final message = '$exportLabel 导出异常：$error';
-      _applyExportExceptionState(
-        target: target,
-        message: message,
-      );
+      _applyExportExceptionState(target: target, message: message);
       _appendLog(message);
+    } finally {
+      api.clearRequestContext();
     }
   }
-
 }

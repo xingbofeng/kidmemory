@@ -37,7 +37,7 @@ describe("Web Companion Data Attribution Fixes", () => {
 
   test("Web Companion service should not call non-existent importAsset method", () => {
     // 读取 Web Companion 服务源码
-    const servicePath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.service.ts');
+    const servicePath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.service.ts');
     const serviceSource = fs.readFileSync(servicePath, 'utf8');
 
     // 检查是否还有对不存在的 importAsset 方法的调用
@@ -49,7 +49,7 @@ describe("Web Companion Data Attribution Fixes", () => {
 
   test("Web Companion service should use importAssets method correctly", () => {
     // 读取 Web Companion 服务源码
-    const servicePath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.service.ts');
+    const servicePath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.service.ts');
     const serviceSource = fs.readFileSync(servicePath, 'utf8');
 
     // 检查是否正确使用 importAssets 方法
@@ -67,7 +67,7 @@ describe("Web Companion Data Attribution Fixes", () => {
 
   test("Web Companion service should pass session childId to persistence port", () => {
     // 读取 Web Companion 服务源码
-    const servicePath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.service.ts');
+    const servicePath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.service.ts');
     const serviceSource = fs.readFileSync(servicePath, 'utf8');
 
     const usesSessionChildId =
@@ -80,7 +80,7 @@ describe("Web Companion Data Attribution Fixes", () => {
 
   test("Web Companion service should handle pullback with correct childId", () => {
     // 读取 Web Companion 服务源码
-    const servicePath = path.join(__dirname, '../../../src/modules/web-companion/web-companion.service.ts');
+    const servicePath = path.join(__dirname, '../../../../src/modules/web-companion/web-companion.service.ts');
     const serviceSource = fs.readFileSync(servicePath, 'utf8');
 
     // 检查 pullback 流程是否获取并使用正确的 childId

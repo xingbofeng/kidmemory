@@ -6,6 +6,7 @@ export const CreateBookJobDtoSchema = z
     assetIds: z.array(z.string().min(1)).optional(),
     title: z.string().optional(),
     theme: z.string().optional(),
+    coverPolicy: z.enum(["auto", "skip"]).optional(),
   })
   .strict();
 

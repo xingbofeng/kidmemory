@@ -66,8 +66,18 @@ class FakeShareTokenRepository implements ShareTokenRepository {
     this.expiredTokenIds.push(id);
   }
 
-  async incrementShareTokenAccess(id: string): Promise<void> {
-    this.incrementedTokenIds.push(id);
+  async incrementShareTokenAccessIfAllowed(input: { id: string; maxAccessCount?: number | null }): Promise<boolean> {
+    const token = this.shareToken;
+    if (!token || token.id !== input.id) {
+      return false;
+    }
+    const maxAccessCount = input.maxAccessCount ?? token.maxAccessCount ?? null;
+    if (maxAccessCount !== null && token.accessCount >= maxAccessCount) {
+      return false;
+    }
+    this.incrementedTokenIds.push(input.id);
+    token.accessCount += 1;
+    return true;
   }
 
   async logShareAccess(input: LogShareAccessInput): Promise<void> {

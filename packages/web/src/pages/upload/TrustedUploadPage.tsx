@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTrustedUploadSession } from '../../hooks/useTrustedUploadSession'
 import { SessionStats } from '../../components/trusted-upload/SessionStats'
 import { ProviderSelector } from '../../components/trusted-upload/ProviderSelector'
@@ -12,6 +13,7 @@ interface TrustedUploadPageProps {
 }
 
 export function TrustedUploadPage({ sessionId, token }: TrustedUploadPageProps) {
+  const { t } = useTranslation()
   const filePickerRef = useRef<FilePickerRef>(null)
 
   const {
@@ -34,12 +36,12 @@ export function TrustedUploadPage({ sessionId, token }: TrustedUploadPageProps) 
   return (
     <div className="app trusted-app">
       <div className="phone-shell trusted-shell" data-view="trusted-upload">
-        <header className="phone-status" aria-label="手机状态栏">
+        <header className="phone-status" aria-label={t('trustedUpload.statusBar')}>
           <span>9:41</span>
           <span className="status-cluster">▮▮▮ ))) ▭</span>
         </header>
 
-        <div className="mobile-browser-bar" aria-label="浏览器地址">
+        <div className="mobile-browser-bar" aria-label={t('trustedUpload.browserAddress')}>
           <span>🔒</span>
           <span>kidmemory.local/upload</span>
           <span>↻</span>
@@ -47,16 +49,14 @@ export function TrustedUploadPage({ sessionId, token }: TrustedUploadPageProps) 
 
         <main className="app-main trusted-main">
           <section className="trusted-hero" aria-labelledby="trusted-upload-title">
-            <button className="trusted-icon-button" aria-label="返回" type="button">←</button>
-            <button className="trusted-icon-button" aria-label="上传设置" type="button">⚙</button>
-            <h1 id="trusted-upload-title">选择并上传照片</h1>
-            {session?.child.displayName && (
-              <p className="trusted-child-name">正在为 {session.child.displayName} 导入素材</p>
+            <button className="trusted-icon-button" aria-label={t('trustedUpload.back')} type="button">←</button>
+            <button className="trusted-icon-button" aria-label={t('trustedUpload.settings')} type="button">⚙</button>
+            <h1 id="trusted-upload-title">{t('trustedUpload.title')}</h1>
+            {session?.child?.displayName && (
+              <p className="trusted-child-name">{t('trustedUpload.importForChild', { name: session.child.displayName })}</p>
             )}
 
-            {loading && (
-              <div className="trusted-panel trusted-centered">正在连接电脑端会话…</div>
-            )}
+            {loading && <div className="trusted-panel trusted-centered">{t('trustedUpload.connecting')}</div>}
 
             {!loading && error && (
               <div className="inline-alert danger" role="alert">{error}</div>
@@ -64,29 +64,15 @@ export function TrustedUploadPage({ sessionId, token }: TrustedUploadPageProps) 
 
             {!loading && session && (
               <>
-                <SessionStats
-                  session={session}
-                  usedCount={usedCount}
-                  remainingText={remainingText}
-                />
+                <SessionStats session={session} usedCount={usedCount} remainingText={remainingText} />
 
-                <ProviderSelector
-                  selectedProvider={selectedProvider}
-                  session={session}
-                  onProviderChange={setSelectedProvider}
-                />
+                <ProviderSelector selectedProvider={selectedProvider} session={session} onProviderChange={setSelectedProvider} />
 
                 <FilePicker ref={filePickerRef} onFilesSelected={handleFileSelect} />
 
-                <TaskList
-                  tasks={tasks}
-                  onClearTasks={handleClearTasks}
-                />
+                <TaskList tasks={tasks} onClearTasks={handleClearTasks} />
 
-                <UploadFooter
-                  tasks={tasks}
-                  onContinueUpload={handleContinueUpload}
-                />
+                <UploadFooter tasks={tasks} onContinueUpload={handleContinueUpload} />
               </>
             )}
           </section>

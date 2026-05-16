@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package kidmemory.v1;
+
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  JOB_STATUS_PENDING = 1;
+  JOB_STATUS_CLAIMED = 2;
+  JOB_STATUS_PROCESSING = 3;
+  JOB_STATUS_COMPLETED = 4;
+  JOB_STATUS_FAILED = 5;
+}
+
+message CloudJob {
+  string job_id = 1;
+  string device_id = 2;
+  string job_type = 3;
+  JobStatus status = 4;
+  int32 priority = 5;
+  string payload_json = 6;
+  string error_message = 7;
+  int64 created_at = 8;
+}
+
+message PendingJobsRequest {
+  string device_id = 1;
+  int32 limit = 2;
+}
+
+message PendingJobsResponse {
+  repeated CloudJob jobs = 1;
+}
+
+message UpdateJobStatusRequest {
+  string job_id = 1;
+  JobStatus status = 2;
+  string error_message = 3;
+}

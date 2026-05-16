@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Post } from "@nestjs/common";
 
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
 import { ConfigService } from "./config.service.ts";
@@ -12,7 +12,7 @@ import {
 
 @Controller()
 export class ConfigController {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
 
   @Get("health")
   health() { return this.configService.health(); }
@@ -69,4 +69,3 @@ export class ConfigController {
   @Post("schema/init")
   initializeSchema() { return this.configService.initializeSchema(); }
 }
-

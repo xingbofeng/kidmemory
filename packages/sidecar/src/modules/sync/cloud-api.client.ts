@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AppConfigService } from '../../infrastructure/config/app-config.service.ts';
 import type {
   RegisterDeviceDto,
@@ -30,9 +30,9 @@ export class CloudApiClient {
   private readonly baseUrl: string;
   private readonly timeout: number;
 
-  constructor(private readonly configService: AppConfigService) {
+  constructor(@Inject(AppConfigService) private readonly configService: AppConfigService) {
     // 从环境变量读取配置
-    this.baseUrl = process.env.CLOUD_API_URL || 'http://localhost:3001';
+    this.baseUrl = process.env.CLOUD_API_URL || 'http://localhost:3002';
     this.timeout = Number(process.env.CLOUD_API_TIMEOUT) || 10000;
   }
 
@@ -40,21 +40,22 @@ export class CloudApiClient {
    * 注册设备
    */
   async registerDevice(dto: RegisterDeviceDto): Promise<DeviceResponseDto> {
-    return this.request<DeviceResponseDto>('POST', '/api/devices/register', dto);
+    return this.request<DeviceResponseDto>('POST', '/devices/register', dto);
   }
 
   /**
    * 发送心跳
    */
   async heartbeat(deviceId: string): Promise<DeviceResponseDto> {
-    return this.request<DeviceResponseDto>('POST', `/api/devices/${deviceId}/heartbeat`);
+    return this.request<DeviceResponseDto>('PUT', `/devices/${deviceId}/heartbeat`);
   }
 
   /**
    * 获取待上传项目
    */
   async getPendingUploadItems(deviceId: string, limit = 10): Promise<UploadItemResponseDto[]> {
-    const url = `/api/devices/${deviceId}/upload-items?status=pending&limit=${limit}`;
+    const encodedDeviceId = encodeURIComponent(deviceId);
+    const url = `/upload-items/pending-sync?deviceId=${encodedDeviceId}&limit=${limit}&offset=0`;
     return this.request<UploadItemResponseDto[]>('GET', url);
   }
 
@@ -66,8 +67,8 @@ export class CloudApiClient {
     dto: UpdateSyncStatusDto
   ): Promise<UploadItemResponseDto> {
     return this.request<UploadItemResponseDto>(
-      'PATCH',
-      `/api/upload-items/${itemId}/sync-status`,
+      'PUT',
+      `/upload-items/${itemId}/sync-status`,
       dto
     );
   }
@@ -76,7 +77,8 @@ export class CloudApiClient {
    * 获取待处理任务
    */
   async getPendingJobs(deviceId: string, limit = 10): Promise<JobResponseDto[]> {
-    const url = `/api/devices/${deviceId}/jobs?status=pending&limit=${limit}`;
+    const encodedDeviceId = encodeURIComponent(deviceId);
+    const url = `/jobs/pending?deviceId=${encodedDeviceId}&limit=${limit}`;
     return this.request<JobResponseDto[]>('GET', url);
   }
 
@@ -84,7 +86,7 @@ export class CloudApiClient {
    * 更新任务状态
    */
   async updateJobStatus(jobId: string, dto: UpdateJobStatusDto): Promise<JobResponseDto> {
-    return this.request<JobResponseDto>('PATCH', `/api/jobs/${jobId}/status`, dto);
+    return this.request<JobResponseDto>('PUT', `/jobs/${jobId}/status`, dto);
   }
 
   /**
@@ -114,20 +116,35 @@ export class CloudApiClient {
 
       clearTimeout(timeoutId);
 
+      const contentType = response.headers.get('content-type') ?? '';
+      const isJson = contentType.includes('application/json');
+      const payload = isJson ? await response.json() : null;
+
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
+        if (this.isApiEnvelope(payload)) {
+          throw new Error(payload.msg || `Cloud-API request failed: ${response.status}`);
+        }
+        const rawText =
+          payload == null
+            ? await response.text().catch(() => 'Unknown error')
+            : JSON.stringify(payload);
         throw new Error(
-          `Cloud-API request failed: ${response.status} ${response.statusText} - ${errorText}`
+          `Cloud-API request failed: ${response.status} ${response.statusText} - ${rawText}`
         );
       }
 
-      // 处理空响应（如 204 No Content）
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        return {} as T;
+      if (this.isApiEnvelope(payload)) {
+        if (payload.code !== 0) {
+          throw new Error(payload.msg || `Cloud-API returned error code ${payload.code}`);
+        }
+        return payload.data as T;
       }
 
-      return (await response.json()) as T;
+      if (payload != null) {
+        return payload as T;
+      }
+
+      return {} as T;
     } catch (error) {
       clearTimeout(timeoutId);
 
@@ -140,5 +157,17 @@ export class CloudApiClient {
 
       throw new Error(`Cloud-API request failed: ${String(error)}`);
     }
+  }
+
+  private isApiEnvelope(
+    value: unknown
+  ): value is { code: number; msg: string; data: unknown } {
+    return Boolean(
+      value &&
+      typeof value === 'object' &&
+      'code' in value &&
+      'msg' in value &&
+      'data' in value
+    );
   }
 }

@@ -21,8 +21,8 @@ const rootDir = join(__dirname, '..');
 const apiCodePath = join(rootDir, 'src/common/api-code.ts');
 const apiCodeContent = readFileSync(apiCodePath, 'utf-8');
 
-// 提取所有错误码
-const codeMatches = apiCodeContent.matchAll(/^\s*(\w+)\s*=\s*(\d+),?\s*$/gm);
+// 提取所有错误码（支持对象字面量 `FOO: 123`）
+const codeMatches = apiCodeContent.matchAll(/^\s*(\w+)\s*:\s*(\d+),?\s*$/gm);
 const codes = new Map();
 for (const match of codeMatches) {
   const [, name, value] = match;

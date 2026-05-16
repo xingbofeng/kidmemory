@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedBook } from '../../types/shareBook'
 
@@ -7,30 +8,26 @@ interface BookShowcaseProps {
 }
 
 export function BookShowcase({ book, onViewBook }: BookShowcaseProps) {
+  const { t, i18n } = useTranslation()
+  const locale = (i18n.resolvedLanguage ?? i18n.language ?? 'zh-CN').startsWith('en') ? 'en-US' : 'zh-CN'
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN', {
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
   return (
     <article className="book-showcase">
       <div className="book-cover-large">
-        <img
-          src={book.previewUrl || '/placeholder-book.png'}
-          alt={`${book.title}封面`}
-        />
+        <img src={book.previewUrl || '/placeholder-book.png'} alt={t('share.bookCoverAlt', { title: book.title })} />
         <div className="book-overlay">
-          <button
-            className="play-button"
-            onClick={onViewBook}
-            aria-label={`预览${book.title}`}
-          >
+          <button className="play-button" onClick={onViewBook} aria-label={t('share.previewBookAria', { title: book.title })}>
             <Icon name="pdf" />
-            <span>预览作品集</span>
+            <span>{t('share.previewBookBtn')}</span>
           </button>
         </div>
       </div>
@@ -40,7 +37,7 @@ export function BookShowcase({ book, onViewBook }: BookShowcaseProps) {
           <h2>{book.title}</h2>
           <span className="status-pill success">
             <Icon name="check" />
-            已完成
+            {t('share.completed')}
           </span>
         </div>
 
@@ -48,23 +45,23 @@ export function BookShowcase({ book, onViewBook }: BookShowcaseProps) {
 
         <dl className="book-meta">
           <div>
-            <dt><Icon name="pdf" />页数</dt>
-            <dd>{book.pageCount} 页</dd>
+            <dt><Icon name="pdf" />{t('share.metaPages')}</dt>
+            <dd>{t('share.pageCount', { count: book.pageCount })}</dd>
           </div>
           <div>
-            <dt><Icon name="time" />创建时间</dt>
+            <dt><Icon name="time" />{t('share.metaCreatedAt')}</dt>
             <dd>{formatDate(book.createdAt)}</dd>
           </div>
           <div>
-            <dt><Icon name="folder" />类型</dt>
-            <dd>儿童成长记录</dd>
+            <dt><Icon name="folder" />{t('share.metaType')}</dt>
+            <dd>{t('share.bookType')}</dd>
           </div>
         </dl>
 
         <div className="book-tags">
-          <span className="book-tag">儿童绘本</span>
-          <span className="book-tag">成长记录</span>
-          <span className="book-tag">家庭回忆</span>
+          <span className="book-tag">{t('share.tag1')}</span>
+          <span className="book-tag">{t('share.tag2')}</span>
+          <span className="book-tag">{t('share.tag3')}</span>
         </div>
       </div>
     </article>

@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { DirectUploadConfig } from '../../lib/direct-upload-types'
 
 interface UploadControlsProps {
@@ -16,13 +17,13 @@ export function UploadControls({
   totalSelected,
   isUploading,
   validationError,
-  onFilesSelected
+  onFilesSelected,
 }: UploadControlsProps) {
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onPickerChange = (event: ChangeEvent<HTMLInputElement>) => {
     const list = Array.from(event.target.files ?? [])
-    // reset input to allow same-file reselection later
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (list.length === 0) return
     onFilesSelected(list)
@@ -32,14 +33,14 @@ export function UploadControls({
     <div className="upload-console">
       <div className="upload-summary">
         <span>
-          已上传成功：<strong>{successCount}</strong>
+          {t('directUpload.uploadedSuccess')}<strong>{successCount}</strong>
         </span>
-        <span>当前队列：{totalSelected} 张</span>
+        <span>{t('directUpload.queueCount', { count: totalSelected })}</span>
       </div>
 
       <div className="picker-row">
         <label className="picker-tile">
-          从相册选择
+          {t('directUpload.pickFromAlbum')}
           <input
             ref={fileInputRef}
             className="file-input"
@@ -48,17 +49,13 @@ export function UploadControls({
             accept="image/*"
             onChange={onPickerChange}
             disabled={isUploading}
-            aria-label="选择图片"
+            aria-label={t('directUpload.pickImageAria')}
           />
         </label>
       </div>
 
-      <p
-        className="privacy-note"
-        data-testid="direct-upload-experience-hint"
-      >
-        体验约束：单次最多 {config.recommendedClientLimit} 张图片，
-        仅支持 JPEG/PNG/WebP/HEIC/HEIF/GIF。该限制为体验约束，非安全约束。
+      <p className="privacy-note" data-testid="direct-upload-experience-hint">
+        {t('directUpload.experienceHint', { limit: config.recommendedClientLimit })}
       </p>
 
       {validationError && (

@@ -259,9 +259,9 @@ echo ""
 log_info "安装项目依赖..."
 
 # 后端依赖
-if [ -d "packages/backend" ]; then
+if [ -d "packages/sidecar" ]; then
     log_info "安装后端依赖..."
-    cd packages/backend
+    cd packages/sidecar
     npm install
     log_success "后端依赖安装完成"
     cd "$PROJECT_ROOT"
@@ -297,8 +297,8 @@ if [ ! -f ".env" ] && [ -f ".env.example" ]; then
 fi
 
 # 创建后端 .env 文件
-if [ -d "packages/backend" ] && [ ! -f "packages/backend/.env" ]; then
-    cat > packages/backend/.env << EOF
+if [ -d "packages/sidecar" ] && [ ! -f "packages/sidecar/.env" ]; then
+    cat > packages/sidecar/.env << EOF
 # 数据库配置
 DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME
 POSTGRES_HOST=localhost
@@ -334,7 +334,7 @@ echo ""
 log_info "通过 Prisma migrations 初始化数据库 schema..."
 
 (
-    cd packages/backend
+    cd packages/sidecar
     DATABASE_URL="postgresql://localhost/$DB_NAME" npm run prisma:migrate >/dev/null 2>&1
 )
 log_success "数据库 schema 初始化完成"
@@ -370,7 +370,7 @@ echo "🚀 启动 KidMemory 开发环境..."
 
 # 启动后端
 echo "启动后端服务..."
-cd packages/backend
+cd packages/sidecar
 npm run dev &
 BACKEND_PID=$!
 
@@ -415,9 +415,9 @@ cd "$PROJECT_ROOT"
 echo "🧪 运行 KidMemory 测试套件..."
 
 # 后端测试
-if [ -d "packages/backend" ]; then
+if [ -d "packages/sidecar" ]; then
     echo "运行后端测试..."
-    cd packages/backend
+    cd packages/sidecar
     npm test
     cd "$PROJECT_ROOT"
 fi
@@ -457,7 +457,7 @@ echo ""
 echo -e "${BLUE}📋 下一步操作：${NC}"
 echo ""
 echo "1. 配置 API Keys (可选):"
-echo "   编辑 packages/backend/.env 文件"
+echo "   编辑 packages/sidecar/.env 文件"
 echo "   添加 OPENAI_API_KEY 或 CLAUDE_API_KEY"
 echo ""
 echo "2. 启动开发环境:"
@@ -473,7 +473,7 @@ echo "5. 检查项目健康状态:"
 echo "   ./scripts/health-check.sh"
 echo ""
 echo -e "${BLUE}📚 有用的命令：${NC}"
-echo "• 查看后端日志: cd packages/backend && npm run dev"
+echo "• 查看后端日志: cd packages/sidecar && npm run dev"
 echo "• 查看数据库: psql -d $DB_NAME"
 echo "• Flutter 分析: cd packages/desktop && flutter analyze"
 echo "• 重新安装依赖: rm -rf node_modules && npm install"

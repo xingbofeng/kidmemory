@@ -1,16 +1,12 @@
-export interface SharedBook {
-  id: string
-  title: string
-  childId: string
-  createdAt: string
-  status: string
+import type { components } from '@kidmemory/protocol/generated/cloud-api/ts'
+
+export type SharedBook = components['schemas']['SharedBookDto'] & {
   description?: string
   previewUrl?: string
   pageCount?: number
 }
 
-export interface ShareTokenValidation {
-  isValid: boolean
+export type ShareTokenValidation = Omit<components['schemas']['ShareTokenValidationResponseDto'], 'shareToken'> & {
   shareToken?: {
     id: string
     childId: string
@@ -18,5 +14,4 @@ export interface ShareTokenValidation {
     resourceId?: string
     accessType: string
   }
-  error?: string
 }

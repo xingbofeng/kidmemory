@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { FileTask } from '../../types/trustedUpload'
 import { formatSize, statusLabel } from '../../utils/trustedUploadUtils'
 
@@ -7,21 +8,19 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, onClearTasks }: TaskListProps) {
+  const { t } = useTranslation()
+
   return (
     <>
       <div className="trusted-queue-heading">
-        <strong>上传队列（{tasks.length}）</strong>
+        <strong>{t('trustedUpload.queueTitle', { count: tasks.length })}</strong>
         <button type="button" onClick={onClearTasks} disabled={tasks.length === 0}>
-          清空队列
+          {t('trustedUpload.clearQueue')}
         </button>
       </div>
 
       <div className="trusted-task-list" aria-live="polite">
-        {tasks.length === 0 && (
-          <div className="trusted-empty">
-            还没有选择图片。请拍照或从相册选择，素材会先上传到可信会话，再由电脑端回拉入库。
-          </div>
-        )}
+        {tasks.length === 0 && <div className="trusted-empty">{t('trustedUpload.queueEmpty')}</div>}
 
         {tasks.map((task) => (
           <article className={`trusted-task trusted-task-${task.status}`} key={task.id}>

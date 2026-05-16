@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { DirectUploadConfig } from '../../lib/direct-upload-types'
 
 interface SessionInfoCardProps {
@@ -6,23 +7,24 @@ interface SessionInfoCardProps {
 }
 
 export function SessionInfoCard({ config, totalSelected }: SessionInfoCardProps) {
+  const { t } = useTranslation()
   const progressLabel = `${totalSelected} / ${config.recommendedClientLimit}`
 
   return (
-    <div className="session-card" aria-label="会话信息">
+    <div className="session-card" aria-label={t('directUpload.sessionInfoAria')}>
       <div className="session-meta">
         <div className="child-row">
           <div>
-            <h2>当前孩子</h2>
+            <h2>{t('directUpload.currentChild')}</h2>
             <p data-testid="direct-upload-child-id">{config.childId}</p>
           </div>
         </div>
         <div className="remaining-time" data-testid="direct-upload-session-path">
-          会话路径：{config.sessionPath}
+          {t('directUpload.sessionPath', { path: config.sessionPath })}
         </div>
         <div className="progress-line" data-testid="direct-upload-count">
           <span>{progressLabel}</span>
-          <span>张</span>
+          <span>{t('directUpload.countUnit')}</span>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { ConfigModule } from './modules/config/config.module.ts';
 import { DevicesModule } from './modules/devices/devices.module.ts';
 import { UploadItemsModule } from './modules/upload-items/upload-items.module.ts';
 import { JobsModule } from './modules/jobs/jobs.module.ts';
+import { WebCompanionModule } from './modules/web-companion/web-companion.module.ts';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JobsModule } from './modules/jobs/jobs.module.ts';
     DevicesModule,
     UploadItemsModule,
     JobsModule,
+    WebCompanionModule,
   ],
 })
 export class AppModule {}

@@ -72,6 +72,66 @@ void main() {
   });
 
   testWidgets(
+    'generate page shows smart actions and free image confirm dialog',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1440, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        MaterialApp(home: DesktopShell(api: _FakeSidecarApi())),
+      );
+      await tester.pumpAndSettle();
+
+      await gotoStep(tester, '生成 / 预览');
+      await tester.pumpAndSettle();
+
+      expect(find.text('生成儿童绘本'), findsOneWidget);
+      expect(find.text('生成成长纪念册'), findsOneWidget);
+      expect(find.text('生成回忆录视频'), findsOneWidget);
+
+      await tester.tap(find.text('生成儿童绘本'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('将使用免费生图服务生成封面图'), findsOneWidget);
+      expect(find.text('继续生成'), findsOneWidget);
+      expect(find.text('跳过封面'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'cover failure exposes retry/skip/log actions and skip uses skip cover policy',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1440, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final api = _CoverFailureSidecarApi();
+      await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+      await tester.pumpAndSettle();
+
+      await gotoStep(tester, '生成 / 预览');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('生成儿童绘本'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('继续生成'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('封面图生成失败'), findsWidgets);
+      expect(secondaryButton('重试'), findsOneWidget);
+      expect(secondaryButton('跳过封面继续导出'), findsOneWidget);
+      expect(secondaryButton('查看日志'), findsOneWidget);
+      expect(find.textContaining('Request ID: req_'), findsWidgets);
+
+      await tester.ensureVisible(secondaryButton('跳过封面继续导出'));
+      await tester.tap(secondaryButton('跳过封面继续导出'));
+      await tester.pumpAndSettle();
+
+      expect(api.lastJobBody?['coverPolicy'], 'skip');
+      expect(find.textContaining('生成完成，可预览并导出 PDF'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'desktop flow keeps navigation open when only optional OpenAI is missing',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
@@ -431,11 +491,7 @@ void main() {
 
       final api = _FakeSidecarApi();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: DesktopShell(api: api),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
 
       await gotoStep(tester, '生成 / 预览');
       await tester.pumpAndSettle();
@@ -531,7 +587,7 @@ void main() {
     await tester.tap(secondaryButton('查看详细日志'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Claude Agent 日志详情'), findsOneWidget);
+    expect(find.text('生成日志详情'), findsOneWidget);
     expect(find.textContaining('状态：'), findsOneWidget);
   });
 
@@ -762,6 +818,7 @@ void main() {
 class _FakeSidecarApi extends SidecarApi {
   Map<String, dynamic>? lastExportBody;
   String? lastJobId;
+  Map<String, dynamic>? lastJobBody;
   Map<String, dynamic>? lastPathBody;
 
   @override
@@ -769,9 +826,7 @@ class _FakeSidecarApi extends SidecarApi {
     if (path == '/config/status') {
       return {
         'ok': true,
-        'paths': {
-          'exportDir': '/tmp/kidmemory-exports',
-        },
+        'paths': {'exportDir': '/tmp/kidmemory-exports'},
       };
     }
     if (path == '/children') {
@@ -807,6 +862,7 @@ class _FakeSidecarApi extends SidecarApi {
       return {'ok': true};
     }
     if (path == '/books/jobs') {
+      lastJobBody = body;
       lastJobId = 'job_123456';
       return {'id': lastJobId, 'status': 'generated'};
     }
@@ -818,6 +874,28 @@ class _FakeSidecarApi extends SidecarApi {
       };
     }
     return {'ok': true};
+  }
+}
+
+class _CoverFailureSidecarApi extends _FakeSidecarApi {
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/books/jobs') {
+      lastJobBody = body;
+      if (body['coverPolicy'] == 'skip') {
+        lastJobId = 'job_123456';
+        return {'id': lastJobId, 'status': 'generated'};
+      }
+      return {
+        'ok': false,
+        'status': 'failed',
+        'message': '封面图生成失败：免费生图服务暂时不可用',
+      };
+    }
+    return super.post(path, body);
   }
 }
 
@@ -833,9 +911,7 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
     if (path == '/config/status') {
       return {
         'ok': true,
-        'paths': {
-          'exportDir': '/tmp/kidmemory-exports',
-        },
+        'paths': {'exportDir': '/tmp/kidmemory-exports'},
         'supabaseStorage': {
           'provider': 'supabase',
           'url': 'https://project.supabase.co',
@@ -907,7 +983,8 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
         'cleanup': {'ok': true},
       };
     }
-    if (path.startsWith('/books/jobs/') && path.endsWith('/export/long-image')) {
+    if (path.startsWith('/books/jobs/') &&
+        path.endsWith('/export/long-image')) {
       lastLongImageExportBody = body;
       return {
         'exported': {'ok': true, 'path': body['targetPath']},

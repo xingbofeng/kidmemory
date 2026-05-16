@@ -74,14 +74,33 @@ export class PrismaShareTokenRepository implements ShareTokenRepository {
     });
   }
 
-  async incrementShareTokenAccess(id: string): Promise<void> {
-    await this.prisma.shareToken.update({
-      where: { id },
+  async incrementShareTokenAccessIfAllowed(input: {
+    id: string;
+    maxAccessCount?: number | null;
+  }): Promise<boolean> {
+    const now = new Date();
+    const where = input.maxAccessCount == null
+      ? {
+          id: input.id,
+          status: "active" as const,
+          expiresAt: { gt: now },
+        }
+      : {
+          id: input.id,
+          status: "active" as const,
+          expiresAt: { gt: now },
+          accessCount: { lt: input.maxAccessCount },
+        };
+
+    const result = await this.prisma.shareToken.updateMany({
+      where,
       data: {
         accessCount: { increment: 1 },
-        lastAccessedAt: new Date(),
+        lastAccessedAt: now,
       },
     });
+
+    return result.count > 0;
   }
 
   async logShareAccess(input: LogShareAccessInput): Promise<void> {

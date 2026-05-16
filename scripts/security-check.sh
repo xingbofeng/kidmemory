@@ -132,8 +132,8 @@ echo ""
 log_section "📦 依赖漏洞扫描"
 
 # 后端依赖扫描
-if [ -d "packages/backend" ]; then
-    cd packages/backend
+if [ -d "packages/sidecar" ]; then
+    cd packages/sidecar
 
     if [ -f "package.json" ] && [ -d "node_modules" ]; then
         echo "扫描后端依赖漏洞..."
@@ -264,17 +264,17 @@ echo ""
 log_section "⚙️ 配置安全检查"
 
 # 检查数据库配置
-if [ -f "packages/backend/.env" ]; then
+if [ -f "packages/sidecar/.env" ]; then
     # 检查默认密码
-    if grep -q "password.*=.*password\|password.*=.*123456\|password.*=.*admin" packages/backend/.env; then
+    if grep -q "password.*=.*password\|password.*=.*123456\|password.*=.*admin" packages/sidecar/.env; then
         security_check "数据库密码强度" "FAIL" "使用了弱密码" "CRITICAL"
     else
         security_check "数据库密码强度" "PASS"
     fi
 
     # 检查生产环境配置
-    if grep -q "NODE_ENV.*=.*production" packages/backend/.env; then
-        if grep -q "DEBUG.*=.*true" packages/backend/.env; then
+    if grep -q "NODE_ENV.*=.*production" packages/sidecar/.env; then
+        if grep -q "DEBUG.*=.*true" packages/sidecar/.env; then
             security_check "生产环境调试模式" "FAIL" "生产环境启用了调试模式" "CRITICAL"
         else
             security_check "生产环境调试模式" "PASS"
@@ -285,8 +285,8 @@ else
 fi
 
 # 检查 CORS 配置
-if grep -r "cors" packages/backend/src/ >/dev/null 2>&1; then
-    if grep -r "origin.*\*" packages/backend/src/ >/dev/null 2>&1; then
+if grep -r "cors" packages/sidecar/src/ >/dev/null 2>&1; then
+    if grep -r "origin.*\*" packages/sidecar/src/ >/dev/null 2>&1; then
         security_check "CORS配置" "WARN" "CORS配置过于宽松"
     else
         security_check "CORS配置" "PASS"
@@ -322,7 +322,7 @@ if [ -n "$SCRIPT_FILES" ]; then
 fi
 
 # 检查配置文件权限
-CONFIG_FILES=(".env" "packages/backend/.env")
+CONFIG_FILES=(".env" "packages/sidecar/.env")
 INSECURE_CONFIGS=false
 for config in "${CONFIG_FILES[@]}"; do
     if [ -f "$config" ]; then
@@ -366,7 +366,7 @@ else
 fi
 
 # 检查端口配置
-if grep -r "listen.*0\.0\.0\.0" packages/backend/ >/dev/null 2>&1; then
+if grep -r "listen.*0\.0\.0\.0" packages/sidecar/ >/dev/null 2>&1; then
     security_check "端口绑定" "WARN" "服务绑定到所有接口"
 else
     security_check "端口绑定" "PASS"

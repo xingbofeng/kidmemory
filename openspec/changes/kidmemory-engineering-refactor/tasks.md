@@ -9,7 +9,7 @@
 | 阶段 2: API 统一       | ✅     | 36/36 (100%)     | 完成     |
 | 阶段 3: OpenAPI & i18n | ✅     | 45/45 (100%)     | 完成     |
 | **阶段 4: 服务拆分**   | **✅** | **56/56 (100%)** | **完成** |
-| 阶段 5: 验收           | 🔄     | 0/16 (0%)        | 待开始   |
+| 阶段 5: 验收           | 🔄     | 13/16 (81%)      | 进行中   |
 
 ### 阶段 4 详细状态
 
@@ -40,11 +40,11 @@
 
 **详细文档**:
 
-- [Phase 4 完成总结](../docs/phase-4-completion-summary.md)
-- [Phase 4 最终总结](../docs/phase-4-final-summary.md)
-- [服务拆分架构](../docs/architecture/service-split.md)
-- [数据流文档](../docs/architecture/data-flow.md)
-- [CI/CD 文档](../docs/deployment/ci-cd.md)
+- [Phase 4 完成总结](../../../docs/phase-4-completion-summary.md)
+- [Phase 4 最终总结](../../../docs/phase-4-final-summary.md)
+- [服务拆分架构](../../../docs/architecture/service-split.md)
+- [数据流文档](../../../docs/architecture/data-flow.md)
+- [CI/CD 文档](../../../docs/deployment/ci-cd.md)
 
 ---
 
@@ -272,25 +272,25 @@
 - [x] 4.10 建立基础 Module（HealthModule / ConfigModule）
 - [x] 4.11 配置独立的环境变量
 - [x] 4.12 验证 cloud-api 可独立启动
-- [~] 4.13a 创建 cloud-api
+- [x] 4.13a 创建 cloud-api
   OpenAPI 生成脚本：输出到 packages/protocol/openapi/cloud-api.openapi.json
-- [~] 4.13b 生成 cloud-api.openapi.json 和 cloud-api.openapi.yaml
-- [~] 4.13c 配置 openapi-typescript 生成 TS 类型（cloud-api.openapi.json →
+- [x] 4.13b 生成 cloud-api.openapi.json 和 cloud-api.openapi.yaml
+- [x] 4.13c 配置 openapi-typescript 生成 TS 类型（cloud-api.openapi.json →
   packages/protocol/generated/cloud-api/ts/）
-- [~] 4.13d
+- [x] 4.13d
   web 切换到引用 packages/protocol/generated/cloud-api/ts/ 替代手写 API 类型
-- [~] 4.13e sidecar
+- [x] 4.13e sidecar
   SyncService 引用 packages/protocol/generated/cloud-api/ts/ 为同步请求类型
-- [ ] 4.13f CI 检查 cloud-api OpenAPI 生成物已更新
+- [x] 4.13f CI 检查 cloud-api OpenAPI 生成物已更新
 
 ### 阶段 4.1.3：设计 DB schema（2 天）
 
-- [~] 4.13 标注现有 schema 中的表归属（local-only / cloud-only / shared）
-- [~] 4.14 设计 sidecar local DB schema
-- [~] 4.15 设计 cloud-api cloud DB schema
-- [~] 4.16 创建 cloud-api Prisma migration
-- [~] 4.17 更新架构文档：说明职责边界
-- [~] 4.18 更新架构文档：说明数据流向
+- [x] 4.13 标注现有 schema 中的表归属（local-only / cloud-only / shared）
+- [x] 4.14 设计 sidecar local DB schema
+- [x] 4.15 设计 cloud-api cloud DB schema
+- [x] 4.16 创建 cloud-api Prisma migration
+- [x] 4.17 更新架构文档：说明职责边界
+- [x] 4.18 更新架构文档：说明数据流向
 
 ### 阶段 4.1.4：迁移上传/分享能力（1 周，🔴 CRITICAL）
 
@@ -396,19 +396,19 @@
 
 ## 验收
 
-- [~] 5.1 所有 JSON API 返回 code/msg/data
-- [~] 5.2 内存限流无泄漏
-- [~] 5.3 上传 commit 幂等
-- [~] 5.4 share token accessCount 原子消费
-- [~] 5.5 Web/Desktop API 层统一
-- [~] 5.6 NestJS 标准化完成
-- [~] 5.7 根目录工程配置统一
-- [~] 5.8 OpenAPI 可访问，TS/Dart client 已生成到 packages/protocol/generated/
-- [~] 5.9 Web/Desktop 支持中英文
-- [~] 5.10 sidecar 和 cloud-api 可独立启动
-- [~] 5.11 sidecar 可向 cloud-api 注册设备，心跳正常，上传素材可被拉取到本地
-- [~] 5.12 cloud-api 不可达时 sidecar 本地功能正常（离线降级）
+- [x] 5.1 所有 JSON API 返回 code/msg/data
+- [x] 5.2 内存限流无泄漏
+- [x] 5.3 上传 commit 幂等
+- [x] 5.4 share token accessCount 原子消费
+- [x] 5.5 Web/Desktop API 层统一
+- [x] 5.6 NestJS 标准化完成
+- [x] 5.7 根目录工程配置统一
+- [x] 5.8 OpenAPI 可访问，TS/Dart client 已生成到 packages/protocol/generated/
+- [x] 5.9 Web/Desktop 支持中英文
+- [x] 5.10 sidecar 和 cloud-api 可独立启动
+- [x] 5.11 sidecar 可向 cloud-api 注册设备，心跳正常，上传素材可被拉取到本地
+- [x] 5.12 cloud-api 不可达时 sidecar 本地功能正常（离线降级）
 - [~] 5.13 CI 全绿
-- [~] 5.14 cloud-api 部署成功
-- [~] 5.15 Web 部署成功
-- [~] 5.16 desktop release dry-run 成功
+- [ ] 5.14 cloud-api 部署成功
+- [ ] 5.15 Web 部署成功
+- [x] 5.16 desktop release dry-run 成功

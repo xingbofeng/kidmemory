@@ -1570,6 +1570,21 @@ HYPERFRAMES_BIN=npx hyperframes
 FFMPEG_BIN=ffmpeg
 ```
 
+## Sidecar SDK 调试模型
+
+```env
+OPENAI_BASE_URL=https://api.xiaomimimo.com/v1
+OPENAI_API_KEY=<仅本地 .env 配置，不入库>
+OPENAI_MODEL=mimo-v2-pro
+```
+
+说明：
+
+```txt
+- OPENAI_API_KEY 仅从本地 .env 读取，不提交到仓库。
+- MCP + skills runtime 联调时，sidecar 通过上述 OpenAI-compatible 配置走 SDK 调试链路。
+```
+
 ---
 
 # 20. 风险与回滚
@@ -1629,15 +1644,38 @@ FFMPEG_BIN=ffmpeg
 适合作为 KidMemory 绘本 Skill 的基础。  
 它不是普通生图工具，而是绘本生产流程：故事问题、故事口吻、页面计划、视觉系统、排版节奏、角色确认、逐页审核、本地文字排版和打印交付。
 
+来源：
+
+```txt
+- 上游仓库: https://github.com/Hermess/picturebook-maker/tree/main/picturebook-maker
+- KidMemory vendor 目录: packages/skills/skills/picturebook-maker
+```
+
 ## 22.3 Hyperframes
 
 适合作为 KidMemory 视频能力的基础。  
 它是 agent-first 的 HTML 视频渲染框架，适合让 Agent 生成 HTML composition，然后渲染 MP4。KidMemory 不需要重写其内部 Skill。
 
+来源：
+
+```txt
+- 上游仓库: https://github.com/heygen-com/hyperframes
+- Registry 源: https://raw.githubusercontent.com/heygen-com/hyperframes/main/registry
+- KidMemory 挂载目录: packages/skills/skills/hyperframes
+```
+
 ## 22.4 dreamweaver-picturebook
 
 适合作为免费生图 provider 的参考。  
 它默认支持 Pollinations，也预留 Cloudflare Workers AI 和 OpenAI-compatible image API。
+
+Pollinations 在本项目中的来源与落地：
+
+```txt
+- Provider 目标端点: https://image.pollinations.ai/prompt/{prompt}
+- KidMemory 扩展脚本: packages/skills/skills/picturebook-maker/extensions/generate_pollinations_image.mjs
+- 隐私边界: 仅文本 prompt，不上传孩子照片二进制或 URL
+```
 
 ---
 

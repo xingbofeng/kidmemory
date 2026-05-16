@@ -10,13 +10,13 @@
 import { describe, it, mock } from 'node:test';
 import assert from 'node:assert';
 import crypto from 'node:crypto';
-import { WebCompanionService } from '../../../src/modules/web-companion/web-companion.service';
-import { UploadItemStatus } from '../../../src/modules/web-companion/constants';
+import { WebCompanionService } from '../../../../src/modules/web-companion/web-companion.service.ts';
+import { UploadItemStatus } from '../../../../src/modules/web-companion/constants.ts';
 import type {
   CommitUploadItemRequest,
   UploadItem,
   UploadSession,
-} from '../../../src/modules/web-companion/types';
+} from '../../../../src/modules/web-companion/types.ts';
 
 // Helper to hash token (same as service)
 function hashToken(token: string): string {
@@ -64,6 +64,7 @@ describe('Upload Commit Idempotency', () => {
       getSessionById: mock.fn(() => Promise.resolve(mockSession)),
       getUploadItemById: mock.fn(() => Promise.resolve(mockItem)),
       updateUploadItemStatus: mock.fn(() => Promise.resolve(mockItem)),
+      commitUploadItemIfNotCommitted: mock.fn(() => Promise.resolve(null)),
     };
 
     const mockAppConfig = {} as any;
@@ -139,10 +140,12 @@ describe('Upload Commit Idempotency', () => {
       committedAt: new Date(),
     };
 
+    let commitCallCount = 0;
     const mockRepository = {
       getSessionById: mock.fn(() => Promise.resolve(mockSession)),
       getUploadItemById: mock.fn(() => Promise.resolve(mockItem)),
       updateUploadItemStatus: mock.fn(() => Promise.resolve(mockUpdatedItem)),
+      commitUploadItemIfNotCommitted: mock.fn(() => Promise.resolve(mockUpdatedItem)),
     };
 
     const mockAppConfig = {} as any;
@@ -163,8 +166,8 @@ describe('Upload Commit Idempotency', () => {
     assert.strictEqual(response.status, UploadItemStatus.UPLOADED_REMOTE);
     assert.strictEqual(response.idempotent, false, 'Should return idempotent: false for first commit');
 
-    // Verify updateUploadItemStatus WAS called at least once (for the commit)
-    assert.ok(mockRepository.updateUploadItemStatus.mock.callCount() >= 1, 'Should update status for first commit');
+    // Verify atomic commit API was called
+    assert.strictEqual(mockRepository.commitUploadItemIfNotCommitted.mock.callCount(), 1, 'Should atomically commit once');
   });
 
   it('should handle concurrent commits gracefully', async () => {
@@ -189,6 +192,7 @@ describe('Upload Commit Idempotency', () => {
     };
 
     let getItemCallCount = 0;
+    let commitCallCount = 0;
     const mockItem: UploadItem = {
       id: mockUploadItemId,
       uploadItemId: mockUploadItemId,
@@ -223,6 +227,18 @@ describe('Upload Commit Idempotency', () => {
           status: UploadItemStatus.UPLOADED_REMOTE,
           committedAt: new Date(),
         });
+      }),
+      commitUploadItemIfNotCommitted: mock.fn(() => {
+        commitCallCount++;
+        // Simulate one winner in concurrent commits
+        if (commitCallCount === 1) {
+          return Promise.resolve({
+            ...mockItem,
+            status: UploadItemStatus.UPLOADED_REMOTE,
+            committedAt: new Date(),
+          });
+        }
+        return Promise.resolve(null);
       }),
     };
 

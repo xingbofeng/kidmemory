@@ -5,40 +5,9 @@
  */
 
 import { httpClient } from '../lib/http-client';
-
-/**
- * Share Token Validation
- */
-export interface ShareTokenValidation {
-  isValid: boolean;
-  shareToken?: {
-    id: string;
-    childId: string;
-    resourceType: string;
-    resourceId?: string;
-    accessType: string;
-  };
-  error?: string;
-}
-
-export interface SharedAsset {
-  id: string;
-  title: string;
-  type: string;
-  createdAt: string;
-  previewUrl?: string;
-}
-
-export interface SharedBook {
-  id: string;
-  title: string;
-  childId: string;
-  createdAt: string;
-  status: string;
-  description?: string;
-  previewUrl?: string;
-  pageCount?: number;
-}
+import type { ShareTokenValidation } from '../types/shareBook';
+import type { SharedAsset } from '../types/shareBrowse';
+import type { SharedBook } from '../types/shareBook';
 
 export async function validateShareToken(shareToken: string): Promise<ShareTokenValidation> {
   return httpClient.get<ShareTokenValidation>(

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedAsset } from '../../types/shareBrowse'
 
@@ -6,12 +7,15 @@ interface AssetsGridProps {
 }
 
 export function AssetsGrid({ assets }: AssetsGridProps) {
+  const { t, i18n } = useTranslation()
+  const locale = (i18n.resolvedLanguage ?? i18n.language ?? 'zh-CN').startsWith('en') ? 'en-US' : 'zh-CN'
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN', {
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
   }
 
@@ -19,8 +23,8 @@ export function AssetsGrid({ assets }: AssetsGridProps) {
     return (
       <div className="empty-state">
         <Icon name="image" />
-        <h3>暂无分享内容</h3>
-        <p>这个分享链接中还没有素材</p>
+        <h3>{t('share.emptyTitle')}</h3>
+        <p>{t('share.emptyDesc')}</p>
       </div>
     )
   }
@@ -30,11 +34,7 @@ export function AssetsGrid({ assets }: AssetsGridProps) {
       {assets.map((asset) => (
         <article key={asset.id} className="asset-card">
           <div className="asset-image">
-            <img
-              src={asset.previewUrl || '/placeholder-image.png'}
-              alt={asset.title}
-              loading="lazy"
-            />
+            <img src={asset.previewUrl || '/placeholder-image.png'} alt={asset.title} loading="lazy" />
           </div>
           <div className="asset-info">
             <h3>{asset.title}</h3>
@@ -48,7 +48,7 @@ export function AssetsGrid({ assets }: AssetsGridProps) {
             onClick={() => {
               window.open(asset.previewUrl, '_blank')
             }}
-            aria-label={`查看 ${asset.title}`}
+            aria-label={t('share.viewAssetAria', { title: asset.title })}
           >
             <Icon name="search" />
           </button>

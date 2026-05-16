@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { UploadProvider, SessionSummary } from '../../types/trustedUpload'
 
 interface ProviderSelectorProps {
@@ -7,6 +8,8 @@ interface ProviderSelectorProps {
 }
 
 export function ProviderSelector({ selectedProvider, session, onProviderChange }: ProviderSelectorProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="route-selector trusted-route-selector">
       <button
@@ -15,8 +18,8 @@ export function ProviderSelector({ selectedProvider, session, onProviderChange }
         disabled={!session.providers?.lan?.available}
         onClick={() => onProviderChange('lan')}
       >
-        <strong>📶 局域网直传</strong>
-        <span>{session.providers?.lan?.available ? '优先使用，速度更快' : '当前网络不可用'}</span>
+        <strong>{t('trustedUpload.lanTitle')}</strong>
+        <span>{session.providers?.lan?.available ? t('trustedUpload.lanFast') : t('trustedUpload.lanUnavailable')}</span>
       </button>
       <button
         className={selectedProvider === 'supabase' ? 'selected' : ''}
@@ -24,8 +27,8 @@ export function ProviderSelector({ selectedProvider, session, onProviderChange }
         disabled={session.providers?.supabase?.available === false}
         onClick={() => onProviderChange('supabase')}
       >
-        <strong>☁ 公网直传</strong>
-        <span>{session.providers?.supabase?.available === false ? '存储配置不可用' : 'Supabase 兜底'}</span>
+        <strong>{t('trustedUpload.cloudTitle')}</strong>
+        <span>{session.providers?.supabase?.available === false ? t('trustedUpload.cloudUnavailable') : t('trustedUpload.cloudFallback')}</span>
       </button>
     </div>
   )

@@ -8,6 +8,8 @@ import type { INestApplication } from "@nestjs/common";
 
 import { AppModule } from "../../src/app.module.ts";
 import { assertObject, assertString, requestJson } from "./backend-contract-client.ts";
+import { GlobalExceptionFilter } from "../../src/infrastructure/http/global-exception.filter.ts";
+import { ApiResponseInterceptor } from "../../src/infrastructure/http/api-response.interceptor.ts";
 
 type TestServer = {
   app: INestApplication;
@@ -16,6 +18,8 @@ type TestServer = {
 
 async function startContractServer(): Promise<TestServer> {
   const app = await NestFactory.create(AppModule, { logger: false });
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalInterceptors(new ApiResponseInterceptor());
   await app.listen(0, "127.0.0.1");
   const address = app.getHttpServer().address();
   if (!address || typeof address !== "object") {
@@ -37,8 +41,11 @@ test("sidecar contract: health endpoint returns stable service metadata", async 
 
   assert.equal(response.status, 200);
   assertObject(response.body);
-  assert.equal(response.body.ok, true);
-  assert.equal(response.body.service, "kidmemory-sidecar");
+  assert.equal(response.body.code, 0);
+  assert.equal(response.body.msg, "success");
+  assertObject(response.body.data);
+  assert.equal(response.body.data.ok, true);
+  assert.equal(response.body.data.service, "kidmemory-sidecar");
 });
 
 test("sidecar contract: invalid public share assets token returns an auth-style error", async (t) => {
@@ -80,6 +87,6 @@ test("sidecar contract: create book job rejects empty asset selection", async (t
 
   assert.equal(response.status, 422);
   assertObject(response.body);
-  assert.equal(response.body.ok, false);
-  assertString(response.body.message);
+  assert.notEqual(response.body.code, 0);
+  assertString(response.body.msg);
 });

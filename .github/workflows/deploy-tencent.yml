@@ -28,19 +28,20 @@ jobs:
             cd "$PROJECT_PATH"
             git fetch origin main && git reset --hard origin/main
 
-            # Backend
-            cd "$PROJECT_PATH/packages/backend"
+            # Cloud API
+            cd "$PROJECT_PATH/packages/cloud-api"
             npm ci --omit=dev
             npm run prisma:generate
             set -a && source .env && set +a
             DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
             npm run build:prod
 
-            # Web
-            cd "$PROJECT_PATH/packages/web"
-            npm ci --omit=dev
-            npm run build
-
             # Reload services
             PROJECT_PATH="$PROJECT_PATH" pm2 reload all
             pm2 save
+
+            # Optional smoke test
+            if [ -n "${{ secrets.TENCENT_SMOKE_BASE_URL }}" ]; then
+              curl -fsS "${{ secrets.TENCENT_SMOKE_BASE_URL }}/health" >/dev/null
+              curl -fsS "${{ secrets.TENCENT_SMOKE_BASE_URL }}/docs/openapi.json" >/dev/null
+            fi

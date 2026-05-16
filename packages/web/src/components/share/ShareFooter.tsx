@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedBook } from '../../types/shareBook'
 
@@ -9,59 +10,49 @@ interface ShareFooterProps {
 }
 
 export function ShareFooter({ book, onViewBook, onDownloadBook, onSaveToPhotos }: ShareFooterProps) {
+  const { t } = useTranslation()
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `${book.title} - KidMemory 作品集`,
-        text: `查看这本珍贵的家庭作品集：${book.title}`,
-        url: window.location.href
+        title: t('share.shareBookTitle', { title: book.title }),
+        text: t('share.shareBookText', { title: book.title }),
+        url: window.location.href,
       })
     } else {
       navigator.clipboard.writeText(window.location.href)
-      alert('分享链接已复制到剪贴板')
+      alert(t('share.shareCopied'))
     }
   }
 
   return (
     <footer className="share-footer">
       <div className="share-actions">
-        <button
-          className="action-button primary"
-          onClick={onViewBook}
-        >
+        <button className="action-button primary" onClick={onViewBook}>
           <Icon name="pdf" />
-          查看完整作品集
+          {t('share.viewFullBook')}
         </button>
-        <button
-          className="action-button secondary"
-          onClick={onDownloadBook}
-        >
+        <button className="action-button secondary" onClick={onDownloadBook}>
           <Icon name="download" />
-          下载 PDF
+          {t('share.downloadPdf')}
         </button>
-        <button
-          className="action-button secondary"
-          onClick={onSaveToPhotos}
-        >
+        <button className="action-button secondary" onClick={onSaveToPhotos}>
           <Icon name="image" />
-          保存长图到相册
+          {t('share.saveLongImage')}
         </button>
       </div>
 
       <div className="share-more">
-        <button
-          className="share-link-button"
-          onClick={handleShare}
-        >
+        <button className="share-link-button" onClick={handleShare}>
           <Icon name="link" />
-          分享给更多朋友
+          {t('share.shareToFriends')}
         </button>
       </div>
 
       <div className="share-branding">
         <p>
           <Icon name="bear-avatar" />
-          由 <strong>KidMemory</strong> 生成 · 家庭记忆，值得珍藏
+          {t('share.branding')}
         </p>
       </div>
     </footer>

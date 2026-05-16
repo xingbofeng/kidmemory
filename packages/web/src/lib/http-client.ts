@@ -19,7 +19,7 @@ export class ApiError extends Error {
   constructor(
     public code: number,
     message: string,
-    public data?: any
+    public data?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
@@ -40,7 +40,7 @@ export class HttpClient {
 
     // Response interceptor to unwrap API format
     this.axios.interceptors.response.use(
-      this.handleResponse.bind(this),
+      this.handleResponse.bind(this) as unknown as (value: AxiosResponse) => AxiosResponse,
       this.handleError.bind(this)
     );
   }
@@ -48,7 +48,7 @@ export class HttpClient {
   /**
    * Handle successful response
    */
-  private handleResponse(response: AxiosResponse): any {
+  private handleResponse(response: AxiosResponse): unknown {
     const data = response.data;
 
     // Check if response is in API format
@@ -69,7 +69,7 @@ export class HttpClient {
   /**
    * Handle error response
    */
-  private handleError(error: any): Promise<never> {
+  private handleError(error: unknown): Promise<never> {
     if (axios.isAxiosError(error) && error.response) {
       const data = error.response.data;
 
@@ -86,7 +86,7 @@ export class HttpClient {
     // Network error or other error
     throw new ApiError(
       ApiCode.UNKNOWN_ERROR,
-      error.message || 'Network error',
+      error instanceof Error ? error.message : 'Network error',
       error
     );
   }
@@ -94,8 +94,8 @@ export class HttpClient {
   /**
    * Check if response is in API format
    */
-  private isApiFormat(data: any): boolean {
-    return (
+  private isApiFormat(data: unknown): data is ApiResponse<unknown> {
+    return Boolean(
       data &&
       typeof data === 'object' &&
       'code' in data &&
@@ -107,7 +107,7 @@ export class HttpClient {
   /**
    * Check if error is retryable
    */
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
     // Network errors are retryable
     if (!axios.isAxiosError(error) || !error.response) {
       return true;
@@ -140,48 +140,48 @@ export class HttpClient {
   /**
    * GET request
    */
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return this.executeWithRetry(() => this.axios.get(url, config));
+  async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.executeWithRetry(() => this.axios.get<T>(url, config) as unknown as Promise<T>);
   }
 
   /**
    * POST request
    */
-  async post<T = any>(
+  async post<T = unknown>(
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.post(url, data, config));
+    return this.executeWithRetry(() => this.axios.post<T>(url, data, config) as unknown as Promise<T>);
   }
 
   /**
    * PUT request
    */
-  async put<T = any>(
+  async put<T = unknown>(
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.put(url, data, config));
+    return this.executeWithRetry(() => this.axios.put<T>(url, data, config) as unknown as Promise<T>);
   }
 
   /**
    * DELETE request
    */
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return this.executeWithRetry(() => this.axios.delete(url, config));
+  async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.executeWithRetry(() => this.axios.delete<T>(url, config) as unknown as Promise<T>);
   }
 
   /**
    * PATCH request
    */
-  async patch<T = any>(
+  async patch<T = unknown>(
     url: string,
-    data?: any,
+    data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.patch(url, data, config));
+    return this.executeWithRetry(() => this.axios.patch<T>(url, data, config) as unknown as Promise<T>);
   }
 }
 
@@ -198,7 +198,7 @@ export function getHttpClient(): HttpClient {
 // For backward compatibility
 export const httpClient = new Proxy({} as HttpClient, {
   get(_target, prop) {
-    return (getHttpClient() as any)[prop];
+    return Reflect.get(getHttpClient(), prop);
   }
 });
 

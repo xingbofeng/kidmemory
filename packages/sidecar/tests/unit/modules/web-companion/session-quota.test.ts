@@ -10,7 +10,7 @@
 
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { SessionQuotaMiddleware } from '../../../src/infrastructure/security/session-quota.middleware';
+import { SessionQuotaMiddleware } from '../../../../src/infrastructure/security/session-quota.middleware.ts';
 import { ApiCode } from '@kidmemory/protocol';
 
 type MockRequest = {
@@ -145,23 +145,26 @@ describe('SessionQuotaMiddleware', () => {
       const middleware = new SessionQuotaMiddleware();
       const childId = 'child1';
 
-      // 创建 20 个会话（达到每日限额），但关闭前面的以保持活跃数在限额内
+      // 创建 20 个会话（达到每日限额），并在每次创建前先释放一个旧会话，
+      // 保持活跃会话数不触发 maxActive 限制。
       for (let i = 1; i <= 20; i++) {
+        if (i > 5) {
+          middleware.recordSessionClosure(childId, `session${i - 5}`);
+        }
+
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
         await middleware.use(req as any, res as any, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
-
-        // 关闭前面的会话以保持活跃数在 5 以内
-        if (i > 5) {
-          middleware.recordSessionClosure(childId, `session${i - 5}`);
-        }
       }
 
       // 检查当前状态
       const statsBefore = middleware.getStats();
       console.log('Stats before 21st request:', JSON.stringify(statsBefore, null, 2));
+
+      // 先释放一个活跃会话，确保第 21 次命中“每日配额”而不是“活跃会话配额”
+      middleware.recordSessionClosure(childId, 'session16');
 
       // 尝试创建第 21 个会话
       const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });

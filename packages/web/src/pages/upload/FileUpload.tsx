@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { UploadSession } from '../../types/api'
 import type { SelectedFile } from '../../types/fileUpload'
 import { uploadSessionFile } from '../../lib/upload-session'
@@ -14,6 +15,7 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ session }: FileUploadProps) {
+  const { t } = useTranslation()
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -47,15 +49,15 @@ export function FileUpload({ session }: FileUploadProps) {
       })
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles])
+    setSelectedFiles((prev) => [...prev, ...validFiles])
 
     if (rejectedFiles.length > 0) {
-      setFileError(`不支持的文件类型：${rejectedFiles.join('、')}。请上传 ${SUPPORTED_TYPE_LABEL} 图片。`)
+      setFileError(t('uploadLegacy.unsupportedType', { files: rejectedFiles.join('、'), label: SUPPORTED_TYPE_LABEL }))
     }
   }
 
   const handleRemoveFile = (id: string) => {
-    setSelectedFiles(prev => prev.filter(f => f.id !== id))
+    setSelectedFiles((prev) => prev.filter((file) => file.id !== id))
   }
 
   const handleClearAll = () => {
@@ -68,38 +70,32 @@ export function FileUpload({ session }: FileUploadProps) {
     setIsUploading(true)
 
     for (const selectedFile of selectedFiles) {
-      setSelectedFiles(prev =>
-        prev.map(f =>
-          f.id === selectedFile.id
-            ? { ...f, status: 'uploading' as const }
-            : f
-        )
+      setSelectedFiles((prev) =>
+        prev.map((file) => (file.id === selectedFile.id ? { ...file, status: 'uploading' as const } : file)),
       )
-      await new Promise(resolve => setTimeout(resolve, 80))
+      await new Promise((resolve) => setTimeout(resolve, 80))
 
       try {
         const result = await uploadSessionFile(session, selectedFile.file)
         if (result.status === 'failed' || result.error) {
-          throw new Error(result.error || '上传失败')
+          throw new Error(result.error || t('uploadLegacy.uploadFailed'))
         }
-        setSelectedFiles(prev =>
-          prev.map(f =>
-            f.id === selectedFile.id
-              ? { ...f, status: 'success' as const, progress: 100 }
-              : f
-          )
+        setSelectedFiles((prev) =>
+          prev.map((file) =>
+            file.id === selectedFile.id ? { ...file, status: 'success' as const, progress: 100 } : file,
+          ),
         )
       } catch (error) {
-        setSelectedFiles(prev =>
-          prev.map(f =>
-            f.id === selectedFile.id
+        setSelectedFiles((prev) =>
+          prev.map((file) =>
+            file.id === selectedFile.id
               ? {
-                  ...f,
+                  ...file,
                   status: 'error' as const,
-                  error: error instanceof Error ? error.message : '上传失败',
+                  error: error instanceof Error ? error.message : t('uploadLegacy.uploadFailed'),
                 }
-              : f
-          )
+              : file,
+          ),
         )
       }
     }
@@ -110,15 +106,8 @@ export function FileUpload({ session }: FileUploadProps) {
   if (isAtLimit) {
     return (
       <div className="upload-console">
-        <div className="inline-alert danger">已达到上传上限</div>
-        <input
-          className="file-input"
-          type="file"
-          multiple
-          accept="image/*"
-          disabled
-          aria-label="选择图片"
-        />
+        <div className="inline-alert danger">{t('uploadLegacy.atLimit')}</div>
+        <input className="file-input" type="file" multiple accept="image/*" disabled aria-label={t('uploadLegacy.selectImage')} />
       </div>
     )
   }
@@ -130,31 +119,16 @@ export function FileUpload({ session }: FileUploadProps) {
     <div className="upload-console">
       <UploadSummary session={session} />
       <RouteSelector />
-      <FilePickerRow
-        onFileSelect={handleFileSelect}
-        canSelectMore={canSelectMore}
-        isUploading={isUploading}
-      />
+      <FilePickerRow onFileSelect={handleFileSelect} canSelectMore={canSelectMore} isUploading={isUploading} />
 
-      {showLimitWarning && (
-        <div className="inline-alert warning">只能再上传 {remainingSlots} 张图片</div>
-      )}
-
+      {showLimitWarning && <div className="inline-alert warning">{t('uploadLegacy.canUploadOnly', { count: remainingSlots })}</div>}
       {fileError && <div className="inline-alert danger">{fileError}</div>}
 
-      <UploadList
-        selectedFiles={selectedFiles}
-        onRemoveFile={handleRemoveFile}
-        onClearAll={handleClearAll}
-      />
+      <UploadList selectedFiles={selectedFiles} onRemoveFile={handleRemoveFile} onClearAll={handleClearAll} />
 
-      <UploadProgress
-        selectedFiles={selectedFiles}
-        isUploading={isUploading}
-        onUpload={handleUpload}
-      />
+      <UploadProgress selectedFiles={selectedFiles} isUploading={isUploading} onUpload={handleUpload} />
 
-      {!fileError && <div className="sr-only">不支持的文件类型</div>}
+      {!fileError && <div className="sr-only">{t('uploadLegacy.unsupportedTypeSr')}</div>}
     </div>
   )
 }

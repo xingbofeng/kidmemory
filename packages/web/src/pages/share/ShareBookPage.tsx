@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/errors'
 import { validateShareToken, getSharedBook } from '../../api/shareApi'
 import type { SharedBook, ShareTokenValidation } from '../../types/shareBook'
@@ -15,6 +16,7 @@ interface ShareBookPageProps {
 }
 
 export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
+  const { t } = useTranslation()
   const [, setValidation] = useState<ShareTokenValidation | null>(null)
   const [book, setBook] = useState<SharedBook | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,45 +27,38 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
       setLoading(true)
       setError(null)
 
-      // Validate share token
       const validationData = await validateShareToken(shareToken)
 
       if (!validationData.isValid) {
-        setError(validationData.error || '分享链接无效或已过期')
+        setError(validationData.error || t('share.invalidOrExpired'))
         return
       }
 
       setValidation(validationData)
 
-      // Verify the book ID matches the share token resource
       if (validationData.shareToken?.resourceType === 'specific_book') {
         const tokenBookId = validationData.shareToken.resourceId
         if (bookId && tokenBookId && bookId !== tokenBookId) {
-          setError('分享链接与请求的作品集不匹配')
+          setError(t('share.bookMismatch'))
           return
         }
       }
 
-      // Load shared book content
-      let targetBookId = bookId;
-
-      // If share token is for a specific book, get the book ID from the token
+      let targetBookId = bookId
       if (validationData.shareToken?.resourceType === 'specific_book') {
-        targetBookId = validationData.shareToken.resourceId;
+        targetBookId = validationData.shareToken.resourceId
       }
 
       if (!targetBookId) {
-        setError('无法确定要显示的作品集');
-        return;
+        setError(t('share.unableToDetermineBook'))
+        return
       }
 
-      // Fetch shared book data from backend
       const bookData = await getSharedBook(shareToken, targetBookId)
-      setBook(bookData);
-
+      setBook(bookData)
     } catch (err) {
       console.error('Failed to load shared book:', err)
-      const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : '加载分享作品集失败')
+      const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : t('share.loadBookFailed')
       setError(message)
     } finally {
       setLoading(false)
@@ -94,7 +89,7 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
     if (book) {
       const link = document.createElement('a')
       link.href = `/api/books/${book.id}/long-image`
-      link.download = `${book.title}_长图.jpg`
+      link.download = `${book.title}_${t('share.longImageSuffix')}.jpg`
       link.click()
     }
   }
@@ -104,23 +99,11 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
   }
 
   if (error) {
-    return (
-      <ShareError
-        title="分享链接无效"
-        message={error}
-        onRetry={() => window.location.reload()}
-      />
-    )
+    return <ShareError title={t('share.invalidTitle')} message={error} onRetry={() => window.location.reload()} />
   }
 
   if (!book) {
-    return (
-      <ShareError
-        title="作品集不存在"
-        message="请检查分享链接是否正确"
-        icon="book"
-      />
-    )
+    return <ShareError title={t('share.bookNotFoundTitle')} message={t('share.bookNotFoundMessage')} icon="book" />
   }
 
   return (
@@ -132,12 +115,7 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
         <BookPreviewSection book={book} />
       </main>
 
-      <ShareFooter
-        book={book}
-        onViewBook={handleViewBook}
-        onDownloadBook={handleDownloadBook}
-        onSaveToPhotos={handleSaveToPhotos}
-      />
+      <ShareFooter book={book} onViewBook={handleViewBook} onDownloadBook={handleDownloadBook} onSaveToPhotos={handleSaveToPhotos} />
     </div>
   )
 }

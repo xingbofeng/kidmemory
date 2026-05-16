@@ -111,11 +111,11 @@ extract_test_count() {
     local suite_name="$2"
 
     case "$suite_name" in
-        "backend-unit")
+        "sidecar-unit")
             # Node.js 测试输出格式
             grep -o "passing ([0-9]*)" "$output_file" | grep -o "[0-9]*" | head -1 || echo "0"
             ;;
-        "backend-integration")
+        "sidecar-integration")
             grep -o "[0-9]* passing" "$output_file" | grep -o "[0-9]*" | head -1 || echo "0"
             ;;
         "flutter-unit")
@@ -156,11 +156,54 @@ fi
 log_success "测试环境检查通过"
 echo ""
 
-# 1. 后端单元测试
-if [ -d "packages/backend" ]; then
+# 1. Protocol 协议层测试
+if [ -d "packages/protocol" ]; then
+    log_info "准备 Protocol 协议层测试环境..."
+
+    cd packages/protocol
+    if [ ! -d "node_modules" ]; then
+        log_info "安装 Protocol 依赖..."
+        npm install
+    fi
+
+    run_test_suite "protocol-check" "npm run check" "$PROJECT_ROOT/packages/protocol"
+    run_test_suite "protocol-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/protocol"
+    run_test_suite "protocol-test" "npm run test" "$PROJECT_ROOT/packages/protocol"
+
+    cd "$PROJECT_ROOT"
+else
+    log_warning "Protocol 目录不存在，跳过协议层测试"
+fi
+
+echo ""
+
+# 2. Cloud API 测试
+if [ -d "packages/cloud-api" ]; then
+    log_info "准备 Cloud API 测试环境..."
+
+    cd packages/cloud-api
+    if [ ! -d "node_modules" ]; then
+        log_info "安装 Cloud API 依赖..."
+        npm install
+    fi
+
+    run_test_suite "cloud-api-lint" "npm run lint" "$PROJECT_ROOT/packages/cloud-api"
+    run_test_suite "cloud-api-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/cloud-api"
+    run_test_suite "cloud-api-unit" "npm run test" "$PROJECT_ROOT/packages/cloud-api"
+    run_test_suite "cloud-api-build-prod" "npm run build:prod" "$PROJECT_ROOT/packages/cloud-api"
+
+    cd "$PROJECT_ROOT"
+else
+    log_warning "Cloud API 目录不存在，跳过 Cloud API 测试"
+fi
+
+echo ""
+
+# 3. Sidecar 测试
+if [ -d "packages/sidecar" ]; then
     log_info "准备后端测试环境..."
 
-    cd packages/backend
+    cd packages/sidecar
 
     # 检查依赖
     if [ ! -d "node_modules" ]; then
@@ -168,16 +211,12 @@ if [ -d "packages/backend" ]; then
         npm install
     fi
 
-    # 检查测试脚本
-    if grep -q '"test"' package.json; then
-        run_test_suite "backend-unit" "npm test" "$PROJECT_ROOT/packages/backend"
-    else
-        log_warning "后端未配置测试脚本"
-    fi
+    run_test_suite "sidecar-lint" "npm run lint" "$PROJECT_ROOT/packages/sidecar"
+    run_test_suite "sidecar-unit" "npm test" "$PROJECT_ROOT/packages/sidecar"
 
     # 运行类型检查
-    if grep -q '"check:src"' package.json; then
-        run_test_suite "backend-typecheck" "npm run check:src" "$PROJECT_ROOT/packages/backend"
+    if grep -q '"type-check"' package.json; then
+        run_test_suite "sidecar-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/sidecar"
     fi
 
     cd "$PROJECT_ROOT"
@@ -187,7 +226,7 @@ fi
 
 echo ""
 
-# 2. Flutter 测试
+# 4. Flutter 测试
 if [ -d "packages/desktop" ]; then
     log_info "准备 Flutter 测试环境..."
 
@@ -213,7 +252,7 @@ fi
 
 echo ""
 
-# 3. Web 前端测试
+# 5. Web 前端测试
 if [ -d "packages/web" ]; then
     log_info "准备 Web 前端测试环境..."
 
@@ -225,17 +264,10 @@ if [ -d "packages/web" ]; then
         npm install
     fi
 
-    # 运行构建测试
-    if grep -q '"build"' package.json; then
-        run_test_suite "web-build" "npm run build" "$PROJECT_ROOT/packages/web"
-    fi
-
-    # 运行单元测试（如果配置了）
-    if grep -q '"test"' package.json; then
-        run_test_suite "web-unit" "npm test" "$PROJECT_ROOT/packages/web"
-    else
-        log_warning "Web 前端未配置测试脚本"
-    fi
+    run_test_suite "web-lint" "npm run lint" "$PROJECT_ROOT/packages/web"
+    run_test_suite "web-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/web"
+    run_test_suite "web-unit" "npm run test -- --run --pool=forks" "$PROJECT_ROOT/packages/web"
+    run_test_suite "web-build" "npm run build" "$PROJECT_ROOT/packages/web"
 
     cd "$PROJECT_ROOT"
 else
@@ -244,15 +276,18 @@ fi
 
 echo ""
 
-# 4. 集成测试
+# 6. 集成测试
 log_info "运行集成测试..."
+
+SIDEcar_ACCEPT_DB_URL="${SIDECAR_ACCEPTANCE_DATABASE_URL:-postgresql://$USER@127.0.0.1:5432/kidmemory_acceptance}"
 
 # 检查数据库连接
 if command -v psql >/dev/null 2>&1; then
     if psql -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
         log_success "数据库连接正常"
-
-        run_test_suite "database-schema" "cd packages/backend && DATABASE_URL=postgresql://localhost/kidmemory_dev npm run prisma:migrate" "$PROJECT_ROOT"
+        run_test_suite "sidecar-prisma-generate" "DATABASE_URL=$SIDEcar_ACCEPT_DB_URL npm run prisma:generate" "$PROJECT_ROOT/packages/sidecar"
+        run_test_suite "sidecar-prisma-migrate" "DATABASE_URL=$SIDEcar_ACCEPT_DB_URL npm run prisma:migrate" "$PROJECT_ROOT/packages/sidecar"
+        run_test_suite "sidecar-integration" "DATABASE_URL=$SIDEcar_ACCEPT_DB_URL npm run test:integration" "$PROJECT_ROOT/packages/sidecar"
     else
         log_warning "数据库连接失败，跳过数据库测试"
     fi
@@ -262,14 +297,14 @@ fi
 
 echo ""
 
-# 6. 架构测试
-if [ -f "packages/backend/tests/architecture/architecture.test.ts" ]; then
-    run_test_suite "architecture" "node --test tests/architecture/architecture.test.ts" "$PROJECT_ROOT/packages/backend"
+# 7. 架构测试
+if [ -f "packages/sidecar/tests/architecture/architecture.test.ts" ]; then
+    run_test_suite "architecture" "tsx --test tests/architecture/architecture.test.ts" "$PROJECT_ROOT/packages/sidecar"
 fi
 
 echo ""
 
-# 7. 性能测试
+# 8. 性能测试
 log_info "运行性能测试..."
 
 # 简单的性能基准测试
@@ -302,8 +337,8 @@ run_performance_test() {
 
 # 检查后端服务是否运行
 if curl -s http://localhost:3001/health >/dev/null 2>&1; then
-    run_performance_test "backend-health" "http://localhost:3001/health"
-    run_performance_test "backend-config" "http://localhost:3001/config/status"
+    run_performance_test "sidecar-health" "http://localhost:3001/health"
+    run_performance_test "sidecar-config" "http://localhost:3001/config/status"
 else
     log_warning "后端服务未运行，跳过性能测试"
 fi
@@ -414,7 +449,7 @@ cat >> "$REPORT_FILE" << EOF
 ## 测试文件位置
 
 - **测试日志**: \`test-results/\`
-- **后端测试**: \`packages/backend/tests/\`
+- **后端测试**: \`packages/sidecar/tests/\`
 - **Flutter测试**: \`packages/desktop/test/\`
 - **Web测试**: \`packages/web/src/__tests__/\` (如果存在)
 

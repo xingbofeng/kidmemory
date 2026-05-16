@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../api/errors'
 import { getDirectUploadConfig } from '../api/uploadApi'
 import {
@@ -7,10 +8,7 @@ import {
   DirectUploadValidationError,
   type DirectUploadClient,
 } from '../lib/direct-upload-client'
-import type {
-  DirectUploadConfig,
-  DirectUploadFileTask,
-} from '../lib/direct-upload-types'
+import type { DirectUploadConfig, DirectUploadFileTask } from '../lib/direct-upload-types'
 
 const DEFAULT_RECOMMENDED_LIMIT = 200
 const DEFAULT_EXPIRES_HINT_SECONDS = 3 * 60 * 60
@@ -32,9 +30,7 @@ interface ParsedConfigError {
   missing: string[]
 }
 
-function parseConfigFromQuery(
-  params: URLSearchParams,
-): ParsedPartialConfig | ParsedConfigError {
+function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | ParsedConfigError {
   const sessionId = params.get('sessionId') ?? ''
   const childId = params.get('childId') ?? ''
   const bucket = params.get('bucket') ?? ''
@@ -52,7 +48,7 @@ function parseConfigFromQuery(
   const publicUrl = params.get('publicUrl') ?? ''
   const limitParam = params.get('supabaseDirectUploadLimit')
   const recommendedClientLimit = (() => {
-    const parsed = limitParam != null ? Number(limitParam) : NaN
+    const parsed = limitParam != null ? Number(limitParam) : Number.NaN
     if (Number.isFinite(parsed) && parsed > 0) return Math.floor(parsed)
     return DEFAULT_RECOMMENDED_LIMIT
   })()
@@ -80,12 +76,11 @@ function nextTaskId(): string {
 }
 
 export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectUploadTasksProps) {
+  const { t } = useTranslation()
   const params = useMemo(
     () =>
-      searchParams ??
-      (typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search)
-        : new URLSearchParams()),
+      searchParams
+      ?? (typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()),
     [searchParams],
   )
 
@@ -94,7 +89,6 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
   const [anonKey, setAnonKey] = useState<string | null>(null)
   const [anonKeyError, setAnonKeyError] = useState<string | null>(null)
 
-  // Load anon key
   useEffect(() => {
     if (!parsed.ok) return
     let cancelled = false
@@ -105,11 +99,13 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
       })
       .catch((err) => {
         if (!cancelled) {
-          const message = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : String(err))
+          const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : String(err)
           setAnonKeyError(message)
         }
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [parsed])
 
   const fullConfig = useMemo((): DirectUploadConfig | null => {
@@ -135,13 +131,9 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
       })
       if (!result.ok) {
         if (result.code === 'limit_exceeded') {
-          setValidationError(
-            `已达到体验约束的张数上限（${result.limit} 张）。这是体验约束，不是安全约束。`,
-          )
+          setValidationError(t('directUpload.experienceHint', { limit: result.limit }))
         } else {
-          setValidationError(
-            `仅支持图片文件（JPEG/PNG/WebP/HEIC/HEIF/GIF）。已忽略：${result.offendingFile.name}`,
-          )
+          setValidationError(`Only image files are supported. Ignored: ${result.offendingFile.name}`)
         }
         return
       }
@@ -165,60 +157,43 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
       setIsUploading(true)
       try {
         for (const task of newTasks) {
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === task.id ? { ...t, status: 'uploading', progress: 0 } : t,
-            ),
-          )
+          setTasks((prev) => prev.map((item) => (item.id === task.id ? { ...item, status: 'uploading', progress: 0 } : item)))
           try {
-            const r = await client.uploadFile(task.file, {
-              onProgress: (p) => {
-                setTasks((prev) =>
-                  prev.map((t) =>
-                    t.id === task.id ? { ...t, progress: p } : t,
-                  ),
-                )
+            const uploadResult = await client.uploadFile(task.file, {
+              onProgress: (progress) => {
+                setTasks((prev) => prev.map((item) => (item.id === task.id ? { ...item, progress } : item)))
               },
             })
-            if (r.ok) {
+            if (uploadResult.ok) {
               setTasks((prev) =>
-                prev.map((t) =>
-                  t.id === task.id
+                prev.map((item) =>
+                  item.id === task.id
                     ? {
-                        ...t,
+                        ...item,
                         status: 'success',
                         progress: 1,
-                        objectKey: r.objectKey,
+                        objectKey: uploadResult.objectKey,
                       }
-                    : t,
+                    : item,
                 ),
               )
             } else {
               setTasks((prev) =>
-                prev.map((t) =>
-                  t.id === task.id
+                prev.map((item) =>
+                  item.id === task.id
                     ? {
-                        ...t,
+                        ...item,
                         status: 'failed',
-                        errorMessage: r.errorMessage,
+                        errorMessage: uploadResult.errorMessage,
                       }
-                    : t,
+                    : item,
                 ),
               )
             }
           } catch (err) {
-            const message =
-              err instanceof DirectUploadValidationError
-                ? err.message
-                : err instanceof Error
-                  ? err.message
-                  : String(err)
+            const message = err instanceof DirectUploadValidationError ? err.message : err instanceof Error ? err.message : String(err)
             setTasks((prev) =>
-              prev.map((t) =>
-                t.id === task.id
-                  ? { ...t, status: 'failed', errorMessage: message }
-                  : t,
-              ),
+              prev.map((item) => (item.id === task.id ? { ...item, status: 'failed', errorMessage: message } : item)),
             )
           }
         }
@@ -226,7 +201,7 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
         setIsUploading(false)
       }
     },
-    [factory, fullConfig, tasks.length],
+    [factory, fullConfig, t, tasks.length],
   )
 
   return {

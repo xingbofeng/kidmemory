@@ -95,10 +95,7 @@ test("sidecar uses nestjs as the production http runtime", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   assert.equal(packageJson.scripts.dev, "tsx watch src/main.ts");
   assert.match(packageJson.scripts.build, /node --run lint/);
-  assert.match(packageJson.scripts.build, /node --run check:src/);
   assert.match(packageJson.scripts.build, /node --run check:tests/);
-  assert.match(packageJson.scripts["check:src"], /check-sidecar-runtime-imports\.mjs/);
-  assert.match(packageJson.scripts["check:src"], /src/);
   assert.match(packageJson.scripts["check:tests"], /tsx --test/);
   assert.match(packageJson.scripts["check:tests"], /tests/);
 

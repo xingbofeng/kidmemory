@@ -7,8 +7,8 @@ import { MemoryDatasetDb, buildSelectedAssetPayload, importSampleDataset, listAs
 test("imports sample dataset idempotently and supports type filtering", async () => {
   const db = createMemoryDb();
 
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
+  await importSampleDataset(db);
 
   assert.equal(db.children.size, 1);
   assert.equal(db.assets.size, 17);
@@ -20,7 +20,7 @@ test("imports sample dataset idempotently and supports type filtering", async ()
 
 test("builds selected asset payload with license/source metadata", async () => {
   const db = createMemoryDb();
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
 
   const payload = await buildSelectedAssetPayload(db, ["asset-sun-house", "asset-dino-world"]);
 
@@ -30,7 +30,7 @@ test("builds selected asset payload with license/source metadata", async () => {
 
 test("imports raster assets as photo assets for sample dataset", async () => {
   const db = createMemoryDb();
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
 
   const photos = await listAssets(db, { type: "photo" });
   assert.equal(photos.length, 9);
@@ -39,7 +39,7 @@ test("imports raster assets as photo assets for sample dataset", async () => {
 
 test("sample import resolves local asset image paths for workspace copying", async () => {
   const db = createMemoryDb();
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
 
   const [asset] = await db.getAssetsByIds(["asset-sun-house"]);
 
@@ -52,7 +52,7 @@ test("sample import resolves local asset image paths for workspace copying", asy
 test("memory dataset db can fetch an imported child by id", async () => {
   const db = new MemoryDatasetDb();
 
-  await importSampleDataset(db, new URL("../../../../examples/sample-dataset/", import.meta.url));
+  await importSampleDataset(db);
 
   const child = await db.getChild("sample-child-001");
   assert.equal(child?.name, "澄澄");
