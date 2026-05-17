@@ -6,6 +6,7 @@ import { ConfigModule } from "../config/config.module.ts";
 import { DatasetModule } from "../dataset/dataset.module.ts";
 import { MediaModule } from "../media/media.module.ts";
 import { SkillLoaderService } from "./skill-loader.service.ts";
+import { SkillAutoPullService } from "./skill-auto-pull.service.ts";
 import { SkillPermissionService } from "./skill-permission.service.ts";
 import { SkillRegistryService } from "./skill-registry.service.ts";
 import { SkillRuntimeService } from "./skill-runtime.service.ts";
@@ -16,6 +17,7 @@ import { SkillWorkspaceService } from "./skill-workspace.service.ts";
   providers: [
     SkillLoaderService,
     SkillRegistryService,
+    SkillAutoPullService,
     SkillWorkspaceService,
     SkillPermissionService,
     SkillRuntimeService,
@@ -23,6 +25,7 @@ import { SkillWorkspaceService } from "./skill-workspace.service.ts";
   exports: [
     SkillLoaderService,
     SkillRegistryService,
+    SkillAutoPullService,
     SkillWorkspaceService,
     SkillPermissionService,
     SkillRuntimeService,

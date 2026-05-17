@@ -9,6 +9,11 @@ export type SkillRegistryEntry = {
   version: string;
   path: string;
   entry: string;
+  pull?: {
+    repo: string;
+    ref: string;
+    subPath: string;
+  };
 };
 
 export type SkillRegistryFile = {
@@ -29,7 +34,7 @@ export class SkillLoaderService {
     if (customRoot) {
       return path.resolve(customRoot);
     }
-    return path.resolve(process.cwd(), "../skills");
+    return path.resolve(process.cwd(), ".kidmemory", "skills");
   }
 
   getRegistryPath() {
@@ -37,7 +42,7 @@ export class SkillLoaderService {
     if (customRegistry) {
       return path.resolve(customRegistry);
     }
-    return path.join(this.getSkillsRootDir(), "skill-registry.json");
+    return path.resolve(process.cwd(), "skills", "skill-registry.json");
   }
 
   async loadRegistry(): Promise<SkillRegistryFile> {
@@ -85,6 +90,13 @@ export class SkillLoaderService {
       version: entry.version,
       path: entry.path,
       entry: entry.entry,
+      pull: entry.pull && typeof entry.pull === "object"
+        ? {
+          repo: String((entry.pull as Record<string, unknown>).repo || "").trim(),
+          ref: String((entry.pull as Record<string, unknown>).ref || "").trim(),
+          subPath: String((entry.pull as Record<string, unknown>).subPath || "").trim(),
+        }
+        : undefined,
     };
   }
 }

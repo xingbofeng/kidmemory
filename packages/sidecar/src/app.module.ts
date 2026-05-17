@@ -7,6 +7,7 @@ import { AgentConfigModule } from "./modules/agent-config/agent-config.module.ts
 import { ConfigModule } from "./modules/config/config.module.ts";
 import { DatasetModule } from "./modules/dataset/dataset.module.ts";
 import { SidecarMcpModule } from "./modules/mcp/mcp.module.ts";
+import { SkillsModule } from "./modules/skills/skills.module.ts";
 import { SyncModule } from "./modules/sync/sync.module.ts";
 import { WebCompanionModule } from "./modules/web-companion/web-companion.module.ts";
 
@@ -23,6 +24,7 @@ Module({
     AgentConfigModule,
     DatasetModule,
     BooksModule,
+    SkillsModule,
     WebCompanionModule,
     SyncModule,
     SidecarMcpModule.registerFromEnv(),
