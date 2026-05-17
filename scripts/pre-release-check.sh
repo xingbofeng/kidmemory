@@ -96,7 +96,7 @@ fi
 if [ -d "packages/protocol" ]; then
     cd packages/protocol
     if [ -d "node_modules" ]; then
-        if npm run check >/dev/null 2>&1 && npm run type-check >/dev/null 2>&1; then
+        if npm run check >/dev/null 2>&1 && npm run type-check >/dev/null 2>&1 && npm run build >/dev/null 2>&1; then
             check_result "Protocol代码检查" "PASS"
         else
             check_result "Protocol代码检查" "FAIL" "Protocol检查失败" "true"

@@ -168,6 +168,7 @@ if [ -d "packages/protocol" ]; then
 
     run_test_suite "protocol-check" "npm run check" "$PROJECT_ROOT/packages/protocol"
     run_test_suite "protocol-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/protocol"
+    run_test_suite "protocol-build" "npm run build" "$PROJECT_ROOT/packages/protocol"
     run_test_suite "protocol-test" "npm run test" "$PROJECT_ROOT/packages/protocol"
 
     cd "$PROJECT_ROOT"

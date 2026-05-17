@@ -29,7 +29,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/cloud-api/package-lock.json
+          cache-dependency-path: |
+            packages/cloud-api/package-lock.json
+            packages/protocol/package-lock.json
+
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
 
       - run: npm ci
       - run: npm run prisma:generate

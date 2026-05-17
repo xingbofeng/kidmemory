@@ -47,7 +47,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/sidecar/package-lock.json
+          cache-dependency-path: |
+            packages/sidecar/package-lock.json
+            packages/protocol/package-lock.json
+
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
 
       - name: Start PostgreSQL with pgvector
         run: |
@@ -92,7 +100,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/cloud-api/package-lock.json
+          cache-dependency-path: |
+            packages/cloud-api/package-lock.json
+            packages/protocol/package-lock.json
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
       - run: npm ci
       - run: npm run prisma:generate
       - run: npm run lint
@@ -112,7 +127,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/web/package-lock.json
+          cache-dependency-path: |
+            packages/web/package-lock.json
+            packages/protocol/package-lock.json
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
       - run: npm ci
       - run: npm run lint
       - run: npm test -- --run
@@ -158,7 +180,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/sidecar/package-lock.json
+          cache-dependency-path: |
+            packages/sidecar/package-lock.json
+            packages/protocol/package-lock.json
+
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
 
       - name: Start PostgreSQL with pgvector
         run: |
