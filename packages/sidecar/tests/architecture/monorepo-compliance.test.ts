@@ -64,3 +64,13 @@ test("production pm2 ecosystem targets cloud-api runtime after service split", (
   assert.doesNotMatch(ecosystemConfig, /packages\/sidecar\/dist\/main\.js/);
   assert.doesNotMatch(ecosystemConfig, /name:\s*['"]kidmemory-web['"]/);
 });
+
+test("deploy workflow bootstraps node runtime before cloud-api npm commands", () => {
+  const deployWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "deploy-tencent.yml"), "utf8");
+  assert.match(deployWorkflow, /command -v npm/);
+  assert.match(deployWorkflow, /command -v node/);
+  assert.match(
+    deployWorkflow,
+    /apt-get install -y nodejs|yum install -y nodejs|dnf install -y nodejs|apk add --no-cache nodejs npm/,
+  );
+});
