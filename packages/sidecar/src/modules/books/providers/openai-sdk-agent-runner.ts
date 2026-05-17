@@ -229,9 +229,18 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
         modelProvider: new OpenAIProviderCtor({ openAIClient: this.getOpenAIClient() }),
         tracingDisabled: true,
       });
-      const result = this.dependencies.Runner
-        ? await this.runner.run(this.agent, initialMessage, this.abortController ? { signal: this.abortController.signal } : undefined)
-        : await this.dependencies.run(this.agent, initialMessage, this.abortController ? { signal: this.abortController.signal } : undefined);
+      let result: any;
+      try {
+        result = this.dependencies.Runner
+          ? await this.runner.run(this.agent, initialMessage, this.abortController ? { signal: this.abortController.signal } : undefined)
+          : await this.dependencies.run(this.agent, initialMessage, this.abortController ? { signal: this.abortController.signal } : undefined);
+      } catch (error) {
+        if (!shouldFallbackToChatCompletions(error, this.config.baseURL)) {
+          throw error;
+        }
+        executionLog.push(`Agents SDK run failed on compatible endpoint, falling back to chat completions: ${error instanceof Error ? error.message : String(error)}`);
+        result = await this.runChatCompletionsFallback(initialMessage, input);
+      }
 
       executionLog.push(`Agent run completed`);
 
@@ -461,6 +470,29 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
     return message;
   }
 
+  private async runChatCompletionsFallback(initialMessage: string, input: AgentRunInput) {
+    const response = await this.getOpenAIClient().chat.completions.create({
+      model: this.config.model,
+      messages: [
+        { role: "system", content: this.buildAgentInstructions(input) },
+        { role: "user", content: initialMessage },
+      ],
+      temperature: this.config.temperature ?? 0.7,
+      max_tokens: this.config.maxTokens ?? 4000,
+    });
+    return {
+      messages: [
+        {
+          role: "assistant",
+          content: response.choices?.[0]?.message?.content || "",
+        },
+      ],
+      usage: {
+        totalTokens: response.usage?.total_tokens,
+      },
+    };
+  }
+
   private async processAgentResponse(
     result: any,
     input: AgentRunInput,
@@ -583,6 +615,14 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
 
 function getTotalTokens(result: any): number | undefined {
   return result?.runContext?.usage?.totalTokens ?? result?.usage?.totalTokens;
+}
+
+function shouldFallbackToChatCompletions(error: unknown, baseURL?: string): boolean {
+  if (!baseURL || baseURL.includes("api.openai.com")) {
+    return false;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return /\b404\b|not found/i.test(message);
 }
 
 function parseBookData(
