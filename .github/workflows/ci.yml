@@ -81,6 +81,7 @@ jobs:
           cache: npm
           cache-dependency-path: packages/cloud-api/package-lock.json
       - run: npm ci
+      - run: npm run prisma:generate
       - run: npm run lint
       - run: npm run type-check
       - run: npm run test
