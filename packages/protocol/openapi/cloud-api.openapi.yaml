@@ -1,0 +1,313 @@
+openapi: 3.0.0
+paths:
+  /health:
+    get:
+      operationId: HealthController_getHealth
+      parameters: []
+      responses:
+        "200":
+          description: Service is healthy
+      summary: Health check endpoint
+      tags: &a1
+        - health
+  /health/ready:
+    get:
+      operationId: HealthController_getReadiness
+      parameters: []
+      responses:
+        "200":
+          description: Service is ready
+      summary: Readiness check endpoint
+      tags: *a1
+  /config/status:
+    get:
+      operationId: ConfigController_getStatus
+      parameters: []
+      responses:
+        "200":
+          description: Configuration status
+      summary: Get configuration status
+      tags:
+        - config
+  /devices/register:
+    post:
+      operationId: DevicesController_register
+      parameters: []
+      responses:
+        "200":
+          description: Device registered successfully
+        "400":
+          description: Invalid request
+      summary: Register a device (idempotent by machineId)
+      tags: &a2
+        - devices
+  /devices/{id}/heartbeat:
+    put:
+      operationId: DevicesController_heartbeat
+      parameters: []
+      responses:
+        "200":
+          description: Heartbeat updated
+        "404":
+          description: Device not found
+      summary: Update device heartbeat
+      tags: *a2
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /devices/{id}:
+    get:
+      operationId: DevicesController_getDevice
+      parameters: []
+      responses:
+        "200":
+          description: Device found
+        "404":
+          description: Device not found
+      summary: Get device by ID
+      tags: *a2
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /upload-items/pending-sync:
+    get:
+      operationId: UploadItemsController_getPendingSync
+      parameters:
+        - name: offset
+          required: false
+          in: query
+          description: Number of items to skip
+          schema:
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Maximum items to return
+          schema:
+            type: number
+        - name: deviceId
+          required: false
+          in: query
+          description: Filter by device ID
+          schema: {}
+      responses:
+        "200":
+          description: Pending items retrieved
+      summary: Get pending sync upload items
+      tags: &a3
+        - upload-items
+  /upload-items/{id}/sync-status:
+    put:
+      operationId: UploadItemsController_updateSyncStatus
+      parameters: []
+      responses:
+        "200":
+          description: Status updated
+        "400":
+          description: Invalid status transition
+        "404":
+          description: Item not found
+      summary: Update upload item sync status
+      tags: *a3
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /jobs/pending:
+    get:
+      operationId: JobsController_getPendingJobs
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Maximum jobs to return
+          schema:
+            type: number
+        - name: deviceId
+          required: false
+          in: query
+          description: Filter by device ID (null = unassigned)
+          schema: {}
+      responses:
+        "200":
+          description: Pending jobs retrieved
+      summary: Get pending jobs for device
+      tags: &a4
+        - jobs
+  /jobs/{id}/status:
+    put:
+      operationId: JobsController_updateStatus
+      parameters: []
+      responses:
+        "200":
+          description: Status updated
+        "400":
+          description: Invalid status transition
+        "404":
+          description: Job not found
+      summary: Update job status
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions/{sessionId}/config:
+    get:
+      operationId: WebCompanionController_getDirectUploadConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      summary: Get direct upload config for trusted upload session
+      tags: &a5
+        - web-companion
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}:
+    get:
+      operationId: WebCompanionController_getSessionSummary
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      summary: Get trusted upload session summary
+      tags: *a5
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/items:
+    post:
+      operationId: WebCompanionController_createUploadItems
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      summary: Create upload items for trusted upload session
+      tags: *a5
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/commit:
+    put:
+      operationId: WebCompanionController_commitUploadItem
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      summary: Commit upload item
+      tags: *a5
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uploadItemId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/access:
+    get:
+      operationId: WebCompanionController_validateShareToken
+      parameters:
+        - name: userAgent
+          required: false
+          in: query
+          schema: {}
+        - name: clientIp
+          required: false
+          in: query
+          schema: {}
+      responses:
+        "200":
+          description: ""
+      summary: Validate public share token
+      tags: *a5
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/assets:
+    get:
+      operationId: WebCompanionController_getSharedAssets
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: ""
+      summary: Get public shared assets
+      tags: *a5
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/book:
+    get:
+      operationId: WebCompanionController_getSharedBook
+      parameters:
+        - name: bookId
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      summary: Get public shared book metadata
+      tags: *a5
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+info:
+  title: KidMemory Cloud API
+  description: Cloud API for KidMemory - uploads, sharing, and device sync
+  version: 1.0.0
+  contact: {}
+tags:
+  - name: health
+    description: Health check endpoints
+  - name: devices
+    description: Device registration and sync
+  - name: jobs
+    description: Job lifecycle and sync
+  - name: upload-items
+    description: Upload item sync
+servers:
+  - url: http://127.0.0.1:3002
+    description: Cloud API local server
+  - url: http://localhost:3002
+    description: Cloud API local server (localhost)
+components:
+  schemas: {}

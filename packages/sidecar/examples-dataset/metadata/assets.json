@@ -1,0 +1,104 @@
+{
+  "assets": [
+    {
+      "id": "asset-sun-house",
+      "type": "artwork",
+      "title": "太阳下的小房子",
+      "imagePath": "assets/raster/阳光花园.png",
+      "thumbnailPath": "assets/raster/阳光花园.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-22",
+      "tags": [
+        "太阳",
+        "房子",
+        "黄色"
+      ],
+      "description": "一幅温暖明亮的儿童画。"
+    },
+    {
+      "id": "asset-dino-world",
+      "type": "artwork",
+      "title": "恐龙世界",
+      "imagePath": "assets/raster/恐龙世界.png",
+      "thumbnailPath": "assets/raster/恐龙世界.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-23",
+      "tags": ["恐龙", "火山", "绿色"],
+      "description": "恐龙在火山旁边散步，天空飘着白云。"
+    },
+    {
+      "id": "asset-rainbow-home",
+      "type": "artwork",
+      "title": "彩虹小家",
+      "imagePath": "assets/raster/草地男孩.png",
+      "thumbnailPath": "assets/raster/草地男孩.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-24",
+      "tags": ["彩虹", "家", "云朵"],
+      "description": "彩虹落在小房子上，像一个柔软的拱门。"
+    },
+    {
+      "id": "asset-space-trip",
+      "type": "artwork",
+      "title": "太空探险",
+      "imagePath": "assets/raster/吹泡泡.png",
+      "thumbnailPath": "assets/raster/吹泡泡.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-25",
+      "tags": ["太空", "星球", "火箭"],
+      "description": "火箭穿过星星，拜访彩色星球。"
+    },
+    {
+      "id": "asset-birthday-cake",
+      "type": "craft",
+      "title": "生日蛋糕",
+      "imagePath": "assets/raster/生日蛋糕.png",
+      "thumbnailPath": "assets/raster/生日蛋糕.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-26",
+      "tags": ["生日", "蛋糕", "手工"],
+      "description": "用纸片和蜡笔做出的三层生日蛋糕。"
+    },
+    {
+      "id": "asset-family-smile",
+      "type": "artwork",
+      "title": "幸福的一家",
+      "imagePath": "assets/raster/幸福一家.png",
+      "thumbnailPath": "assets/raster/幸福一家.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-27",
+      "tags": ["家人", "阳光", "人物"],
+      "description": "一家人站在草地上，旁边有小花和太阳。"
+    },
+    {
+      "id": "asset-paper-house",
+      "type": "craft",
+      "title": "我的小房子",
+      "imagePath": "assets/raster/小熊画.png",
+      "thumbnailPath": "assets/raster/小熊画.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-28",
+      "tags": ["建筑", "房子", "手工"],
+      "description": "纸板搭出的小房子，有蓝色屋顶和小围栏。"
+    },
+    {
+      "id": "asset-ocean-fish",
+      "type": "artwork",
+      "title": "海底世界",
+      "imagePath": "assets/raster/海底世界.png",
+      "thumbnailPath": "assets/raster/海底世界.png",
+      "sourceUrl": "self-created-cc0",
+      "license": "CC0-1.0",
+      "capturedAt": "2025-04-29",
+      "tags": ["海洋", "鱼", "蓝色"],
+      "description": "小鱼在海草之间游来游去，水面冒着泡泡。"
+    }
+  ]
+}

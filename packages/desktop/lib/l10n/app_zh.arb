@@ -1,0 +1,43 @@
+{
+  "@@locale": "zh",
+  "appTitle": "KidMemory",
+  "@appTitle": {
+    "description": "应用标题"
+  },
+  "loading": "加载中...",
+  "@loading": {
+    "description": "加载提示"
+  },
+  "error": "错误",
+  "@error": {
+    "description": "错误提示"
+  },
+  "success": "成功",
+  "@success": {
+    "description": "成功提示"
+  },
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮"
+  },
+  "confirm": "确认",
+  "@confirm": {
+    "description": "确认按钮"
+  },
+  "setupTitle": "环境配置",
+  "@setupTitle": {
+    "description": "设置页面标题"
+  },
+  "childProfileTitle": "孩子档案",
+  "@childProfileTitle": {
+    "description": "孩子档案页面标题"
+  },
+  "assetLibraryTitle": "素材库",
+  "@assetLibraryTitle": {
+    "description": "素材库页面标题"
+  },
+  "generateExportTitle": "生成导出",
+  "@generateExportTitle": {
+    "description": "生成导出页面标题"
+  }
+}

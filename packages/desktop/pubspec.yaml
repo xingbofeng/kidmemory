@@ -1,0 +1,32 @@
+name: kidmemory_desktop
+description: KidMemory 1.0 macOS desktop application.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  desktop_drop: ^0.7.1
+  file_selector: ^1.1.0
+  flutter_svg: ^2.0.17
+  qr_flutter: ^4.1.0
+  kidmemory_protocol:
+    path: ../protocol/generated/sidecar/dart
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/icons/library/
+    - assets/sample_dataset/raster/

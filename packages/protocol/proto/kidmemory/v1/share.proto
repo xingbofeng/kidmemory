@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package kidmemory.v1;
+
+message ShareToken {
+  string token = 1;
+  string child_id = 2;
+  string book_id = 3;
+  int32 max_access_count = 4;
+  int32 access_count = 5;
+  int64 expires_at = 6;
+  bool revoked = 7;
+}
+
+message ShareAccessLog {
+  string token = 1;
+  string ip_address = 2;
+  string user_agent = 3;
+  bool success = 4;
+  int64 accessed_at = 5;
+}
+
+message ValidateShareTokenRequest {
+  string token = 1;
+}
+
+message ValidateShareTokenResponse {
+  ShareToken share_token = 1;
+}

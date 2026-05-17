@@ -1,0 +1,50 @@
+{
+  "name": "@kidmemory/cloud-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "test": "find tests -name '*.test.ts' -print0 | xargs -0 tsx --test",
+    "test:unit": "find tests/unit -name '*.test.ts' -print0 | xargs -0 tsx --test",
+    "test:integration": "tsx --test tests/integration/*.test.ts",
+    "lint": "eslint --max-warnings=0 \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "type-check": "tsc -p tsconfig.build.json --noEmit",
+    "build": "node --run lint && node --run test:unit",
+    "build:prod": "npm run prisma:generate && tsc -p tsconfig.build.json",
+    "gen:openapi": "tsx scripts/generate-openapi.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:dev": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@kidmemory/protocol": "file:../protocol",
+    "@nestjs/common": "^11.1.21",
+    "@nestjs/core": "^11.1.21",
+    "@nestjs/platform-express": "^11.1.21",
+    "@nestjs/swagger": "^11.4.3",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@supabase/supabase-js": "^2.105.4",
+    "cors": "^2.8.6",
+    "helmet": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "^22.19.19",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.34.0",
+    "prisma": "^7.8.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2",
+    "yaml": "^2.8.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

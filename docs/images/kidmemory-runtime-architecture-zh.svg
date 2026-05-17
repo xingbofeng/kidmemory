@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="650" viewBox="0 0 1080 650" role="img" aria-labelledby="title desc">
+  <title id="title">KidMemory 运行时架构</title>
+  <desc id="desc">桌面端、Sidecar、本地数据库、Agent 工作区、移动 Web Companion、云端 API、对象存储与本地素材库的关系</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1f2937; }
+      .title { font-size: 30px; font-weight: 780; }
+      .subtitle { font-size: 14px; fill: #64748b; }
+      .lane { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; rx: 22; ry: 22; }
+      .box { stroke-width: 2.2; rx: 14; ry: 14; }
+      .label { font-size: 17px; font-weight: 740; text-anchor: middle; dominant-baseline: middle; }
+      .small { font-size: 13px; fill: #64748b; text-anchor: middle; dominant-baseline: middle; }
+      .arrow { stroke: #475569; stroke-width: 2.3; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 7 7; }
+    </style>
+  </defs>
+  <rect width="1080" height="650" fill="#ffffff"/>
+  <text class="title" x="64" y="58">运行时架构</text>
+  <text class="subtitle" x="66" y="84">桌面端本地核心、可选移动端伴侣以及云端辅助上传和分享面板</text>
+
+  <rect class="lane" x="50" y="115" width="980" height="260"/>
+  <text class="subtitle" x="78" y="145">本地桌面运行时</text>
+
+  <rect class="box" x="80" y="185" width="170" height="74" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="165" y="214" fill="#1e3a8a">Flutter 桌面端</text>
+  <text class="small" x="165" y="238">审核与控制</text>
+
+  <rect class="box" x="310" y="185" width="170" height="74" fill="#d1fae5" stroke="#059669"/>
+  <text class="label" x="395" y="214" fill="#064e3b">Sidecar 启动器</text>
+  <text class="small" x="395" y="238">进程和环境</text>
+
+  <rect class="box" x="540" y="185" width="190" height="74" fill="#ede9fe" stroke="#7c3aed"/>
+  <text class="label" x="635" y="214" fill="#4c1d95">NestJS 本地 API</text>
+  <text class="small" x="635" y="238">本地 HTTP 边界</text>
+
+  <rect class="box" x="800" y="185" width="180" height="74" fill="#fef3c7" stroke="#ca8a04"/>
+  <text class="label" x="890" y="214" fill="#713f12">PostgreSQL</text>
+  <text class="small" x="890" y="238">pgvector 检索</text>
+
+  <rect class="box" x="540" y="292" width="190" height="58" fill="#cffafe" stroke="#0891b2"/>
+  <text class="label" x="635" y="321" fill="#164e63">数据集/检索/任务</text>
+
+  <rect class="box" x="800" y="292" width="180" height="58" fill="#fee2e2" stroke="#dc2626"/>
+  <text class="label" x="890" y="321" fill="#7f1d1d">Agent 工作区</text>
+
+  <rect class="box" x="310" y="292" width="170" height="58" fill="#e2e8f0" stroke="#475569"/>
+  <text class="label" x="395" y="321" fill="#334155">HTML / PDF 导出</text>
+
+  <line class="arrow" x1="250" y1="222" x2="300" y2="222"/>
+  <line class="arrow" x1="480" y1="222" x2="530" y2="222"/>
+  <line class="arrow" x1="730" y1="222" x2="790" y2="222"/>
+  <line class="arrow" x1="635" y1="260" x2="635" y2="282"/>
+  <line class="arrow" x1="735" y1="321" x2="790" y2="321"/>
+  <path class="arrow" d="M800 336 C670 392 520 392 405 354"/>
+
+  <rect class="lane" x="50" y="415" width="980" height="175"/>
+  <text class="subtitle" x="78" y="445">移动端与云端伴侣</text>
+
+  <rect class="box" x="90" y="485" width="170" height="62" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="175" y="516" fill="#1e3a8a">手机浏览端</text>
+
+  <rect class="box" x="320" y="485" width="175" height="62" fill="#d1fae5" stroke="#059669"/>
+  <text class="label" x="407" y="516" fill="#064e3b">Web Companion</text>
+
+  <rect class="box" x="555" y="485" width="175" height="62" fill="#ede9fe" stroke="#7c3aed"/>
+  <text class="label" x="642" y="516" fill="#4c1d95">可信上传</text>
+
+  <rect class="box" x="790" y="440" width="175" height="62" fill="#ffedd5" stroke="#ea580c"/>
+  <text class="label" x="877" y="471" fill="#7c2d12">云 API</text>
+
+  <rect class="box" x="790" y="535" width="175" height="62" fill="#e2e8f0" stroke="#475569"/>
+  <text class="label" x="877" y="566" fill="#334155">对象存储</text>
+
+  <line class="arrow" x1="260" y1="516" x2="310" y2="516"/>
+  <line class="arrow" x1="495" y1="516" x2="545" y2="516"/>
+  <path class="arrow" d="M730 504 C752 492 764 482 780 474"/>
+  <path class="arrow" d="M730 528 C752 540 764 552 780 562"/>
+  <path class="arrow dash" d="M555 501 C442 438 298 392 190 270"/>
+  <text class="subtitle" x="385" y="420">回拉入本地素材库</text>
+</svg>

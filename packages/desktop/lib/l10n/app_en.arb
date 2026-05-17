@@ -1,0 +1,43 @@
+{
+  "@@locale": "en",
+  "appTitle": "KidMemory",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading message"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Error message"
+  },
+  "success": "Success",
+  "@success": {
+    "description": "Success message"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button"
+  },
+  "setupTitle": "Setup",
+  "@setupTitle": {
+    "description": "Setup page title"
+  },
+  "childProfileTitle": "Child Profile",
+  "@childProfileTitle": {
+    "description": "Child profile page title"
+  },
+  "assetLibraryTitle": "Asset Library",
+  "@assetLibraryTitle": {
+    "description": "Asset library page title"
+  },
+  "generateExportTitle": "Generate & Export",
+  "@generateExportTitle": {
+    "description": "Generate export page title"
+  }
+}

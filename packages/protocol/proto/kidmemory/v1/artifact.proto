@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package kidmemory.v1;
+
+enum ArtifactType {
+  ARTIFACT_TYPE_UNSPECIFIED = 0;
+  ARTIFACT_TYPE_PDF = 1;
+  ARTIFACT_TYPE_LONG_IMAGE = 2;
+  ARTIFACT_TYPE_HTML = 3;
+}
+
+message ArtifactMetadata {
+  string artifact_id = 1;
+  string book_job_id = 2;
+  ArtifactType type = 3;
+  string storage_provider = 4;
+  string object_key = 5;
+  string remote_url = 6;
+  int64 size_bytes = 7;
+  int64 created_at = 8;
+}
+
+message ArtifactSyncRequest {
+  string device_id = 1;
+  ArtifactMetadata artifact = 2;
+}
+
+message ArtifactSyncResponse {
+  bool accepted = 1;
+  string message = 2;
+}

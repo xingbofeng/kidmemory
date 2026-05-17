@@ -1,0 +1,947 @@
+openapi: 3.0.0
+paths:
+  /api/monitor/security/stats:
+    get:
+      operationId: SecurityMonitorController_getSecurityStats
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a1
+        - SecurityMonitor
+  /api/monitor/security/health:
+    get:
+      operationId: SecurityMonitorController_getSecurityHealth
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /health:
+    get:
+      operationId: ConfigController_health
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a2
+        - Config
+  /config/status:
+    get:
+      operationId: ConfigController_status
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+  /config/ui:
+    get:
+      operationId: ConfigController_uiConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+  /config/paths:
+    post:
+      operationId: ConfigController_updatePaths
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/postgres:
+    post:
+      operationId: ConfigController_updatePostgres
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/openai:
+    post:
+      operationId: ConfigController_updateOpenAI
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/supabase-storage:
+    post:
+      operationId: ConfigController_updateSupabaseStorage
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/supabase-storage/test:
+    post:
+      operationId: ConfigController_testSupabaseStorage
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/check/postgres:
+    post:
+      operationId: ConfigController_postgresReadiness
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/check/openai:
+    post:
+      operationId: ConfigController_openAIReadiness
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/check/claude:
+    post:
+      operationId: ConfigController_claudeReadiness
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /config/check/pgvector:
+    post:
+      operationId: ConfigController_pgVectorReadiness
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /schema/init:
+    post:
+      operationId: ConfigController_initializeSchema
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a2
+  /api/config/agent-configs:
+    get:
+      operationId: AgentConfigController_listConfigs
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a3
+        - AgentConfig
+    post:
+      operationId: AgentConfigController_createConfig
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a3
+  /api/config/agent-configs/{id}:
+    get:
+      operationId: AgentConfigController_getConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+    put:
+      operationId: AgentConfigController_updateConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+    delete:
+      operationId: AgentConfigController_deleteConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/config/agent-configs/default:
+    get:
+      operationId: AgentConfigController_getDefaultConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /api/config/agent-configs/{id}/set-default:
+    post:
+      operationId: AgentConfigController_setDefaultConfig
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a3
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/config/agent-configs/{id}/test:
+    post:
+      operationId: AgentConfigController_testConfig
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a3
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /sample/import:
+    post:
+      operationId: DatasetController_importSample
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a4
+        - Dataset
+  /children:
+    post:
+      operationId: DatasetController_createChild
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+    get:
+      operationId: DatasetController_listChildren
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /assets/import:
+    post:
+      operationId: DatasetController_importAssets
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+  /children/{id}:
+    get:
+      operationId: DatasetController_getChild
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    patch:
+      operationId: DatasetController_updateChild
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    delete:
+      operationId: DatasetController_deleteChild
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /assets:
+    get:
+      operationId: DatasetController_listAssets
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /assets/{id}:
+    get:
+      operationId: DatasetController_getAsset
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    patch:
+      operationId: DatasetController_updateAssetPatch
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    delete:
+      operationId: DatasetController_deleteAsset
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /assets/{id}/preview:
+    get:
+      operationId: DatasetController_getAssetPreview
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /assets/batch:
+    delete:
+      operationId: DatasetController_deleteAssetsBatch
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /search/query:
+    post:
+      operationId: DatasetController_searchAssets
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+  /search/candidate-pool:
+    get:
+      operationId: DatasetController_listSearchCandidatePool
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /search/candidate-pool/items:
+    post:
+      operationId: DatasetController_addSearchCandidatePoolItems
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+    delete:
+      operationId: DatasetController_removeSearchCandidatePoolItems
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /search/indexing-status:
+    get:
+      operationId: DatasetController_getSearchIndexingStatus
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /storage/assets/{id}/sync:
+    post:
+      operationId: DatasetController_syncAssetToStorage
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /storage/export-artifacts/{id}/sync:
+    post:
+      operationId: DatasetController_syncExportArtifactToStorage
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /storage/sync/run:
+    post:
+      operationId: DatasetController_runStorageSync
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+  /storage/export-artifacts/{id}/share:
+    get:
+      operationId: DatasetController_getExportArtifactShareMetadata
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /search/indexing/run:
+    post:
+      operationId: DatasetController_runSearchIndexer
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+  /sample/reset:
+    post:
+      operationId: DatasetController_resetSample
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a4
+  /books/jobs:
+    post:
+      operationId: BooksController_createJob
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a5
+        - Books
+    get:
+      operationId: BooksController_listJobs
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+  /books/jobs/{id}:
+    get:
+      operationId: BooksController_getJob
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /books/jobs/{id}/cancel:
+    post:
+      operationId: BooksController_cancelJob
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /books/jobs/{id}/retry:
+    post:
+      operationId: BooksController_retryJob
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /books/jobs/{id}/preview:
+    get:
+      operationId: BooksController_preview
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /books/jobs/{id}/export/pdf:
+    post:
+      operationId: BooksController_exportPdf
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /books/jobs/{id}/export/long-image:
+    post:
+      operationId: BooksController_exportLongImage
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions:
+    post:
+      operationId: WebCompanionController_createSession
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a6
+        - WebCompanion
+  /api/web-companion/sessions/{sessionId}:
+    get:
+      operationId: WebCompanionController_getSessionSummary
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/detail:
+    get:
+      operationId: WebCompanionController_getSessionDetail
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/items:
+    post:
+      operationId: WebCompanionController_createUploadItems
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/commit:
+    put:
+      operationId: WebCompanionController_commitUploadItem
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uploadItemId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/retry:
+    post:
+      operationId: WebCompanionController_retryUploadItem
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: uploadItemId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/close:
+    post:
+      operationId: WebCompanionController_closeSession
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/submit:
+    post:
+      operationId: WebCompanionController_submitSession
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/recent:
+    get:
+      operationId: WebCompanionController_getRecentUploads
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/assets/{assetId}:
+    get:
+      operationId: WebCompanionController_getAssetDetails
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: assetId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/books:
+    get:
+      operationId: WebCompanionController_getBooksList
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/books/{bookId}:
+    get:
+      operationId: WebCompanionController_getBookDetails
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: bookId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/share:
+    post:
+      operationId: WebCompanionController_createShareToken
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/sessions/{sessionId}/share/{shareTokenId}/revoke:
+    post:
+      operationId: WebCompanionController_revokeShareToken
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: shareTokenId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/access:
+    get:
+      operationId: WebCompanionController_accessSharedContent
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/assets:
+    get:
+      operationId: WebCompanionController_getSharedAssets
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/share/{shareToken}/book:
+    get:
+      operationId: WebCompanionController_getSharedBook
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+    parameters:
+      - name: shareToken
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions:
+    post:
+      operationId: DirectUploadController_createSession
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a7
+        - DirectUpload
+  /api/web-companion/direct-upload/sessions/{sessionId}/objects:
+    get:
+      operationId: DirectUploadController_listObjects
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions/{sessionId}/pullback:
+    post:
+      operationId: DirectUploadController_pullback
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a7
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions/{sessionId}/status:
+    get:
+      operationId: DirectUploadController_getStatus
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions/{sessionId}/config:
+    get:
+      operationId: DirectUploadController_getSessionConfig
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/lan/discover:
+    get:
+      operationId: LanReceiverController_discover
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a8
+        - LanReceiver
+  /api/web-companion/lan/pair:
+    post:
+      operationId: LanReceiverController_pair
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a8
+  /api/web-companion/lan/sessions/{sessionId}/upload:
+    post:
+      operationId: LanReceiverController_upload
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a8
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/lan/sessions/{sessionId}/status:
+    get:
+      operationId: LanReceiverController_getSessionStatus
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/lan/devices:
+    get:
+      operationId: LanReceiverController_discoverDevices
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /mcp:
+    post:
+      operationId: StreamableHttpController_handlePostRequest
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a9
+        - StreamableHttp
+    get:
+      operationId: StreamableHttpController_handleGetRequest
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a9
+    delete:
+      operationId: StreamableHttpController_handleDeleteRequest
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a9
+info:
+  title: KidMemory Sidecar API
+  description: Local sidecar API for KidMemory desktop application
+  version: 1.0.0
+  contact: {}
+tags:
+  - name: config
+    description: Configuration endpoints
+  - name: dataset
+    description: Dataset management
+  - name: books
+    description: Book generation
+  - name: web-companion
+    description: Web companion endpoints
+servers:
+  - url: http://127.0.0.1:4317
+    description: Sidecar local API
+  - url: http://localhost:4317
+    description: Sidecar local API (localhost)
+components:
+  schemas: {}

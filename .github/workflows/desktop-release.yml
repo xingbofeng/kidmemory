@@ -1,0 +1,78 @@
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - "v*-alpha"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: build macOS artifact and prerelease
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/sidecar/package-lock.json
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build sidecar dist
+        working-directory: packages/sidecar
+        run: |
+          npm ci
+          npm run prisma:generate
+          npm run build:prod
+
+      - name: Build desktop app
+        working-directory: packages/desktop
+        run: |
+          flutter pub get
+          flutter build macos --release
+
+      - name: Bundle sidecar into .app
+        run: |
+          set -euo pipefail
+          APP_PATH="$(find packages/desktop/build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -n 1)"
+          if [ -z "${APP_PATH}" ]; then
+            echo "No macOS .app artifact found"
+            exit 1
+          fi
+          RESOURCE_DIR="${APP_PATH}/Contents/Resources/sidecar"
+          mkdir -p "${RESOURCE_DIR}"
+          cp -R packages/sidecar/dist "${RESOURCE_DIR}/dist"
+          cp packages/sidecar/package.json "${RESOURCE_DIR}/package.json"
+
+      - name: Archive artifact
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          APP_PATH="$(find packages/desktop/build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -n 1)"
+          APP_NAME="$(basename "${APP_PATH}")"
+          tar -czf "dist/${APP_NAME}.tar.gz" -C "$(dirname "${APP_PATH}")" "${APP_NAME}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos-unsigned
+          path: dist/*.tar.gz
+
+      - name: Create GitHub prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: dist/*.tar.gz
+          body: |
+            Unsigned macOS alpha artifact built by CI.
+            Use for internal validation only.

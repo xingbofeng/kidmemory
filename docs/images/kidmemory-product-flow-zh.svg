@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430" role="img" aria-labelledby="title desc">
+  <title id="title">KidMemory 产品流程</title>
+  <desc id="desc">采集、整理、检索、编排、生成、审核、发布、归档</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#475569"/>
+    </marker>
+    <style>
+      text { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; }
+      .title { font-size: 28px; font-weight: 750; }
+      .label { font-size: 20px; font-weight: 760; text-anchor: middle; dominant-baseline: middle; }
+      .note { font-size: 13px; fill: #64748b; text-anchor: middle; }
+      .box { rx: 14; ry: 14; stroke-width: 2.2; }
+      .arrow { stroke: #475569; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="980" height="430" fill="#ffffff"/>
+  <text class="title" x="70" y="62">KidMemory 产品流程</text>
+  <text class="note" x="280" y="88">从零散家庭素材到可审核、可导出、可长期保存的记忆作品</text>
+
+  <rect class="box" x="70" y="130" width="150" height="72" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="145" y="166" fill="#1e3a8a">采集</text>
+  <line class="arrow" x1="224" y1="166" x2="280" y2="166"/>
+
+  <rect class="box" x="290" y="130" width="150" height="72" fill="#d1fae5" stroke="#059669"/>
+  <text class="label" x="365" y="166" fill="#064e3b">整理</text>
+  <line class="arrow" x1="444" y1="166" x2="500" y2="166"/>
+
+  <rect class="box" x="510" y="130" width="150" height="72" fill="#ede9fe" stroke="#7c3aed"/>
+  <text class="label" x="585" y="166" fill="#4c1d95">检索</text>
+  <line class="arrow" x1="664" y1="166" x2="720" y2="166"/>
+
+  <rect class="box" x="730" y="130" width="150" height="72" fill="#fef3c7" stroke="#ca8a04"/>
+  <text class="label" x="805" y="166" fill="#713f12">编排</text>
+  <path class="arrow" d="M805 206 C805 238 805 244 805 272"/>
+
+  <rect class="box" x="730" y="280" width="150" height="72" fill="#fee2e2" stroke="#dc2626"/>
+  <text class="label" x="805" y="316" fill="#7f1d1d">生成</text>
+  <line class="arrow" x1="726" y1="316" x2="670" y2="316"/>
+
+  <rect class="box" x="510" y="280" width="150" height="72" fill="#cffafe" stroke="#0891b2"/>
+  <text class="label" x="585" y="316" fill="#164e63">审核</text>
+  <line class="arrow" x1="506" y1="316" x2="450" y2="316"/>
+
+  <rect class="box" x="290" y="280" width="150" height="72" fill="#ffedd5" stroke="#ea580c"/>
+  <text class="label" x="365" y="316" fill="#7c2d12">发布</text>
+  <line class="arrow" x1="286" y1="316" x2="230" y2="316"/>
+
+  <rect class="box" x="70" y="280" width="150" height="72" fill="#e2e8f0" stroke="#475569"/>
+  <text class="label" x="145" y="316" fill="#334155">归档</text>
+</svg>

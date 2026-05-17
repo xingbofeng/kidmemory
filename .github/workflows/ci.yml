@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sidecar:
+    name: sidecar build and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/sidecar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/sidecar/package-lock.json
+            packages/protocol/package-lock.json
+
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
+
+      - name: Start PostgreSQL with pgvector
+        run: |
+          docker run -d \
+            --name postgres-test \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=kidmemory_test \
+            -p 5432:5432 \
+            pgvector/pgvector:pg16
+          
+          # Wait for PostgreSQL to be ready
+          timeout 30 bash -c 'until docker exec postgres-test pg_isready -U postgres; do sleep 1; done'
+
+      - run: npm ci
+      - run: npm run prisma:generate
+
+      - name: Apply Prisma migrations to test database
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - run: npm run lint
+      - run: npm run type-check
+      - name: Run all tests
+        run: npm run test
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_DATABASE: kidmemory_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - run: npm run build
+
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker stop postgres-test && docker rm postgres-test
+
+
+  cloud_api:
+    name: cloud-api lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cloud-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/cloud-api/package-lock.json
+            packages/protocol/package-lock.json
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm run test
+      - run: npm run build
+      - run: npm run gen:openapi
+      - name: Ensure cloud-api OpenAPI artifacts are up to date
+        run: git diff --exit-code -- ../protocol/openapi/cloud-api.openapi.json ../protocol/openapi/cloud-api.openapi.yaml
+
+  web_companion:
+    name: web companion type-check, lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/web/package-lock.json
+            packages/protocol/package-lock.json
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm test -- --run
+      - run: npm run build
+
+  desktop_flutter:
+    name: desktop flutter analyze and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # Visual regression goldens (test/visual_golden_test.dart and goldens/*.png)
+      # are captured on macOS with PingFang SC and will diff against Linux font
+      # rendering, so the CI run skips them. Other test files cover routing,
+      # widget contracts, and architecture invariants.
+      - name: Run unit and widget tests (excluding visual goldens)
+        run: |
+          set -euo pipefail
+          mapfile -t TEST_FILES < <(find test -name '*_test.dart' -not -name 'visual_golden_test.dart')
+          flutter test "${TEST_FILES[@]}"
+        shell: bash

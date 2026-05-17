@@ -1,0 +1,49 @@
+{
+  "name": "@kidmemory/protocol",
+  "version": "0.1.0",
+  "description": "KidMemory unified protocol layer - API types, error codes, and response formats",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./sidecar": {
+      "types": "./src/sidecar/index.ts",
+      "default": "./dist/sidecar/index.js"
+    },
+    "./cloud-api": {
+      "types": "./src/cloud-api/index.ts",
+      "default": "./dist/cloud-api/index.js"
+    },
+    "./generated/cloud-api/ts": "./generated/cloud-api/ts/index.d.ts",
+    "./generated/sidecar/ts": "./generated/sidecar/ts/index.d.ts"
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "type-check": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "docs:openapi": "npm --prefix ../sidecar run gen:openapi && npm --prefix ../cloud-api run gen:openapi && node scripts/enhance-openapi-docs.mjs && npx redoc-cli bundle openapi/sidecar.openapi.enhanced.json --options.hideHostname=true --options.pathInMiddlePanel=true -o openapi/sidecar.openapi.preview.zh.html && npx redoc-cli bundle openapi/cloud-api.openapi.enhanced.json --options.hideHostname=true --options.pathInMiddlePanel=true -o openapi/cloud-api.openapi.preview.zh.html",
+    "gen:ts": "node scripts/generate-ts-client.mjs",
+    "gen:dart": "node scripts/generate-dart-client.mjs",
+    "proto:lint": "buf lint proto"
+  },
+  "keywords": [
+    "protocol",
+    "api",
+    "types"
+  ],
+  "author": "KidMemory Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@bufbuild/buf": "^1.69.0",
+    "@openapitools/openapi-generator-cli": "^2.22.0",
+    "@types/node": "^22.0.0",
+    "openapi-typescript": "^7.10.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

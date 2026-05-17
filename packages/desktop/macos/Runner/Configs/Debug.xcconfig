@@ -1,0 +1,9 @@
+#include? "PodsRunnerDebug.xcconfig"
+#include "../../Flutter/Flutter-Debug.xcconfig"
+#include "Warnings.xcconfig"
+#include "AppInfo.xcconfig"
+
+// Local debug builds on Apple Silicon should not compile x86_64 slices, otherwise
+// some CocoaPods Swift headers can fail with "unsupported Swift architecture".
+ONLY_ACTIVE_ARCH = YES
+EXCLUDED_ARCHS[sdk=macosx*] = x86_64

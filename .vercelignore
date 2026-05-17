@@ -1,0 +1,14 @@
+.git
+.agents
+.claude
+.codebuddy
+.codex
+.vscode
+.env
+apps
+examples
+node_modules
+packages/sidecar
+packages/desktop
+scripts
+templates
