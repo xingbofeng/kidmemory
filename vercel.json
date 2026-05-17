@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd packages/web && npm run build",
+  "buildCommand": "cd packages/protocol && npm ci && npm run build && cd ../web && npm ci && npm run build",
   "outputDirectory": "packages/web/dist",
   "routes": [
     {
