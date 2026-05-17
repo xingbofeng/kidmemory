@@ -408,7 +408,7 @@
 - [x] 5.10 sidecar 和 cloud-api 可独立启动
 - [x] 5.11 sidecar 可向 cloud-api 注册设备，心跳正常，上传素材可被拉取到本地
 - [x] 5.12 cloud-api 不可达时 sidecar 本地功能正常（离线降级）
-- [~] 5.13 CI 全绿
-- [ ] 5.14 cloud-api 部署成功
-- [ ] 5.15 Web 部署成功
+- [x] 5.13 CI 全绿
+- [x] 5.14 cloud-api 部署成功
+- [x] 5.15 Web 部署成功
 - [x] 5.16 desktop release dry-run 成功

@@ -18,13 +18,16 @@ This document describes the SSH + PM2 deployment path used by `.github/workflows
 - `pm2`
 - project repo already cloned on the server (`TENCENT_PROJECT_PATH`)
 - cloud-api runtime `.env` present at `packages/cloud-api/.env`
+- PostgreSQL reachable by `DATABASE_URL`
+- `pgvector` extension enabled in the target database
 
 ## Deployment Flow
 
 1. Fetch and reset to `origin/main`.
-2. Build and migrate `packages/cloud-api`.
-3. Reload PM2 services.
-4. Optionally run smoke checks if `TENCENT_SMOKE_BASE_URL` is configured.
+2. Build `packages/protocol` so runtime JS and generated type exports are present.
+3. Build and migrate `packages/cloud-api`.
+4. Reload PM2 services.
+5. Optionally run smoke checks if `TENCENT_SMOKE_BASE_URL` is configured.
 
 ## Smoke Endpoint Expectations
 

@@ -2,6 +2,13 @@
 
 Web deployment is triggered by `.github/workflows/deploy-vercel.yml`.
 
+The project-level Vercel build command is defined in `vercel.json` and must build
+the shared protocol package before the web package:
+
+```bash
+cd packages/protocol && npm ci && npm run build && cd ../web && npm ci && npm run build
+```
+
 ## Required GitHub Secret
 
 - `VERCEL_DEPLOY_HOOK_URL`: deploy hook URL from your Vercel project.

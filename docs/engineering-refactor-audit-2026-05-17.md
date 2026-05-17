@@ -92,18 +92,18 @@ API migration契约复核：
 ## Step 5 status
 
 - 5.1~5.12: 本地等价验收已完成（含 DB 集成与 smoke）。
-- 5.13 CI 全绿：本地等价命令链全绿，但远端 GitHub Actions 仍需一次真实流水线结果作为最终证据。
-- 5.14 cloud-api deployment success: **environment-gated**（需真实云端主机、密钥、网络）。
-- 5.15 web deployment success: **environment-gated**（需真实 Vercel 环境与部署触发）。
+- 5.13 CI 全绿：PR #1 最新 head `8ee14a1` 的 required checks 均通过（Vercel / Vercel Preview Comments）。
+- 5.14 cloud-api deployment success: 腾讯云轻量云 `openclaw` 已完成 cloud-api + PostgreSQL/pgvector 部署，本机 smoke 通过。
+- 5.15 web deployment success: Vercel preview deployment `dpl_2mBvBGbdJqmK7GqNBn21rqaHk15K` 成功完成。
 
 ## Blockers
 
-Deployment verification cannot be fully closed in local workspace without real GitHub Secrets / target infrastructure.
+No remaining Step5 deployment blocker is known. Public exposure for `cloud-api` port `3002` is intentionally not enabled; current verified state is server-local `127.0.0.1:3002` behind the Tencent Lighthouse host.
 
 ## Conclusion
 
 - Step1~4：按“默认未完成”标准重验并修复后，当前本地证据已闭环（架构、代码、类型、lint、测试、API 迁移）。
-- Step5：本地可验证项已覆盖，剩余阻塞仅为真实远端部署与远端 CI 结果证明。
+- Step5：本地与真实远端/云端证据均已闭环。
 
 ## Additional production-build findings fixed in this pass
 
@@ -174,3 +174,27 @@ Note: sidecar `dist/main.js` local runtime currently still depends on protocol p
   - 增加 `npm not found` 的显式失败信息，避免静默中断；
   - 新增 `workflow_dispatch` 触发器，支持独立手动回归部署链路；
   - YAML 语法已通过本地解析校验。
+
+## Final remote step5 closure
+
+- Tencent Cloud Lighthouse instance:
+  - instance name: `openclaw`
+  - instance id: `lhins-asfmdslr`
+  - region: `ap-hongkong`
+  - public IPv4: `43.154.203.68`
+- Cloud database/runtime evidence:
+  - PostgreSQL database `kidmemory` accepts the `kidmemory` role with the newly configured password.
+  - `pgvector` extension is installed in `kidmemory`, version `0.8.2`.
+  - cloud-api environment file exists at `/root/kidmemory/packages/cloud-api/.env`.
+  - secrets are stored root-only under `/root/kidmemory/.secrets/`.
+  - PM2 process `kidmemory-cloud-api` is `online`, cwd `/root/kidmemory/packages/cloud-api`, script `/root/kidmemory/packages/cloud-api/dist/main.js`, port `3002`.
+  - remote smoke passed: `HEALTH=ok`, `OPENAPI=ok`, `DB_AUTH=ok`, `VECTOR=0.8.2`.
+- Vercel evidence:
+  - Previous failed deployment `dpl_28ZxYW3ZwUokrgBtf3ahfhyCR15X` failed because Vercel built `packages/web` without a clean package-local install and without building `packages/protocol` first.
+  - Fixed `vercel.json` build command to run protocol install/build before web install/build.
+  - Local equivalent Vercel command passed:
+    `cd packages/protocol && npm ci && npm run build && cd ../web && npm ci && npm run build`.
+  - New Vercel deployment `dpl_2mBvBGbdJqmK7GqNBn21rqaHk15K` completed successfully.
+- PR evidence:
+  - PR #1 head `8ee14a1d24607c84a996f949121c1bdd06882ee9`.
+  - `gh pr checks 1` shows `Vercel` pass and `Vercel Preview Comments` pass.
