@@ -1,6 +1,7 @@
 name: Deploy to Tencent Cloud
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["CI"]
     types:
@@ -24,6 +25,28 @@ jobs:
           script: |
             set -e
             PROJECT_PATH="${{ secrets.TENCENT_PROJECT_PATH || '/root/kidmemory' }}"
+
+            # Ensure Node.js toolchain is available in non-interactive SSH shell
+            if ! command -v npm >/dev/null 2>&1; then
+              export NVM_DIR="$HOME/.nvm"
+              if [ -s "$NVM_DIR/nvm.sh" ]; then
+                . "$NVM_DIR/nvm.sh"
+                nvm use --lts >/dev/null 2>&1 || true
+              fi
+            fi
+
+            if ! command -v npm >/dev/null 2>&1; then
+              if [ -x "/usr/local/bin/npm" ]; then
+                export PATH="/usr/local/bin:$PATH"
+              elif [ -x "/opt/homebrew/bin/npm" ]; then
+                export PATH="/opt/homebrew/bin:$PATH"
+              fi
+            fi
+
+            if ! command -v npm >/dev/null 2>&1; then
+              echo "npm not found in PATH after bootstrap; aborting deploy"
+              exit 127
+            fi
 
             cd "$PROJECT_PATH"
             git fetch origin main && git reset --hard origin/main

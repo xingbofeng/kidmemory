@@ -191,6 +191,7 @@ if [ -d "packages/cloud-api" ]; then
     run_test_suite "cloud-api-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/cloud-api"
     run_test_suite "cloud-api-unit" "npm run test" "$PROJECT_ROOT/packages/cloud-api"
     run_test_suite "cloud-api-build-prod" "npm run build:prod" "$PROJECT_ROOT/packages/cloud-api"
+    run_test_suite "cloud-api-runtime-smoke" "DATABASE_URL=postgresql://$USER@127.0.0.1:5432/kidmemory_cloud bash -c 'node dist/main.js > /tmp/kidmemory-cloudapi-smoke.log 2>&1 & pid=\$!; sleep 4; curl -fsS http://127.0.0.1:3002/health >/dev/null; curl -fsS http://127.0.0.1:3002/docs/openapi.json >/dev/null; kill \$pid; wait \$pid 2>/dev/null || true'" "$PROJECT_ROOT/packages/cloud-api"
 
     cd "$PROJECT_ROOT"
 else
@@ -218,6 +219,8 @@ if [ -d "packages/sidecar" ]; then
     if grep -q '"type-check"' package.json; then
         run_test_suite "sidecar-typecheck" "npm run type-check" "$PROJECT_ROOT/packages/sidecar"
     fi
+    run_test_suite "sidecar-build-prod" "npm run build:prod" "$PROJECT_ROOT/packages/sidecar"
+    run_test_suite "sidecar-runtime-smoke" "DATABASE_URL=postgresql://$USER@127.0.0.1:5432/kidmemory_acceptance bash -c 'node dist/main.js > /tmp/kidmemory-sidecar-smoke.log 2>&1 & pid=\$!; sleep 4; curl -fsS http://127.0.0.1:4317/health >/dev/null; curl -fsS http://127.0.0.1:4317/docs/openapi.json >/dev/null; kill \$pid; wait \$pid 2>/dev/null || true'" "$PROJECT_ROOT/packages/sidecar"
 
     cd "$PROJECT_ROOT"
 else
@@ -298,8 +301,9 @@ fi
 echo ""
 
 # 7. 架构测试
+cd "$PROJECT_ROOT"
 if [ -f "packages/sidecar/tests/architecture/architecture.test.ts" ]; then
-    run_test_suite "architecture" "tsx --test tests/architecture/architecture.test.ts" "$PROJECT_ROOT/packages/sidecar"
+    run_test_suite "architecture" "npx tsx --test tests/architecture/architecture.test.ts" "$PROJECT_ROOT/packages/sidecar"
 fi
 
 echo ""

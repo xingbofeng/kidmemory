@@ -3,20 +3,20 @@
   "version": "0.1.0",
   "description": "KidMemory unified protocol layer - API types, error codes, and response formats",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./sidecar": {
-      "types": "./src/sidecar/index.ts",
-      "default": "./src/sidecar/index.ts"
+      "types": "./dist/sidecar/index.d.ts",
+      "default": "./dist/sidecar/index.js"
     },
     "./cloud-api": {
-      "types": "./src/cloud-api/index.ts",
-      "default": "./src/cloud-api/index.ts"
+      "types": "./dist/cloud-api/index.d.ts",
+      "default": "./dist/cloud-api/index.js"
     },
     "./generated/cloud-api/ts": "./generated/cloud-api/ts/index.d.ts",
     "./generated/sidecar/ts": "./generated/sidecar/ts/index.d.ts"

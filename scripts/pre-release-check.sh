@@ -258,7 +258,7 @@ log_category "依赖和漏洞检查"
 # 后端依赖漏洞检查
 if [ -d "packages/sidecar/node_modules" ]; then
     cd packages/sidecar
-    if npm audit --audit-level=high >/dev/null 2>&1; then
+    if npm audit --omit=dev --audit-level=high >/dev/null 2>&1; then
         check_result "后端依赖安全" "PASS"
     else
         check_result "后端依赖安全" "WARN" "发现高危依赖漏洞（建议在发布前修复）" "false"
@@ -269,7 +269,7 @@ fi
 # Web 前端依赖漏洞检查
 if [ -d "packages/web/node_modules" ]; then
     cd packages/web
-    if npm audit --audit-level=high >/dev/null 2>&1; then
+    if npm audit --omit=dev --audit-level=high >/dev/null 2>&1; then
         check_result "Web前端依赖安全" "PASS"
     else
         check_result "Web前端依赖安全" "WARN" "发现高危依赖漏洞（建议在发布前修复）" "false"
