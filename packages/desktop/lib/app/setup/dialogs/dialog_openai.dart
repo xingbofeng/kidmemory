@@ -14,6 +14,7 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
     final openai = status['openai'] is Map<String, dynamic>
         ? status['openai'] as Map<String, dynamic>
         : const <String, dynamic>{};
+
     final baseUrlController = TextEditingController(
       text: _stringOrDefault(openai['baseUrl'], ''),
     );
@@ -26,6 +27,7 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
         cachedApiKey: _openAiApiKeyCache ?? '',
       ),
     );
+
     var showApiKey = false;
 
     final shouldSave = await showDialog<bool>(
@@ -33,7 +35,7 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text('配置大模型接口'),
+            title: Text(AppLocalizations.of(context)!.setupOpenAiDialogTitle),
             content: SizedBox(
               width: 560,
               child: SingleChildScrollView(
@@ -59,10 +61,13 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
                       onTap: () => _selectAllText(apiKeyController),
                       decoration: InputDecoration(
                         labelText: 'OPENAI_API_KEY',
-                        hintText: '输入 API Key',
-                        helperText: '本地明文保存，点击眼睛可显示/隐藏',
+                        hintText: AppLocalizations.of(context)!.setupInputApiKey,
+                        helperText:
+                            AppLocalizations.of(context)!.setupApiKeyVisibilityHint,
                         suffixIcon: IconButton(
-                          tooltip: showApiKey ? '隐藏' : '显示',
+                          tooltip: showApiKey
+                              ? AppLocalizations.of(context)!.actionHide
+                              : AppLocalizations.of(context)!.actionShow,
                           onPressed: () =>
                               setDialogState(() => showApiKey = !showApiKey),
                           icon: Icon(
@@ -83,17 +88,18 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.actionCancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('保存'),
+                child: Text(AppLocalizations.of(context)!.actionSave),
               ),
             ],
           );
         },
       ),
     );
+
     if (shouldSave != true) return;
 
     final draft = _OpenAiConfigDraft.fromControllers(
@@ -111,9 +117,19 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
     if (result.okValue) {
       _setShellState(() => _openAiApiKeyCache = draft.apiKey);
     }
-    _appendLog(result.okValue ? 'OpenAI 配置已更新' : 'OpenAI 配置更新失败');
+
+    _appendLog(
+      result.okValue
+          ? AppLocalizations.of(context)!.setupOpenAiConfigUpdated
+          : AppLocalizations.of(context)!.setupOpenAiConfigUpdateFailed,
+    );
     if (!mounted) return;
-    _showSnackBar(result.okValue ? 'OpenAI 配置已保存' : 'OpenAI 配置保存失败');
-    await refreshReadiness();
+
+    _showSnackBar(
+      result.okValue
+          ? AppLocalizations.of(context)!.setupOpenAiConfigSaved
+          : AppLocalizations.of(context)!.setupOpenAiConfigSaveFailed,
+    );
+    await _DesktopShellReadiness(this).refreshReadiness();
   }
 }

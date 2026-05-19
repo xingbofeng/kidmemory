@@ -26,6 +26,7 @@
 
 - `product/architecture.md`：长期架构说明。
 - `product/roadmap.md`：功能路线图。
+- `agent-workflow/`：Hermes + 本地 Harness + Codex 的 Issue 驱动开发流程。
 - `acceptance/manual-e2e-checklist.md`：功能验收清单（按钮级 + 接口级，可逐条打勾执行）。
 - `design/`：设计稿和视觉参考。
 - `assets/`：文档使用的静态资源。

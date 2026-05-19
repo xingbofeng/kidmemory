@@ -132,10 +132,10 @@ class _AssetLibraryController {
         .toList();
     if (normalized.isNotEmpty) return normalized;
     return const [
-      {'value': 'all', 'label': '全部'},
-      {'value': 'artwork', 'label': '绘画'},
-      {'value': 'photo', 'label': '照片'},
-      {'value': 'craft', 'label': '手工'},
+      {'value': 'all', 'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel},
+      {'value': 'artwork', 'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel},
+      {'value': 'photo', 'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel},
+      {'value': 'craft', 'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel},
     ];
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_step.dart';
+import '../../../l10n/app_localizations.dart';
 
 abstract final class AppIconAssets {
   static const libraryRoot = 'assets/icons/library';
@@ -241,7 +242,7 @@ class Sidebar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: const [
+                    children: [
                       BearBadge(size: 56),
                       SizedBox(width: 14),
                       Expanded(
@@ -259,7 +260,7 @@ class Sidebar extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '本地成长档案',
+                              AppLocalizations.of(context)!.sidebarLocalProfileTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -275,28 +276,32 @@ class Sidebar extends StatelessWidget {
                   const SizedBox(height: 28),
                   NavItem(
                     iconAsset: childIconAsset,
-                    label: '孩子档案',
+                    label: AppLocalizations.of(context)!.childProfileTitle,
+                    icon: Icons.child_care_rounded,
                     active: step == AppStep.child,
                     enabled: !navigationLocked,
                     onTap: () => onStep(AppStep.child),
                   ),
                   NavItem(
                     iconAsset: folderIconAsset,
-                    label: '素材库',
+                    label: AppLocalizations.of(context)!.assetLibraryTitle,
+                    icon: Icons.grid_view_rounded,
                     active: step == AppStep.assets,
                     enabled: !navigationLocked && hasChildProfile,
                     onTap: () => onStep(AppStep.assets),
                   ),
                   NavItem(
                     iconAsset: wandIconAsset,
-                    label: '创作台',
+                    label: AppLocalizations.of(context)!.assetStudioTitle,
+                    icon: Icons.auto_awesome_rounded,
                     active: step == AppStep.generate,
                     enabled: !navigationLocked,
                     onTap: () => onStep(AppStep.generate),
                   ),
                   NavItem(
                     iconAsset: settingsIconAsset,
-                    label: '设置',
+                    label: AppLocalizations.of(context)!.sidebarSettingsTitle,
+                    icon: Icons.settings_rounded,
                     active: step == AppStep.setup,
                     enabled: true,
                     onTap: () => onStep(AppStep.setup),
@@ -378,13 +383,13 @@ class NavItem extends StatelessWidget {
                   child: Opacity(
                     opacity: enabled ? 1 : 0.48,
                     child: Row(
-                      children: [
-                        Icon(
-                          _navIconForLabel(label),
-                          size: 22,
-                          color: active
-                              ? const Color(0xff14773c)
-                              : const Color(0xff6f6258),
+                        children: [
+                          Icon(
+                            icon ?? Icons.circle_outlined,
+                            size: 22,
+                            color: active
+                                ? const Color(0xff14773c)
+                                : const Color(0xff6f6258),
                         ),
                         const SizedBox(width: 14),
                         Text(
@@ -412,16 +417,7 @@ class NavItem extends StatelessWidget {
   }
 }
 
-IconData _navIconForLabel(String label) {
-  if (label.contains('孩子')) return Icons.child_care_rounded;
-  if (label.contains('素材')) return Icons.grid_view_rounded;
-  if (label.contains('生成') || label.contains('创作')) {
-    return Icons.auto_awesome_rounded;
-  }
-  if (label.contains('示例')) return Icons.dataset_outlined;
-  if (label.contains('设置')) return Icons.settings_rounded;
-  return Icons.circle_outlined;
-}
+ 
 
 class BearBadge extends StatelessWidget {
   const BearBadge({this.size = 72, super.key});
@@ -451,11 +447,11 @@ class _SidebarSignature extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xffe8e2d9)),
     ),
-    child: const Column(
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '本地优先',
+          AppLocalizations.of(context)!.localPriorityLabel,
           style: TextStyle(
             color: Color(0xff2d241c),
             fontSize: 15,
@@ -464,7 +460,7 @@ class _SidebarSignature extends StatelessWidget {
         ),
         SizedBox(height: 6),
         Text(
-          '每一份素材，都会进入本地成长档案。',
+          AppLocalizations.of(context)!.sidebarSignatureDescription,
           style: TextStyle(
             color: Color(0xff8c7663),
             height: 1.45,

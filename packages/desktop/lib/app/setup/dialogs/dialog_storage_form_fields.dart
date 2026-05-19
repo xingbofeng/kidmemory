@@ -10,7 +10,7 @@ const _supabaseApiKeysDocsUrl = 'https://supabase.com/docs/guides/api/api-keys';
 
 extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
   void _selectAllText(TextEditingController controller) {
-    controller.selection = TextSelection(
+    controller.election = TextSelection(
       baseOffset: 0,
       extentOffset: controller.text.length,
     );
@@ -88,7 +88,7 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       if (helpUrl != null && helpTooltip != null)
         _storageDialogDocsButton(tooltip: helpTooltip, url: helpUrl),
       IconButton(
-        tooltip: visible ? '隐藏' : '显示',
+        tooltip: visible ? AppLocalizations.of(context)!.actionHide : AppLocalizations.of(context)!.actionShow,
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
@@ -167,14 +167,14 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
     required VoidCallback onToggleS3SecretKey,
   }) {
     return [
-      const Text(
-        '先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。',
+      Text(
+        AppLocalizations.of(context)!.setupStorageSectionIntro,
         style: TextStyle(color: Color(0xff6f6258), height: 1.35),
       ),
       _storageDialogGap(14),
       _storageDialogSectionTitle(
-        'S3 方式（推荐）',
-        helpTooltip: '打开 Supabase S3 官方说明',
+        AppLocalizations.of(context)!.setupStorageS3ModeLabel,
+        helpTooltip: AppLocalizations.of(context)!.setupOpenSupabaseS3Docs,
         helpUrl: _supabaseStorageS3AuthDocsUrl,
       ),
       _storageDialogGap(),
@@ -220,27 +220,27 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
     return [
       _storageDialogField(
         controller: s3EndpointController,
-        label: '接口地址',
-        hintText: 'https://<project-ref>.storage.supabase.co/storage/v1/s3',
-        helperText: '去 Supabase 的 Storage > Settings > S3 说明页复制 endpoint。',
+        label: AppLocalizations.of(context)!.setupStorageEndpointLabel,
+        hintText: 'https://<project-ref>.torage.upabase.co/storage/v1/s3',
+        helperText: AppLocalizations.of(context)!.setupStorageS3EndpointHint,
         helpUrl: _supabaseStorageS3CompatibilityDocsUrl,
-        helpTooltip: '打开 S3 兼容性说明',
+        helpTooltip: AppLocalizations.of(context)!.setupOpenS3CompatibilityHelp,
       ),
       _storageDialogGap(),
       _storageDialogField(
         controller: s3RegionController,
-        label: '区域',
+        label: AppLocalizations.of(context)!.setupRegionLabel,
         hintText: 'auto',
-        helperText: '大多数项目直接填 auto 就行。',
+        helperText: AppLocalizations.of(context)!.setupAutoUseAutoValue,
       ),
       _storageDialogGap(),
       _storageDialogField(
         controller: bucketController,
-        label: '桶名',
+        label: AppLocalizations.of(context)!.setupBucketNameLabel,
         hintText: 'kidmemory',
-        helperText: '去 Supabase 的 Storage > Buckets 里看 bucket 名。',
+        helperText: AppLocalizations.of(context)!.setupStorageBucketNameHint,
         helpUrl: _supabaseStorageBucketsDocsUrl,
-        helpTooltip: '打开 buckets 官方说明',
+        helpTooltip: AppLocalizations.of(context)!.setupOpenBucketsHelp,
       ),
       _storageDialogGap(),
       _storageDialogSecretField(
@@ -248,10 +248,10 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         label: 'Access Key ID',
         visible: showS3AccessKey,
         onToggle: onToggleS3AccessKey,
-        hintText: '输入或粘贴 Access Key ID',
-        helperText: '去 Supabase 的 Storage > Settings > S3 说明页复制 Access Key ID。',
+        hintText: AppLocalizations.of(context)!.setupInputAccessKeyId,
+        helperText: AppLocalizations.of(context)!.setupStorageS3AccessKeyIdHint,
         helpUrl: _supabaseStorageS3AuthDocsUrl,
-        helpTooltip: '打开 S3 认证说明',
+        helpTooltip: AppLocalizations.of(context)!.setupOpenS3AuthHelp,
       ),
       _storageDialogGap(),
       _storageDialogSecretField(
@@ -259,11 +259,11 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         label: 'Secret Access Key',
         visible: showS3SecretKey,
         onToggle: onToggleS3SecretKey,
-        hintText: '输入或粘贴 Secret Access Key',
+        hintText: AppLocalizations.of(context)!.setupInputSecretAccessKey,
         helperText:
-            '去 Supabase 的 Storage > Settings > S3 说明页复制 Secret Access Key。',
+            AppLocalizations.of(context)!.setupStorageS3SecretKeyHint,
         helpUrl: _supabaseStorageS3AuthDocsUrl,
-        helpTooltip: '打开 S3 认证说明',
+        helpTooltip: AppLocalizations.of(context)!.setupOpenS3AuthHelp,
       ),
     ];
   }
@@ -279,30 +279,30 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
   }) {
     return [
       _storageDialogSectionTitle(
-        'REST 方式（可选）',
-        helpTooltip: '打开 Supabase API Keys 官方说明',
+        AppLocalizations.of(context)!.setupStorageRestModeLabel,
+        helpTooltip: AppLocalizations.of(context)!.setupOpenSupabaseApiKeysHelp,
         helpUrl: _supabaseApiKeysDocsUrl,
       ),
       _storageDialogGap(),
       _storageDialogField(
         controller: urlController,
-        label: '项目地址',
-        hintText: 'https://<project-ref>.supabase.co',
-        helperText: '去 Supabase 项目首页或 Settings > API 里找 SUPABASE_URL。',
+        label: AppLocalizations.of(context)!.setupProjectUrlLabel,
+        hintText: 'https://<project-ref>.upabase.co',
+        helperText: AppLocalizations.of(context)!.setupStorageProjectUrlHint,
       ),
       _storageDialogGap(),
       _storageDialogField(
         controller: publicBaseUrlController,
-        label: '公开访问前缀（可选）',
-        hintText: '公开桶可填完整对象前缀',
-        helperText: '只有公开桶才需要；私有桶可以留空，分享时会自动生成签名链接。',
+        label: AppLocalizations.of(context)!.setupStoragePublicAccessPrefixLabel,
+        hintText: AppLocalizations.of(context)!.setupStoragePublicPrefixHint,
+        helperText: AppLocalizations.of(context)!.setupPublicBucketOptionalHint,
       ),
       _storageDialogGap(),
       _storageDialogField(
         controller: ttlController,
-        label: '签名链接有效期（秒）',
+        label: AppLocalizations.of(context)!.setupSignedUrlTTLLabel,
         hintText: '3600',
-        helperText: '不改的话，默认就是 1 小时，填 3600 就可以。',
+        helperText: AppLocalizations.of(context)!.setupSignedUrlDefaultHint,
         keyboardType: TextInputType.number,
       ),
       _storageDialogGap(),
@@ -311,11 +311,11 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         label: 'Service Role Key',
         visible: showServiceRoleKey,
         onToggle: onToggleServiceRoleKey,
-        hintText: '输入或粘贴 Service Role Key',
+        hintText: AppLocalizations.of(context)!.setupInputServiceRoleKey,
         helperText:
-            '去 Supabase 的 Settings > API Keys 里找 service_role / secret key。',
+            AppLocalizations.of(context)!.setupStorageApiKeyHelpServiceRole,
         helpUrl: _supabaseApiKeysDocsUrl,
-        helpTooltip: '打开 API Keys 官方说明',
+        helpTooltip: AppLocalizations.of(context)!.setupOpenApiKeysHelp,
       ),
     ];
   }

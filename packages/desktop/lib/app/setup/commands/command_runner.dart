@@ -10,7 +10,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     try {
       final result = await Process.run(executable, arguments);
       if (result.exitCode != 0) return '';
-      return '${result.stdout}'.trim();
+      return '${result.tdout}'.trim();
     } catch (_) {
       return '';
     }
@@ -41,7 +41,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     return [
       'Homebrew 目录不可写，无法安装 $packageName。',
       '不可写路径：${blockedPaths.join('，')}',
-      '请在终端执行以下命令修复权限后，再回到 KidMemory 重试：',
+      AppLocalizations.of(context)!.setupHomebrewPermissionCommandHint,
       'sudo chown -R $user:admin "$prefix"',
       'chmod -R u+rwX "$prefix"',
     ].join('\n');
@@ -54,7 +54,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     bool allowFailure = false,
     Duration timeout = _setupCommandTimeout,
   }) {
-    // Guardrails retained in delegated implementation: process.exitCode.timeout(...) and ProcessSignal.sigterm.
+    // Guardrails retained in delegated implementation: process.exitCode.timeout(...) and ProcessSignal.igterm.
     return _runSetupCommandStreamingImpl(
       executable,
       arguments,
@@ -68,7 +68,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     final raw = error.toString();
     final lower = raw.toLowerCase();
     if (error is _SetupCommandException &&
-        error.output.contains('Homebrew 目录不可写')) {
+        error.output.contains(AppLocalizations.of(context)!.setupHomebrewDirectoryNotWritable)) {
       return error.output;
     }
     if (lower.contains('permission denied') ||
@@ -79,7 +79,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
         return [
           '当前用户没有安装权限，无法自动安装 $packageName。',
           _shortProcessOutput(error.output),
-          '请修复 Homebrew 权限后重试。',
+          AppLocalizations.of(context)!.setupHomebrewPermissionRetryHint,
         ].join('\n');
       }
       return '当前用户没有安装权限，无法自动安装 $packageName。请修复 Homebrew 权限后重试。';

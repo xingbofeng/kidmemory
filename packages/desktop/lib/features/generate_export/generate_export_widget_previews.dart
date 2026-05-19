@@ -4,62 +4,62 @@ import 'package:flutter/widget_previews.dart';
 import '../setup/setup_page.dart';
 import 'generate_export_page.dart';
 
-@Preview(group: 'Supabase Storage', name: '设置页已配置', size: Size(1440, 900))
+@Preview(group: 'Supabase Storage', name: 'Setup Preview', size: Size(1440, 900))
 Widget supabaseStorageSetupPreview() {
   return MaterialApp(
     home: Scaffold(
       body: SetupPage(
-        readinessMessage: '初始化成功，已完成 3 / 3 项 readiness 检测',
-        checks: const [
+        readinessMessage: '准备完成：可继续开始导出',
+        checks: [
           SetupCheckVm(
             index: '1',
-            title: 'PostgreSQL 配置',
-            body: '本地数据库连接正常。',
-            action: '重新检测',
-            state: '正常',
+            title: '1. 配置 Supabase URL',
+            body: '确认已填写项目 URL 与密钥。',
+            action: '测试',
+            state: '已检测',
             ok: true,
           ),
           SetupCheckVm(
             index: '2',
-            title: 'Sidecar 本地服务',
-            body: '负责配置检测、数据库初始化、素材导入和生成任务。',
-            action: '重新连接',
-            state: '已启动',
+            title: '2. 配置 Bucket',
+            body: '确认导出数据 Bucket 已创建。',
+            action: '前往',
+            state: '已配置',
             ok: true,
           ),
           SetupCheckVm(
             index: '3',
-            title: 'pgvector 检测',
-            body: 'pgvector 已安装并启用。',
-            action: '重新检测',
-            state: '正常',
+            title: '3. 存储权限',
+            body: '确认服务角色密钥权限可用于存储读写。',
+            action: '测试',
+            state: '通过',
             ok: true,
           ),
           SetupCheckVm(
             index: '4',
-            title: '大模型接口配置',
-            body: '提供文本生成、标签与提示词能力。',
+            title: '4. 目录与签名',
+            body: '确认 URL 签名有效期配置符合预期。',
             action: '配置',
             state: '正常',
             ok: true,
           ),
           SetupCheckVm(
             index: '5',
-            title: '本地数据目录',
-            body: '数据目录：/Users/me/Library/Application Support/KidMemory/data',
-            action: '配置目录',
-            state: '已配置',
+            title: '5. 连接测试',
+            body: '已成功尝试连接导出服务。',
+            action: '重试',
+            state: '连接成功',
             ok: true,
           ),
         ],
-        supabaseStorage: const SupabaseStorageVm(
+        supabaseStorage: SupabaseStorageVm(
           configured: true,
           url: 'https://project.supabase.co',
           bucket: 'kidmemory-exports',
           serviceRoleKeyConfigured: true,
           publicBaseUrl: '',
           signedUrlTtlSeconds: 3600,
-          testMessage: '测试通过',
+          testMessage: '签名 URL 校验通过',
         ),
         onSetupAction: _previewSetupNoop,
         onRefreshReadiness: _previewNoop,
@@ -71,7 +71,7 @@ Widget supabaseStorageSetupPreview() {
   );
 }
 
-@Preview(group: 'Supabase Storage', name: 'JPG 长图已同步', size: Size(1440, 900))
+@Preview(group: 'Supabase Storage', name: 'Long Image Preview', size: Size(1440, 900))
 Widget longImageExportPreview() {
   return MaterialApp(
     home: Scaffold(
@@ -80,25 +80,25 @@ Widget longImageExportPreview() {
         generated: true,
         generating: false,
         exported: true,
-        statusMessage: '长图 JPG 已导出：/tmp/kidmemory/job_123456.jpg',
+        statusMessage: '导出任务已完成',
         requestId: 'req_123456',
-        logLines: const [
-          '10:21:03  生成完成，已获得 jobId: job_123456',
-          '10:21:16  长图 JPG 导出成功：/tmp/kidmemory/job_123456.jpg',
-          '10:21:18  Supabase Storage 同步完成',
+        logLines: [
+          '正在读取样本',
+          '已生成封面',
+          '导出任务提交成功',
         ],
         templateOptions: const ['温暖童趣', '童话式成长记忆', '简约纪实'],
         pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
         styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
-        exportTargetOptions: const [
-          'PDF 文件  高质量 PDF（打印级别）',
-          '长图 PNG  适合移动分享',
-          '长图 JPG  体积更小',
+        exportTargetOptions: [
+          '导出为图片',
+          '导出为 PDF',
+          '导出为长图',
         ],
         selectedTemplate: '温暖童趣',
-        selectedPageSize: 'A4 竖版  210 × 297 mm',
-        selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
-        selectedExportTarget: '长图 JPG  体积更小',
+        selectedPageSize: 'A4 竖版',
+        selectedStyle: '自然温和',
+        selectedExportTarget: '导出为长图',
         exportResult: const ExportResultVm(
           kind: 'long_image_jpg',
           localPath: '/tmp/kidmemory/job_123456.jpg',

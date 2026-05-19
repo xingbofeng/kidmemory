@@ -6,6 +6,7 @@ import '../../shared/models/library_models.dart';
 import '../../shared/widgets/chrome.dart';
 import '../../shared/widgets/content.dart';
 import '../../shared/widgets/layout.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ChildProfilePage extends StatelessWidget {
   const ChildProfilePage({
@@ -43,8 +44,8 @@ class ChildProfilePage extends StatelessWidget {
       );
     }
     return PageFrame(
-      title: '孩子档案',
-      subtitle: '珍藏成长点滴，记录美好时光',
+      title: AppLocalizations.of(context)!.childProfileTitle,
+      subtitle: AppLocalizations.of(context)!.childProfileS715,
       decoration: _ProfileHeaderScene(
         children: children,
         selectedChildId: child.id,
@@ -162,7 +163,7 @@ class _EmptyProfileTitleBlock extends StatelessWidget {
       ),
       SizedBox(height: 42),
       Text(
-        '孩子档案',
+        AppLocalizations.of(context)!.childProfileTitle,
         style: TextStyle(
           color: Color(0xff28170f),
           fontSize: 46,
@@ -173,7 +174,7 @@ class _EmptyProfileTitleBlock extends StatelessWidget {
       ),
       SizedBox(height: 24),
       Text(
-        '珍藏成长点滴，记录美好时光',
+        AppLocalizations.of(context)!.childProfileS715,
         style: TextStyle(
           color: Color(0xff8a8177),
           fontSize: 18,
@@ -363,7 +364,7 @@ class _EmptyHeroCopy extends StatelessWidget {
                   const AppAssetIcon(leafIconAsset, size: 20),
                   const SizedBox(width: 9),
                   Text(
-                    '欢迎使用 KidMemory',
+                    AppLocalizations.of(context)!.childProfileS645,
                     style: TextStyle(
                       color: const Color(0xff419a57),
                       fontSize: compact ? 14 : 17,
@@ -376,7 +377,7 @@ class _EmptyHeroCopy extends StatelessWidget {
           ),
           SizedBox(height: compact ? 20 : 30),
           Text(
-            '还没有孩子档案',
+            AppLocalizations.of(context)!.childProfileS887,
             style: TextStyle(
               color: const Color(0xff28170f),
               fontSize: compact ? 34 : 44,
@@ -423,7 +424,7 @@ class _EmptyHeroCopy extends StatelessWidget {
                       children: [
                         _WhiteCircleIcon(icon: Icons.add_rounded),
                         SizedBox(width: 10),
-                        Flexible(child: Text('添加档案')),
+                        Flexible(child: Text(AppLocalizations.of(context)!.childProfileS693)),
                       ],
                     ),
                   ),
@@ -452,7 +453,7 @@ class _EmptyHeroCopy extends StatelessWidget {
                       children: [
                         AppAssetIcon(gridIconAsset, size: 20),
                         SizedBox(width: 10),
-                        Flexible(child: Text('查看示例')),
+                        Flexible(child: Text(AppLocalizations.of(context)!.childProfileS625)),
                       ],
                     ),
                   ),
@@ -473,45 +474,45 @@ class _EmptyFeatureStrip extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       if (constraints.maxWidth < 680) {
-        return const Wrap(
+        return Wrap(
           alignment: WrapAlignment.center,
           spacing: 18,
           runSpacing: 16,
           children: [
             _FeaturePill(
               iconAsset: imageIconAsset,
-              title: '记录素材',
-              text: '照片、视频、笔记',
+              title: AppLocalizations.of(context)!.childProfileS842,
+              text: AppLocalizations.of(context)!.childProfileS706,
             ),
             _FeaturePill(
               iconAsset: timelineIconAsset,
-              title: '成长时间轴',
-              text: '重要时刻，一目了然',
+              title: AppLocalizations.of(context)!.childProfileS495,
+              text: AppLocalizations.of(context)!.childProfileS925,
             ),
             _FeaturePill(
               iconAsset: starIconAsset,
-              title: '作品集',
-              text: '珍藏创作与成果',
+              title: AppLocalizations.of(context)!.childProfileS231,
+              text: AppLocalizations.of(context)!.childProfileS714,
             ),
           ],
         );
       }
-      return const Row(
+      return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _FeaturePill(
             iconAsset: imageIconAsset,
-            title: '记录素材',
-            text: '照片、视频、笔记',
+            title: AppLocalizations.of(context)!.childProfileS842,
+            text: AppLocalizations.of(context)!.childProfileS706,
           ),
           _FeatureDivider(),
           _FeaturePill(
             iconAsset: timelineIconAsset,
-            title: '成长时间轴',
-            text: '重要时刻，一目了然',
+            title: AppLocalizations.of(context)!.childProfileS495,
+            text: AppLocalizations.of(context)!.childProfileS925,
           ),
           _FeatureDivider(),
-          _FeaturePill(iconAsset: starIconAsset, title: '作品集', text: '珍藏创作与成果'),
+          _FeaturePill(iconAsset: starIconAsset, title: AppLocalizations.of(context)!.childProfileS231, text: AppLocalizations.of(context)!.childProfileS714),
         ],
       );
     },
@@ -605,8 +606,8 @@ class _EmptyPrivacyCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: compact ? 18 : 28),
-            const Text(
-              '从一份档案开始',
+            Text(
+              AppLocalizations.of(context)!.childProfileS224,
               style: TextStyle(
                 color: Color(0xff28170f),
                 fontSize: 27,
@@ -616,8 +617,8 @@ class _EmptyPrivacyCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: compact ? 12 : 16),
-            const Text(
-              '所有孩子信息和成长素材本地保存',
+            Text(
+              AppLocalizations.of(context)!.childProfileS499,
               style: TextStyle(
                 color: Color(0xff756a60),
                 fontSize: 16,
@@ -626,24 +627,24 @@ class _EmptyPrivacyCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: compact ? 18 : 24),
-            const _PrivacyRow(
+            _PrivacyRow(
               iconAsset: lockIconAsset,
-              title: '本地存储，隐私安心',
-              text: '所有数据仅保存在你的设备中',
+              title: AppLocalizations.of(context)!.childProfileS602,
+              text: AppLocalizations.of(context)!.childProfileS500,
               compact: true,
             ),
             SizedBox(height: compact ? 12 : 16),
-            const _PrivacyRow(
+            _PrivacyRow(
               iconAsset: leafIconAsset,
-              title: '离线可用，随时记录',
-              text: '无网络也能查看与添加内容',
+              title: AppLocalizations.of(context)!.childProfileS785,
+              text: AppLocalizations.of(context)!.childProfileS556,
               compact: true,
             ),
             SizedBox(height: compact ? 12 : 16),
-            const _PrivacyRow(
+            _PrivacyRow(
               iconAsset: childIconAsset,
-              title: '从一个孩子开始',
-              text: '后续可随时添加更多孩子档案',
+              title: AppLocalizations.of(context)!.childProfileS223,
+              text: AppLocalizations.of(context)!.childProfileS342,
               compact: true,
             ),
             SizedBox(height: compact ? 16 : 20),
@@ -740,7 +741,7 @@ class _DataOwnershipBanner extends StatelessWidget {
         SizedBox(width: 12),
         Expanded(
           child: Text(
-            '你的数据，只属于你和孩子',
+            AppLocalizations.of(context)!.childProfileS238,
             style: TextStyle(
               color: Color(0xff58a05a),
               fontSize: 15,
@@ -1214,7 +1215,7 @@ class _ChildProfileContent extends StatelessWidget {
             width: _actionButtonWidth,
             height: _actionButtonHeight,
             child: SecondaryButton(
-              label: '新增',
+              label: AppLocalizations.of(context)!.childProfileS554,
               icon: Icons.add_rounded,
               iconAsset: addIconAsset,
               fullWidth: true,
@@ -1228,7 +1229,7 @@ class _ChildProfileContent extends StatelessWidget {
             width: _actionButtonWidth,
             height: _actionButtonHeight,
             child: SecondaryButton(
-              label: '编辑',
+              label: AppLocalizations.of(context)!.childProfileS834,
               icon: Icons.edit_rounded,
               iconAsset: editIconAsset,
               fullWidth: true,
@@ -1287,8 +1288,8 @@ class _ChildProfileContent extends StatelessWidget {
                               const SizedBox(height: 18),
                               Text(
                                 assets.isEmpty
-                                    ? '导入素材后，这里会按真实素材更新成长统计和最近作品。'
-                                    : '当前素材库已连接到本地 sidecar，可用于生成成长作品集。',
+                                    ? AppLocalizations.of(context)!.childProfileS401
+                                    : AppLocalizations.of(context)!.childProfileS486,
                                 style: TextStyle(color: Colors.brown.shade600),
                               ),
                               const SizedBox(height: 16),
@@ -1474,8 +1475,8 @@ class _ProfileHeaderScene extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const Text(
-                '当前档案',
+              Text(
+                AppLocalizations.of(context)!.childProfileS480,
                 style: TextStyle(
                   fontSize: 12,
                   color: Color(0xff6f6258),
@@ -1512,7 +1513,7 @@ class _ProfileHeaderScene extends StatelessWidget {
               width: 128,
               height: 46,
               child: SecondaryButton(
-                label: '查看示例',
+                label: AppLocalizations.of(context)!.childProfileS625,
                 icon: Icons.dataset_outlined,
                 iconAsset: gridIconAsset,
                 fullWidth: true,
@@ -1525,7 +1526,7 @@ class _ProfileHeaderScene extends StatelessWidget {
             const SizedBox(width: 12),
             children.length > 1
                 ? PopupMenuButton<String>(
-                    tooltip: '切换孩子档案',
+                    tooltip: AppLocalizations.of(context)!.childProfileS276,
                     onSelected: onChildChanged,
                     position: PopupMenuPosition.under,
                     itemBuilder: (context) => [
@@ -1555,10 +1556,10 @@ class _ProfileHeaderScene extends StatelessWidget {
 AssetVm? _profileImageAsset(List<AssetVm> assets) {
   bool looksLikeChildPortrait(AssetVm asset) {
     final text = '${asset.title} ${asset.description} ${asset.tags.join(' ')}';
-    return text.contains('男孩') ||
-        text.contains('女孩') ||
-        text.contains('孩子') ||
-        text.contains('小朋友') ||
+    return text.contains(AppLocalizations.of(context)!.childProfileS757) ||
+        text.contains(AppLocalizations.of(context)!.childProfileS366) ||
+        text.contains(AppLocalizations.of(context)!.assetLibraryChildLabel) ||
+        text.contains(AppLocalizations.of(context)!.childProfileS425) ||
         text.contains('笑') ||
         text.toLowerCase().contains('child');
   }
@@ -1604,11 +1605,11 @@ class _GrowthStatsPanel extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _MetricTile(label: '素材总数', value: '$assetCount'),
+              child: _MetricTile(label: AppLocalizations.of(context)!.contentMetricTotalLabel, value: '$assetCount'),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _MetricTile(label: '绘画', value: '$artworkCount'),
+              child: _MetricTile(label: AppLocalizations.of(context)!.contentCategoryDrawingLabel, value: '$artworkCount'),
             ),
           ],
         ),
@@ -1616,11 +1617,11 @@ class _GrowthStatsPanel extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _MetricTile(label: '照片', value: '$photoCount'),
+              child: _MetricTile(label: AppLocalizations.of(context)!.contentAssetTypePhotoLabel, value: '$photoCount'),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _MetricTile(label: '手工', value: '$craftCount'),
+              child: _MetricTile(label: AppLocalizations.of(context)!.contentAssetTypeCraftLabel, value: '$craftCount'),
             ),
           ],
         ),
@@ -1664,17 +1665,17 @@ class _DistributionPanel extends StatelessWidget {
                   children: [
                     _LegendRow(
                       iconAsset: paletteIconAsset,
-                      label: '绘画',
+                      label: AppLocalizations.of(context)!.contentCategoryDrawingLabel,
                       value: artworkCount,
                     ),
                     _LegendRow(
                       iconAsset: cameraIconAsset,
-                      label: '照片',
+                      label: AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
                       value: photoCount,
                     ),
                     _LegendRow(
                       iconAsset: bearDocumentIconAsset,
-                      label: '手工',
+                      label: AppLocalizations.of(context)!.contentAssetTypeCraftLabel,
                       value: craftCount,
                     ),
                   ],
@@ -1773,9 +1774,9 @@ class _RecentAssetsPanel extends StatelessWidget {
           const SizedBox(height: 18),
           Expanded(
             child: recentAssets.isEmpty
-                ? const _EmptyPanelHint(
+                ? _EmptyPanelHint(
                     iconAsset: imageIconAsset,
-                    text: '导入素材后显示最近作品',
+                    text: AppLocalizations.of(context)!.childProfileS400,
                   )
                 : Row(
                     children: [
@@ -1823,16 +1824,16 @@ class _CollectionRecordsPanel extends StatelessWidget {
   const _CollectionRecordsPanel();
 
   @override
-  Widget build(BuildContext context) => const SurfaceCard(
+  Widget build(BuildContext context) => SurfaceCard(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(iconAsset: bookIconAsset, title: '作品集记录'),
+        _SectionHeader(iconAsset: bookIconAsset, title: AppLocalizations.of(context)!.contentPortfolioRecordTitle),
         SizedBox(height: 18),
         Expanded(
           child: _EmptyPanelHint(
             iconAsset: bookIconAsset,
-            text: '生成完成后会显示本地作品集记录',
+            text: AppLocalizations.of(context)!.childProfileS733,
           ),
         ),
       ],
@@ -1850,16 +1851,16 @@ class _ActivityTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     final timelineItems = assets.isEmpty
         ? const [
-            _TimelineItem('创建档案', '今天', childIconAsset),
-            _TimelineItem('导入素材', '待开始', imageIconAsset),
-            _TimelineItem('生成作品', '待开始', bookIconAsset),
+            _TimelineItem(AppLocalizations.of(context)!.childProfileS287, AppLocalizations.of(context)!.childProfileS222, childIconAsset),
+            _TimelineItem(AppLocalizations.of(context)!.childProfileS399, AppLocalizations.of(context)!.childProfileS487, imageIconAsset),
+            _TimelineItem(AppLocalizations.of(context)!.childProfileS720, AppLocalizations.of(context)!.childProfileS487, bookIconAsset),
           ]
         : assets
               .take(5)
               .map(
                 (asset) => _TimelineItem(
                   asset.title,
-                  asset.capturedAt.isEmpty ? '未填写日期' : asset.capturedAt,
+                  asset.capturedAt.isEmpty ? AppLocalizations.of(context)!.contentDateMissingLabel : asset.capturedAt,
                   _assetIconAsset(asset.type),
                 ),
               )
@@ -1909,34 +1910,34 @@ class _ProfileAsidePanel extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _SectionHeader(
+                    _SectionHeader(
                       iconAsset: infoIconAsset,
-                      title: '档案信息',
+                      title: AppLocalizations.of(context)!.childProfileS633,
                     ),
                     const SizedBox(height: 16),
                     _InfoRow(
                       iconAsset: childIconAsset,
-                      label: '姓名',
+                      label: AppLocalizations.of(context)!.childProfileS367,
                       value: child.name,
                     ),
                     _InfoRow(
                       iconAsset: gridIconAsset,
-                      label: '素材总数',
+                      label: AppLocalizations.of(context)!.contentMetricTotalLabel,
                       value: '${assets.length} 项',
                     ),
                     _InfoRow(
                       iconAsset: imageIconAsset,
-                      label: '最近素材',
-                      value: assets.isEmpty ? '暂无' : assets.first.title,
+                      label: AppLocalizations.of(context)!.childProfileS574,
+                      value: assets.isEmpty ? AppLocalizations.of(context)!.childProfileS566 : assets.first.title,
                     ),
                     const Divider(height: 24),
-                    const _SectionHeader(
+                    _SectionHeader(
                       iconAsset: bearHeadIconAsset,
-                      title: '成长里程碑',
+                      title: AppLocalizations.of(context)!.childProfileS497,
                     ),
                     const SizedBox(height: 12),
                     _MilestoneRow(
-                      text: assets.isEmpty ? '等待第一份素材' : '已开始积累成长素材',
+                      text: assets.isEmpty ? AppLocalizations.of(context)!.childProfileS799 : AppLocalizations.of(context)!.childProfileS446,
                     ),
                     const _MilestoneRow(text: '时间线按素材日期自动更新'),
                     const _MilestoneRow(text: '作品集记录保存在本地'),
@@ -1947,11 +1948,11 @@ class _ProfileAsidePanel extends StatelessWidget {
           ),
           if (showRail) ...[
             const SizedBox(height: 18),
-            const Expanded(
+            Expanded(
               flex: 2,
               child: _ProfileArtworkRail(
-                title: '每一份素材，都会进入本地成长档案',
-                text: '统计和时间线来自当前孩子的素材库。',
+                title: AppLocalizations.of(context)!.childProfileS670,
+                text: AppLocalizations.of(context)!.childProfileS832,
                 compact: true,
               ),
             ),
@@ -2137,13 +2138,13 @@ class _EmptyPanelHint extends StatelessWidget {
 }
 
 Color _softAccent(String key) {
-  if (key.contains('camera') || key.contains('照片')) {
+  if (key.contains('camera') || key.contains(AppLocalizations.of(context)!.contentAssetTypePhotoLabel)) {
     return const Color(0xff5d9be8);
   }
-  if (key.contains('palette') || key.contains('调色')) {
+  if (key.contains('palette') || key.contains(AppLocalizations.of(context)!.childProfileS872)) {
     return const Color(0xffffbd54);
   }
-  if (key.contains('book') || key.contains('书本')) {
+  if (key.contains('book') || key.contains(AppLocalizations.of(context)!.childProfileS217)) {
     return const Color(0xff6f9af8);
   }
   return const Color(0xff2faa61);

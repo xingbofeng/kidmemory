@@ -7,7 +7,7 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
       generated = false;
       exported = false;
       exportResult = null;
-      statusMessage = '正在生成作品集';
+      statusMessage = AppLocalizations.of(context)!.generateExportS662;
     });
     _appendLog('开始生成，当前选中 ${selectedAssets.length} 张素材');
   }
@@ -18,12 +18,12 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
       generated = result.generated;
       jobId = result.jobId.isNotEmpty ? result.jobId : null;
       statusMessage = generated
-          ? '生成完成，可预览并导出 PDF'
+          ? AppLocalizations.of(context)!.exportGenerationStateS736
           : (result.messageValue.isNotEmpty
                 ? result.messageValue
-                : '生成失败，请检查 sidecar 日志');
+                : AppLocalizations.of(context)!.exportGenerationStateS730);
     });
-    _appendLog(generated ? '生成完成，已获得 jobId: $jobId' : '生成失败，请检查 sidecar 日志');
+    _appendLog(generated ? '生成完成，已获得 jobId: $jobId' : AppLocalizations.of(context)!.exportGenerationStateS730);
   }
 
   void _applyGenerationError(Object error) {

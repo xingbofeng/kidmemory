@@ -29,7 +29,7 @@ extension _DesktopShellImportPreview on _DesktopShellState {
     required String typeLabel,
     required Map<String, int> seenLabels,
   }) {
-    final label = rawLabel.trim().isEmpty ? '未命名素材' : rawLabel.trim();
+    final label = rawLabel.trim().isEmpty ? AppLocalizations.of(context)!.importPreviewS578 : rawLabel.trim();
     final seen = seenLabels[label] ?? 0;
     seenLabels[label] = seen + 1;
     if (seen == 0) return label;
@@ -64,9 +64,9 @@ extension _DesktopShellImportPreview on _DesktopShellState {
 
   String _assetTypeLabel(String type) {
     return switch (type) {
-      'photo' => '照片',
-      'craft' => '手工',
-      _ => '儿童画',
+      'photo' => AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
+      'craft' => AppLocalizations.of(context)!.contentAssetTypeCraftLabel,
+      _ => AppLocalizations.of(context)!.contentCategoryArtworkLabel,
     };
   }
 

@@ -5,17 +5,17 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
     if (assets.isNotEmpty) {
       final target = '${api.baseUrl}/assets/${assets.first.id}/preview';
       _appendLog('打开示例素材预览：${assets.first.id}');
-      await _safeOpenExternalTarget(target, '示例素材');
+      await _safeOpenExternalTarget(target, AppLocalizations.of(context)!.datasetPreviewS783);
       return;
     }
     if (jobId == null || !generated) {
-      _showSnackBar('请先导入示例数据并完成一次生成，才能查看示例 PDF');
-      _appendLog('打开示例 PDF：缺少可用预览来源');
+      _showSnackBar(AppLocalizations.of(context)!.datasetPreviewS853);
+      _appendLog(AppLocalizations.of(context)!.datasetPreviewS521);
       return;
     }
     final previewUrl = '${api.baseUrl}/books/jobs/$jobId/preview';
     _appendLog('打开历史作品预览：$jobId');
-    await _safeOpenExternalTarget(previewUrl, '示例 PDF');
+    await _safeOpenExternalTarget(previewUrl, AppLocalizations.of(context)!.datasetPreviewS771);
   }
 
   Future<void> _showGenerationLogDetails() async {
@@ -24,7 +24,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('生成日志详情'),
+          title: Text(AppLocalizations.of(context)!.datasetPreviewS743)),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
@@ -36,7 +36,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('关闭'),
+              child: Text(AppLocalizations.of(context)!.actionCloseLabel)),
             ),
           ],
         );
@@ -46,12 +46,12 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
 
   Future<void> _previewAllPages() async {
     if (jobId == null || !generated) {
-      _showSnackBar('请先完成生成，再打开预览全部页面');
-      _appendLog('预览全部页面：缺少 jobId');
+      _showSnackBar(AppLocalizations.of(context)!.datasetPreviewS852);
+      _appendLog(AppLocalizations.of(context)!.datasetPreviewS952);
       return;
     }
     final previewUrl = '${api.baseUrl}/books/jobs/$jobId/preview';
     _appendLog('打开预览页面：$jobId');
-    await _safeOpenExternalTarget(previewUrl, '页面预览');
+    await _safeOpenExternalTarget(previewUrl, AppLocalizations.of(context)!.generateExportS943);
   }
 }

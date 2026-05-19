@@ -1,6 +1,7 @@
 import '../../shared/models/library_models.dart';
 import 'package:kidmemory_protocol/kidmemory_protocol.dart';
 import 'sidecar_api.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DesktopSidecarGateway {
   const DesktopSidecarGateway(this._api);
@@ -644,7 +645,7 @@ ChildVm _childVmFromJson(Map<String, dynamic> raw) => ChildVm(
 
 String _childDisplayName(Map<String, dynamic> raw) {
   final id = _stringAt(raw, 'id');
-  if (id.startsWith('sample-child')) return '小朋友';
+  if (id.startsWith('sample-child')) return AppLocalizations.of(context)!.childProfileS425;
   return _stringAny(raw, const ['name', 'id']);
 }
 

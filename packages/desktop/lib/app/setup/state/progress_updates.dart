@@ -44,7 +44,7 @@ extension _DesktopShellSetupProgressUpdates on _DesktopShellState {
           title: check.title,
           body: check.body,
           action: check.action,
-          state: ok ? '已配置' : '需处理',
+          state: ok ? AppLocalizations.of(context)!.setupConfigured : AppLocalizations.of(context)!.setupNeedsAction,
           ok: ok,
           secondaryActionLabel: check.secondaryActionLabel,
           secondaryActionPath: check.secondaryActionPath,
@@ -61,7 +61,7 @@ extension _DesktopShellSetupProgressUpdates on _DesktopShellState {
     String checkTitle,
     SetupCheckVm Function(SetupCheckVm check) replace,
   ) {
-    final checks = source.isEmpty ? _disconnectedSetupChecks() : source;
+    final checks = source.isEmpty ? _disconnectedSetupChecks(context) : source;
     var replaced = false;
     final next = checks.map((check) {
       if (check.title != checkTitle) return check;

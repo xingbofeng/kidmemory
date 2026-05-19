@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/chrome.dart';
 import '../../shared/widgets/content.dart';
 import '../../shared/widgets/layout.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExportResultVm {
   const ExportResultVm({
@@ -116,12 +117,12 @@ class GenerateExportPage extends StatelessWidget {
     final exportLabel = _exportDisplayName(exportText);
     final generationState = exported
         ? '$exportLabel 已导出'
-        : (generated ? '已生成' : (generating ? '生成中' : '等待生成'));
+        : (generated ? AppLocalizations.of(context)!.generateExportS450 : (generating ? AppLocalizations.of(context)!.generateExportS718 : AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel));
     final showCoverFailureActions = _showCoverFailureActions(statusMessage);
     final canGenerate = selectedCount > 0 && !generating;
     return PageFrame(
-      title: '创作台',
-      subtitle: '选择素材和创作方式，KidMemory 会帮你生成绘本、成长纪念册或回忆视频。',
+      title: AppLocalizations.of(context)!.assetStudioTitle,
+      subtitle: AppLocalizations.of(context)!.generateExportS909,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final controlPanel = GenerateSettingsPanel(
@@ -279,7 +280,7 @@ class GenerateExportPage extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('确认：调用免费生图'),
+        title: Text(AppLocalizations.of(context)!.generateExportS769)),
         content: const Text('将使用免费生图服务生成封面图。\n不会上传孩子照片，只会发送文字描述。'),
         actions: [
           TextButton(
@@ -287,14 +288,14 @@ class GenerateExportPage extends StatelessWidget {
               Navigator.of(dialogContext).pop();
               onContinue();
             },
-            child: const Text('继续生成'),
+            child: Text(AppLocalizations.of(context)!.generateExportS833)),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
               onSkipCover();
             },
-            child: const Text('跳过封面'),
+            child: Text(AppLocalizations.of(context)!.generateExportS876)),
           ),
         ],
       ),
@@ -304,20 +305,20 @@ class GenerateExportPage extends StatelessWidget {
   bool _showCoverFailureActions(String message) {
     final normalized = message.trim();
     if (normalized.isEmpty) return false;
-    return normalized.contains('封面') && normalized.contains('失败');
+    return normalized.contains(AppLocalizations.of(context)!.generateExportS419) && normalized.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel);
   }
 }
 
 bool _shouldShowGenerationError(String statusMessage) {
   final message = statusMessage.trim();
   if (message.isEmpty) return false;
-  if (message == '等待生成') return false;
-  if (message == '正在生成作品集') return false;
-  if (message.contains('生成完成')) return false;
-  return message.contains('失败') ||
-      message.contains('异常') ||
-      message.contains('不可用') ||
-      message.contains('超时');
+  if (message == AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel) return false;
+  if (message == AppLocalizations.of(context)!.generateExportS662) return false;
+  if (message.contains(AppLocalizations.of(context)!.generateExportS731)) return false;
+  return message.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel) ||
+      message.contains(AppLocalizations.of(context)!.generateExportS472) ||
+      message.contains(AppLocalizations.of(context)!.generateExportS214) ||
+      message.contains(AppLocalizations.of(context)!.generateExportS875);
 }
 
 class SmartGenerateActions extends StatelessWidget {
@@ -344,14 +345,14 @@ class SmartGenerateActions extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '你想为孩子创作什么？',
+                  AppLocalizations.of(context)!.generateExportS237,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                 ),
               ),
               _StatusChip(
-                label: selectedCount == 0 ? '等待选择素材' : '已选 $selectedCount 张素材',
+                label: selectedCount == 0 ? AppLocalizations.of(context)!.generateExportS800 : '已选 $selectedCount 张素材',
                 color: selectedCount == 0
                     ? const Color(0xff9a5a14)
                     : const Color(0xff168542),
@@ -362,15 +363,15 @@ class SmartGenerateActions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '输入目标或选择快捷类型，Agent 会按素材、故事、预览和导出组织创作流程。',
+          Text(
+            AppLocalizations.of(context)!.generateExportS883,
             style: TextStyle(color: Color(0xff6f6258)),
           ),
           const SizedBox(height: 14),
           TextField(
             enabled: !generating,
             decoration: InputDecoration(
-              hintText: '例如：用春游照片做一本 8 页绘本',
+              hintText: AppLocalizations.of(context)!.generateExportS243,
               prefixIcon: const Icon(
                 Icons.auto_awesome_outlined,
                 color: Color(0xff3f8c55),
@@ -400,8 +401,8 @@ class SmartGenerateActions extends StatelessWidget {
             children: [
               Expanded(
                 child: _CreativeTypeCard(
-                  title: '生成儿童绘本',
-                  description: '生成 6-12 页故事绘本',
+                  title: AppLocalizations.of(context)!.generateExportS721,
+                  description: AppLocalizations.of(context)!.generateExportS717,
                   icon: Icons.auto_stories_outlined,
                   selected: true,
                   onPressed: onGeneratePictureBook,
@@ -410,8 +411,8 @@ class SmartGenerateActions extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _CreativeTypeCard(
-                  title: '生成成长纪念册',
-                  description: '按时间线整理成长记录',
+                  title: AppLocalizations.of(context)!.generateExportS740,
+                  description: AppLocalizations.of(context)!.generateExportS532,
                   icon: Icons.view_timeline_outlined,
                   selected: false,
                   onPressed: onGenerateMemoryAlbum,
@@ -420,8 +421,8 @@ class SmartGenerateActions extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _CreativeTypeCard(
-                  title: '生成回忆录视频',
-                  description: '生成带字幕和音乐的短视频',
+                  title: AppLocalizations.of(context)!.generateExportS727,
+                  description: AppLocalizations.of(context)!.generateExportS738,
                   icon: Icons.movie_creation_outlined,
                   selected: false,
                   onPressed: onGenerateMemoryVideo,
@@ -431,8 +432,8 @@ class SmartGenerateActions extends StatelessWidget {
           ),
           if (selectedCount == 0) ...[
             const SizedBox(height: 12),
-            const Text(
-              '请先选择素材，之后即可开始生成。',
+            Text(
+              AppLocalizations.of(context)!.generateExportS859,
               style: TextStyle(
                 color: Color(0xff9a5a14),
                 fontWeight: FontWeight.w700,
@@ -529,19 +530,19 @@ class GenerationReadinessBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = exported
-        ? 'PDF 已导出'
+        ? AppLocalizations.of(context)!.generateExportS128
         : generated
-        ? '生成完成'
+        ? AppLocalizations.of(context)!.generateExportS731
         : generating
-        ? '生成中'
-        : '准备开始';
+        ? AppLocalizations.of(context)!.generateExportS718
+        : AppLocalizations.of(context)!.generateExportS272;
     final subtitle = exported
-        ? '可在保存目录中查看'
+        ? AppLocalizations.of(context)!.generateExportS328
         : generated
-        ? '可预览或导出'
+        ? AppLocalizations.of(context)!.generateExportS335
         : generating
-        ? '正在创建作品集'
-        : '尚未创建生成任务';
+        ? AppLocalizations.of(context)!.generateExportS651
+        : AppLocalizations.of(context)!.generateExportS427;
     final color = generated || exported
         ? const Color(0xff2faa61)
         : const Color(0xffffbd54);
@@ -630,8 +631,8 @@ class GenerationEntrySummary extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '当前任务',
+                Text(
+                  AppLocalizations.of(context)!.generateExportS473,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 10),
@@ -641,23 +642,23 @@ class GenerationEntrySummary extends StatelessWidget {
                   children: [
                     const _TaskFact(label: '目标', value: '儿童绘本'),
                     _TaskFact(
-                      label: '状态',
-                      value: hasAssets ? '素材已准备' : '素材未选择',
+                      label: AppLocalizations.of(context)!.generateExportS708,
+                      value: hasAssets ? AppLocalizations.of(context)!.generateExportS813 : AppLocalizations.of(context)!.generateExportS819,
                       emphasis: !hasAssets,
                     ),
-                    _TaskFact(label: '已选素材', value: '$selectedCount 项'),
+                    _TaskFact(label: AppLocalizations.of(context)!.generateExportS460, value: '$selectedCount 项'),
                     const _TaskFact(label: '建议素材', value: '至少 6 张'),
                     _TaskFact(
-                      label: '输出',
+                      label: AppLocalizations.of(context)!.generateExportS884,
                       value: '${_compactOption(sizeText)} / 长图',
                     ),
-                    _TaskFact(label: '风格', value: _compactOption(styleText)),
+                    _TaskFact(label: AppLocalizations.of(context)!.generateExportS956, value: _compactOption(styleText)),
                   ],
                 ),
                 if (!hasAssets) ...[
                   const SizedBox(height: 12),
-                  const Text(
-                    '请选择孩子的照片、画作或手工作品。素材准备好后，Agent 会生成创作计划并开始预览。',
+                  Text(
+                    AppLocalizations.of(context)!.generateExportS868,
                     style: TextStyle(color: Color(0xff7a6a5b), height: 1.45),
                   ),
                 ],
@@ -671,7 +672,7 @@ class GenerationEntrySummary extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _StatusChip(
-                  label: hasAssets ? '等待开始' : '等待选择素材',
+                  label: hasAssets ? AppLocalizations.of(context)!.generateExportS795 : AppLocalizations.of(context)!.generateExportS800,
                   color: hasAssets
                       ? const Color(0xff168542)
                       : const Color(0xff9a5a14),
@@ -681,13 +682,13 @@ class GenerationEntrySummary extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
-                  label: hasAssets ? '查看素材' : '去素材库选择',
+                  label: hasAssets ? AppLocalizations.of(context)!.generateExportS627 : AppLocalizations.of(context)!.generateExportS324,
                   icon: Icons.grid_view_rounded,
                   onPressed: onViewSelectedAssets,
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
-                  label: 'AI 帮我挑素材',
+                  label: AppLocalizations.of(context)!.generateExportS102,
                   icon: Icons.auto_awesome_outlined,
                   onPressed: onViewSelectedAssets,
                 ),
@@ -782,7 +783,7 @@ class _StatusChip extends StatelessWidget {
 
 String _compactOption(String value) {
   final normalized = value.trim();
-  if (normalized.isEmpty) return '默认';
+  if (normalized.isEmpty) return AppLocalizations.of(context)!.generateExportS957;
   return normalized.split(RegExp(r'\s{2,}')).first.trim();
 }
 
@@ -808,10 +809,10 @@ class GeneratedWorkSummary extends StatelessWidget {
   Widget build(BuildContext context) => SurfaceCard(
     child: Row(
       children: [
-        const WarmPicture(
+        WarmPicture(
           icon: Icons.auto_stories,
           assetPath: bookIconAsset,
-          label: '本次作品集',
+          label: AppLocalizations.of(context)!.generateExportS617,
           height: 180,
           width: 190,
         ),
@@ -820,8 +821,8 @@ class GeneratedWorkSummary extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '本次作品集',
+              Text(
+                AppLocalizations.of(context)!.generateExportS617,
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 10),
@@ -863,47 +864,47 @@ class GenerationFlowProgress extends StatelessWidget {
     final steps = [
       _PlanStepData(
         icon: Icons.photo_library_outlined,
-        title: '选择素材',
-        body: hasAssets ? '已选择 $selectedCount 张' : '等待选择素材',
+        title: AppLocalizations.of(context)!.generateExportS907,
+        body: hasAssets ? '已选择 $selectedCount 张' : AppLocalizations.of(context)!.generateExportS800,
         active: !hasAssets,
         complete: hasAssets,
       ),
       _PlanStepData(
         icon: Icons.route_outlined,
-        title: '生成计划',
-        body: generated || generating ? 'Agent 正在规划' : '准备大纲',
+        title: AppLocalizations.of(context)!.generateExportS747,
+        body: generated || generating ? AppLocalizations.of(context)!.generateExportS107 : AppLocalizations.of(context)!.generateExportS270,
         active: hasAssets && !generated,
         complete: generated,
       ),
       _PlanStepData(
         icon: Icons.edit_note_outlined,
-        title: '生成故事',
+        title: AppLocalizations.of(context)!.generateExportS742,
         body: generating
-            ? '正在写故事'
+            ? AppLocalizations.of(context)!.generateExportS647
             : generated
-            ? '故事已生成'
-            : '等待执行',
+            ? AppLocalizations.of(context)!.generateExportS547
+            : AppLocalizations.of(context)!.generateExportS797,
         active: generating,
         complete: generated,
       ),
       _PlanStepData(
         icon: Icons.grid_view_outlined,
-        title: '渲染预览',
-        body: generated ? '可查看预览' : '生成后展示',
+        title: AppLocalizations.of(context)!.generateExportS698,
+        body: generated ? AppLocalizations.of(context)!.generateExportS332 : AppLocalizations.of(context)!.generateExportS725,
         active: generated && !exported,
         complete: generated,
       ),
       _PlanStepData(
         icon: Icons.file_download_outlined,
-        title: '导出作品',
-        body: exported ? '$exportLabel 已导出' : '等待导出',
+        title: AppLocalizations.of(context)!.generateExportS407,
+        body: exported ? '$exportLabel 已导出' : AppLocalizations.of(context)!.generateExportS794,
         active: generated && !exported,
         complete: exported,
       ),
       _PlanStepData(
         icon: Icons.ios_share_outlined,
-        title: '保存 / 分享',
-        body: exported ? '可打开或分享' : '导出后解锁',
+        title: AppLocalizations.of(context)!.generateExportS245,
+        body: exported ? AppLocalizations.of(context)!.generateExportS331 : AppLocalizations.of(context)!.generateExportS409,
         active: exported,
         complete: exported,
       ),
@@ -913,8 +914,8 @@ class GenerationFlowProgress extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Agent 执行计划',
+          Text(
+            AppLocalizations.of(context)!.generateExportS105,
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 14),
@@ -1042,7 +1043,7 @@ class AssetInputCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  hasAssets ? '素材 · 已选择 $count 张' : '素材',
+                  hasAssets ? '素材 · 已选择 $count 张' : AppLocalizations.of(context)!.generateExportS808,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
@@ -1051,14 +1052,14 @@ class AssetInputCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   hasAssets
-                      ? '这些素材会进入本次创作计划。你可以返回素材库重新选择，或让 Agent 重新挑选。'
-                      : '还没有选择素材。请选择孩子的照片、画作或手工作品，建议至少 6 张。',
+                      ? AppLocalizations.of(context)!.generateExportS893
+                      : AppLocalizations.of(context)!.generateExportS889,
                   style: const TextStyle(
                     color: Color(0xff7a6a5b),
                     height: 1.45,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 if (hasAssets)
                   Wrap(
                     spacing: 8,
@@ -1097,12 +1098,12 @@ class AssetInputCard extends StatelessWidget {
             direction: Axis.vertical,
             children: [
               SecondaryButton(
-                label: hasAssets ? '重新选择' : '去素材库选择',
+                label: hasAssets ? AppLocalizations.of(context)!.generateExportS923 : AppLocalizations.of(context)!.generateExportS324,
                 icon: Icons.grid_view_rounded,
                 onPressed: onViewSelectedAssets,
               ),
               SecondaryButton(
-                label: hasAssets ? '让 Agent 重新挑选' : 'AI 帮我挑素材',
+                label: hasAssets ? AppLocalizations.of(context)!.generateExportS841 : AppLocalizations.of(context)!.generateExportS102,
                 icon: Icons.auto_awesome_outlined,
                 onPressed: onViewSelectedAssets,
               ),
@@ -1137,7 +1138,7 @@ class CreativePreviewPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  generated ? '页面预览（约 $pageCount 页）' : '页面预览',
+                  generated ? '页面预览（约 $pageCount 页）' : AppLocalizations.of(context)!.generateExportS943,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
@@ -1146,10 +1147,10 @@ class CreativePreviewPanel extends StatelessWidget {
               ),
               _StatusChip(
                 label: generating
-                    ? '生成中'
+                    ? AppLocalizations.of(context)!.generateExportS718
                     : generated
-                    ? '可预览'
-                    : '等待生成',
+                    ? AppLocalizations.of(context)!.generateExportS334
+                    : AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel,
                 color: generating
                     ? const Color(0xff9a5a14)
                     : generated
@@ -1166,29 +1167,29 @@ class CreativePreviewPanel extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             generating
-                ? '正在生成预览页面，完成后会展示封面、故事页和导出效果。'
+                ? AppLocalizations.of(context)!.generateExportS663
                 : generated
-                ? '封面、故事页和成长记录已准备好，可以继续导出。'
-                : '预览将在生成后出现。KidMemory 会在这里展示封面、页面和导出效果。',
+                ? AppLocalizations.of(context)!.generateExportS420
+                : AppLocalizations.of(context)!.generateExportS954,
             style: const TextStyle(color: Color(0xff7a6a5b), height: 1.45),
           ),
           const SizedBox(height: 14),
           Row(
             children: [
               _PreviewTile(
-                title: generated ? '封面' : '封面',
+                title: generated ? AppLocalizations.of(context)!.generateExportS419 : AppLocalizations.of(context)!.generateExportS419,
                 icon: Icons.auto_stories_outlined,
                 active: generated,
               ),
               const SizedBox(width: 12),
               _PreviewTile(
-                title: generated ? '第 1 页' : '故事页',
+                title: generated ? AppLocalizations.of(context)!.generateExportS790 : AppLocalizations.of(context)!.generateExportS548,
                 icon: Icons.article_outlined,
                 active: generated,
               ),
               const SizedBox(width: 12),
               _PreviewTile(
-                title: generated ? '导出效果' : '导出效果',
+                title: generated ? AppLocalizations.of(context)!.generateExportS413 : AppLocalizations.of(context)!.generateExportS413,
                 icon: Icons.picture_as_pdf_outlined,
                 active: generated,
               ),
@@ -1268,8 +1269,8 @@ class GenerationEntryLog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Agent 活动',
+              Text(
+                AppLocalizations.of(context)!.generateExportS108,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 8),
@@ -1281,7 +1282,7 @@ class GenerationEntryLog extends StatelessWidget {
           ),
         ),
         SecondaryButton(
-          label: '生成后查看日志',
+          label: AppLocalizations.of(context)!.generateExportS726,
           icon: Icons.list_alt_rounded,
           iconAsset: timelineIconAsset,
           onPressed: null,
@@ -1314,7 +1315,7 @@ class ActivityTimelinePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = logLines.isEmpty
-        ? ['等待开始。点击“开始生成”后，这里会显示素材分析、故事生成、预览渲染和导出进度。']
+        ? [AppLocalizations.of(context)!.generateExportS796]
         : logLines;
     return SurfaceCard(
       child: Column(
@@ -1322,20 +1323,20 @@ class ActivityTimelinePanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Agent 活动',
+                  AppLocalizations.of(context)!.generateExportS108,
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
                 ),
               ),
               _StatusChip(
                 label: exported
-                    ? '已完成'
+                    ? AppLocalizations.of(context)!.generateExportS442
                     : generated
-                    ? '等待导出'
+                    ? AppLocalizations.of(context)!.generateExportS794
                     : generating
-                    ? '进行中'
-                    : '等待开始',
+                    ? AppLocalizations.of(context)!.generateExportS895
+                    : AppLocalizations.of(context)!.generateExportS795,
                 color: exported || generated
                     ? const Color(0xff168542)
                     : generating
@@ -1379,7 +1380,7 @@ class ActivityTimelinePanel extends StatelessWidget {
           ],
           const SizedBox(height: 12),
           SecondaryButton(
-            label: logLines.isEmpty ? '生成后查看日志' : '查看详细日志',
+            label: logLines.isEmpty ? AppLocalizations.of(context)!.generateExportS726 : AppLocalizations.of(context)!.contentViewDetailsLabel,
             icon: Icons.list_alt_rounded,
             onPressed: logLines.isEmpty ? null : onViewDetails,
           ),
@@ -1451,7 +1452,7 @@ class GenerationErrorActionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = statusMessage.contains('封面') ? '封面图生成失败' : '生成失败';
+    final title = statusMessage.contains(AppLocalizations.of(context)!.generateExportS419) ? AppLocalizations.of(context)!.generateExportS421 : AppLocalizations.of(context)!.generateExportS729;
     final reason = _extractReason(statusMessage);
     return SurfaceCard(
       backgroundColor: const Color(0xfffff4f3),
@@ -1478,17 +1479,17 @@ class GenerationErrorActionsPanel extends StatelessWidget {
             runSpacing: 10,
             children: [
               SecondaryButton(
-                label: '重试',
+                label: AppLocalizations.of(context)!.actionRetryLabel,
                 iconAsset: refreshIconAsset,
                 onPressed: onRetry,
               ),
               SecondaryButton(
-                label: '跳过封面继续导出',
+                label: AppLocalizations.of(context)!.generateExportS877,
                 iconAsset: pdfIconAsset,
                 onPressed: onSkipCover,
               ),
               SecondaryButton(
-                label: '查看日志',
+                label: AppLocalizations.of(context)!.generateExportS624,
                 iconAsset: timelineIconAsset,
                 onPressed: onViewLogs,
               ),
@@ -1511,7 +1512,7 @@ class GenerationErrorActionsPanel extends StatelessWidget {
 
   String _extractReason(String message) {
     final normalized = message.trim();
-    if (normalized.isEmpty) return '任务执行失败';
+    if (normalized.isEmpty) return AppLocalizations.of(context)!.generateExportS226;
     final colonIndex = normalized.indexOf('：');
     if (colonIndex >= 0 && colonIndex + 1 < normalized.length) {
       return normalized.substring(colonIndex + 1).trim();
@@ -1541,16 +1542,16 @@ class CoverFailureActionPanel extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '封面图生成失败',
+        Text(
+          AppLocalizations.of(context)!.generateExportS421,
           style: TextStyle(
             fontWeight: FontWeight.w900,
             color: Color(0xff9b3a2b),
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          '原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。',
+        Text(
+          AppLocalizations.of(context)!.generateExportS315,
           style: TextStyle(color: Color(0xff6f6258), height: 1.45),
         ),
         const SizedBox(height: 12),
@@ -1559,17 +1560,17 @@ class CoverFailureActionPanel extends StatelessWidget {
           runSpacing: 10,
           children: [
             SecondaryButton(
-              label: '重试',
+              label: AppLocalizations.of(context)!.actionRetryLabel,
               iconAsset: refreshIconAsset,
               onPressed: onRetry,
             ),
             SecondaryButton(
-              label: '跳过封面继续导出',
+              label: AppLocalizations.of(context)!.generateExportS877,
               iconAsset: pdfIconAsset,
               onPressed: onSkipAndContinue,
             ),
             SecondaryButton(
-              label: '查看日志',
+              label: AppLocalizations.of(context)!.generateExportS624,
               iconAsset: timelineIconAsset,
               onPressed: onViewLog,
             ),
@@ -1630,10 +1631,10 @@ class GenerateSettingsPanel extends StatelessWidget {
     final hasAssets = selectedCount > 0;
     final subtitle = generated
         ? '生成完成后可预览或导出 $exportLabel。'
-        : '调整模板、尺寸和导出方式。设置完成后即可开始创作。';
+        : AppLocalizations.of(context)!.generateExportS871;
     final primaryLabel = generated
         ? (exported ? '$exportLabel 已导出' : _exportButtonLabel(exportText))
-        : (generating ? '生成中...' : '开始生成绘本');
+        : (generating ? AppLocalizations.of(context)!.generateExportS719 : AppLocalizations.of(context)!.generateExportS470);
     final primaryAction = generating
         ? null
         : (generated ? onExport : onGenerate);
@@ -1644,8 +1645,8 @@ class GenerateSettingsPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '生成控制台',
+            Text(
+              AppLocalizations.of(context)!.generateExportS741,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
@@ -1657,25 +1658,25 @@ class GenerateSettingsPanel extends StatelessWidget {
               exported: exported,
             ),
             const SizedBox(height: 20),
-            const _SettingRow(
-              title: '创作类型',
-              value: '儿童绘本',
+            _SettingRow(
+              title: AppLocalizations.of(context)!.generateExportS279,
+              value: AppLocalizations.of(context)!.generateExportS255,
               icon: Icons.auto_stories_outlined,
             ),
             ExportOption(
-              title: '模板',
+              title: AppLocalizations.of(context)!.generateExportS644,
               value: _compactOption(templateText),
               icon: Icons.image,
               iconAsset: imageIconAsset,
             ),
             ExportOption(
-              title: '页面尺寸',
+              title: AppLocalizations.of(context)!.generateExportS942,
               value: _compactOption(sizeText),
               icon: Icons.description_outlined,
               iconAsset: a4FileIconAsset,
             ),
             ExportOption(
-              title: '文案风格',
+              title: AppLocalizations.of(context)!.generateExportS553,
               value: _compactOption(styleText),
               icon: Icons.style,
               iconAsset: brushIconAsset,
@@ -1696,7 +1697,7 @@ class GenerateSettingsPanel extends StatelessWidget {
             const SizedBox(height: 14),
             generated
                 ? SecondaryButton(
-                    label: generating ? '生成中...' : '重新生成',
+                    label: generating ? AppLocalizations.of(context)!.generateExportS719 : AppLocalizations.of(context)!.generateExportS921,
                     icon: Icons.refresh_rounded,
                     iconAsset: refreshIconAsset,
                     fullWidth: true,
@@ -1704,7 +1705,7 @@ class GenerateSettingsPanel extends StatelessWidget {
                     onPressed: generating ? null : onGenerate,
                   )
                 : SecondaryButton(
-                    label: '查看已选素材',
+                    label: AppLocalizations.of(context)!.generateExportS623,
                     icon: Icons.grid_view_rounded,
                     iconAsset: gridIconAsset,
                     fullWidth: true,
@@ -1713,8 +1714,8 @@ class GenerateSettingsPanel extends StatelessWidget {
                   ),
             if (!generated && !hasAssets) ...[
               const SizedBox(height: 8),
-              const Text(
-                '请先选择素材，开始生成才会启用。',
+              Text(
+                AppLocalizations.of(context)!.generateExportS860,
                 style: TextStyle(
                   color: Color(0xff9a5a14),
                   fontSize: 12,
@@ -1725,7 +1726,7 @@ class GenerateSettingsPanel extends StatelessWidget {
             const SizedBox(height: 14),
             generated
                 ? SecondaryButton(
-                    label: '预览全部页面',
+                    label: AppLocalizations.of(context)!.generateExportS951,
                     icon: Icons.visibility_outlined,
                     iconAsset: viewIconAsset,
                     fullWidth: true,
@@ -1737,7 +1738,7 @@ class GenerateSettingsPanel extends StatelessWidget {
             Text(
               generated
                   ? '导出将写入当前导出目录，完成后可在“打开导出文件夹”中查看 $exportLabel 文件'
-                  : '生成完成后，可以导出 PDF、长图或创建分享链接。',
+                  : AppLocalizations.of(context)!.generateExportS735,
               style: const TextStyle(color: Color(0xffa57a3a), fontSize: 13),
             ),
           ],
@@ -1773,19 +1774,19 @@ class _ReadinessSummary extends StatelessWidget {
       child: Column(
         children: [
           _ConsoleFact(
-            label: '素材状态',
-            value: hasAssets ? '$selectedCount / 建议 6+' : '0 / 建议 6+',
+            label: AppLocalizations.of(context)!.generateExportS821,
+            value: hasAssets ? '$selectedCount / 建议 6+' : AppLocalizations.of(context)!.generateExportS83,
           ),
           const SizedBox(height: 8),
           _ConsoleFact(
-            label: '任务状态',
+            label: AppLocalizations.of(context)!.generateExportS227,
             value: exported
-                ? '已导出'
+                ? AppLocalizations.of(context)!.generateExportS444
                 : generated
-                ? '已生成'
+                ? AppLocalizations.of(context)!.generateExportS450
                 : hasAssets
-                ? '等待开始'
-                : '等待选择素材',
+                ? AppLocalizations.of(context)!.generateExportS795
+                : AppLocalizations.of(context)!.generateExportS800,
           ),
           const SizedBox(height: 8),
           const _ConsoleFact(label: '云端分享', value: '生成后可上传'),
@@ -1875,12 +1876,12 @@ class _LockedPreviewNotice extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
     backgroundColor: const Color(0xfff6f0e8),
     child: Row(
-      children: const [
+      children: [
         AppAssetIcon(lockIconAsset, size: compactInlineIconSize),
         SizedBox(width: 9),
         Expanded(
           child: Text(
-            '预览与导出将在生成后解锁',
+            AppLocalizations.of(context)!.generateExportS949,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Color(0xff8c7663),
@@ -1918,7 +1919,7 @@ class ExportTargetSelector extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('导出目标', style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(AppLocalizations.of(context)!.generateExportS417), style: TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             key: ValueKey(selected),
@@ -1990,7 +1991,7 @@ class ExportResultPanel extends StatelessWidget {
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                '生成完成后，可以导出 PDF、长图或创建分享链接。',
+                AppLocalizations.of(context)!.generateExportS735,
                 style: TextStyle(
                   color: Color(0xff7a6a5b),
                   fontWeight: FontWeight.w700,
@@ -2005,15 +2006,15 @@ class ExportResultPanel extends StatelessWidget {
     final hasShare = current?.shareText.trim().isNotEmpty == true;
     final canCopyImage = current?.isLongImage == true && hasLocalFile;
     final status = current == null
-        ? (generated ? '等待导出' : '生成后可导出')
+        ? (generated ? AppLocalizations.of(context)!.generateExportS794 : AppLocalizations.of(context)!.generateExportS724)
         : _storageStatusLabel(current.storageStatus);
     final remoteStatus = current == null
-        ? '生成后可上传分享'
+        ? AppLocalizations.of(context)!.generateExportS723
         : current.remoteUrl.trim().isNotEmpty
-        ? '已生成分享链接'
+        ? AppLocalizations.of(context)!.generateExportS452
         : hasShare
-        ? '可复制分享文案'
-        : '仅本地文件';
+        ? AppLocalizations.of(context)!.generateExportS329
+        : AppLocalizations.of(context)!.generateExportS220;
     final error = current?.errorReason.trim() ?? '';
 
     return SurfaceCard(
@@ -2030,9 +2031,9 @@ class ExportResultPanel extends StatelessWidget {
             children: [
               const AppAssetIcon(cloudUploadIconAsset, size: 26),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '导出结果',
+                  AppLocalizations.of(context)!.generateExportS418,
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
                 ),
               ),
@@ -2051,12 +2052,12 @@ class ExportResultPanel extends StatelessWidget {
             runSpacing: 8,
             children: [
               _ExportFact(
-                label: '本地文件',
-                value: hasLocalFile ? current!.localPath : '尚未导出',
+                label: AppLocalizations.of(context)!.generateExportS611,
+                value: hasLocalFile ? current!.localPath : AppLocalizations.of(context)!.generateExportS428,
               ),
-              _ExportFact(label: '云端分享', value: status),
-              _ExportFact(label: '分享链接', value: remoteStatus),
-              if (error.isNotEmpty) _ExportFact(label: '错误原因', value: error),
+              _ExportFact(label: AppLocalizations.of(context)!.generateExportS218, value: status),
+              _ExportFact(label: AppLocalizations.of(context)!.generateExportS274, value: remoteStatus),
+              if (error.isNotEmpty) _ExportFact(label: AppLocalizations.of(context)!.generateExportS930, value: error),
             ],
           ),
           const SizedBox(height: 14),
@@ -2065,17 +2066,17 @@ class ExportResultPanel extends StatelessWidget {
             runSpacing: 10,
             children: [
               SecondaryButton(
-                label: '打开导出文件夹',
+                label: AppLocalizations.of(context)!.generateExportS518,
                 iconAsset: folderIconAsset,
                 onPressed: hasLocalFile ? onOpenExportFolder : null,
               ),
               SecondaryButton(
-                label: '复制分享文案',
+                label: AppLocalizations.of(context)!.generateExportS357,
                 iconAsset: linkIconAsset,
                 onPressed: hasShare ? onCopyShareText : null,
               ),
               SecondaryButton(
-                label: '复制长图',
+                label: AppLocalizations.of(context)!.generateExportS358,
                 iconAsset: imageFileIconAsset,
                 onPressed: canCopyImage ? onCopyLongImage : null,
               ),
@@ -2114,10 +2115,10 @@ class ExportResultPanel extends StatelessWidget {
     required bool canCopyImage,
     required ExportResultVm? result,
   }) {
-    if (!hasLocalFile) return '导出完成后才能打开文件夹或复制长图。';
-    if (!hasShare) return '导出物尚未上传分享，暂不能复制分享文案。';
-    if (!canCopyImage) return '当前导出不是长图，不能复制长图内容。';
-    return '分享链接已生成，可直接发送给家人查看。';
+    if (!hasLocalFile) return AppLocalizations.of(context)!.generateExportS411;
+    if (!hasShare) return AppLocalizations.of(context)!.generateExportS415;
+    if (!canCopyImage) return AppLocalizations.of(context)!.generateExportS476;
+    return AppLocalizations.of(context)!.generateExportS275;
   }
 }
 
@@ -2143,36 +2144,39 @@ class _ExportFact extends StatelessWidget {
 }
 
 String _exportButtonLabel(String exportText) {
-  if (_isJpgTarget(exportText)) return '导出 JPG 长图';
-  if (_isPngTarget(exportText)) return '导出 PNG 长图';
-  return '导出 PDF';
+  if (_isJpgTarget(exportText)) return AppLocalizations.of(context)!.generateExportS404;
+  if (_isPngTarget(exportText)) return AppLocalizations.of(context)!.generateExportS406;
+  return AppLocalizations.of(context)!.generateExportS405;
 }
 
 String _exportDisplayName(String exportText) {
-  if (_isJpgTarget(exportText)) return '长图 JPG';
-  if (_isPngTarget(exportText)) return '长图 PNG';
+  if (_isJpgTarget(exportText)) return AppLocalizations.of(context)!.generateExportS931;
+  if (_isPngTarget(exportText)) return AppLocalizations.of(context)!.generateExportS934;
   return 'PDF';
 }
 
 bool _isPngTarget(String exportText) {
   final normalized = exportText.toLowerCase();
-  return normalized.contains('png') || exportText.contains('长图 PNG');
+  return normalized.contains('png') || exportText.contains(AppLocalizations.of(context)!.generateExportS934);
 }
 
 bool _isJpgTarget(String exportText) {
   final normalized = exportText.toLowerCase();
   return normalized.contains('jpg') ||
       normalized.contains('jpeg') ||
-      exportText.contains('长图 JPG');
+      exportText.contains(AppLocalizations.of(context)!.generateExportS931);
 }
 
 String _storageStatusLabel(String status) {
-  return switch (status.trim()) {
-    'synced' => '已同步',
-    'pending' || 'running' => '同步中',
-    'retry_wait' => '等待重试',
-    'failed' => '同步失败',
-    'local_only' || '' || 'ready' => '仅本地',
-    final value => value,
-  };
+  final normalized = status.trim();
+  if (normalized == 'synced') return AppLocalizations.of(context)!.generateExportS438;
+  if (normalized == 'pending' || normalized == 'running') {
+    return AppLocalizations.of(context)!.generateExportS336;
+  }
+  if (normalized == 'retry_wait') return AppLocalizations.of(context)!.generateExportS802;
+  if (normalized == 'failed') return AppLocalizations.of(context)!.generateExportS340;
+  if (normalized.isEmpty || normalized == 'local_only' || normalized == 'ready') {
+    return AppLocalizations.of(context)!.generateExportS219;
+  }
+  return normalized;
 }

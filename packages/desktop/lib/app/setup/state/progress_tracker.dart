@@ -6,11 +6,13 @@ class _BrewPhaseTracker {
   _BrewPhaseTracker({
     required this.baseProgress,
     required this.maxProgress,
+    required this.l10n,
     required this.onUpdate,
   });
 
   final double baseProgress;
   final double maxProgress;
+  final AppLocalizations l10n;
   final void Function(double progress, String label) onUpdate;
 
   double _current = 0;
@@ -24,23 +26,23 @@ class _BrewPhaseTracker {
 
     if (trimmed.startsWith('==> Fetching')) {
       target = baseProgress + (maxProgress - baseProgress) * 0.15;
-      label = '正在获取资源...';
+      label = l10n.setupFetchingResources;
     } else if (trimmed.startsWith('==> Downloading')) {
       target = baseProgress + (maxProgress - baseProgress) * 0.3;
-      label = '正在下载...';
+      label = l10n.setupDownloading;
     } else if (trimmed.startsWith('==> Installing') ||
         trimmed.contains('==> Installing')) {
       target = baseProgress + (maxProgress - baseProgress) * 0.6;
-      label = '正在安装...';
+      label = l10n.setupInstallingSoftware;
     } else if (trimmed.startsWith('==> Pouring') ||
         trimmed.contains('==> Pouring')) {
       target = baseProgress + (maxProgress - baseProgress) * 0.85;
-      label = '正在配置...';
+      label = l10n.setupConfiguring;
     } else if (trimmed.startsWith('🍺') ||
         trimmed.startsWith('==> Summary') ||
         trimmed.startsWith('==> Linking')) {
       target = maxProgress;
-      label = '安装完成';
+      label = l10n.setupInstallCompleted;
     } else if (trimmed.startsWith('Error:') ||
         trimmed.startsWith('==> Error')) {
       label = trimmed;

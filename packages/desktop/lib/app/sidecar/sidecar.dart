@@ -3,7 +3,7 @@ part of '../desktop_shell.dart';
 extension _DesktopShellSidecarLifecycle on _DesktopShellState {
   Future<void> _bootstrapSidecarAndRefresh() async {
     if (mounted) {
-      _setShellState(() => readinessMessage = 'Sidecar 状态检查中');
+      _setShellState(() => readinessMessage = AppLocalizations.of(context)!.sidecarS151);
     }
     if (Platform.environment['FLUTTER_TEST'] == 'true') {
       await _ensureSidecarRunning();
@@ -11,14 +11,14 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
       return;
     }
     if (_bundledPostgresRuntimeAvailable()) {
-      final pgReady = await _ensureBundledPostgresReady('PostgreSQL 配置');
+      final pgReady = await _ensureBundledPostgresReady(AppLocalizations.of(context)!.setupPostgresTitle);
       if (!pgReady) {
-        _markSidecarUnavailable('内置 PostgreSQL 启动失败，已阻断 sidecar 启动。');
+        _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS266);
         return;
       }
       final relaunched = await _ensureSidecarRunning(forceRestart: true);
       if (!relaunched) {
-        _markSidecarUnavailable('Sidecar 重启失败，初始化未完成。');
+        _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS155);
         return;
       }
       await refreshReadiness();
@@ -30,13 +30,13 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
     }
     if (mounted) {
       _setShellState(() {
-        readinessMessage = '正在启动 Sidecar';
+        readinessMessage = AppLocalizations.of(context)!.sidecarS652;
         readinessChecks = _pgFirstSetupChecks();
       });
     }
     final sidecarReady = await _ensureSidecarRunning();
     if (!sidecarReady) {
-      _markSidecarUnavailable('Sidecar 未就绪，初始化未完成。');
+      _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS145);
       return;
     }
     await refreshReadiness();
@@ -64,7 +64,7 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
   }
 
   List<SetupCheckVm> _pgFirstSetupChecks() {
-    final checks = _disconnectedSetupChecks();
+    final checks = _disconnectedSetupChecks(context);
     return _applySequentialSetupLocks(checks);
   }
 
@@ -76,7 +76,7 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
           ? check
           : _copySetupCheck(
               check,
-              state: check.ok == true ? check.state : '等待上一步',
+              state: check.ok == true ? check.state : AppLocalizations.of(context)!.sidecarS792,
               actionEnabled: false,
             );
       if (check.ok != true) blocked = true;

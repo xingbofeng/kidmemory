@@ -39,12 +39,14 @@ class _AssetStorageAction extends StatelessWidget {
         normalized == 'pending' ||
         normalized == 'running' ||
         normalized == 'retry_wait';
-    final label = normalized == 'failed' ? '重新同步' : '同步到 Supabase';
+    final label = normalized == 'failed'
+        ? AppLocalizations.of(context)!.assetLibraryResyncLabel
+        : AppLocalizations.of(context)!.assetLibrarySyncToStorageLabel;
     final reason = synced
-        ? '素材已同步到 Supabase Storage'
+        ? AppLocalizations.of(context)!.assetLibrarySyncedToStorageText
         : running
-        ? '素材正在同步或等待重试'
-        : '把本地素材同步到 Supabase Storage，失败不影响本地使用';
+            ? AppLocalizations.of(context)!.assetLibrarySyncRunningOrRetryText
+            : AppLocalizations.of(context)!.assetLibraryLocalSyncFallbackText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,14 +72,17 @@ class _AssetStorageAction extends StatelessWidget {
 }
 
 String _storageStatusLabel(String status) {
-  return switch (status.trim()) {
-    'synced' => '已同步',
-    'pending' || 'running' => '同步中',
-    'retry_wait' => '等待重试',
-    'failed' => '同步失败',
-    'local_only' || '' || 'ready' => '仅本地',
-    final value => value,
-  };
+  final normalized = status.trim();
+  if (normalized == 'synced') return AppLocalizations.of(context)!.assetLibraryStatusSynced;
+  if (normalized == 'pending' || normalized == 'running') {
+    return AppLocalizations.of(context)!.assetLibraryStatusSyncing;
+  }
+  if (normalized == 'retry_wait') return AppLocalizations.of(context)!.assetLibraryStatusRetryWaiting;
+  if (normalized == 'failed') return AppLocalizations.of(context)!.assetLibraryStatusFailed;
+  if (normalized.isEmpty || normalized == 'local_only' || normalized == 'ready') {
+    return AppLocalizations.of(context)!.assetLibraryStatusLocalOnly;
+  }
+  return normalized;
 }
 
 class _LibraryHeaderStatus extends StatelessWidget {
@@ -379,7 +384,7 @@ class _LibraryToolbar extends StatelessWidget {
                       child: SearchBox(
                         controller: searchController,
                         onChanged: onSearchChanged,
-                        hintText: '搜索素材、标签、描述...',
+                        hintText: AppLocalizations.of(context)!.assetLibrarySearchHintText,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -390,7 +395,7 @@ class _LibraryToolbar extends StatelessWidget {
                         onPressed: semanticSearching || importBusy
                             ? null
                             : onSemanticSearch,
-                        child: Text(semanticSearching ? '搜索中' : '搜索'),
+                        child: Text(semanticSearching ? AppLocalizations.of(context)!.assetLibrarySearchingLabel : AppLocalizations.of(context)!.assetLibrarySearchButtonLabel),
                       ),
                     ),
                   ],
@@ -403,7 +408,7 @@ class _LibraryToolbar extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onSmartPick,
                     icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: const Text('帮我挑素材'),
+                    label: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: _AssetLibraryPalette.successAction,
                       backgroundColor: _AssetLibraryPalette.successSoft,
@@ -420,14 +425,14 @@ class _LibraryToolbar extends StatelessWidget {
                   _ToolbarButton(
                     icon: Icons.add_photo_alternate_outlined,
                     iconAsset: imageIconAsset,
-                    label: importBusy ? '导入中...' : '导入图片',
+                    label: importBusy ? AppLocalizations.of(context)!.sampleDatasetImportingActionLabel : AppLocalizations.of(context)!.assetLibraryImportPhotoLabel,
                     onPressed: importBusy ? null : onImportFiles,
                   ),
                 if (showImportActions)
                   _ToolbarButton(
                     icon: Icons.folder_open_outlined,
                     iconAsset: folderIconAsset,
-                    label: importBusy ? '导入中...' : '导入文件夹',
+                    label: importBusy ? AppLocalizations.of(context)!.sampleDatasetImportingActionLabel : AppLocalizations.of(context)!.assetLibraryImportFolderLabel,
                     onPressed: importBusy ? null : onImportFolder,
                   ),
               ];
@@ -463,13 +468,13 @@ class _LibraryToolbar extends StatelessWidget {
             children: [
               if (!isDemoMode)
                 _ToolbarLabeledField(
-                  label: '孩子',
+                  label: AppLocalizations.of(context)!.assetLibraryChildLabel,
                   width: 188,
                   child: children.isEmpty
-                      ? const _ReadonlyToolbarField(
+                      ? _ReadonlyToolbarField(
                           icon: Icons.child_care,
                           iconAsset: childIconAsset,
-                          label: '暂无孩子档案',
+                          label: AppLocalizations.of(context)!.assetLibraryNoChildProfileText,
                         )
                       : DropdownButtonFormField<String>(
                           initialValue: selectedChildId ?? children.first.id,
@@ -488,12 +493,12 @@ class _LibraryToolbar extends StatelessWidget {
                         ),
                 ),
               _ToolbarLabeledField(
-                label: '排序',
+                label: AppLocalizations.of(context)!.assetLibrarySortLabel,
                 width: 236,
                 child: DropdownButtonFormField<String>(
                   initialValue: selectedSortMode,
                   isExpanded: true,
-                  items: _assetSortOptions
+                  items: _assetSortOptions(context)
                       .map(
                         (option) => DropdownMenuItem(
                           value: option['value'],
@@ -512,7 +517,7 @@ class _LibraryToolbar extends StatelessWidget {
               ),
               _InlineStatusChip(
                 icon: Icons.refresh_rounded,
-                label: refreshingIndex ? '索引刷新中' : '刷新索引',
+                label: refreshingIndex ? AppLocalizations.of(context)!.assetLibraryIndexRefreshingLabel : AppLocalizations.of(context)!.assetLibraryRefreshIndexLabel,
                 onPressed: refreshingIndex ? null : onRefreshSearchIndexing,
               ),
               if (showImportActions) ...[
@@ -633,7 +638,7 @@ class _SearchStatusStrip extends StatelessWidget {
             ),
           ),
           if (onClear != null)
-            TextButton(onPressed: onClear, child: const Text('清除')),
+            TextButton(onPressed: onClear, child: Text(AppLocalizations.of(context)!.assetLibraryClearSearchLabel))),
         ],
       ),
     );
@@ -682,8 +687,8 @@ class _SelectionBasket extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (previewAssets.isEmpty)
-            const Text(
-              '选择素材后会在这里汇总。',
+            Text(
+              AppLocalizations.of(context)!.assetLibraryNoSelectedAssetsText,
               style: TextStyle(
                 color: _AssetLibraryPalette.bodyMuted,
                 fontSize: 12,
@@ -718,7 +723,7 @@ class _SelectionBasket extends StatelessWidget {
             ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '去生成作品集',
+            label: AppLocalizations.of(context)!.assetLibraryGoToGenerateLabel,
             iconAsset: wandIconAsset,
             fullWidth: true,
             height: 42,
@@ -731,11 +736,13 @@ class _SelectionBasket extends StatelessWidget {
 }
 
 String _assetIconAsset(String type) {
-  return switch (type) {
-    'photo' || '照片' => cameraIconAsset,
-    'craft' || '手工' => bearDocumentIconAsset,
-    _ => paletteIconAsset,
-  };
+  if (type == 'photo' || type == AppLocalizations.of(context)!.contentAssetTypePhotoLabel) {
+    return cameraIconAsset;
+  }
+  if (type == 'craft' || type == AppLocalizations.of(context)!.contentAssetTypeCraftLabel) {
+    return bearDocumentIconAsset;
+  }
+  return paletteIconAsset;
 }
 
 class _ReadonlyToolbarField extends StatelessWidget {
@@ -928,14 +935,14 @@ class _BatchActionBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _BatchTextButton(label: '生成绘本', onPressed: onGoToGenerate),
-          _BatchTextButton(label: '生成回忆视频', onPressed: onGoToGenerate),
-          _BatchTextButton(label: '生成纪念册', onPressed: onGoToGenerate),
-          TextButton(onPressed: onClearSelection, child: const Text('取消选择')),
+          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGeneratePictureBookLabel, onPressed: onGoToGenerate),
+          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGenerateVideoLabel, onPressed: onGoToGenerate),
+          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGenerateAlbumLabel, onPressed: onGoToGenerate),
+          TextButton(onPressed: onClearSelection, child: Text(AppLocalizations.of(context)!.assetLibraryClearSelectionLabel))),
           TextButton.icon(
             onPressed: onDeleteSelected,
             icon: const Icon(Icons.delete_outline_rounded, size: 18),
-            label: Text(deleteBusy ? '删除中...' : '批量删除'),
+            label: Text(deleteBusy ? AppLocalizations.of(context)!.assetLibraryBatchDeletingLabel : AppLocalizations.of(context)!.assetLibraryBatchDeleteButtonLabel),
             style: TextButton.styleFrom(
               foregroundColor: _AssetLibraryPalette.dangerText,
             ),
@@ -997,13 +1004,13 @@ class EmptyAssetLibrary extends StatelessWidget {
                 child: const AppAssetIcon(imageIconAsset, size: 42),
               ),
               const SizedBox(height: 18),
-              const Text(
-                '还没有素材',
+              Text(
+                AppLocalizations.of(context)!.assetLibraryEmptyLibraryTitle,
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '导入本地图片、整个文件夹，或把文件拖拽到素材库后，这里会显示真实缩略图和 metadata 编辑入口。',
+              Text(
+                AppLocalizations.of(context)!.assetLibraryImportDescriptionText,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _AssetLibraryPalette.bodyMuted,
@@ -1017,14 +1024,14 @@ class EmptyAssetLibrary extends StatelessWidget {
                   _ToolbarButton(
                     icon: Icons.add_photo_alternate_outlined,
                     iconAsset: imageIconAsset,
-                    label: '导入图片',
+                    label: AppLocalizations.of(context)!.assetLibraryImportPhotoLabel,
                     onPressed: onImportFiles,
                   ),
                   const SizedBox(width: 12),
                   _ToolbarButton(
                     icon: Icons.folder_open_outlined,
                     iconAsset: folderIconAsset,
-                    label: '导入文件夹',
+                    label: AppLocalizations.of(context)!.assetLibraryImportFolderLabel,
                     onPressed: onImportFolder,
                   ),
                 ],
@@ -1062,13 +1069,13 @@ class _EmptySearchResults extends StatelessWidget {
                 color: _AssetLibraryPalette.bodyMuted,
               ),
               const SizedBox(height: 16),
-              const Text(
-                '没有找到匹配素材',
+              Text(
+                AppLocalizations.of(context)!.assetLibraryEmptySearchTitle,
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '试试换个关键词，或让 Agent 帮你挑选相关素材。',
+              Text(
+                AppLocalizations.of(context)!.assetLibrarySearchFallbackHint,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _AssetLibraryPalette.bodyMuted,
@@ -1081,12 +1088,12 @@ class _EmptySearchResults extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: onClearSearch,
-                    child: const Text('清空搜索'),
+                    child: Text(AppLocalizations.of(context)!.assetLibraryClearSearchActionLabel)),
                   ),
                   FilledButton.icon(
                     onPressed: onSmartPick,
                     icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: const Text('AI 帮我挑素材'),
+                    label: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
                   ),
                 ],
               ),
@@ -1125,13 +1132,13 @@ class _InspectorEmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
-            '选择一个素材',
+          Text(
+            AppLocalizations.of(context)!.assetLibrarySelectAssetTitle,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          const Text(
-            '在这里查看和编辑标题、标签、描述，也可以让 Agent 帮你整理素材。',
+          Text(
+            AppLocalizations.of(context)!.assetLibraryInspectorHintText,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: _AssetLibraryPalette.bodyMuted,
@@ -1142,7 +1149,7 @@ class _InspectorEmptyState extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onSmartPick,
             icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-            label: const Text('AI 帮我整理素材'),
+            label: Text(AppLocalizations.of(context)!.assetLibrarySmartOrganizeLabel)),
           ),
         ],
       ),

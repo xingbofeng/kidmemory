@@ -3,23 +3,23 @@ part of '../../desktop_shell.dart';
 extension _DesktopShellSetupStorageTest on _DesktopShellState {
   Future<void> _testSupabaseStorage() async {
     if (!supabaseStorage.configured || supabaseStorage.testing) {
-      _showSnackBar('请先配置 Supabase REST 或 S3 所需参数');
+      _showSnackBar(AppLocalizations.of(context)!.setupConfigureStorageFirst);
       return;
     }
     _setShellState(() {
       supabaseStorage = supabaseStorage.copyWith(
         testing: true,
-        testMessage: '正在测试连接...',
+        testMessage: AppLocalizations.of(context)!.setupTestingConnection,
       );
     });
     final result = await gateway.testSupabaseStorageDto();
     if (!mounted) return;
-    final cleanupMessage = result.cleanupOk ? '' : '，测试对象清理失败';
+    final cleanupMessage = result.cleanupOk ? '' : AppLocalizations.of(context)!.setupTestCleanupFailedSuffix;
     final message = result.okValue
         ? '测试通过$cleanupMessage'
         : (result.messageValue.isNotEmpty
               ? result.messageValue
-              : (result.codeValue.isNotEmpty ? result.codeValue : '测试失败'));
+              : (result.codeValue.isNotEmpty ? result.codeValue : AppLocalizations.of(context)!.setupTestFailed));
     _setShellState(() {
       supabaseStorage = supabaseStorage.copyWith(
         testing: false,

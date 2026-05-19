@@ -12,6 +12,7 @@ import {
   type StorageProviderForSync,
 } from "../storage/providers/storage-sync.ts";
 import { createDatasetService } from "./providers/dataset.domain.ts";
+import { createOpenAIAssetMetadataInferer, type InferAssetMetadata } from "./providers/asset-metadata-inference.ts";
 import type { StorageSyncJobStatus } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
 
 type DatasetServiceFactories = {
@@ -20,6 +21,7 @@ type DatasetServiceFactories = {
     db: Awaited<ReturnType<DatasetStateService["activatePersistent"]>>;
     provider: StorageProviderForSync;
   }) => ReturnType<typeof createStorageSyncService>;
+  createInferAssetMetadata?: (config: AppConfigService) => InferAssetMetadata | undefined;
 };
 export const DATASET_SERVICE_FACTORIES = Symbol("DATASET_SERVICE_FACTORIES");
 
@@ -30,6 +32,7 @@ export class DatasetService {
   private readonly factories: Required<DatasetServiceFactories>;
   private storageProvider?: StorageProviderForSync;
   private storageSync?: ReturnType<typeof createStorageSyncService>;
+  private inferAssetMetadata?: InferAssetMetadata | null;
 
   constructor(
     @Inject(DatasetStateService) datasetState: DatasetStateService,
@@ -43,11 +46,23 @@ export class DatasetService {
         factories.createStorageProvider
         ?? ((cfg) => createSupabaseStorageProvider({ config: cfg.config.supabaseStorage })),
       createStorageSync: factories.createStorageSync ?? createStorageSyncService,
+      createInferAssetMetadata: factories.createInferAssetMetadata ?? ((cfg) => createOpenAIAssetMetadataInferer(cfg)),
     };
   }
 
+  private getInferAssetMetadata() {
+    if (this.inferAssetMetadata === undefined) {
+      this.inferAssetMetadata = this.factories.createInferAssetMetadata(this.config) ?? null;
+    }
+    return this.inferAssetMetadata ?? undefined;
+  }
+
   private get delegate() {
-    return createDatasetService({ datasetState: this.datasetState, config: this.config });
+    return createDatasetService({
+      datasetState: this.datasetState,
+      config: this.config,
+      inferAssetMetadata: this.getInferAssetMetadata(),
+    });
   }
 
   private async readDb(): Promise<SampleDb> {

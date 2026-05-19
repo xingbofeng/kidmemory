@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { InfrastructureModule } from "../../infrastructure/infrastructure.module.ts";
+import { SearchIndexingWorkerService } from "./providers/search-indexing.worker.ts";
 import { DatasetController } from "./dataset.controller.ts";
 import { DATASET_SERVICE_FACTORIES, DatasetService } from "./dataset.service.ts";
 
@@ -9,6 +10,7 @@ import { DATASET_SERVICE_FACTORIES, DatasetService } from "./dataset.service.ts"
   controllers: [DatasetController],
   providers: [
     DatasetService,
+    SearchIndexingWorkerService,
     {
       provide: DATASET_SERVICE_FACTORIES,
       useValue: {},

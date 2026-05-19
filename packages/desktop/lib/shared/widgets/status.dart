@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'chrome.dart';
 import 'layout.dart';
+import '../../../l10n/app_localizations.dart';
 
 enum AppToastTone { success, info, warning, error }
 
@@ -242,7 +243,7 @@ class ReadyStatus extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
     child: Row(
       mainAxisSize: MainAxisSize.min,
-      children: const [
+      children: [
         CircleAvatar(
           backgroundColor: Color(0xff2faa61),
           child: AppAssetIcon(completeIconAsset, size: 24),
@@ -251,15 +252,15 @@ class ReadyStatus extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '环境已就绪',
+          Text(
+              AppLocalizations.of(context)!.setupEnvironmentReady,
               style: TextStyle(
                 color: Color(0xff168542),
                 fontWeight: FontWeight.w900,
               ),
             ),
             Text(
-              '检测结果来自 sidecar',
+              AppLocalizations.of(context)!.setupCheckResultFromSidecar,
               style: TextStyle(fontSize: 12, color: Color(0xff77685e)),
             ),
           ],
@@ -276,13 +277,16 @@ class ReadinessStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disconnected = message.startsWith('Sidecar 未连接');
+    final l10n = AppLocalizations.of(context)!;
+    final disconnected = message.startsWith(l10n.setupSidecarDisconnected);
     final ready = _readinessComplete(message);
     final accent = disconnected
         ? const Color(0xffd68622)
         : (ready ? const Color(0xff2faa61) : const Color(0xffffbd54));
-    final title = disconnected ? '本地服务准备中' : (ready ? '环境已就绪' : '检测中');
-    final detail = disconnected ? '正在连接 KidMemory 本地服务' : message;
+    final title = disconnected
+        ? l10n.setupLocalServicePreparing
+        : (ready ? l10n.setupEnvironmentReady : l10n.setupEnvironmentChecking);
+    final detail = disconnected ? l10n.setupConnectingLocalService : message;
     final icon = disconnected
         ? linkIconAsset
         : (ready ? completeIconAsset : refreshIconAsset);

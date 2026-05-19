@@ -5,7 +5,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
     if (artifactId.isEmpty) {
       return _ExportSyncResult(
         storageStatus: 'local_only',
-        errorReason: 'sidecar 未返回导出物记录',
+        errorReason: AppLocalizations.of(context)!.exportSyncS195,
       );
     }
     if (!supabaseStorage.configured) {
@@ -15,7 +15,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
     if (childId == null || childId.isEmpty) {
       return _ExportSyncResult(
         storageStatus: 'local_only',
-        errorReason: '缺少孩子档案，暂不能同步导出物',
+        errorReason: AppLocalizations.of(context)!.exportSyncS837,
       );
     }
 
@@ -28,7 +28,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
         storageStatus: 'failed',
         errorReason: enqueued.reasonValue.isNotEmpty
             ? enqueued.reasonValue
-            : '同步入队失败',
+            : AppLocalizations.of(context)!.exportSyncS337,
       );
     }
     final worker = await gateway.runStorageSyncDto(limit: 5);
@@ -46,7 +46,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
           ? ''
           : _stringOrDefault(
               share.messageValue,
-              worker.failedValue > 0 ? 'Supabase Storage 同步失败' : '',
+              worker.failedValue > 0 ? AppLocalizations.of(context)!.exportSyncS157 : '',
             ),
     );
   }

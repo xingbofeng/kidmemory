@@ -3,6 +3,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import 'direct_upload_models.dart';
 import 'direct_upload_status.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Direct Upload session dialog.
 ///
@@ -63,7 +64,10 @@ class DirectUploadDialog extends StatelessWidget {
                           ElevatedButton.icon(
                             onPressed: busy ? null : () => onPullback(),
                             icon: const Icon(Icons.cloud_download_outlined),
-                            label: const Text('拉回本地'),
+                            label: Text(
+                              AppLocalizations.of(context)!
+                                  .directUploadPullBackActionLabel,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           if (busy)
@@ -75,8 +79,8 @@ class DirectUploadDialog extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        '回拉状态',
+                      Text(
+                        AppLocalizations.of(context)!.uploadRemoteStatusTitle,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
@@ -105,14 +109,14 @@ class _DialogHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
-            '扫码上传 · Direct',
+            AppLocalizations.of(context)!.directUploadDialogTitle,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
           ),
         ),
         IconButton(
-          tooltip: '关闭',
+          tooltip: AppLocalizations.of(context)!.actionCloseLabel,
           icon: const Icon(Icons.close),
           onPressed: onClose,
         ),
@@ -135,12 +139,12 @@ class _RiskBanner extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Icon(Icons.warning_amber_outlined, color: Color(0xffb38018)),
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Supabase 直传验证版 — 对象需电脑端回拉后才算入库',
+              AppLocalizations.of(context)!.directUploadRiskNotice,
               style: TextStyle(
                 color: Color(0xff6c4a07),
                 fontWeight: FontWeight.w700,
@@ -178,8 +182,8 @@ class _InfoSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '会话路径',
+              Text(
+                AppLocalizations.of(context)!.uploadSessionPathLabel,
                 style: TextStyle(color: Color(0xff6f8d72), fontSize: 12),
               ),
               SelectableText(
@@ -187,8 +191,8 @@ class _InfoSection extends StatelessWidget {
                 style: const TextStyle(fontFamily: 'Menlo', fontSize: 13),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '扫码或复制链接',
+              Text(
+                AppLocalizations.of(context)!.uploadAccessLinkLabel,
                 style: TextStyle(color: Color(0xff6f8d72), fontSize: 12),
               ),
               SelectableText(
@@ -226,7 +230,7 @@ class _QrCodeCard extends StatelessWidget {
       alignment: Alignment.center,
       padding: const EdgeInsets.all(10),
       child: Semantics(
-        label: 'Direct Upload 扫码链接二维码',
+        label: AppLocalizations.of(context)!.directUploadQrCodeLabel,
         value: data,
         image: true,
         child: QrImageView(
@@ -268,10 +272,22 @@ class _SummaryRow extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        _SummaryChip(label: '等待回拉', value: s.pendingRemote),
-        _SummaryChip(label: '回拉中', value: s.downloading),
-        _SummaryChip(label: '已入库', value: s.ready),
-        _SummaryChip(label: '失败', value: s.failed),
+        _SummaryChip(
+          label: AppLocalizations.of(context)!.uploadStatusPendingPullbackLabel,
+          value: s.pendingRemote,
+        ),
+        _SummaryChip(
+          label: AppLocalizations.of(context)!.uploadStatusDownloadingLabel,
+          value: s.downloading,
+        ),
+        _SummaryChip(
+          label: AppLocalizations.of(context)!.uploadStatusReadyLabel,
+          value: s.ready,
+        ),
+        _SummaryChip(
+          label: AppLocalizations.of(context)!.uploadStatusFailedLabel,
+          value: s.failed,
+        ),
       ],
     );
   }

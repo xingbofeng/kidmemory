@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../core/sidecar/sidecar_api.dart';
 import 'trusted_upload_controller.dart';
 import 'trusted_upload_dialog.dart';
@@ -26,7 +27,7 @@ class TrustedUploadEntryButton extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: () => _showTrustedUploadDialog(context),
       icon: const Icon(Icons.qr_code_2),
-      label: const Text('扫码上传'),
+      label: Text(AppLocalizations.of(context)!.trustedUploadEntryButtonLabel),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),

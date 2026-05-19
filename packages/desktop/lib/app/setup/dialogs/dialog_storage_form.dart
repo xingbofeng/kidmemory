@@ -25,13 +25,13 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('配置 Supabase Storage'),
+              title: Text(AppLocalizations.of(context)!.setupStorageDialogTitle)),
               content: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 560),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.tart,
                     children: _buildSupabaseStorageDialogFields(
                       urlController: urlController,
                       bucketController: bucketController,
@@ -64,11 +64,11 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.actionCancel)),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('保存'),
+                  child: Text(AppLocalizations.of(context)!.actionSave)),
                 ),
               ],
             );

@@ -32,12 +32,2368 @@
   "@childProfileTitle": {
     "description": "孩子档案页面标题"
   },
+  "assetStudioTitle": "创作台",
+  "@assetStudioTitle": {
+    "description": "创作台页面标题"
+  },
   "assetLibraryTitle": "素材库",
   "@assetLibraryTitle": {
     "description": "素材库页面标题"
   },
+  "sidebarSettingsTitle": "设置",
+  "@sidebarSettingsTitle": {
+    "description": "侧边栏设置入口标题"
+  },
+  "sidebarLocalProfileTitle": "本地成长档案",
+  "@sidebarLocalProfileTitle": {
+    "description": "侧边栏本地成长档案标题"
+  },
+  "localPriorityLabel": "本地优先",
+  "@localPriorityLabel": {
+    "description": "本地优先标签"
+  },
+  "sidebarSignatureDescription": "每一份素材，都会进入本地成长档案。",
+  "@sidebarSignatureDescription": {
+    "description": "侧边栏标语"
+  },
   "generateExportTitle": "生成导出",
   "@generateExportTitle": {
     "description": "生成导出页面标题"
+  },
+  "directUploadEntryButtonLabel": "扫码上传 · Direct",
+  "@directUploadEntryButtonLabel": {
+    "description": "Direct upload 入口按钮文字"
+  },
+  "directUploadDialogTitle": "扫码上传 · Direct",
+  "@directUploadDialogTitle": {
+    "description": "Direct upload 弹窗标题"
+  },
+  "directUploadPullBackActionLabel": "拉回本地",
+  "@directUploadPullBackActionLabel": {
+    "description": "Direct upload 回拉按钮文案"
+  },
+  "uploadRemoteStatusTitle": "回拉状态",
+  "@uploadRemoteStatusTitle": {
+    "description": "Direct upload 回拉状态区域标题"
+  },
+  "actionCloseLabel": "关闭",
+  "@actionCloseLabel": {
+    "description": "actionCloseLabel"
+  },
+  "directUploadRiskNotice": "Supabase 直传验证版 — 对象需电脑端回拉后才算入库",
+  "@directUploadRiskNotice": {
+    "description": "Direct upload 风险说明"
+  },
+  "uploadSessionPathLabel": "会话路径",
+  "@uploadSessionPathLabel": {
+    "description": "Direct upload 会话路径字段标签"
+  },
+  "uploadAccessLinkLabel": "扫码或复制链接",
+  "@uploadAccessLinkLabel": {
+    "description": "Direct upload 链接信息标签"
+  },
+  "directUploadQrCodeLabel": "Direct Upload 扫码链接二维码",
+  "@directUploadQrCodeLabel": {
+    "description": "Direct upload 二维码无障碍标签"
+  },
+  "directUploadNoItemsHint": "暂无远端对象，请先在手机端扫码上传",
+  "@directUploadNoItemsHint": {
+    "description": "Direct upload 无对象提示"
+  },
+  "actionRetryLabel": "重试",
+  "@actionRetryLabel": {
+    "description": "通用重试按钮文案"
+  },
+  "uploadStatusPendingPullbackLabel": "等待回拉",
+  "@uploadStatusPendingPullbackLabel": {
+    "description": "上传状态：等待回拉"
+  },
+  "uploadStatusDownloadingLabel": "回拉中",
+  "@uploadStatusDownloadingLabel": {
+    "description": "上传状态：回拉中"
+  },
+  "uploadStatusReadyLabel": "已入库",
+  "@uploadStatusReadyLabel": {
+    "description": "上传状态：已入库"
+  },
+  "uploadStatusFailedLabel": "失败",
+  "@uploadStatusFailedLabel": {
+    "description": "上传状态：失败"
+  },
+  "uploadStatusUnknownErrorLabel": "未知错误",
+  "@uploadStatusUnknownErrorLabel": {
+    "description": "错误详情：未知错误"
+  },
+  "trustedUploadEntryButtonLabel": "扫码上传",
+  "@trustedUploadEntryButtonLabel": {
+    "description": "Trusted upload 入口按钮文字"
+  },
+  "errorTitle": "错误",
+  "@errorTitle": {
+    "description": "错误标题"
+  },
+  "trustedUploadSessionNotReadyMessage": "会话未创建",
+  "@trustedUploadSessionNotReadyMessage": {
+    "description": "会话未创建时的错误提示"
+  },
+  "trustedUploadDialogTitle": "扫码上传",
+  "@trustedUploadDialogTitle": {
+    "description": "Trusted upload 弹窗标题"
+  },
+  "trustedUploadDescription": "后端可信上传：使用 signed upload、自动回拉入库",
+  "@trustedUploadDescription": {
+    "description": "Trusted upload 说明文案"
+  },
+  "trustedUploadCopyOrScanLabel": "手机扫码或复制链接:",
+  "@trustedUploadCopyOrScanLabel": {
+    "description": "Trusted upload 链接说明文案"
+  },
+  "trustedUploadNetworkHint": "请确保手机可以访问上方 URL 所在的桌面端网络地址。",
+  "@trustedUploadNetworkHint": {
+    "description": "Trusted upload 网络连接提示"
+  },
+  "uploadStatusTotalLabel": "总计",
+  "@uploadStatusTotalLabel": {
+    "description": "上传状态汇总标签：总数"
+  },
+  "uploadStatusWaitingLabel": "等待",
+  "@uploadStatusWaitingLabel": {
+    "description": "上传状态汇总标签：等待"
+  },
+  "uploadStatusUploadingLabel": "上传中",
+  "@uploadStatusUploadingLabel": {
+    "description": "上传状态汇总标签：上传中"
+  },
+  "uploadStatusPullingLabel": "回拉中",
+  "@uploadStatusPullingLabel": {
+    "description": "上传状态汇总标签：回拉中"
+  },
+  "setupPostgresTitle": "PostgreSQL 配置",
+  "setupPgvectorTitle": "pgvector 检测",
+  "setupOpenAiTitle": "大模型接口配置",
+  "setupLocalDataDirTitle": "本地数据目录",
+  "setupSidecarServiceTitle": "Sidecar 本地服务",
+  "setupItemTitle": "配置项",
+  "setupWaitingConfigLoad": "等待配置读取",
+  "setupPending": "待检测",
+  "setupHealthy": "正常",
+  "setupNeedsAction": "需处理",
+  "setupPurposeLabel": "用途",
+  "setupPurposePrefixAscii": "用途:",
+  "setupPurposePrefixCn": "用途：",
+  "setupSystemConfigItemSummary": "系统配置项。",
+  "actionInstallAndConfigure": "安装与配置",
+  "actionStartSidecar": "启动 Sidecar",
+  "actionConfigure": "配置",
+  "actionConfigureDirectory": "配置目录",
+  "actionEditConfig": "修改配置",
+  "actionOpenDirectory": "打开目录",
+  "actionRefreshChecks": "刷新检测",
+  "actionTest": "测试",
+  "actionCheck": "检测",
+  "actionInstall": "安装",
+  "actionStart": "启动",
+  "actionDirectory": "目录",
+  "actionView": "查看",
+  "actionConfigurePathToken": "__action__:配置",
+  "setupCompletePreviousStepFirst": "请先完成上一步配置",
+  "setupDirectoryCannotEdit": "这个目录项暂时不能在桌面端修改",
+  "setupNoConfigDialog": "这个配置项暂无弹窗配置",
+  "setupNoAutoInstallFlow": "这个配置项暂无自动安装流程",
+  "setupHomebrewDirectoryNotWritable": "Homebrew 目录不可写",
+  "setupLocalServiceResponsibilities": "KidMemory 的本地服务负责配置、检测和数据任务。通常会随应用自动准备。",
+  "setupOpenAiConfigSaveFailed": "OpenAI 配置保存失败",
+  "setupOpenAiConfigSaved": "OpenAI 配置已保存",
+  "setupOpenAiConfigUpdated": "OpenAI 配置已更新",
+  "setupOpenAiConfigUpdateFailed": "OpenAI 配置更新失败",
+  "setupPostgresNotReadyNeedConfig": "PostgreSQL 仍未就绪，安装 pgvector 前请先完成数据库配置",
+  "setupPostgresHandledButSidecarNotStarted": "PostgreSQL 已处理，但 Sidecar 未能启动",
+  "setupPostgresConfigured": "PostgreSQL 已配置完成",
+  "setupPostgresNotReadyAutoInstall": "PostgreSQL 未就绪，自动执行 PostgreSQL 安装与配置",
+  "setupPostgresNotReadyCheckConfigRetry": "PostgreSQL 未就绪，请检查数据库配置后重试",
+  "setupPostgresNotReadyStartLocalService": "PostgreSQL 还未就绪，请启动本机服务后重试",
+  "setupStorageRestModeLabel": "REST 方式（可选）",
+  "setupStorageS3ModeLabel": "S3 方式（推荐）",
+  "setupSidecarStarted": "Sidecar 已启动",
+  "setupSidecarStartedSchemaNotReady": "Sidecar 已启动，schema 初始化未完成",
+  "setupSidecarConnected": "Sidecar 已连接",
+  "setupSidecarStartFailed": "Sidecar 未能启动",
+  "setupSidecarStartFailedNodeOrBundled": "Sidecar 未能启动，请检查 Node.js 或 bundled sidecar",
+  "setupSidecarDisconnected": "Sidecar 未连接",
+  "setupStorageConfigTitle": "Storage 配置",
+  "setupStorageConfigSaveFailed": "Supabase Storage 配置保存失败",
+  "setupStorageConfigSaved": "Supabase Storage 配置已保存",
+  "setupPgvectorInitFailed": "pgvector 初始化失败",
+  "setupPgvectorInitFailedExtMissing": "pgvector 初始化失败，请确认扩展已安装",
+  "setupPgvectorNotReady": "pgvector 尚未就绪",
+  "setupPgvectorNotReadyInstallExtRetry": "pgvector 尚未就绪，请安装扩展后重试",
+  "setupPgvectorReady": "pgvector 已安装并通过检测",
+  "setupPgvectorWaitForPostgres": "pgvector 流程检测到 PostgreSQL 未就绪，自动联动执行 PostgreSQL 安装配置",
+  "setupSchemaInitFailed": "schema 初始化未成功",
+  "setupSignedUrlDefaultHint": "不改的话，默认就是 1 小时，填 3600 就可以。",
+  "setupLocalDataDirectoryDescription": "为 KidMemory 提供核心数据库连接，保存孩子资料、素材和生成历史。",
+  "actionSave": "保存",
+  "actionSaveSettings": "保存配置",
+  "agentSettingsTitle": "Agent 设置",
+  "agentSettingsOpenAiDescription": "配置 OpenAI Agent SDK 服务端点，用于生成儿童作品集。支持 OpenAI API 或兼容的本地服务。",
+  "agentSettingsSectionTitle": "Agent SDK 配置",
+  "agentSettingsMissingConfigMessage": "请填写完整的配置信息",
+  "agentSettingsConnectionTestSuccess": "连接测试成功",
+  "agentSettingsConnectionTestFailed": "连接测试失败",
+  "agentSettingsSaveSuccess": "Agent 配置已成功保存",
+  "agentSettingsConfigNameLabel": "配置名称",
+  "agentSettingsNameHelper": "用于在本机区分不同 Agent 配置",
+  "agentSettingsBaseUrlHint": "https://api.openai.com 或本地服务地址",
+  "agentSettingsBaseUrlHelper": "支持 OpenAI API 或兼容的本地 Agent SDK 服务",
+  "agentSettingsApiKeyHint": "sk-... 或本地服务的认证密钥",
+  "agentSettingsApiKeyHelper": "用于认证的 API 密钥",
+  "agentSettingsModelLabel": "模型名称",
+  "agentSettingsModelHint": "gpt-4, gpt-3.5-turbo 等",
+  "agentSettingsModelDefaultHint": "留空将使用默认模型 gpt-4",
+  "agentSettingsUsageTitle": "使用说明",
+  "agentSettingsOpenAiStepTitle": "1. OpenAI API",
+  "agentSettingsOpenAiStepDescription": "使用官方 OpenAI API 服务",
+  "agentSettingsLocalStepTitle": "2. 本地服务",
+  "agentSettingsLocalStepDescription": "运行兼容 OpenAI API 的本地 Agent SDK 服务",
+  "agentSettingsCustomEndpointStepTitle": "3. 自定义端点",
+  "agentSettingsCustomEndpointStepDescription": "支持任何兼容 OpenAI API 格式的服务",
+  "setupStorageSectionIntro": "先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。",
+  "setupStoragePublicPrefixHint": "公开桶可填完整对象前缀",
+  "setupStoragePublicAccessPrefixLabel": "公开访问前缀（可选）",
+  "setupBuiltinPostgresNoPgvector": "内置 PostgreSQL runtime 未包含 pgvector 扩展",
+  "setupBuiltinPostgresNoPgvectorInstruction": "内置 PostgreSQL runtime 未包含 pgvector 扩展，请补齐后重试。",
+  "setupCreateLocalDatabase": "创建 KidMemory 本地资料库",
+  "setupInitStarted": "初始化",
+  "setupInitDatabaseSchema": "初始化 KidMemory 数据库结构",
+  "setupInitBuiltinDataDir": "初始化内置 PostgreSQL 数据目录",
+  "setupRegionLabel": "区域",
+  "setupStorageApiKeyHelpServiceRole": "去 Supabase 的 Settings > API Keys 里找 service_role / secret key。",
+  "setupStorageBucketNameHint": "去 Supabase 的 Storage > Buckets 里看 bucket 名。",
+  "setupStorageS3AccessKeyIdHint": "去 Supabase 的 Storage > Settings > S3 说明页复制 Access Key ID。",
+  "setupStorageS3SecretKeyHint": "去 Supabase 的 Storage > Settings > S3 说明页复制 Secret Access Key。",
+  "setupStorageS3EndpointHint": "去 Supabase 的 Storage > Settings > S3 说明页复制 endpoint。",
+  "setupStorageProjectUrlHint": "去 Supabase 项目首页或 Settings > API 里找 SUPABASE_URL。",
+  "actionCancel": "取消",
+  "setupPublicBucketOptionalHint": "只有公开桶才需要；私有桶可以留空，分享时会自动生成签名链接。",
+  "setupStatusStarting": "启动中",
+  "setupStartBuiltinPostgres": "启动内置 PostgreSQL 服务",
+  "setupEnableVectorExtension": "启用 vector 扩展",
+  "setupEnableVectorExtensionAndInit": "启用 vector 扩展并初始化 schema",
+  "setupRecheckPostgresConnection": "复查 PostgreSQL 连接",
+  "setupRecheckPgvectorExtension": "复查 pgvector 扩展",
+  "setupAutoUseAutoValue": "大多数项目直接填 auto 就行。",
+  "setupInstalling": "安装中",
+  "setupInstallCompleted": "安装完成",
+  "setupIntroAiStorageMessage": "完成以下配置以启用 AI 能力与本地数据存储。我们会帮你检测环境并确保一切就绪。",
+  "setupChosen": "已选择",
+  "setupConfigured": "已配置",
+  "setupStartPostgresWorkflow": "开始 PostgreSQL 安装与配置流程",
+  "setupOpenApiKeysHelp": "打开 API Keys 官方说明",
+  "setupOpenS3CompatibilityHelp": "打开 S3 兼容性说明",
+  "setupOpenS3AuthHelp": "打开 S3 认证说明",
+  "setupOpenSupabaseApiKeysHelp": "打开 Supabase API Keys 官方说明",
+  "setupOpenSupabaseS3Docs": "打开 Supabase S3 官方说明",
+  "setupOpenBucketsHelp": "打开 buckets 官方说明",
+  "setupStorageEndpointLabel": "接口地址",
+  "setupOpenAiDescription": "提供文本生成、标签与提示词能力。请配置 Base URL、模型与 API Key。",
+  "setupInitDatabaseSchemaFailed": "数据库结构初始化失败",
+  "actionShow": "显示",
+  "setupNoPostgresRuntimeFound": "未找到可用 PostgreSQL runtime，请确认 Resources/postgres 或设置 KIDMEMORY_POSTGRES_RUNTIME_DIR。",
+  "setupPostgresRuntimeNotDetected": "未检测到 PostgreSQL runtime，请确认 Resources/postgres 或仓库 third_party/postgres/macos 可用。",
+  "setupPostgresNotDetected": "未检测到 PostgreSQL，请确认本机服务已安装并启动",
+  "setupBundledPostgresRuntimeMissing": "未检测到内置 PostgreSQL runtime",
+  "setupBundledPostgresRuntimeReleaseRequired": "未检测到内置 PostgreSQL runtime，请使用带 runtime 的 Release 包。",
+  "setupNotConfigured": "未配置",
+  "setupLocalPathSelected": "本地已选择",
+  "setupLocalPathUpdated": "本地数据目录已更新",
+  "setupLocalPathUpdatedSidecarPending": "本地数据目录已更新；sidecar 启动后会继续读取配置",
+  "setupApiKeyVisibilityHint": "本地明文保存，点击眼睛可显示/隐藏",
+  "setupLocalServicePreparing": "本地服务准备中",
+  "setupVerifyBuiltinPgvectorExtension": "校验内置 pgvector 扩展",
+  "setupBucketNameLabel": "桶名",
+  "setupCheckPostgresService": "检测 PostgreSQL 服务",
+  "setupCheckPostgresConnection": "检测 PostgreSQL 连接",
+  "setupChecking": "检测中",
+  "setupRuntimeFoundInitialize": "检测到内置 PostgreSQL runtime，开始初始化。",
+  "setupCheckRequestNoResult": "检测请求已发出，但 sidecar 未返回结果",
+  "setupDownloading": "正在下载...",
+  "setupSidecarStarting": "正在启动 Sidecar...",
+  "setupInstallingSoftware": "正在安装...",
+  "setupTestingConnection": "正在测试连接...",
+  "setupFetchingResources": "正在获取资源...",
+  "setupConfiguring": "正在配置...",
+  "setupTestFailed": "测试失败",
+  "actionTestConnection": "测试连接",
+  "setupTestConnectionFailed": "测试连接失败",
+  "setupTestConnectionSuccess": "测试连接成功",
+  "setupEnvironmentReady": "环境已就绪",
+  "setupEnvironmentChecking": "环境检测中",
+  "setupEnvironmentReadyForCreation": "环境检测已通过，可进入正式创作流程。",
+  "setupCheckResultFromSidecar": "检测结果来自 sidecar",
+  "setupConnectingLocalService": "正在连接 KidMemory 本地服务",
+  "setupExportDescriptionHint": "用于保存导出结果与分享文件。",
+  "setupSignedUrlTTLLabel": "签名链接有效期（秒）",
+  "setupPageTitle": "设置",
+  "setupHomebrewPermissionRetryHint": "请修复 Homebrew 权限后重试。",
+  "setupConfigureStorageFirst": "请先配置 Supabase REST 或 S3 所需参数",
+  "setupHomebrewPermissionCommandHint": "请在终端执行以下命令修复权限后，再回到 KidMemory 重试：",
+  "setupSidecarConfigUnavailable": "读取 sidecar 配置失败，初始化未完成。",
+  "setupInputApiKey": "输入 API Key",
+  "setupInputAccessKeyId": "输入或粘贴 Access Key ID",
+  "setupInputSecretAccessKey": "输入或粘贴 Secret Access Key",
+  "setupInputServiceRoleKey": "输入或粘贴 Service Role Key",
+  "setupStorageDialogTitle": "配置 Supabase Storage",
+  "setupOpenAiDialogTitle": "配置大模型接口",
+  "actionReconnect": "重新连接",
+  "actionHide": "隐藏",
+  "setupCheckDependencyHint": "集中检查初始化依赖是否可用。",
+  "setupNeedsConfiguration": "需配置",
+  "setupProjectUrlLabel": "项目地址",
+  "setupTestCleanupFailedSuffix": "，测试对象清理失败",
+  "sampleDatasetPageTitle": "示例数据集",
+  "@sampleDatasetPageTitle": {
+    "description": "sampleDatasetPageTitle"
+  },
+  "sampleDatasetPageSubtitle": "使用隐私安全的虚拟素材，快速体验 KidMemory 的素材库、创作台和导出流程。",
+  "@sampleDatasetPageSubtitle": {
+    "description": "sampleDatasetPageSubtitle"
+  },
+  "sampleDatasetBackTooltip": "返回孩子档案",
+  "@sampleDatasetBackTooltip": {
+    "description": "sampleDatasetBackTooltip"
+  },
+  "contentMetricTotalLabel": "素材总数",
+  "@contentMetricTotalLabel": {
+    "description": "contentMetricTotalLabel"
+  },
+  "contentCategoryArtworkLabel": "儿童画",
+  "@contentCategoryArtworkLabel": {
+    "description": "contentCategoryArtworkLabel"
+  },
+  "contentCategoryCraftLabel": "手工作品",
+  "@contentCategoryCraftLabel": {
+    "description": "contentCategoryCraftLabel"
+  },
+  "contentLicenseLabel": "素材许可",
+  "@contentLicenseLabel": {
+    "description": "contentLicenseLabel"
+  },
+  "contentAssetTypePhotoLabel": "照片",
+  "@contentAssetTypePhotoLabel": {
+    "description": "contentAssetTypePhotoLabel"
+  },
+  "assetLibrarySearchHintText": "搜索素材、标签、描述...",
+  "@assetLibrarySearchHintText": {
+    "description": "assetLibrarySearchHintText"
+  },
+  "assetLibrarySearchingLabel": "搜索中",
+  "@assetLibrarySearchingLabel": {
+    "description": "assetLibrarySearchingLabel"
+  },
+  "assetLibrarySearchButtonLabel": "搜索",
+  "@assetLibrarySearchButtonLabel": {
+    "description": "assetLibrarySearchButtonLabel"
+  },
+  "assetLibrarySmartPickLabel": "帮我挑素材",
+  "@assetLibrarySmartPickLabel": {
+    "description": "assetLibrarySmartPickLabel"
+  },
+  "assetLibrarySmartOrganizeLabel": "AI 帮我整理素材",
+  "@assetLibrarySmartOrganizeLabel": {
+    "description": "assetLibrarySmartOrganizeLabel"
+  },
+  "assetLibraryImportPhotoLabel": "导入图片",
+  "@assetLibraryImportPhotoLabel": {
+    "description": "assetLibraryImportPhotoLabel"
+  },
+  "assetLibraryImportFolderLabel": "导入文件夹",
+  "@assetLibraryImportFolderLabel": {
+    "description": "assetLibraryImportFolderLabel"
+  },
+  "assetLibraryImportDescriptionText": "导入本地图片、整个文件夹，或把文件拖拽到素材库后，这里会显示真实缩略图和 metadata 编辑入口。",
+  "@assetLibraryImportDescriptionText": {
+    "description": "assetLibraryImportDescriptionText"
+  },
+  "assetLibrarySortLabel": "排序",
+  "@assetLibrarySortLabel": {
+    "description": "assetLibrarySortLabel"
+  },
+  "assetLibraryIndexRefreshingLabel": "索引刷新中",
+  "@assetLibraryIndexRefreshingLabel": {
+    "description": "assetLibraryIndexRefreshingLabel"
+  },
+  "assetLibraryRefreshIndexLabel": "刷新索引",
+  "@assetLibraryRefreshIndexLabel": {
+    "description": "assetLibraryRefreshIndexLabel"
+  },
+  "assetLibraryChildLabel": "孩子",
+  "@assetLibraryChildLabel": {
+    "description": "assetLibraryChildLabel"
+  },
+  "assetLibraryNoChildProfileText": "暂无孩子档案",
+  "@assetLibraryNoChildProfileText": {
+    "description": "assetLibraryNoChildProfileText"
+  },
+  "assetLibraryClearSelectionLabel": "取消选择",
+  "@assetLibraryClearSelectionLabel": {
+    "description": "assetLibraryClearSelectionLabel"
+  },
+  "assetLibraryClearSearchLabel": "清空搜索",
+  "@assetLibraryClearSearchLabel": {
+    "description": "assetLibraryClearSearchLabel"
+  },
+  "assetLibraryClearSearchActionLabel": "清除",
+  "@assetLibraryClearSearchActionLabel": {
+    "description": "assetLibraryClearSearchActionLabel"
+  },
+  "assetLibraryBatchGeneratePictureBookLabel": "生成绘本",
+  "@assetLibraryBatchGeneratePictureBookLabel": {
+    "description": "assetLibraryBatchGeneratePictureBookLabel"
+  },
+  "assetLibraryBatchGenerateVideoLabel": "生成回忆视频",
+  "@assetLibraryBatchGenerateVideoLabel": {
+    "description": "assetLibraryBatchGenerateVideoLabel"
+  },
+  "assetLibraryBatchGenerateAlbumLabel": "生成纪念册",
+  "@assetLibraryBatchGenerateAlbumLabel": {
+    "description": "assetLibraryBatchGenerateAlbumLabel"
+  },
+  "assetLibraryGoToGenerateLabel": "去生成作品集",
+  "@assetLibraryGoToGenerateLabel": {
+    "description": "assetLibraryGoToGenerateLabel"
+  },
+  "assetLibraryBatchDeletingLabel": "删除中...",
+  "@assetLibraryBatchDeletingLabel": {
+    "description": "assetLibraryBatchDeletingLabel"
+  },
+  "assetLibraryBatchDeleteButtonLabel": "批量删除",
+  "@assetLibraryBatchDeleteButtonLabel": {
+    "description": "assetLibraryBatchDeleteButtonLabel"
+  },
+  "assetLibraryEmptyLibraryTitle": "还没有素材",
+  "@assetLibraryEmptyLibraryTitle": {
+    "description": "assetLibraryEmptyLibraryTitle"
+  },
+  "assetLibraryNoSelectedAssetsText": "选择一个素材",
+  "@assetLibraryNoSelectedAssetsText": {
+    "description": "assetLibraryNoSelectedAssetsText"
+  },
+  "assetLibraryEmptySearchTitle": "没有找到匹配素材",
+  "@assetLibraryEmptySearchTitle": {
+    "description": "assetLibraryEmptySearchTitle"
+  },
+  "assetLibrarySearchFallbackHint": "试试换个关键词，或让 Agent 帮你挑选相关素材。",
+  "@assetLibrarySearchFallbackHint": {
+    "description": "assetLibrarySearchFallbackHint"
+  },
+  "assetLibrarySelectAssetTitle": "选择素材后会在这里汇总。",
+  "@assetLibrarySelectAssetTitle": {
+    "description": "assetLibrarySelectAssetTitle"
+  },
+  "assetLibraryInspectorHintText": "在这里查看和编辑标题、标签、描述，也可以让 Agent 帮你整理素材。",
+  "@assetLibraryInspectorHintText": {
+    "description": "assetLibraryInspectorHintText"
+  },
+  "sampleDatasetInfoCardTitle": "数据说明",
+  "@sampleDatasetInfoCardTitle": {
+    "description": "sampleDatasetInfoCardTitle"
+  },
+  "sampleDatasetInfoCardDescription": "虚拟脱敏素材，仅用于功能演示。可随时重置为干净状态。",
+  "@sampleDatasetInfoCardDescription": {
+    "description": "sampleDatasetInfoCardDescription"
+  },
+  "sampleDatasetImportStepsTitle": "导入步骤",
+  "@sampleDatasetImportStepsTitle": {
+    "description": "sampleDatasetImportStepsTitle"
+  },
+  "sampleDatasetImportStepsDescription": "确认数据，点击导入，等待完成，然后继续探索生成流程。",
+  "@sampleDatasetImportStepsDescription": {
+    "description": "sampleDatasetImportStepsDescription"
+  },
+  "sampleDatasetExpectedOutputTitle": "预期输出",
+  "@sampleDatasetExpectedOutputTitle": {
+    "description": "sampleDatasetExpectedOutputTitle"
+  },
+  "sampleDatasetExpectedOutputDescription": "手动导入素材与标签后，可继续体验创作台与样例 PDF。",
+  "@sampleDatasetExpectedOutputDescription": {
+    "description": "sampleDatasetExpectedOutputDescription"
+  },
+  "sampleDatasetAfterImportDescriptionTitle": "导入后将包含",
+  "@sampleDatasetAfterImportDescriptionTitle": {
+    "description": "sampleDatasetAfterImportDescriptionTitle"
+  },
+  "sampleDatasetImportingStatusTitle": "正在导入示例数据...",
+  "@sampleDatasetImportingStatusTitle": {
+    "description": "sampleDatasetImportingStatusTitle"
+  },
+  "sampleDatasetImportingStatusDescription": "创建示例孩子档案、导入示例素材并写入标签。",
+  "@sampleDatasetImportingStatusDescription": {
+    "description": "sampleDatasetImportingStatusDescription"
+  },
+  "sampleDatasetImportingActionLabel": "导入中...",
+  "@sampleDatasetImportingActionLabel": {
+    "description": "sampleDatasetImportingActionLabel"
+  },
+  "sampleDatasetViewPdfLabel": "查看示例 PDF",
+  "@sampleDatasetViewPdfLabel": {
+    "description": "sampleDatasetViewPdfLabel"
+  },
+  "sampleDatasetNotImportedTitle": "状态：未导入",
+  "@sampleDatasetNotImportedTitle": {
+    "description": "sampleDatasetNotImportedTitle"
+  },
+  "sampleDatasetImportInstructionText": "点击导入后，示例素材会写入本地数据库。",
+  "@sampleDatasetImportInstructionText": {
+    "description": "sampleDatasetImportInstructionText"
+  },
+  "sampleDatasetImportButtonLabel": "导入示例数据集",
+  "@sampleDatasetImportButtonLabel": {
+    "description": "sampleDatasetImportButtonLabel"
+  },
+  "sampleDatasetBrowseAssetsLabel": "浏览示例素材",
+  "@sampleDatasetBrowseAssetsLabel": {
+    "description": "sampleDatasetBrowseAssetsLabel"
+  },
+  "sampleDatasetGenerateSampleBookLabel": "生成示例绘本",
+  "@sampleDatasetGenerateSampleBookLabel": {
+    "description": "sampleDatasetGenerateSampleBookLabel"
+  },
+  "sampleDatasetImportedTitle": "示例数据已导入",
+  "@sampleDatasetImportedTitle": {
+    "description": "sampleDatasetImportedTitle"
+  },
+  "sampleDatasetImportedStatusText": "你可以继续浏览示例素材，或体验生成流程。",
+  "@sampleDatasetImportedStatusText": {
+    "description": "sampleDatasetImportedStatusText"
+  },
+  "sampleDatasetResetDataLabel": "重置数据",
+  "@sampleDatasetResetDataLabel": {
+    "description": "sampleDatasetResetDataLabel"
+  },
+  "sampleDatasetResetDataHint": "请检查本地数据库和示例素材文件。",
+  "@sampleDatasetResetDataHint": {
+    "description": "sampleDatasetResetDataHint"
+  },
+  "sampleDatasetRetryImportButtonLabel": "重试导入",
+  "@sampleDatasetRetryImportButtonLabel": {
+    "description": "sampleDatasetRetryImportButtonLabel"
+  },
+  "sampleDatasetImportFailedTitle": "导入失败",
+  "@sampleDatasetImportFailedTitle": {
+    "description": "sampleDatasetImportFailedTitle"
+  },
+  "sampleDatasetPlaceholderSunlightGardenLabel": "阳光花园",
+  "@sampleDatasetPlaceholderSunlightGardenLabel": {
+    "description": "sampleDatasetPlaceholderSunlightGardenLabel"
+  },
+  "sampleDatasetPlaceholderGrassFieldLabel": "草地男孩",
+  "@sampleDatasetPlaceholderGrassFieldLabel": {
+    "description": "sampleDatasetPlaceholderGrassFieldLabel"
+  },
+  "sampleDatasetPlaceholderBirthdayCakeLabel": "生日蛋糕",
+  "@sampleDatasetPlaceholderBirthdayCakeLabel": {
+    "description": "sampleDatasetPlaceholderBirthdayCakeLabel"
+  },
+  "sampleDatasetPlaceholderBirthdayBoyLabel": "生日男孩",
+  "@sampleDatasetPlaceholderBirthdayBoyLabel": {
+    "description": "sampleDatasetPlaceholderBirthdayBoyLabel"
+  },
+  "sampleDatasetPlaceholderOceanWorldLabel": "海底世界",
+  "@sampleDatasetPlaceholderOceanWorldLabel": {
+    "description": "sampleDatasetPlaceholderOceanWorldLabel"
+  },
+  "sampleDatasetPlaceholderDinosaurWorldLabel": "恐龙世界",
+  "@sampleDatasetPlaceholderDinosaurWorldLabel": {
+    "description": "sampleDatasetPlaceholderDinosaurWorldLabel"
+  },
+  "sampleDatasetPlaceholderHappinessFamilyLabel": "幸福一家",
+  "@sampleDatasetPlaceholderHappinessFamilyLabel": {
+    "description": "sampleDatasetPlaceholderHappinessFamilyLabel"
+  },
+  "sampleDatasetPlaceholderDrawingLabel": "小熊画",
+  "@sampleDatasetPlaceholderDrawingLabel": {
+    "description": "sampleDatasetPlaceholderDrawingLabel"
+  },
+  "sampleDatasetPlaceholderSunlightGardenPath": "asset://assets/sample_dataset/raster/阳光花园.png",
+  "@sampleDatasetPlaceholderSunlightGardenPath": {
+    "description": "sampleDatasetPlaceholderSunlightGardenPath"
+  },
+  "sampleDatasetPlaceholderGrassFieldPath": "asset://assets/sample_dataset/raster/草地男孩.png",
+  "@sampleDatasetPlaceholderGrassFieldPath": {
+    "description": "sampleDatasetPlaceholderGrassFieldPath"
+  },
+  "sampleDatasetPlaceholderBirthdayCakePath": "asset://assets/sample_dataset/raster/生日蛋糕.png",
+  "@sampleDatasetPlaceholderBirthdayCakePath": {
+    "description": "sampleDatasetPlaceholderBirthdayCakePath"
+  },
+  "sampleDatasetPlaceholderBirthdayBoyPath": "asset://assets/sample_dataset/raster/生日男孩.png",
+  "@sampleDatasetPlaceholderBirthdayBoyPath": {
+    "description": "sampleDatasetPlaceholderBirthdayBoyPath"
+  },
+  "sampleDatasetPlaceholderOceanWorldPath": "asset://assets/sample_dataset/raster/海底世界.png",
+  "@sampleDatasetPlaceholderOceanWorldPath": {
+    "description": "sampleDatasetPlaceholderOceanWorldPath"
+  },
+  "sampleDatasetPlaceholderDinosaurWorldPath": "asset://assets/sample_dataset/raster/恐龙世界.png",
+  "@sampleDatasetPlaceholderDinosaurWorldPath": {
+    "description": "sampleDatasetPlaceholderDinosaurWorldPath"
+  },
+  "sampleDatasetPlaceholderHappinessFamilyPath": "asset://assets/sample_dataset/raster/幸福一家.png",
+  "@sampleDatasetPlaceholderHappinessFamilyPath": {
+    "description": "sampleDatasetPlaceholderHappinessFamilyPath"
+  },
+  "sampleDatasetPlaceholderDrawingPath": "asset://assets/sample_dataset/raster/小熊画.png",
+  "@sampleDatasetPlaceholderDrawingPath": {
+    "description": "sampleDatasetPlaceholderDrawingPath"
+  },
+  "contentPreparingStatusLabel": "正在准备...",
+  "@contentPreparingStatusLabel": {
+    "description": "contentPreparingStatusLabel"
+  },
+  "contentProcessingStatusLabel": "正在处理中...",
+  "@contentProcessingStatusLabel": {
+    "description": "contentProcessingStatusLabel"
+  },
+  "contentNeedsConfigurationLabel": "需配置",
+  "@contentNeedsConfigurationLabel": {
+    "description": "contentNeedsConfigurationLabel"
+  },
+  "contentNotConfiguredLabel": "未配置",
+  "@contentNotConfiguredLabel": {
+    "description": "contentNotConfiguredLabel"
+  },
+  "contentDisconnectedLabel": "未连接",
+  "@contentDisconnectedLabel": {
+    "description": "contentDisconnectedLabel"
+  },
+  "contentWaitingLabel": "准备中",
+  "@contentWaitingLabel": {
+    "description": "contentWaitingLabel"
+  },
+  "contentTestLabel": "测试",
+  "@contentTestLabel": {
+    "description": "contentTestLabel"
+  },
+  "contentCheckLabel": "检测",
+  "@contentCheckLabel": {
+    "description": "contentCheckLabel"
+  },
+  "contentConfigureLabel": "配置",
+  "@contentConfigureLabel": {
+    "description": "contentConfigureLabel"
+  },
+  "contentModifyLabel": "修改",
+  "@contentModifyLabel": {
+    "description": "contentModifyLabel"
+  },
+  "contentDirectoryLabel": "目录",
+  "@contentDirectoryLabel": {
+    "description": "contentDirectoryLabel"
+  },
+  "contentConnectLabel": "连接",
+  "@contentConnectLabel": {
+    "description": "contentConnectLabel"
+  },
+  "contentModelLabel": "大模型",
+  "@contentModelLabel": {
+    "description": "contentModelLabel"
+  },
+  "contentArtworkDescriptionText": "包含当前示例孩子的儿童画素材",
+  "@contentArtworkDescriptionText": {
+    "description": "contentArtworkDescriptionText"
+  },
+  "contentCraftDescriptionText": "包含纸板、手工和结构化素材",
+  "@contentCraftDescriptionText": {
+    "description": "contentCraftDescriptionText"
+  },
+  "contentPhotoDescriptionText": "含拍照素材与扫描件",
+  "@contentPhotoDescriptionText": {
+    "description": "contentPhotoDescriptionText"
+  },
+  "contentTagInfoText": "包含主题、颜色、场景和创作类型标签",
+  "@contentTagInfoText": {
+    "description": "contentTagInfoText"
+  },
+  "contentAssetPreviewFallbackTitle": "作品预览",
+  "@contentAssetPreviewFallbackTitle": {
+    "description": "contentAssetPreviewFallbackTitle"
+  },
+  "contentPreviewCloseHint": "点击右上角可关闭预览",
+  "@contentPreviewCloseHint": {
+    "description": "contentPreviewCloseHint"
+  },
+  "contentTypeFilterAllLabel": "全部",
+  "@contentTypeFilterAllLabel": {
+    "description": "contentTypeFilterAllLabel"
+  },
+  "contentDrawingCountLabel": "绘画数量",
+  "@contentDrawingCountLabel": {
+    "description": "contentDrawingCountLabel"
+  },
+  "contentPhotoCountLabel": "照片数量",
+  "@contentPhotoCountLabel": {
+    "description": "contentPhotoCountLabel"
+  },
+  "contentGeneratedPdfLabel": "已生成 PDF",
+  "@contentGeneratedPdfLabel": {
+    "description": "contentGeneratedPdfLabel"
+  },
+  "contentAssetDistributionTitle": "素材分布",
+  "@contentAssetDistributionTitle": {
+    "description": "contentAssetDistributionTitle"
+  },
+  "contentAssetDistributionSummaryText": "绘画作品 49% 照片 35% 手工作品 9%",
+  "@contentAssetDistributionSummaryText": {
+    "description": "contentAssetDistributionSummaryText"
+  },
+  "contentRecentWorksTitle": "最近作品",
+  "@contentRecentWorksTitle": {
+    "description": "contentRecentWorksTitle"
+  },
+  "contentPortfolioRecordTitle": "作品集记录",
+  "@contentPortfolioRecordTitle": {
+    "description": "contentPortfolioRecordTitle"
+  },
+  "contentSampleBookTitleSpring": "春日拾光 · 2025-04-01 · 24页",
+  "@contentSampleBookTitleSpring": {
+    "description": "contentSampleBookTitleSpring"
+  },
+  "contentSampleBookTitleBirthday": "三岁生日纪念册 · 2024-06-20 · 32页",
+  "@contentSampleBookTitleBirthday": {
+    "description": "contentSampleBookTitleBirthday"
+  },
+  "contentSampleBookTitleDaycare": "幼儿园生活点滴 · 2024-01-15 · 28页",
+  "@contentSampleBookTitleDaycare": {
+    "description": "contentSampleBookTitleDaycare"
+  },
+  "contentBannerHeaderSubtitle": "每一个笑容，都值得被珍藏。",
+  "@contentBannerHeaderSubtitle": {
+    "description": "contentBannerHeaderSubtitle"
+  },
+  "contentBannerHeaderTitle": "每一幅画，都是成长的印记",
+  "@contentBannerHeaderTitle": {
+    "description": "contentBannerHeaderTitle"
+  },
+  "contentAssetSearchHint": "搜索素材名称、标签或来源...",
+  "@contentAssetSearchHint": {
+    "description": "contentAssetSearchHint"
+  },
+  "contentPagerPreviousTooltip": "上一页",
+  "@contentPagerPreviousTooltip": {
+    "description": "contentPagerPreviousTooltip"
+  },
+  "contentPagerNextTooltip": "下一页",
+  "@contentPagerNextTooltip": {
+    "description": "contentPagerNextTooltip"
+  },
+  "contentCollectionTotalCountLabel": "1,248 个",
+  "@contentCollectionTotalCountLabel": {
+    "description": "contentCollectionTotalCountLabel"
+  },
+  "contentNoTagReasonHint": "待补充标签",
+  "@contentNoTagReasonHint": {
+    "description": "contentNoTagReasonHint"
+  },
+  "contentDateMissingLabel": "未填写日期",
+  "@contentDateMissingLabel": {
+    "description": "contentDateMissingLabel"
+  },
+  "contentUnnamedPhotoLabel": "未命名照片",
+  "@contentUnnamedPhotoLabel": {
+    "description": "contentUnnamedPhotoLabel"
+  },
+  "contentUnnamedCraftLabel": "未命名手工",
+  "@contentUnnamedCraftLabel": {
+    "description": "contentUnnamedCraftLabel"
+  },
+  "contentUnnamedDrawingLabel": "未命名绘画",
+  "@contentUnnamedDrawingLabel": {
+    "description": "contentUnnamedDrawingLabel"
+  },
+  "contentPreviewWaitingForGenerationLabel": "等待生成",
+  "@contentPreviewWaitingForGenerationLabel": {
+    "description": "contentPreviewWaitingForGenerationLabel"
+  },
+  "contentPreviewCompletedLabel": "预览完成 可预览全部内容",
+  "@contentPreviewCompletedLabel": {
+    "description": "contentPreviewCompletedLabel"
+  },
+  "contentPreviewWaitingLabel": "预览等待 生成后可查看",
+  "@contentPreviewWaitingLabel": {
+    "description": "contentPreviewWaitingLabel"
+  },
+  "contentExportCompletedFileLabel": "已导出 文件完成",
+  "@contentExportCompletedFileLabel": {
+    "description": "contentExportCompletedFileLabel"
+  },
+  "contentExportFormatSelectionHint": "可导出 生成后选择格式",
+  "@contentExportFormatSelectionHint": {
+    "description": "contentExportFormatSelectionHint"
+  },
+  "contentNoSelectedAssetsHint": "暂无已选素材",
+  "@contentNoSelectedAssetsHint": {
+    "description": "contentNoSelectedAssetsHint"
+  },
+  "contentViewAllLabel": "查看全部",
+  "@contentViewAllLabel": {
+    "description": "contentViewAllLabel"
+  },
+  "contentCoverAppearsAfterGenerationLabel": "封面将在生成后出现",
+  "@contentCoverAppearsAfterGenerationLabel": {
+    "description": "contentCoverAppearsAfterGenerationLabel"
+  },
+  "contentStoryPagesWaitingLabel": "故事页面等待生成",
+  "@contentStoryPagesWaitingLabel": {
+    "description": "contentStoryPagesWaitingLabel"
+  },
+  "contentExportBeforePreviewHint": "导出前先完成预览",
+  "@contentExportBeforePreviewHint": {
+    "description": "contentExportBeforePreviewHint"
+  },
+  "contentTaskProgressLogTitle": "任务进度日志",
+  "@contentTaskProgressLogTitle": {
+    "description": "contentTaskProgressLogTitle"
+  },
+  "contentViewDetailsLabel": "查看详细日志",
+  "@contentViewDetailsLabel": {
+    "description": "contentViewDetailsLabel"
+  },
+  "contentPreviewWaitingTitle": "页面预览（等待生成）",
+  "@contentPreviewWaitingTitle": {
+    "description": "contentPreviewWaitingTitle"
+  },
+  "contentPreviewAvailableAfterGenerationHint": "预览会在生成完成后显示",
+  "@contentPreviewAvailableAfterGenerationHint": {
+    "description": "contentPreviewAvailableAfterGenerationHint"
+  },
+  "contentSectionCoverLabel": "1 封面",
+  "@contentSectionCoverLabel": {
+    "description": "contentSectionCoverLabel"
+  },
+  "contentSectionStoriesLabel": "2 素材故事",
+  "@contentSectionStoriesLabel": {
+    "description": "contentSectionStoriesLabel"
+  },
+  "contentSectionGrowthRecordsLabel": "3 成长记录",
+  "@contentSectionGrowthRecordsLabel": {
+    "description": "contentSectionGrowthRecordsLabel"
+  },
+  "contentAssetTypeCraftLabel": "手工",
+  "@contentAssetTypeCraftLabel": {
+    "description": "contentAssetTypeCraftLabel"
+  },
+  "contentCategoryDrawingLabel": "绘画",
+  "@contentCategoryDrawingLabel": {
+    "description": "contentCategoryDrawingLabel"
+  },
+  "contentOpenLabel": "打开",
+  "@contentOpenLabel": {
+    "description": "contentOpenLabel"
+  },
+  "contentTagLabel": "标签",
+  "@contentTagLabel": {
+    "description": "contentTagLabel"
+  },
+  "generateExportS83": "0 / 建议 6+",
+  "@generateExportS83": {
+    "description": "generateExportS83"
+  },
+  "generateExportS102": "AI 帮我挑素材",
+  "@generateExportS102": {
+    "description": "generateExportS102"
+  },
+  "generateExportS105": "Agent 执行计划",
+  "@generateExportS105": {
+    "description": "generateExportS105"
+  },
+  "generateExportS107": "Agent 正在规划",
+  "@generateExportS107": {
+    "description": "generateExportS107"
+  },
+  "generateExportS108": "Agent 活动",
+  "@generateExportS108": {
+    "description": "generateExportS108"
+  },
+  "generateExportS128": "PDF 已导出",
+  "@generateExportS128": {
+    "description": "generateExportS128"
+  },
+  "generateExportS214": "不可用",
+  "@generateExportS214": {
+    "description": "generateExportS214"
+  },
+  "generateExportS218": "云端分享",
+  "@generateExportS218": {
+    "description": "generateExportS218"
+  },
+  "generateExportS219": "仅本地",
+  "@generateExportS219": {
+    "description": "generateExportS219"
+  },
+  "generateExportS220": "仅本地文件",
+  "@generateExportS220": {
+    "description": "generateExportS220"
+  },
+  "generateExportS226": "任务执行失败",
+  "@generateExportS226": {
+    "description": "generateExportS226"
+  },
+  "generateExportS227": "任务状态",
+  "@generateExportS227": {
+    "description": "generateExportS227"
+  },
+  "generateExportS237": "你想为孩子创作什么？",
+  "@generateExportS237": {
+    "description": "generateExportS237"
+  },
+  "generateExportS243": "例如：用春游照片做一本 8 页绘本",
+  "@generateExportS243": {
+    "description": "generateExportS243"
+  },
+  "generateExportS245": "保存 / 分享",
+  "@generateExportS245": {
+    "description": "generateExportS245"
+  },
+  "generateExportS255": "儿童绘本",
+  "@generateExportS255": {
+    "description": "generateExportS255"
+  },
+  "generateExportS270": "准备大纲",
+  "@generateExportS270": {
+    "description": "generateExportS270"
+  },
+  "generateExportS272": "准备开始",
+  "@generateExportS272": {
+    "description": "generateExportS272"
+  },
+  "generateExportS274": "分享链接",
+  "@generateExportS274": {
+    "description": "generateExportS274"
+  },
+  "generateExportS275": "分享链接已生成，可直接发送给家人查看。",
+  "@generateExportS275": {
+    "description": "generateExportS275"
+  },
+  "generateExportS279": "创作类型",
+  "@generateExportS279": {
+    "description": "generateExportS279"
+  },
+  "generateExportS315": "原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。",
+  "@generateExportS315": {
+    "description": "generateExportS315"
+  },
+  "generateExportS324": "去素材库选择",
+  "@generateExportS324": {
+    "description": "generateExportS324"
+  },
+  "generateExportS328": "可在保存目录中查看",
+  "@generateExportS328": {
+    "description": "generateExportS328"
+  },
+  "generateExportS329": "可复制分享文案",
+  "@generateExportS329": {
+    "description": "generateExportS329"
+  },
+  "generateExportS331": "可打开或分享",
+  "@generateExportS331": {
+    "description": "generateExportS331"
+  },
+  "generateExportS332": "可查看预览",
+  "@generateExportS332": {
+    "description": "generateExportS332"
+  },
+  "generateExportS334": "可预览",
+  "@generateExportS334": {
+    "description": "generateExportS334"
+  },
+  "generateExportS335": "可预览或导出",
+  "@generateExportS335": {
+    "description": "generateExportS335"
+  },
+  "generateExportS336": "同步中",
+  "@generateExportS336": {
+    "description": "generateExportS336"
+  },
+  "generateExportS340": "同步失败",
+  "@generateExportS340": {
+    "description": "generateExportS340"
+  },
+  "generateExportS357": "复制分享文案",
+  "@generateExportS357": {
+    "description": "generateExportS357"
+  },
+  "generateExportS358": "复制长图",
+  "@generateExportS358": {
+    "description": "generateExportS358"
+  },
+  "generateExportS404": "导出 JPG 长图",
+  "@generateExportS404": {
+    "description": "generateExportS404"
+  },
+  "generateExportS405": "导出 PDF",
+  "@generateExportS405": {
+    "description": "generateExportS405"
+  },
+  "generateExportS406": "导出 PNG 长图",
+  "@generateExportS406": {
+    "description": "generateExportS406"
+  },
+  "generateExportS407": "导出作品",
+  "@generateExportS407": {
+    "description": "generateExportS407"
+  },
+  "generateExportS409": "导出后解锁",
+  "@generateExportS409": {
+    "description": "generateExportS409"
+  },
+  "generateExportS411": "导出完成后才能打开文件夹或复制长图。",
+  "@generateExportS411": {
+    "description": "generateExportS411"
+  },
+  "generateExportS413": "导出效果",
+  "@generateExportS413": {
+    "description": "generateExportS413"
+  },
+  "generateExportS415": "导出物尚未上传分享，暂不能复制分享文案。",
+  "@generateExportS415": {
+    "description": "generateExportS415"
+  },
+  "generateExportS417": "导出目标",
+  "@generateExportS417": {
+    "description": "generateExportS417"
+  },
+  "generateExportS418": "导出结果",
+  "@generateExportS418": {
+    "description": "generateExportS418"
+  },
+  "generateExportS419": "封面",
+  "@generateExportS419": {
+    "description": "generateExportS419"
+  },
+  "generateExportS420": "封面、故事页和成长记录已准备好，可以继续导出。",
+  "@generateExportS420": {
+    "description": "generateExportS420"
+  },
+  "generateExportS421": "封面图生成失败",
+  "@generateExportS421": {
+    "description": "generateExportS421"
+  },
+  "generateExportS427": "尚未创建生成任务",
+  "@generateExportS427": {
+    "description": "generateExportS427"
+  },
+  "generateExportS428": "尚未导出",
+  "@generateExportS428": {
+    "description": "generateExportS428"
+  },
+  "generateExportS438": "已同步",
+  "@generateExportS438": {
+    "description": "generateExportS438"
+  },
+  "generateExportS442": "已完成",
+  "@generateExportS442": {
+    "description": "generateExportS442"
+  },
+  "generateExportS444": "已导出",
+  "@generateExportS444": {
+    "description": "generateExportS444"
+  },
+  "generateExportS450": "已生成",
+  "@generateExportS450": {
+    "description": "generateExportS450"
+  },
+  "generateExportS452": "已生成分享链接",
+  "@generateExportS452": {
+    "description": "generateExportS452"
+  },
+  "generateExportS460": "已选素材",
+  "@generateExportS460": {
+    "description": "generateExportS460"
+  },
+  "generateExportS470": "开始生成绘本",
+  "@generateExportS470": {
+    "description": "generateExportS470"
+  },
+  "generateExportS472": "异常",
+  "@generateExportS472": {
+    "description": "generateExportS472"
+  },
+  "generateExportS473": "当前任务",
+  "@generateExportS473": {
+    "description": "generateExportS473"
+  },
+  "generateExportS476": "当前导出不是长图，不能复制长图内容。",
+  "@generateExportS476": {
+    "description": "generateExportS476"
+  },
+  "generateExportS518": "打开导出文件夹",
+  "@generateExportS518": {
+    "description": "generateExportS518"
+  },
+  "generateExportS532": "按时间线整理成长记录",
+  "@generateExportS532": {
+    "description": "generateExportS532"
+  },
+  "generateExportS547": "故事已生成",
+  "@generateExportS547": {
+    "description": "generateExportS547"
+  },
+  "generateExportS548": "故事页",
+  "@generateExportS548": {
+    "description": "generateExportS548"
+  },
+  "generateExportS553": "文案风格",
+  "@generateExportS553": {
+    "description": "generateExportS553"
+  },
+  "generateExportS611": "本地文件",
+  "@generateExportS611": {
+    "description": "generateExportS611"
+  },
+  "generateExportS617": "本次作品集",
+  "@generateExportS617": {
+    "description": "generateExportS617"
+  },
+  "generateExportS623": "查看已选素材",
+  "@generateExportS623": {
+    "description": "generateExportS623"
+  },
+  "generateExportS624": "查看日志",
+  "@generateExportS624": {
+    "description": "generateExportS624"
+  },
+  "generateExportS627": "查看素材",
+  "@generateExportS627": {
+    "description": "generateExportS627"
+  },
+  "generateExportS644": "模板",
+  "@generateExportS644": {
+    "description": "generateExportS644"
+  },
+  "generateExportS647": "正在写故事",
+  "@generateExportS647": {
+    "description": "generateExportS647"
+  },
+  "generateExportS651": "正在创建作品集",
+  "@generateExportS651": {
+    "description": "generateExportS651"
+  },
+  "generateExportS662": "正在生成作品集",
+  "@generateExportS662": {
+    "description": "generateExportS662"
+  },
+  "generateExportS663": "正在生成预览页面，完成后会展示封面、故事页和导出效果。",
+  "@generateExportS663": {
+    "description": "generateExportS663"
+  },
+  "generateExportS698": "渲染预览",
+  "@generateExportS698": {
+    "description": "generateExportS698"
+  },
+  "generateExportS708": "状态",
+  "@generateExportS708": {
+    "description": "generateExportS708"
+  },
+  "generateExportS717": "生成 6-12 页故事绘本",
+  "@generateExportS717": {
+    "description": "generateExportS717"
+  },
+  "generateExportS718": "生成中",
+  "@generateExportS718": {
+    "description": "generateExportS718"
+  },
+  "generateExportS719": "生成中...",
+  "@generateExportS719": {
+    "description": "generateExportS719"
+  },
+  "generateExportS721": "生成儿童绘本",
+  "@generateExportS721": {
+    "description": "generateExportS721"
+  },
+  "generateExportS723": "生成后可上传分享",
+  "@generateExportS723": {
+    "description": "generateExportS723"
+  },
+  "generateExportS724": "生成后可导出",
+  "@generateExportS724": {
+    "description": "generateExportS724"
+  },
+  "generateExportS725": "生成后展示",
+  "@generateExportS725": {
+    "description": "generateExportS725"
+  },
+  "generateExportS726": "生成后查看日志",
+  "@generateExportS726": {
+    "description": "generateExportS726"
+  },
+  "generateExportS727": "生成回忆录视频",
+  "@generateExportS727": {
+    "description": "generateExportS727"
+  },
+  "generateExportS729": "生成失败",
+  "@generateExportS729": {
+    "description": "generateExportS729"
+  },
+  "generateExportS731": "生成完成",
+  "@generateExportS731": {
+    "description": "generateExportS731"
+  },
+  "generateExportS735": "生成完成后，可以导出 PDF、长图或创建分享链接。",
+  "@generateExportS735": {
+    "description": "generateExportS735"
+  },
+  "generateExportS738": "生成带字幕和音乐的短视频",
+  "@generateExportS738": {
+    "description": "generateExportS738"
+  },
+  "generateExportS740": "生成成长纪念册",
+  "@generateExportS740": {
+    "description": "generateExportS740"
+  },
+  "generateExportS741": "生成控制台",
+  "@generateExportS741": {
+    "description": "generateExportS741"
+  },
+  "generateExportS742": "生成故事",
+  "@generateExportS742": {
+    "description": "generateExportS742"
+  },
+  "generateExportS747": "生成计划",
+  "@generateExportS747": {
+    "description": "generateExportS747"
+  },
+  "generateExportS769": "确认：调用免费生图",
+  "@generateExportS769": {
+    "description": "generateExportS769"
+  },
+  "generateExportS790": "第 1 页",
+  "@generateExportS790": {
+    "description": "generateExportS790"
+  },
+  "generateExportS794": "等待导出",
+  "@generateExportS794": {
+    "description": "generateExportS794"
+  },
+  "generateExportS795": "等待开始",
+  "@generateExportS795": {
+    "description": "generateExportS795"
+  },
+  "generateExportS796": "等待开始。点击“开始生成”后，这里会显示素材分析、故事生成、预览渲染和导出进度。",
+  "@generateExportS796": {
+    "description": "generateExportS796"
+  },
+  "generateExportS797": "等待执行",
+  "@generateExportS797": {
+    "description": "generateExportS797"
+  },
+  "generateExportS800": "等待选择素材",
+  "@generateExportS800": {
+    "description": "generateExportS800"
+  },
+  "generateExportS802": "等待重试",
+  "@generateExportS802": {
+    "description": "generateExportS802"
+  },
+  "generateExportS808": "素材",
+  "@generateExportS808": {
+    "description": "generateExportS808"
+  },
+  "generateExportS813": "素材已准备",
+  "@generateExportS813": {
+    "description": "generateExportS813"
+  },
+  "generateExportS819": "素材未选择",
+  "@generateExportS819": {
+    "description": "generateExportS819"
+  },
+  "generateExportS821": "素材状态",
+  "@generateExportS821": {
+    "description": "generateExportS821"
+  },
+  "generateExportS833": "继续生成",
+  "@generateExportS833": {
+    "description": "generateExportS833"
+  },
+  "generateExportS841": "让 Agent 重新挑选",
+  "@generateExportS841": {
+    "description": "generateExportS841"
+  },
+  "generateExportS859": "请先选择素材，之后即可开始生成。",
+  "@generateExportS859": {
+    "description": "generateExportS859"
+  },
+  "generateExportS860": "请先选择素材，开始生成才会启用。",
+  "@generateExportS860": {
+    "description": "generateExportS860"
+  },
+  "generateExportS868": "请选择孩子的照片、画作或手工作品。素材准备好后，Agent 会生成创作计划并开始预览。",
+  "@generateExportS868": {
+    "description": "generateExportS868"
+  },
+  "generateExportS871": "调整模板、尺寸和导出方式。设置完成后即可开始创作。",
+  "@generateExportS871": {
+    "description": "generateExportS871"
+  },
+  "generateExportS875": "超时",
+  "@generateExportS875": {
+    "description": "generateExportS875"
+  },
+  "generateExportS876": "跳过封面",
+  "@generateExportS876": {
+    "description": "generateExportS876"
+  },
+  "generateExportS877": "跳过封面继续导出",
+  "@generateExportS877": {
+    "description": "generateExportS877"
+  },
+  "generateExportS883": "输入目标或选择快捷类型，Agent 会按素材、故事、预览和导出组织创作流程。",
+  "@generateExportS883": {
+    "description": "generateExportS883"
+  },
+  "generateExportS884": "输出",
+  "@generateExportS884": {
+    "description": "generateExportS884"
+  },
+  "generateExportS889": "还没有选择素材。请选择孩子的照片、画作或手工作品，建议至少 6 张。",
+  "@generateExportS889": {
+    "description": "generateExportS889"
+  },
+  "generateExportS893": "这些素材会进入本次创作计划。你可以返回素材库重新选择，或让 Agent 重新挑选。",
+  "@generateExportS893": {
+    "description": "generateExportS893"
+  },
+  "generateExportS895": "进行中",
+  "@generateExportS895": {
+    "description": "generateExportS895"
+  },
+  "generateExportS907": "选择素材",
+  "@generateExportS907": {
+    "description": "generateExportS907"
+  },
+  "generateExportS909": "选择素材和创作方式，KidMemory 会帮你生成绘本、成长纪念册或回忆视频。",
+  "@generateExportS909": {
+    "description": "generateExportS909"
+  },
+  "generateExportS921": "重新生成",
+  "@generateExportS921": {
+    "description": "generateExportS921"
+  },
+  "generateExportS923": "重新选择",
+  "@generateExportS923": {
+    "description": "generateExportS923"
+  },
+  "generateExportS930": "错误原因",
+  "@generateExportS930": {
+    "description": "generateExportS930"
+  },
+  "generateExportS931": "长图 JPG",
+  "@generateExportS931": {
+    "description": "generateExportS931"
+  },
+  "generateExportS934": "长图 PNG",
+  "@generateExportS934": {
+    "description": "generateExportS934"
+  },
+  "generateExportS942": "页面尺寸",
+  "@generateExportS942": {
+    "description": "generateExportS942"
+  },
+  "generateExportS943": "页面预览",
+  "@generateExportS943": {
+    "description": "generateExportS943"
+  },
+  "generateExportS949": "预览与导出将在生成后解锁",
+  "@generateExportS949": {
+    "description": "generateExportS949"
+  },
+  "generateExportS951": "预览全部页面",
+  "@generateExportS951": {
+    "description": "generateExportS951"
+  },
+  "generateExportS954": "预览将在生成后出现。KidMemory 会在这里展示封面、页面和导出效果。",
+  "@generateExportS954": {
+    "description": "generateExportS954"
+  },
+  "generateExportS956": "风格",
+  "@generateExportS956": {
+    "description": "generateExportS956"
+  },
+  "generateExportS957": "默认",
+  "@generateExportS957": {
+    "description": "generateExportS957"
+  },
+  "assetLibraryPageS285": "创建时间（最新）",
+  "@assetLibraryPageS285": {
+    "description": "assetLibraryPageS285"
+  },
+  "assetLibraryPageS286": "创建时间（最早）",
+  "@assetLibraryPageS286": {
+    "description": "assetLibraryPageS286"
+  },
+  "assetLibraryPageS786": "种类（绘画/照片/手工）",
+  "@assetLibraryPageS786": {
+    "description": "assetLibraryPageS786"
+  },
+  "assetLibraryPageS631": "标题（A-Z）",
+  "@assetLibraryPageS631": {
+    "description": "assetLibraryPageS631"
+  },
+  "assetLibraryPageS879": "输入关键词可本地筛选，也可以使用语义搜索",
+  "@assetLibraryPageS879": {
+    "description": "assetLibraryPageS879"
+  },
+  "assetLibraryPageS847": "语义索引待加载",
+  "@assetLibraryPageS847": {
+    "description": "assetLibraryPageS847"
+  },
+  "assetLibraryPageS433": "已切换孩子档案，可重新搜索",
+  "@assetLibraryPageS433": {
+    "description": "assetLibraryPageS433"
+  },
+  "assetLibraryPageS599": "未选择孩子",
+  "@assetLibraryPageS599": {
+    "description": "assetLibraryPageS599"
+  },
+  "assetLibraryPageS660": "正在本地筛选素材",
+  "@assetLibraryPageS660": {
+    "description": "assetLibraryPageS660"
+  },
+  "assetLibraryPageS483": "当前环境暂未启用语义搜索",
+  "@assetLibraryPageS483": {
+    "description": "assetLibraryPageS483"
+  },
+  "assetLibraryPageS858": "请先选择孩子档案再搜索",
+  "@assetLibraryPageS858": {
+    "description": "assetLibraryPageS858"
+  },
+  "assetLibraryPageS867": "请输入标题、标签或自然语言描述",
+  "@assetLibraryPageS867": {
+    "description": "assetLibraryPageS867"
+  },
+  "assetLibraryPageS665": "正在语义搜索...",
+  "@assetLibraryPageS665": {
+    "description": "assetLibraryPageS665"
+  },
+  "assetLibraryPageS825": "索引状态不可用",
+  "@assetLibraryPageS825": {
+    "description": "assetLibraryPageS825"
+  },
+  "assetLibraryPageS440": "已回到素材库浏览",
+  "@assetLibraryPageS440": {
+    "description": "assetLibraryPageS440"
+  },
+  "assetLibraryPageS572": "暂时无法挑选",
+  "@assetLibraryPageS572": {
+    "description": "assetLibraryPageS572"
+  },
+  "assetLibraryPageS481": "当前没有可用素材，请先导入素材后再试。",
+  "@assetLibraryPageS481": {
+    "description": "assetLibraryPageS481"
+  },
+  "assetLibraryPageS869": "请选择本次目标：",
+  "@assetLibraryPageS869": {
+    "description": "assetLibraryPageS869"
+  },
+  "assetLibraryPageS902": "适合做绘本",
+  "@assetLibraryPageS902": {
+    "description": "assetLibraryPageS902"
+  },
+  "assetLibraryPageS901": "适合做成长纪念册",
+  "@assetLibraryPageS901": {
+    "description": "assetLibraryPageS901"
+  },
+  "assetLibraryPageS900": "适合做回忆录视频",
+  "@assetLibraryPageS900": {
+    "description": "assetLibraryPageS900"
+  },
+  "assetLibraryPageS503": "手动调整",
+  "@assetLibraryPageS503": {
+    "description": "assetLibraryPageS503"
+  },
+  "assetLibraryPageS919": "重新挑选",
+  "@assetLibraryPageS919": {
+    "description": "assetLibraryPageS919"
+  },
+  "assetLibraryPageS765": "确认使用",
+  "@assetLibraryPageS765": {
+    "description": "assetLibraryPageS765"
+  },
+  "assetLibraryPageS564": "智能挑选已应用",
+  "@assetLibraryPageS564": {
+    "description": "assetLibraryPageS564"
+  },
+  "assetLibraryPageS430": "已保留当前选择",
+  "@assetLibraryPageS430": {
+    "description": "assetLibraryPageS430"
+  },
+  "assetLibraryPageS235": "你可以继续手动勾选素材。",
+  "@assetLibraryPageS235": {
+    "description": "assetLibraryPageS235"
+  },
+  "assetLibraryPageS531": "拖入的路径暂时无法导入",
+  "@assetLibraryPageS531": {
+    "description": "assetLibraryPageS531"
+  },
+  "assetLibraryPageS403": "导入部分完成",
+  "@assetLibraryPageS403": {
+    "description": "assetLibraryPageS403"
+  },
+  "assetLibraryPageS392": "导入完成",
+  "@assetLibraryPageS392": {
+    "description": "assetLibraryPageS392"
+  },
+  "assetLibraryPageS581": "未导入素材",
+  "@assetLibraryPageS581": {
+    "description": "assetLibraryPageS581"
+  },
+  "assetLibraryPageS767": "确认批量删除",
+  "@assetLibraryPageS767": {
+    "description": "assetLibraryPageS767"
+  },
+  "assetLibraryPageS296": "删除",
+  "@assetLibraryPageS296": {
+    "description": "assetLibraryPageS296"
+  },
+  "assetLibraryPageS619": "来源",
+  "@assetLibraryPageS619": {
+    "description": "assetLibraryPageS619"
+  },
+  "assetLibraryPageS284": "创建时间",
+  "@assetLibraryPageS284": {
+    "description": "assetLibraryPageS284"
+  },
+  "assetLibraryPageS289": "创建者",
+  "@assetLibraryPageS289": {
+    "description": "assetLibraryPageS289"
+  },
+  "assetLibraryPageS782": "示例档案",
+  "@assetLibraryPageS782": {
+    "description": "assetLibraryPageS782"
+  },
+  "assetLibraryPageS620": "来源设备",
+  "@assetLibraryPageS620": {
+    "description": "assetLibraryPageS620"
+  },
+  "assetLibraryPageS268": "内置示例",
+  "@assetLibraryPageS268": {
+    "description": "assetLibraryPageS268"
+  },
+  "assetLibraryPageS368": "存储位置",
+  "@assetLibraryPageS368": {
+    "description": "assetLibraryPageS368"
+  },
+  "assetLibraryPageS784": "示例素材库",
+  "@assetLibraryPageS784": {
+    "description": "assetLibraryPageS784"
+  },
+  "assetLibraryPageS225": "从本次作品集移除",
+  "@assetLibraryPageS225": {
+    "description": "assetLibraryPageS225"
+  },
+  "assetLibraryPageS308": "加入本次作品集",
+  "@assetLibraryPageS308": {
+    "description": "assetLibraryPageS308"
+  },
+  "assetLibraryPageS221": "仅用于本次生成，不会修改原始素材",
+  "@assetLibraryPageS221": {
+    "description": "assetLibraryPageS221"
+  },
+  "assetLibraryPageS575": "有未保存修改",
+  "@assetLibraryPageS575": {
+    "description": "assetLibraryPageS575"
+  },
+  "assetLibraryPageS630": "标题",
+  "@assetLibraryPageS630": {
+    "description": "assetLibraryPageS630"
+  },
+  "assetLibraryPageS242": "例如：春游里的泡泡",
+  "@assetLibraryPageS242": {
+    "description": "assetLibraryPageS242"
+  },
+  "assetLibraryPageS806": "类型",
+  "@assetLibraryPageS806": {
+    "description": "assetLibraryPageS806"
+  },
+  "assetLibraryPageS558": "日期",
+  "@assetLibraryPageS558": {
+    "description": "assetLibraryPageS558"
+  },
+  "assetLibraryPageS95": "2026-05-17 或 2026年5月17日",
+  "@assetLibraryPageS95": {
+    "description": "assetLibraryPageS95"
+  },
+  "assetLibraryPageS498": "户外、泡泡、春游",
+  "@assetLibraryPageS498": {
+    "description": "assetLibraryPageS498"
+  },
+  "assetLibraryPageS535": "描述",
+  "@assetLibraryPageS535": {
+    "description": "assetLibraryPageS535"
+  },
+  "assetLibraryPageS843": "记录这份素材背后的故事",
+  "@assetLibraryPageS843": {
+    "description": "assetLibraryPageS843"
+  },
+  "assetLibraryPageS614": "本地状态",
+  "@assetLibraryPageS614": {
+    "description": "assetLibraryPageS614"
+  },
+  "assetLibraryPageS824": "索引状态",
+  "@assetLibraryPageS824": {
+    "description": "assetLibraryPageS824"
+  },
+  "assetLibraryPageS528": "技术信息",
+  "@assetLibraryPageS528": {
+    "description": "assetLibraryPageS528"
+  },
+  "assetLibraryPageS316": "原始文件",
+  "@assetLibraryPageS316": {
+    "description": "assetLibraryPageS316"
+  },
+  "assetLibraryPageS615": "本地素材",
+  "@assetLibraryPageS615": {
+    "description": "assetLibraryPageS615"
+  },
+  "assetLibraryPageS616": "本地路径",
+  "@assetLibraryPageS616": {
+    "description": "assetLibraryPageS616"
+  },
+  "assetLibraryPageS597": "未记录",
+  "@assetLibraryPageS597": {
+    "description": "assetLibraryPageS597"
+  },
+  "assetLibraryPageS246": "保存中...",
+  "@assetLibraryPageS246": {
+    "description": "assetLibraryPageS246"
+  },
+  "assetLibraryPageS247": "保存修改",
+  "@assetLibraryPageS247": {
+    "description": "assetLibraryPageS247"
+  },
+  "assetLibraryPageS546": "放弃修改",
+  "@assetLibraryPageS546": {
+    "description": "assetLibraryPageS546"
+  },
+  "assetLibraryPageS516": "打开原图",
+  "@assetLibraryPageS516": {
+    "description": "assetLibraryPageS516"
+  },
+  "assetLibraryPageS304": "删除素材",
+  "@assetLibraryPageS304": {
+    "description": "assetLibraryPageS304"
+  },
+  "assetLibraryPageS249": "保存成功",
+  "@assetLibraryPageS249": {
+    "description": "assetLibraryPageS249"
+  },
+  "assetLibraryPageS248": "保存失败",
+  "@assetLibraryPageS248": {
+    "description": "assetLibraryPageS248"
+  },
+  "assetLibraryPageS766": "确认删除素材",
+  "@assetLibraryPageS766": {
+    "description": "assetLibraryPageS766"
+  },
+  "assetLibraryPageS298": "删除后将从本地素材库移除，是否继续？",
+  "@assetLibraryPageS298": {
+    "description": "assetLibraryPageS298"
+  },
+  "assetLibraryPageS434": "已删除",
+  "@assetLibraryPageS434": {
+    "description": "assetLibraryPageS434"
+  },
+  "assetLibraryPageS299": "删除失败",
+  "@assetLibraryPageS299": {
+    "description": "assetLibraryPageS299"
+  },
+  "assetLibraryPageS447": "已打开原图",
+  "@assetLibraryPageS447": {
+    "description": "assetLibraryPageS447"
+  },
+  "assetLibraryPageS437": "已加入同步队列",
+  "@assetLibraryPageS437": {
+    "description": "assetLibraryPageS437"
+  },
+  "assetLibraryPageS338": "同步入队失败，请检查 Supabase Storage 配置",
+  "@assetLibraryPageS338": {
+    "description": "assetLibraryPageS338"
+  },
+  "childProfileS715": "珍藏成长点滴，记录美好时光",
+  "@childProfileS715": {
+    "description": "childProfileS715"
+  },
+  "childProfileS645": "欢迎使用 KidMemory",
+  "@childProfileS645": {
+    "description": "childProfileS645"
+  },
+  "childProfileS887": "还没有孩子档案",
+  "@childProfileS887": {
+    "description": "childProfileS887"
+  },
+  "childProfileS693": "添加档案",
+  "@childProfileS693": {
+    "description": "childProfileS693"
+  },
+  "childProfileS625": "查看示例",
+  "@childProfileS625": {
+    "description": "childProfileS625"
+  },
+  "childProfileS842": "记录素材",
+  "@childProfileS842": {
+    "description": "childProfileS842"
+  },
+  "childProfileS706": "照片、视频、笔记",
+  "@childProfileS706": {
+    "description": "childProfileS706"
+  },
+  "childProfileS495": "成长时间轴",
+  "@childProfileS495": {
+    "description": "childProfileS495"
+  },
+  "childProfileS925": "重要时刻，一目了然",
+  "@childProfileS925": {
+    "description": "childProfileS925"
+  },
+  "childProfileS231": "作品集",
+  "@childProfileS231": {
+    "description": "childProfileS231"
+  },
+  "childProfileS714": "珍藏创作与成果",
+  "@childProfileS714": {
+    "description": "childProfileS714"
+  },
+  "childProfileS224": "从一份档案开始",
+  "@childProfileS224": {
+    "description": "childProfileS224"
+  },
+  "childProfileS499": "所有孩子信息和成长素材本地保存",
+  "@childProfileS499": {
+    "description": "childProfileS499"
+  },
+  "childProfileS602": "本地存储，隐私安心",
+  "@childProfileS602": {
+    "description": "childProfileS602"
+  },
+  "childProfileS500": "所有数据仅保存在你的设备中",
+  "@childProfileS500": {
+    "description": "childProfileS500"
+  },
+  "childProfileS785": "离线可用，随时记录",
+  "@childProfileS785": {
+    "description": "childProfileS785"
+  },
+  "childProfileS556": "无网络也能查看与添加内容",
+  "@childProfileS556": {
+    "description": "childProfileS556"
+  },
+  "childProfileS223": "从一个孩子开始",
+  "@childProfileS223": {
+    "description": "childProfileS223"
+  },
+  "childProfileS342": "后续可随时添加更多孩子档案",
+  "@childProfileS342": {
+    "description": "childProfileS342"
+  },
+  "childProfileS238": "你的数据，只属于你和孩子",
+  "@childProfileS238": {
+    "description": "childProfileS238"
+  },
+  "childProfileS554": "新增",
+  "@childProfileS554": {
+    "description": "childProfileS554"
+  },
+  "childProfileS834": "编辑",
+  "@childProfileS834": {
+    "description": "childProfileS834"
+  },
+  "childProfileS401": "导入素材后，这里会按真实素材更新成长统计和最近作品。",
+  "@childProfileS401": {
+    "description": "childProfileS401"
+  },
+  "childProfileS486": "当前素材库已连接到本地 sidecar，可用于生成成长作品集。",
+  "@childProfileS486": {
+    "description": "childProfileS486"
+  },
+  "childProfileS480": "当前档案",
+  "@childProfileS480": {
+    "description": "childProfileS480"
+  },
+  "childProfileS276": "切换孩子档案",
+  "@childProfileS276": {
+    "description": "childProfileS276"
+  },
+  "childProfileS757": "男孩",
+  "@childProfileS757": {
+    "description": "childProfileS757"
+  },
+  "childProfileS366": "女孩",
+  "@childProfileS366": {
+    "description": "childProfileS366"
+  },
+  "childProfileS425": "小朋友",
+  "@childProfileS425": {
+    "description": "childProfileS425"
+  },
+  "childProfileS400": "导入素材后显示最近作品",
+  "@childProfileS400": {
+    "description": "childProfileS400"
+  },
+  "childProfileS733": "生成完成后会显示本地作品集记录",
+  "@childProfileS733": {
+    "description": "childProfileS733"
+  },
+  "childProfileS287": "创建档案",
+  "@childProfileS287": {
+    "description": "childProfileS287"
+  },
+  "childProfileS222": "今天",
+  "@childProfileS222": {
+    "description": "childProfileS222"
+  },
+  "childProfileS399": "导入素材",
+  "@childProfileS399": {
+    "description": "childProfileS399"
+  },
+  "childProfileS487": "待开始",
+  "@childProfileS487": {
+    "description": "childProfileS487"
+  },
+  "childProfileS720": "生成作品",
+  "@childProfileS720": {
+    "description": "childProfileS720"
+  },
+  "childProfileS633": "档案信息",
+  "@childProfileS633": {
+    "description": "childProfileS633"
+  },
+  "childProfileS367": "姓名",
+  "@childProfileS367": {
+    "description": "childProfileS367"
+  },
+  "childProfileS574": "最近素材",
+  "@childProfileS574": {
+    "description": "childProfileS574"
+  },
+  "childProfileS566": "暂无",
+  "@childProfileS566": {
+    "description": "childProfileS566"
+  },
+  "childProfileS497": "成长里程碑",
+  "@childProfileS497": {
+    "description": "childProfileS497"
+  },
+  "childProfileS799": "等待第一份素材",
+  "@childProfileS799": {
+    "description": "childProfileS799"
+  },
+  "childProfileS446": "已开始积累成长素材",
+  "@childProfileS446": {
+    "description": "childProfileS446"
+  },
+  "childProfileS670": "每一份素材，都会进入本地成长档案",
+  "@childProfileS670": {
+    "description": "childProfileS670"
+  },
+  "childProfileS832": "统计和时间线来自当前孩子的素材库。",
+  "@childProfileS832": {
+    "description": "childProfileS832"
+  },
+  "childProfileS872": "调色",
+  "@childProfileS872": {
+    "description": "childProfileS872"
+  },
+  "childProfileS217": "书本",
+  "@childProfileS217": {
+    "description": "childProfileS217"
+  },
+  "datasetChildrenS690": "添加孩子档案",
+  "@datasetChildrenS690": {
+    "description": "datasetChildrenS690"
+  },
+  "datasetChildrenS688": "添加",
+  "@datasetChildrenS688": {
+    "description": "datasetChildrenS688"
+  },
+  "datasetChildrenS689": "添加失败：请确认 Sidecar 已启动",
+  "@datasetChildrenS689": {
+    "description": "datasetChildrenS689"
+  },
+  "datasetChildrenS854": "请先添加一个孩子再编辑资料",
+  "@datasetChildrenS854": {
+    "description": "datasetChildrenS854"
+  },
+  "datasetChildrenS835": "编辑资料",
+  "@datasetChildrenS835": {
+    "description": "datasetChildrenS835"
+  },
+  "datasetChildrenS856": "请先选择一个孩子档案",
+  "@datasetChildrenS856": {
+    "description": "datasetChildrenS856"
+  },
+  "datasetChildrenS301": "删除孩子档案",
+  "@datasetChildrenS301": {
+    "description": "datasetChildrenS301"
+  },
+  "datasetChildrenS300": "删除失败：请先清空这个孩子关联的素材",
+  "@datasetChildrenS300": {
+    "description": "datasetChildrenS300"
+  },
+  "datasetChildrenS906": "选择生日",
+  "@datasetChildrenS906": {
+    "description": "datasetChildrenS906"
+  },
+  "datasetChildrenS762": "确定",
+  "@datasetChildrenS762": {
+    "description": "datasetChildrenS762"
+  },
+  "datasetChildrenS748": "生日",
+  "@datasetChildrenS748": {
+    "description": "datasetChildrenS748"
+  },
+  "datasetChildrenS703": "点按选择生日",
+  "@datasetChildrenS703": {
+    "description": "datasetChildrenS703"
+  },
+  "datasetChildrenS356": "备注",
+  "@datasetChildrenS356": {
+    "description": "datasetChildrenS356"
+  },
+  "datasetChildrenS263": "兴趣、性格、记录偏好等",
+  "@datasetChildrenS263": {
+    "description": "datasetChildrenS263"
+  },
+  "nodeInstallS161": "Volta 安装 Node.js",
+  "@nodeInstallS161": {
+    "description": "nodeInstallS161"
+  },
+  "nodeInstallS177": "fnm 安装 Node.js",
+  "@nodeInstallS177": {
+    "description": "nodeInstallS177"
+  },
+  "@nodeInstallS18": {
+    "description": "nodeInstallS18"
+  },
+  "nodeInstallS123": "MacPorts 安装 Node.js",
+  "@nodeInstallS123": {
+    "description": "nodeInstallS123"
+  },
+  "nodeInstallS180": "nodenv 安装 Node.js",
+  "@nodeInstallS180": {
+    "description": "nodeInstallS180"
+  },
+  "nodeInstallS586": "未找到可用的 macOS Node.js 安装器，请先安装 Node.js 后重试。",
+  "@nodeInstallS586": {
+    "description": "nodeInstallS586"
+  },
+  "nodeInstallS115": "Homebrew 安装 Node.js",
+  "@nodeInstallS115": {
+    "description": "nodeInstallS115"
+  },
+  "nodeInstallS202": "winget 安装 Node.js",
+  "@nodeInstallS202": {
+    "description": "nodeInstallS202"
+  },
+  "nodeInstallS111": "Chocolatey 安装 Node.js",
+  "@nodeInstallS111": {
+    "description": "nodeInstallS111"
+  },
+  "nodeInstallS139": "Scoop 安装 Node.js",
+  "@nodeInstallS139": {
+    "description": "nodeInstallS139"
+  },
+  "nodeInstallS594": "未检测到可用的 Windows Node.js 安装器。",
+  "@nodeInstallS594": {
+    "description": "nodeInstallS594"
+  },
+  "nodeInstallS167": "apt-get 安装 Node.js",
+  "@nodeInstallS167": {
+    "description": "nodeInstallS167"
+  },
+  "nodeInstallS176": "dnf 安装 Node.js",
+  "@nodeInstallS176": {
+    "description": "nodeInstallS176"
+  },
+  "nodeInstallS203": "yum 安装 Node.js",
+  "@nodeInstallS203": {
+    "description": "nodeInstallS203"
+  },
+  "nodeInstallS181": "pacman 安装 Node.js",
+  "@nodeInstallS181": {
+    "description": "nodeInstallS181"
+  },
+  "nodeInstallS204": "zypper 安装 Node.js",
+  "@nodeInstallS204": {
+    "description": "nodeInstallS204"
+  },
+  "nodeInstallS166": "apk 安装 Node.js",
+  "@nodeInstallS166": {
+    "description": "nodeInstallS166"
+  },
+  "nodeInstallS593": "未检测到可用的 Linux Node.js 安装器。",
+  "@nodeInstallS593": {
+    "description": "nodeInstallS593"
+  },
+  "desktopShellDefaultsS101": "A4 竖版 210 × 297 mm",
+  "@desktopShellDefaultsS101": {
+    "description": "desktopShellDefaultsS101"
+  },
+  "desktopShellDefaultsS100": "A4 横版 297 × 210 mm",
+  "@desktopShellDefaultsS100": {
+    "description": "desktopShellDefaultsS100"
+  },
+  "desktopShellDefaultsS99": "A3 竖版 297 × 420 mm",
+  "@desktopShellDefaultsS99": {
+    "description": "desktopShellDefaultsS99"
+  },
+  "desktopShellDefaultsS697": "温暖童趣 亲切温暖，适合儿童阅读",
+  "@desktopShellDefaultsS697": {
+    "description": "desktopShellDefaultsS697"
+  },
+  "desktopShellDefaultsS787": "童话叙事 文字更具故事感",
+  "@desktopShellDefaultsS787": {
+    "description": "desktopShellDefaultsS787"
+  },
+  "desktopShellDefaultsS826": "纪实风 中性偏学术表达",
+  "@desktopShellDefaultsS826": {
+    "description": "desktopShellDefaultsS826"
+  },
+  "desktopShellDefaultsS129": "PDF 文件 高质量 PDF（打印级别）",
+  "@desktopShellDefaultsS129": {
+    "description": "desktopShellDefaultsS129"
+  },
+  "desktopShellDefaultsS935": "长图 PNG 适合移动分享",
+  "@desktopShellDefaultsS935": {
+    "description": "desktopShellDefaultsS935"
+  },
+  "desktopShellDefaultsS932": "长图 JPG 体积更小",
+  "@desktopShellDefaultsS932": {
+    "description": "desktopShellDefaultsS932"
+  },
+  "feedbackPageS555": "无法",
+  "@feedbackPageS555": {
+    "description": "feedbackPageS555"
+  },
+  "feedbackPageS583": "未找到",
+  "@feedbackPageS583": {
+    "description": "feedbackPageS583"
+  },
+  "feedbackPageS673": "没有",
+  "@feedbackPageS673": {
+    "description": "feedbackPageS673"
+  },
+  "feedbackPageS582": "未就绪",
+  "@feedbackPageS582": {
+    "description": "feedbackPageS582"
+  },
+  "feedbackPageS383": "完成",
+  "@feedbackPageS383": {
+    "description": "feedbackPageS383"
+  },
+  "feedbackPageS429": "已保存",
+  "@feedbackPageS429": {
+    "description": "feedbackPageS429"
+  },
+  "feedbackPageS448": "已更新",
+  "@feedbackPageS448": {
+    "description": "feedbackPageS448"
+  },
+  "sidecarLauncherS679": "测试环境，跳过 sidecar 自动启动。",
+  "@sidecarLauncherS679": {
+    "description": "sidecarLauncherS679"
+  },
+  "sidecarLauncherS98": "4317 端口已被占用，但未响应 KidMemory sidecar health。",
+  "@sidecarLauncherS98": {
+    "description": "sidecarLauncherS98"
+  },
+  "sidecarLauncherS584": "未找到 sidecar 运行目录。请确认 app bundle 中包含 Resources/sidecar，或设置 KIDMEMORY_SIDECAR_DIR。",
+  "@sidecarLauncherS584": {
+    "description": "sidecarLauncherS584"
+  },
+  "sidecarLauncherS146": "Sidecar 未就绪，开始尝试自动启动。",
+  "@sidecarLauncherS146": {
+    "description": "sidecarLauncherS146"
+  },
+  "sidecarLauncherS141": "Sidecar 启动中",
+  "@sidecarLauncherS141": {
+    "description": "sidecarLauncherS141"
+  },
+  "sidecarLauncherS592": "未检测到可用于启动 sidecar 的 Node.js。",
+  "@sidecarLauncherS592": {
+    "description": "sidecarLauncherS592"
+  },
+  "sidecarLauncherS591": "未检测到可启动的 sidecar 入口，已跳过自动启动。",
+  "@sidecarLauncherS591": {
+    "description": "sidecarLauncherS591"
+  },
+  "sidecarLauncherS140": "Sidecar 初始化成功。",
+  "@sidecarLauncherS140": {
+    "description": "sidecarLauncherS140"
+  },
+  "sidecarLauncherS193": "sidecar 启动失败：服务未在预期时间内通过 health 检查。",
+  "@sidecarLauncherS193": {
+    "description": "sidecarLauncherS193"
+  },
+  "sidecarLauncherS194": "sidecar 启动失败：运行目录缺少 dist/main.js。",
+  "@sidecarLauncherS194": {
+    "description": "sidecarLauncherS194"
+  },
+  "desktopShellS696": "温暖童趣",
+  "@desktopShellS696": {
+    "description": "desktopShellS696"
+  },
+  "desktopShellS101": "A4 竖版 210 × 297 mm",
+  "@desktopShellS101": {
+    "description": "desktopShellS101"
+  },
+  "desktopShellS697": "温暖童趣 亲切温暖，适合儿童阅读",
+  "@desktopShellS697": {
+    "description": "desktopShellS697"
+  },
+  "desktopShellS129": "PDF 文件 高质量 PDF（打印级别）",
+  "@desktopShellS129": {
+    "description": "desktopShellS129"
+  },
+  "desktopShellS89": "11:05:12 准备素材并构建 workspace",
+  "@desktopShellS89": {
+    "description": "desktopShellS89"
+  },
+  "desktopShellS90": "11:05:18 调用 sidecar 生成任务",
+  "@desktopShellS90": {
+    "description": "desktopShellS90"
+  },
+  "desktopShellS91": "11:05:28 校验 book.json 与 book.html",
+  "@desktopShellS91": {
+    "description": "desktopShellS91"
+  },
+  "desktopShellS92": "11:05:52 等待预览 / PDF 导出",
+  "@desktopShellS92": {
+    "description": "desktopShellS92"
+  },
+  "datasetPreviewS783": "示例素材",
+  "@datasetPreviewS783": {
+    "description": "datasetPreviewS783"
+  },
+  "datasetPreviewS853": "请先导入示例数据并完成一次生成，才能查看示例 PDF",
+  "@datasetPreviewS853": {
+    "description": "datasetPreviewS853"
+  },
+  "datasetPreviewS521": "打开示例 PDF：缺少可用预览来源",
+  "@datasetPreviewS521": {
+    "description": "datasetPreviewS521"
+  },
+  "datasetPreviewS771": "示例 PDF",
+  "@datasetPreviewS771": {
+    "description": "datasetPreviewS771"
+  },
+  "datasetPreviewS743": "生成日志详情",
+  "@datasetPreviewS743": {
+    "description": "datasetPreviewS743"
+  },
+  "datasetPreviewS852": "请先完成生成，再打开预览全部页面",
+  "@datasetPreviewS852": {
+    "description": "datasetPreviewS852"
+  },
+  "datasetPreviewS952": "预览全部页面：缺少 jobId",
+  "@datasetPreviewS952": {
+    "description": "datasetPreviewS952"
+  },
+  "datasetSampleS696": "温暖童趣",
+  "@datasetSampleS696": {
+    "description": "datasetSampleS696"
+  },
+  "datasetSampleS101": "A4 竖版 210 × 297 mm",
+  "@datasetSampleS101": {
+    "description": "datasetSampleS101"
+  },
+  "datasetSampleS697": "温暖童趣 亲切温暖，适合儿童阅读",
+  "@datasetSampleS697": {
+    "description": "datasetSampleS697"
+  },
+  "datasetSampleS764": "确定要重置示例数据吗？",
+  "@datasetSampleS764": {
+    "description": "datasetSampleS764"
+  },
+  "datasetSampleS894": "这会删除当前示例档案和示例素材，并重新恢复到初始状态。",
+  "@datasetSampleS894": {
+    "description": "datasetSampleS894"
+  },
+  "datasetSampleS595": "未检测到示例数据档案，请先导入示例数据集",
+  "@datasetSampleS595": {
+    "description": "datasetSampleS595"
+  },
+  "sidecarS151": "Sidecar 状态检查中",
+  "@sidecarS151": {
+    "description": "sidecarS151"
+  },
+  "sidecarS266": "内置 PostgreSQL 启动失败，已阻断 sidecar 启动。",
+  "@sidecarS266": {
+    "description": "sidecarS266"
+  },
+  "sidecarS155": "Sidecar 重启失败，初始化未完成。",
+  "@sidecarS155": {
+    "description": "sidecarS155"
+  },
+  "sidecarS652": "正在启动 Sidecar",
+  "@sidecarS652": {
+    "description": "sidecarS652"
+  },
+  "sidecarS145": "Sidecar 未就绪，初始化未完成。",
+  "@sidecarS145": {
+    "description": "sidecarS145"
+  },
+  "sidecarS792": "等待上一步",
+  "@sidecarS792": {
+    "description": "sidecarS792"
+  },
+  "datasetS857": "请先选择孩子档案",
+  "@datasetS857": {
+    "description": "datasetS857"
+  },
+  "datasetS469": "开始导入示例数据集",
+  "@datasetS469": {
+    "description": "datasetS469"
+  },
+  "datasetS657": "正在导入示例数据集...",
+  "@datasetS657": {
+    "description": "datasetS657"
+  },
+  "datasetS776": "示例数据集导入失败：sidecar 无响应或数据库未就绪",
+  "@datasetS776": {
+    "description": "datasetS776"
+  },
+  "datasetS391": "导入失败：Sidecar 未连接或数据库未就绪",
+  "@datasetS391": {
+    "description": "datasetS391"
+  },
+  "datasetS781": "示例数据集已导入，素材库已刷新",
+  "@datasetS781": {
+    "description": "datasetS781"
+  },
+  "datasetS779": "示例数据集导入未完成，请检查 sidecar",
+  "@datasetS779": {
+    "description": "datasetS779"
+  },
+  "exportActionsS850": "请先完成导出，再打开导出文件夹",
+  "@exportActionsS850": {
+    "description": "exportActionsS850"
+  },
+  "exportActionsS414": "导出文件夹",
+  "@exportActionsS414": {
+    "description": "exportActionsS414"
+  },
+  "exportActionsS416": "导出物尚未同步到 Supabase Storage，暂不能复制分享文案",
+  "@exportActionsS416": {
+    "description": "exportActionsS416"
+  },
+  "exportActionsS273": "分享文案已复制",
+  "@exportActionsS273": {
+    "description": "exportActionsS273"
+  },
+  "exportActionsS475": "当前导出不是长图，不能复制长图",
+  "@exportActionsS475": {
+    "description": "exportActionsS475"
+  },
+  "exportActionsS479": "当前平台暂不支持直接复制图片内容，已复制长图本地路径",
+  "@exportActionsS479": {
+    "description": "exportActionsS479"
+  },
+  "importPageS905": "选择本地数据目录",
+  "@importPageS905": {
+    "description": "importPageS905"
+  },
+  "importPageS904": "选择文件夹",
+  "@importPageS904": {
+    "description": "importPageS904"
+  },
+  "importPageS386": "导入前需要一个孩子档案，请先检查 sidecar 连接",
+  "@importPageS386": {
+    "description": "importPageS386"
+  },
+  "importPageS674": "没有可读取的本地文件，请确认选择的是图片、zip 或可访问的文件夹",
+  "@importPageS674": {
+    "description": "importPageS674"
+  },
+  "exportSyncS195": "sidecar 未返回导出物记录",
+  "@exportSyncS195": {
+    "description": "exportSyncS195"
+  },
+  "exportSyncS837": "缺少孩子档案，暂不能同步导出物",
+  "@exportSyncS837": {
+    "description": "exportSyncS837"
+  },
+  "exportSyncS337": "同步入队失败",
+  "@exportSyncS337": {
+    "description": "exportSyncS337"
+  },
+  "exportSyncS157": "Supabase Storage 同步失败",
+  "@exportSyncS157": {
+    "description": "exportSyncS157"
+  },
+  "exportGenerationStateS736": "生成完成，可预览并导出 PDF",
+  "@exportGenerationStateS736": {
+    "description": "exportGenerationStateS736"
+  },
+  "exportGenerationStateS730": "生成失败，请检查 sidecar 日志",
+  "@exportGenerationStateS730": {
+    "description": "exportGenerationStateS730"
+  },
+  "datasetExternalS760": "目录路径为空，无法打开",
+  "@datasetExternalS760": {
+    "description": "datasetExternalS760"
+  },
+  "datasetExternalS478": "当前平台不支持打开本地路径",
+  "@datasetExternalS478": {
+    "description": "datasetExternalS478"
+  },
+  "datasetExternalS477": "当前平台不支持外部打开",
+  "@datasetExternalS477": {
+    "description": "datasetExternalS477"
+  },
+  "importPreviewS578": "未命名素材",
+  "@importPreviewS578": {
+    "description": "importPreviewS578"
+  },
+  "importSummaryS402": "导入结果未返回",
+  "@importSummaryS402": {
+    "description": "importSummaryS402"
+  },
+  "importSummaryS676": "没有收到 sidecar 导入统计，请检查本地服务状态",
+  "@importSummaryS676": {
+    "description": "importSummaryS676"
+  },
+  "directUploadS855": "请先选择一个孩子再创建扫码上传会话",
+  "@directUploadS855": {
+    "description": "directUploadS855"
+  },
+  "directUploadS650": "正在创建 Direct Upload 扫码会话...",
+  "@directUploadS650": {
+    "description": "directUploadS650"
+  },
+  "@desktopSidecarGatewayS3": {
+    "description": "desktopSidecarGatewayS3"
+  },
+  "textUtilsS557": "无错误输出",
+  "@textUtilsS557": {
+    "description": "textUtilsS557"
+  },
+  "exportAssetSyncS862": "请先配置 Supabase Storage",
+  "@exportAssetSyncS862": {
+    "description": "exportAssetSyncS862"
+  },
+  "exportPageS851": "请先完成生成，再导出",
+  "@exportPageS851": {
+    "description": "exportPageS851"
+  },
+  "exportPageS410": "导出失败：缺少 jobId",
+  "@exportPageS410": {
+    "description": "exportPageS410"
+  },
+  "exportPageS649": "正在准备导出目录...",
+  "@exportPageS649": {
+    "description": "exportPageS649"
+  },
+  "exportPageS702": "点击导出，准备读取当前导出目录",
+  "@exportPageS702": {
+    "description": "exportPageS702"
   }
 }

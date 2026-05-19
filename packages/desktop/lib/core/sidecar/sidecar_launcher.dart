@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'sidecar_api.dart';
+import '../../../l10n/app_localizations.dart';
 
 typedef ExecutableFinder = String? Function(String name);
 
@@ -28,7 +29,7 @@ class SidecarLauncher {
     // In test environments the sidecar API is mocked; never attempt
     // socket connection or process launch (both block FakeAsync).
     if (Platform.environment['FLUTTER_TEST'] == 'true') {
-      onLog('测试环境，跳过 sidecar 自动启动。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS679);
       return true;
     }
 
@@ -38,22 +39,22 @@ class SidecarLauncher {
       return true;
     }
     if (await _sidecarReachable()) {
-      onLog('4317 端口已被占用，但未响应 KidMemory sidecar health。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS98);
       return false;
     }
 
     final sidecarDir = _resolveSidecarDirectory();
     if (sidecarDir == null) {
-      onLog('未找到 sidecar 运行目录。请确认 app bundle 中包含 Resources/sidecar，或设置 KIDMEMORY_SIDECAR_DIR。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS584);
       return false;
     }
 
-    onLog('Sidecar 未就绪，开始尝试自动启动。');
-    onReadinessMessage?.call('Sidecar 启动中');
+    onLog(AppLocalizations.of(context)!.sidecarLauncherS146);
+    onReadinessMessage?.call(AppLocalizations.of(context)!.sidecarLauncherS141);
     if (!await ensureNodeAvailable()) return false;
     final node = _bundledNodePath(sidecarDir) ?? findExecutable('node');
     if (node == null) {
-      onLog('未检测到可用于启动 sidecar 的 Node.js。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS592);
       return false;
     }
 
@@ -62,7 +63,7 @@ class SidecarLauncher {
       nodeExecutable: node,
     );
     if (launch == null) {
-      onLog('未检测到可启动的 sidecar 入口，已跳过自动启动。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS591);
       return false;
     }
 
@@ -98,10 +99,10 @@ class SidecarLauncher {
           .transform(const LineSplitter())
           .listen((line) => onLog('sidecar stderr: $line'));
       if (await waitForApiReady(attempts: 120)) {
-        onLog('Sidecar 初始化成功。');
+        onLog(AppLocalizations.of(context)!.sidecarLauncherS140);
         return true;
       }
-      onLog('sidecar 启动失败：服务未在预期时间内通过 health 检查。');
+      onLog(AppLocalizations.of(context)!.sidecarLauncherS193);
     } catch (error) {
       debugPrint('KidMemory sidecar auto-start failed: $error');
       onLog('sidecar 启动失败：$error');
@@ -261,7 +262,7 @@ class SidecarLauncher {
     if (distEntry.existsSync()) {
       return (nodeExecutable, [distEntry.path]);
     }
-    onLog('sidecar 启动失败：运行目录缺少 dist/main.js。');
+    onLog(AppLocalizations.of(context)!.sidecarLauncherS194);
     return null;
   }
 

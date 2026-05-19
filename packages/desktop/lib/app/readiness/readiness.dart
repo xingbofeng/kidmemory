@@ -8,7 +8,7 @@ extension _DesktopShellReadiness on _DesktopShellState {
       _applyReadinessUiConfig(loadedUiConfig);
 
       if (!snapshot.available) {
-        _markSidecarUnavailable('读取 sidecar 配置失败，初始化未完成。');
+        _markSidecarUnavailable(AppLocalizations.of(context)!.setupSidecarConfigUnavailable);
         return;
       }
       _applyReadinessStorageAndPaths(snapshot.config);
@@ -21,13 +21,13 @@ extension _DesktopShellReadiness on _DesktopShellState {
         final schemaMessage = snapshot.schema.message ?? '';
         final message = schemaMessage.isNotEmpty
             ? schemaMessage
-            : 'schema 初始化未成功';
+            : AppLocalizations.of(context)!.setupSchemaInitFailed;
         _appendLog('schema 初始化未完成：$message');
       }
       _setShellState(() {
         readinessMessage = schemaReady
             ? '初始化成功，已完成 ${readyCount + 1} / 2 项 readiness 检测'
-            : 'Sidecar 已启动，schema 初始化未完成';
+            : AppLocalizations.of(context)!.setupSidecarStartedSchemaNotReady;
         readinessChecks = _buildReadinessChecks(openai: snapshot.openai);
       });
       if (schemaReady) {

@@ -4,7 +4,7 @@ import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 export const UpdateChildDtoSchema = z
   .object({
     name: z.string().trim().min(1, "name is required").optional(),
-    birthday: z.string().trim().min(1).optional(),
+    birthday: z.string().trim().optional(),
     notes: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
   })

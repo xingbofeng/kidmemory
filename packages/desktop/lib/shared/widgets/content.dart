@@ -8,6 +8,7 @@ import '../../data/sample_assets.dart';
 import 'chrome.dart';
 import 'layout.dart';
 import 'status.dart';
+import '../../../l10n/app_localizations.dart';
 
 part 'content_asset_generation.dart';
 
@@ -43,7 +44,8 @@ class SetupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final needsAttention = healthy == false || _setupNeedsAttention(state);
+    final l10n = AppLocalizations.of(context)!;
+    final needsAttention = healthy == false || _setupNeedsAttention(l10n, state);
     final backgroundColor = switch ((healthy, needsAttention)) {
       (true, _) => const Color(0xffedf7ee),
       (_, true) => const Color(0xfffff1dd),
@@ -70,7 +72,7 @@ class SetupCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _SetupIconBadge(
-                icon: _setupIcon(),
+                icon: _setupIcon(l10n),
                 color: foregroundColor,
                 backgroundColor: healthy == true
                     ? const Color(0xffeef8f0)
@@ -127,7 +129,7 @@ class SetupCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              progressLabel ?? '正在准备...',
+              progressLabel ?? l10n.contentPreparingStatusLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -145,7 +147,7 @@ class SetupCard extends StatelessWidget {
                   child: SecondaryButton(
                     label: secondaryActionLabel!,
                     onPressed: onSecondaryAction,
-                    icon: _actionIcon(secondaryActionLabel!),
+                    icon: _actionIcon(l10n, secondaryActionLabel!),
                     fullWidth: true,
                     height: 52,
                   ),
@@ -154,9 +156,9 @@ class SetupCard extends StatelessWidget {
                 const SizedBox(width: 10),
               Expanded(
                 child: SecondaryButton(
-                  label: _primaryActionLabel(),
+                  label: _primaryActionLabel(l10n),
                   onPressed: actionEnabled ? onAction : null,
-                  icon: _actionIcon(_primaryActionLabel()),
+                  icon: _actionIcon(l10n, _primaryActionLabel(l10n)),
                   fullWidth: true,
                   height: 52,
                 ),
@@ -168,40 +170,40 @@ class SetupCard extends StatelessWidget {
     );
   }
 
-  String _primaryActionLabel() {
+  String _primaryActionLabel(AppLocalizations l10n) {
     if (actionEnabled) return action;
-    if (progress != null) return progressLabel ?? '正在处理中...';
+    if (progress != null) return progressLabel ?? l10n.contentProcessingStatusLabel;
     return action;
   }
 
-  bool _setupNeedsAttention(String value) {
-    return value.contains('需配置') ||
-        value.contains('未配置') ||
-        value.contains('未连接') ||
-        value.contains('准备中');
+  bool _setupNeedsAttention(AppLocalizations l10n, String value) {
+    return value.contains(l10n.contentNeedsConfigurationLabel) ||
+        value.contains(l10n.contentNotConfiguredLabel) ||
+        value.contains(l10n.contentDisconnectedLabel) ||
+        value.contains(l10n.contentWaitingLabel);
   }
 
-  IconData _actionIcon(String label) {
-    if (label.contains('测试') || label.contains('检测')) {
+  IconData _actionIcon(AppLocalizations l10n, String label) {
+    if (label.contains(l10n.contentTestLabel) || label.contains(l10n.contentCheckLabel)) {
       return Icons.link_rounded;
     }
-    if (label.contains('配置') || label.contains('修改')) {
+    if (label.contains(l10n.contentConfigureLabel) || label.contains(l10n.contentModifyLabel)) {
       return Icons.settings_outlined;
     }
-    if (label.contains('目录') || label.contains('打开')) {
+    if (label.contains(l10n.contentDirectoryLabel) || label.contains(l10n.contentOpenLabel)) {
       return Icons.folder_open_rounded;
     }
-    if (label.contains('连接')) {
+    if (label.contains(l10n.contentConnectLabel)) {
       return Icons.link_rounded;
     }
     return Icons.play_arrow_rounded;
   }
 
-  IconData _setupIcon() {
+  IconData _setupIcon(AppLocalizations l10n) {
     if (title.contains('PostgreSQL') || title.contains('pgvector')) {
       return Icons.storage_rounded;
     }
-    if (title.contains('大模型') || title.contains('OpenAI')) {
+    if (title.contains(l10n.contentModelLabel) || title.contains('OpenAI')) {
       return Icons.psychology_alt_rounded;
     }
     return healthy == true ? Icons.check_rounded : Icons.settings_outlined;
@@ -285,7 +287,9 @@ class InfoHero extends StatelessWidget {
             ],
           ),
         ),
-        ?trailing,
+        if (trailing != null) ...[
+          trailing!,
+        ],
       ],
     ),
   );
@@ -297,63 +301,67 @@ class MetricStrip extends StatelessWidget {
   final List<(String, String)> metrics;
 
   @override
-  Widget build(BuildContext context) => SurfaceCard(
-    child: Row(
-      children: [
-        for (var index = 0; index < metrics.length; index++) ...[
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AppAssetIcon(_metricIconAsset(metrics[index].$1), size: 22),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        metrics[index].$1,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xff8c7663),
-                          fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SurfaceCard(
+      child: Row(
+        children: [
+          for (var index = 0; index < metrics.length; index++) ...[
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AppAssetIcon(
+                        _metricIconAsset(l10n, metrics[index].$1),
+                        size: 22,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          metrics[index].$1,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xff8c7663),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  metrics[index].$2,
-                  style: const TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w900,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    metrics[index].$2,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (index != metrics.length - 1)
-            Container(
-              width: 1,
-              height: 46,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              color: const Color(0xffeee6dc).withValues(alpha: 0.58),
-            ),
+            if (index != metrics.length - 1)
+              Container(
+                width: 1,
+                height: 46,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                color: const Color(0xffeee6dc).withValues(alpha: 0.58),
+              ),
+          ],
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
-  String _metricIconAsset(String label) {
-    return switch (label) {
-      '素材总数' => gridIconAsset,
-      '儿童画' => paletteIconAsset,
-      '手工作品' => bearDocumentIconAsset,
-      '素材许可' => shieldIconAsset,
-      '照片' => cameraIconAsset,
-      _ => infoIconAsset,
-    };
+  String _metricIconAsset(AppLocalizations l10n, String label) {
+    if (label == l10n.contentMetricTotalLabel) return gridIconAsset;
+    if (label == l10n.contentCategoryArtworkLabel) return paletteIconAsset;
+    if (label == l10n.contentCategoryCraftLabel) return bearDocumentIconAsset;
+    if (label == l10n.contentLicenseLabel) return shieldIconAsset;
+    if (label == l10n.contentAssetTypePhotoLabel) return cameraIconAsset;
+    return infoIconAsset;
   }
 }
 
@@ -555,27 +563,27 @@ class SidePanel extends StatelessWidget {
         const SizedBox(height: 20),
         DatasetLine(
           iconAsset: paletteIconAsset,
-          title: '儿童画',
+          title: AppLocalizations.of(context)!.contentCategoryArtworkLabel,
           value: '$artworkCount 张',
-          text: '包含当前示例孩子的儿童画素材',
+          text: AppLocalizations.of(context)!.contentArtworkDescriptionText,
         ),
         DatasetLine(
           iconAsset: bearDocumentIconAsset,
-          title: '手工作品',
+          title: AppLocalizations.of(context)!.contentCategoryCraftLabel,
           value: '$craftCount 件',
-          text: '包含纸板、手工和结构化素材',
+          text: AppLocalizations.of(context)!.contentCraftDescriptionText,
         ),
         DatasetLine(
           iconAsset: cameraIconAsset,
-          title: '照片',
+          title: AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
           value: '$photoCount 张',
-          text: '含拍照素材与扫描件',
+          text: AppLocalizations.of(context)!.contentPhotoDescriptionText,
         ),
         DatasetLine(
           iconAsset: tagIconAsset,
-          title: '标签',
+          title: AppLocalizations.of(context)!.contentTagLabel,
           value: '$tagCount 个',
-          text: '包含主题、颜色、场景和创作类型标签',
+          text: AppLocalizations.of(context)!.contentTagInfoText,
         ),
       ],
     ),
@@ -818,7 +826,7 @@ Future<void> showAssetArtworkPreviewDialog({
   String? fallbackAssetPath,
   String? path,
 }) {
-  final title = label.trim().isEmpty ? '作品预览' : label.trim();
+  final title = label.trim().isEmpty ? AppLocalizations.of(context)!.contentAssetPreviewFallbackTitle : label.trim();
   return showDialog<void>(
     context: context,
     builder: (dialogContext) {
@@ -849,7 +857,7 @@ Future<void> showAssetArtworkPreviewDialog({
                   IconButton(
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     icon: const Icon(Icons.close_rounded),
-                    tooltip: '关闭',
+                    tooltip: AppLocalizations.of(context)!.actionCloseLabel,
                   ),
                 ],
               ),
@@ -871,7 +879,7 @@ Future<void> showAssetArtworkPreviewDialog({
               ),
               const SizedBox(height: 12),
               Text(
-                '点击右上角可关闭预览',
+                AppLocalizations.of(context)!.contentPreviewCloseHint,
                 style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
               ),
             ],
@@ -897,12 +905,12 @@ class MetricPanel extends StatelessWidget {
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 18),
-        const MetricStrip(
+        MetricStrip(
           metrics: [
-            ('素材总数', '1,248 个'),
-            ('绘画数量', '612'),
-            ('照片数量', '213'),
-            ('已生成 PDF', '13'),
+            (AppLocalizations.of(context)!.contentMetricTotalLabel, AppLocalizations.of(context)!.contentCollectionTotalCountLabel),
+            (AppLocalizations.of(context)!.contentDrawingCountLabel, '612'),
+            (AppLocalizations.of(context)!.contentPhotoCountLabel, '213'),
+            (AppLocalizations.of(context)!.contentGeneratedPdfLabel, '13'),
           ],
         ),
       ],
@@ -917,14 +925,14 @@ class DistributionPanel extends StatelessWidget {
   Widget build(BuildContext context) => SurfaceCard(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
-          '素材分布',
+          AppLocalizations.of(context)!.contentAssetDistributionTitle,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
         SizedBox(height: 24),
         Center(child: AppAssetIcon(imageIconAsset, size: 92)),
-        Text('绘画作品 49%    照片 35%    手工作品 9%'),
+        Text(AppLocalizations.of(context)!.contentAssetDistributionSummaryText),
       ],
     ),
   );
@@ -940,8 +948,8 @@ class RecentWorksPanel extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '最近作品',
+        Text(
+          AppLocalizations.of(context)!.contentRecentWorksTitle,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 18),
@@ -979,17 +987,17 @@ class BookRecordsPanel extends StatelessWidget {
   Widget build(BuildContext context) => SurfaceCard(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
-          '作品集记录',
+          AppLocalizations.of(context)!.contentPortfolioRecordTitle,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
         SizedBox(height: 10),
-        Text('春日拾光  ·  2025-04-01  ·  24页'),
+        Text(AppLocalizations.of(context)!.contentSampleBookTitleSpring),
         SizedBox(height: 8),
-        Text('三岁生日纪念册  ·  2024-06-20  ·  32页'),
+        Text(AppLocalizations.of(context)!.contentSampleBookTitleBirthday),
         SizedBox(height: 8),
-        Text('幼儿园生活点滴  ·  2024-01-15  ·  28页'),
+        Text(AppLocalizations.of(context)!.contentSampleBookTitleDaycare),
       ],
     ),
   );
@@ -1029,22 +1037,22 @@ class ProfileAside extends StatelessWidget {
         ),
       ),
       SizedBox(height: 18),
-      SuccessBanner(title: '每一幅画，都是成长的印记', text: '每一个笑容，都值得被珍藏。'),
+      SuccessBanner(title: AppLocalizations.of(context)!.contentBannerHeaderTitle, text: AppLocalizations.of(context)!.contentBannerHeaderSubtitle),
     ],
   );
 }
 
 class SearchBox extends StatelessWidget {
-  const SearchBox({
+  SearchBox({
     this.controller,
     this.onChanged,
-    this.hintText = '搜索素材名称、标签或来源...',
+    this.hintText,
     super.key,
   });
 
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
-  final String hintText;
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) => TextField(
@@ -1055,7 +1063,7 @@ class SearchBox extends StatelessWidget {
         padding: EdgeInsets.all(12),
         child: AppAssetIcon(searchIconAsset, size: inlineIconSize),
       ),
-      hintText: hintText,
+      hintText: hintText ?? AppLocalizations.of(context)!.contentAssetSearchHint,
       filled: true,
       fillColor: const Color(0xfffffbf5),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -1072,25 +1080,27 @@ class SearchBox extends StatelessWidget {
 }
 
 class FilterChips extends StatelessWidget {
-  const FilterChips({
-    this.typeOptions = const [
-      {'value': 'all', 'label': '全部'},
-      {'value': 'artwork', 'label': '绘画'},
-      {'value': 'photo', 'label': '照片'},
-      {'value': 'craft', 'label': '手工'},
-    ],
+  FilterChips({
+    this.typeOptions,
     this.selectedType = 'all',
     this.onChanged,
     super.key,
   });
 
-  final List<Map<String, String>> typeOptions;
+  final List<Map<String, String>>? typeOptions;
   final String selectedType;
   final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final items = typeOptions.where(
+    final resolvedTypeOptions = typeOptions ??
+        [
+          {'value': 'all', 'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel},
+          {'value': 'artwork', 'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel},
+          {'value': 'photo', 'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel},
+          {'value': 'craft', 'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel},
+        ];
+    final items = resolvedTypeOptions.where(
       (option) =>
           (option['value'] ?? '').trim().isNotEmpty &&
           (option['label'] ?? '').trim().isNotEmpty,
@@ -1143,7 +1153,7 @@ class PaginationBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Tooltip(
-          message: '上一页',
+          message: AppLocalizations.of(context)!.contentPagerPreviousTooltip,
           child: IconButton(
             onPressed: currentPage > 0 ? onPrevious : null,
             icon: const Icon(Icons.chevron_left_rounded),
@@ -1162,7 +1172,7 @@ class PaginationBar extends StatelessWidget {
           const SizedBox(width: 8),
         ],
         Tooltip(
-          message: '下一页',
+          message: AppLocalizations.of(context)!.contentPagerNextTooltip,
           child: IconButton(
             onPressed: currentPage < totalPages - 1 ? onNext : null,
             icon: const Icon(Icons.chevron_right_rounded),

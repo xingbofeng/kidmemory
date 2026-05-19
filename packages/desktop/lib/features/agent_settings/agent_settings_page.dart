@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kidmemory_protocol/kidmemory_protocol.dart' show AgentConfigResponseDto;
 import '../../../core/sidecar/agent_config_api.dart';
 import '../../../core/sidecar/sidecar_api.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AgentSettingsPage extends StatefulWidget {
   final SidecarApi sidecarApi;
@@ -75,9 +76,10 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
   }
 
   Future<void> _testConnection() async {
+    final l10n = AppLocalizations.of(context)!;
     if (baseUrlController.text.isEmpty ||
         (currentConfig == null && apiKeyController.text.isEmpty)) {
-      _showError('请填写完整的配置信息');
+      _showError(l10n.agentSettingsMissingConfigMessage);
       return;
     }
 
@@ -104,10 +106,10 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
 
       if (result.success) {
         setState(() {
-          successMessage = '连接测试成功';
+          successMessage = l10n.agentSettingsConnectionTestSuccess;
         });
       } else {
-        _showError(result.errorMessage ?? '连接测试失败');
+        _showError(result.errorMessage ?? l10n.agentSettingsConnectionTestFailed);
       }
     } catch (e) {
       setState(() {
@@ -118,8 +120,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
   }
 
   Future<void> _saveConfiguration() async {
+    final l10n = AppLocalizations.of(context)!;
     if (baseUrlController.text.isEmpty || apiKeyController.text.isEmpty) {
-      _showError('请填写完整的配置信息');
+      _showError(l10n.agentSettingsMissingConfigMessage);
       return;
     }
 
@@ -179,7 +182,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
       setState(() {
         currentConfig = savedConfig;
         isLoading = false;
-        successMessage = 'Agent 配置已成功保存';
+        successMessage = l10n.agentSettingsSaveSuccess;
       });
     } catch (e) {
       setState(() {
@@ -200,7 +203,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agent 设置'),
+        title: Text(AppLocalizations.of(context)!.agentSettingsTitle),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
@@ -224,7 +227,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '配置 OpenAI Agent SDK 服务端点，用于生成儿童作品集。支持 OpenAI API 或兼容的本地服务。',
+                      AppLocalizations.of(context)!.agentSettingsOpenAiDescription,
                       style: TextStyle(color: Colors.blue.shade700),
                     ),
                   ),
@@ -284,44 +287,44 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
             ],
 
             // 配置表单
-            const Text(
-              'Agent SDK 配置',
+            Text(
+              AppLocalizations.of(context)!.agentSettingsSectionTitle,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
 
             _buildTextField(
               controller: nameController,
-              label: '配置名称',
+              label: AppLocalizations.of(context)!.agentSettingsConfigNameLabel,
               hint: 'OpenAI',
-              helperText: '用于在本机区分不同 Agent 配置',
+              helperText: AppLocalizations.of(context)!.agentSettingsNameHelper,
             ),
             const SizedBox(height: 16),
 
             _buildTextField(
               controller: baseUrlController,
               label: 'Base URL',
-              hint: 'https://api.openai.com 或本地服务地址',
+              hint: AppLocalizations.of(context)!.agentSettingsBaseUrlHint,
               required: true,
-              helperText: '支持 OpenAI API 或兼容的本地 Agent SDK 服务',
+              helperText: AppLocalizations.of(context)!.agentSettingsBaseUrlHelper,
             ),
             const SizedBox(height: 16),
 
             _buildTextField(
               controller: apiKeyController,
               label: 'API Key',
-              hint: 'sk-... 或本地服务的认证密钥',
+              hint: AppLocalizations.of(context)!.agentSettingsApiKeyHint,
               obscureText: true,
               required: true,
-              helperText: '用于认证的 API 密钥',
+              helperText: AppLocalizations.of(context)!.agentSettingsApiKeyHelper,
             ),
             const SizedBox(height: 16),
 
             _buildTextField(
               controller: modelController,
-              label: '模型名称',
-              hint: 'gpt-4, gpt-3.5-turbo 等',
-              helperText: '留空将使用默认模型 gpt-4',
+              label: AppLocalizations.of(context)!.agentSettingsModelLabel,
+              hint: AppLocalizations.of(context)!.agentSettingsModelHint,
+              helperText: AppLocalizations.of(context)!.agentSettingsModelDefaultHint,
             ),
             const SizedBox(height: 32),
 
@@ -335,7 +338,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                     child: OutlinedButton.icon(
                       onPressed: _testConnection,
                       icon: const Icon(Icons.wifi_protected_setup),
-                      label: const Text('测试连接'),
+                      label: Text(AppLocalizations.of(context)!.actionTestConnection),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -343,7 +346,7 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                     child: ElevatedButton.icon(
                       onPressed: _saveConfiguration,
                       icon: const Icon(Icons.save),
-                      label: const Text('保存配置'),
+                      label: Text(AppLocalizations.of(context)!.actionSaveSettings),
                     ),
                   ),
                 ],
@@ -353,8 +356,8 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
             const SizedBox(height: 32),
 
             // 使用说明
-            const Text(
-              '使用说明',
+            Text(
+              AppLocalizations.of(context)!.agentSettingsUsageTitle,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -368,9 +371,18 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHelpItem('1. OpenAI API', '使用官方 OpenAI API 服务'),
-                  _buildHelpItem('2. 本地服务', '运行兼容 OpenAI API 的本地 Agent SDK 服务'),
-                  _buildHelpItem('3. 自定义端点', '支持任何兼容 OpenAI API 格式的服务'),
+                  _buildHelpItem(
+                    AppLocalizations.of(context)!.agentSettingsOpenAiStepTitle,
+                    AppLocalizations.of(context)!.agentSettingsOpenAiStepDescription,
+                  ),
+                  _buildHelpItem(
+                    AppLocalizations.of(context)!.agentSettingsLocalStepTitle,
+                    AppLocalizations.of(context)!.agentSettingsLocalStepDescription,
+                  ),
+                  _buildHelpItem(
+                    AppLocalizations.of(context)!.agentSettingsCustomEndpointStepTitle,
+                    AppLocalizations.of(context)!.agentSettingsCustomEndpointStepDescription,
+                  ),
                 ],
               ),
             ),

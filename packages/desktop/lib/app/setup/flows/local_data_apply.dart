@@ -16,14 +16,14 @@ extension _DesktopShellSetupLocalDataApply on _DesktopShellState {
         readinessChecks = _replacePathChecks(
           readinessChecks,
           appliedPaths,
-          state: result.okValue ? '已选择' : '本地已选择',
+          state: result.okValue ? AppLocalizations.of(context)!.setupChosen : AppLocalizations.of(context)!.setupLocalPathSelected,
         );
       });
     _appendLog('本地数据目录已更新：${appliedPaths.dataDir}');
     _showSnackBar(
       result.okValue
-          ? '本地数据目录已更新'
-          : '本地数据目录已更新；sidecar 启动后会继续读取配置',
+          ? AppLocalizations.of(context)!.setupLocalPathUpdated
+          : AppLocalizations.of(context)!.setupLocalPathUpdatedSidecarPending,
     );
     if (!mounted) return;
     await refreshReadiness();

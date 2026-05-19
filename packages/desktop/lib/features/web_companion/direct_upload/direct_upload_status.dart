@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'direct_upload_models.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Renders the pull-back status rows produced by the sidecar status
 /// endpoint. Each row reflects one of the four states defined by the
@@ -18,10 +19,10 @@ class DirectUploadStatusList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
         child: Text(
-          '暂无远端对象，请先在手机端扫码上传',
+          AppLocalizations.of(context)!.directUploadNoItemsHint,
           style: TextStyle(color: Color(0xff6f8d72)),
         ),
       );
@@ -44,7 +45,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final descriptor = _describe(item);
+    final descriptor = _describe(context, item);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -95,7 +96,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
             const SizedBox(width: 8),
             TextButton(
               onPressed: () => onRetry(item.objectKey),
-              child: const Text('重试'),
+              child: Text(AppLocalizations.of(context)!.actionRetryLabel),
             ),
           ],
         ],
@@ -103,7 +104,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
     );
   }
 
-  _RowDescriptor _describe(DirectUploadStatusItem item) {
+  _RowDescriptor _describe(BuildContext context, DirectUploadStatusItem item) {
     switch (item.status) {
       case 'pending_remote':
         return _RowDescriptor(
@@ -112,7 +113,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
             color: Color(0xff6f8d72),
             size: 22,
           ),
-          statusLabel: '等待回拉',
+          statusLabel: AppLocalizations.of(context)!.uploadStatusPendingPullbackLabel,
           statusColor: const Color(0xff6f8d72),
           identifier: item.displayName,
         );
@@ -123,7 +124,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
             height: 22,
             child: CircularProgressIndicator(strokeWidth: 2.5),
           ),
-          statusLabel: '回拉中',
+          statusLabel: AppLocalizations.of(context)!.uploadStatusDownloadingLabel,
           statusColor: const Color(0xff2f80ed),
           identifier: item.displayName,
         );
@@ -134,7 +135,7 @@ class _DirectUploadStatusRow extends StatelessWidget {
             color: Color(0xff2faa61),
             size: 22,
           ),
-          statusLabel: '已入库',
+          statusLabel: AppLocalizations.of(context)!.uploadStatusReadyLabel,
           statusColor: const Color(0xff2faa61),
           identifier: item.displayName,
         );
@@ -145,10 +146,12 @@ class _DirectUploadStatusRow extends StatelessWidget {
             color: Color(0xffc0392b),
             size: 22,
           ),
-          statusLabel: '回拉失败',
+          statusLabel: AppLocalizations.of(context)!.uploadStatusFailedLabel,
           statusColor: const Color(0xffc0392b),
           identifier: item.displayName,
-          detail: item.errorMessage ?? item.errorCode ?? '未知错误',
+          detail: item.errorMessage ??
+              item.errorCode ??
+              AppLocalizations.of(context)!.uploadStatusUnknownErrorLabel,
         );
       default:
         return _RowDescriptor(

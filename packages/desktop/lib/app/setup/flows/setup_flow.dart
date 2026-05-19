@@ -5,20 +5,20 @@ extension _DesktopShellSetupFlow on _DesktopShellState {
     _setSetupProgress(
       _sidecarSetupTitle,
       0.15,
-      '正在启动 Sidecar...',
-      state: '启动中',
+      AppLocalizations.of(context)!.setupSidecarStarting,
+      state: AppLocalizations.of(context)!.setupStatusStarting,
     );
     final ready = await _ensureSidecarRunning();
     if (!ready) {
       _finishSetupProgress(
         _sidecarSetupTitle,
-        'Sidecar 未能启动，请检查 Node.js 或 bundled sidecar',
+        AppLocalizations.of(context)!.setupSidecarStartFailedNodeOrBundled,
         ok: false,
       );
-      _showSnackBar('Sidecar 未能启动');
+      _showSnackBar(AppLocalizations.of(context)!.setupSidecarStartFailed);
       return;
     }
-    _finishSetupProgress(_sidecarSetupTitle, 'Sidecar 已启动', ok: true);
+    _finishSetupProgress(_sidecarSetupTitle, AppLocalizations.of(context)!.setupSidecarStarted, ok: true);
     await refreshReadiness();
   }
 }

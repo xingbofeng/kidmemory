@@ -2,11 +2,11 @@ part of '../desktop_shell.dart';
 
 extension _DesktopShellReadinessRules on _DesktopShellState {
   String _setupActionForTitle(Object? rawAction, String title) {
-    if (title == 'PostgreSQL 配置' ||
+    if (title == AppLocalizations.of(context)!.setupPostgresTitle ||
         title == _sidecarSetupTitle ||
-        title == 'pgvector 检测' ||
-        title == '大模型接口配置' ||
-        title == '本地数据目录') {
+        title == AppLocalizations.of(context)!.setupPgvectorTitle ||
+        title == AppLocalizations.of(context)!.setupOpenAiTitle ||
+        title == AppLocalizations.of(context)!.setupLocalDataDirTitle) {
       return _defaultSetupAction(title);
     }
     final resolved = '$rawAction'.trim();
@@ -20,14 +20,20 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
   }
 
   String _defaultSetupAction(String title) {
-    return switch (title) {
-      'PostgreSQL 配置' => '安装与配置',
-      _sidecarSetupTitle => '启动 Sidecar',
-      'pgvector 检测' => '安装与配置',
-      '大模型接口配置' => '配置',
-      '本地数据目录' => '配置目录',
-      _ => '查看',
-    };
+    if (title == AppLocalizations.of(context)!.setupPostgresTitle) {
+      return AppLocalizations.of(context)!.actionInstallAndConfigure;
+    }
+    if (title == _sidecarSetupTitle) return AppLocalizations.of(context)!.actionStartSidecar;
+    if (title == AppLocalizations.of(context)!.setupPgvectorTitle) {
+      return AppLocalizations.of(context)!.actionInstallAndConfigure;
+    }
+    if (title == AppLocalizations.of(context)!.setupOpenAiTitle) {
+      return AppLocalizations.of(context)!.actionConfigure;
+    }
+    if (title == AppLocalizations.of(context)!.setupLocalDataDirTitle) {
+      return AppLocalizations.of(context)!.actionConfigureDirectory;
+    }
+    return AppLocalizations.of(context)!.actionView;
   }
 
   String _extractSetupPurpose(String body) {
@@ -35,14 +41,14 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
     for (final rawLine in lines) {
       final line = rawLine.trim();
       if (line.isEmpty) continue;
-      if (line == '用途') return '系统配置项。';
-      if (line.startsWith('用途：')) {
-        return line.replaceFirst('用途：', '').trim();
+      if (line == AppLocalizations.of(context)!.setupPurposeLabel) return AppLocalizations.of(context)!.setupSystemConfigItemSummary;
+      if (line.startsWith(AppLocalizations.of(context)!.setupPurposePrefixCn)) {
+        return line.replaceFirst(AppLocalizations.of(context)!.setupPurposePrefixCn, '').trim();
       }
-      if (line.startsWith('用途:')) {
-        return line.replaceFirst('用途:', '').trim();
+      if (line.startsWith(AppLocalizations.of(context)!.setupPurposePrefixAscii)) {
+        return line.replaceFirst(AppLocalizations.of(context)!.setupPurposePrefixAscii, '').trim();
       }
-      if (line.startsWith('用途')) {
+      if (line.startsWith(AppLocalizations.of(context)!.setupPurposeLabel)) {
         final marker = line.indexOf('：');
         if (marker != -1 && marker + 1 < line.length) {
           return line.substring(marker + 1).trim();
@@ -50,6 +56,6 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
       }
       return line;
     }
-    return '系统配置项。';
+    return AppLocalizations.of(context)!.setupSystemConfigItemSummary;
   }
 }

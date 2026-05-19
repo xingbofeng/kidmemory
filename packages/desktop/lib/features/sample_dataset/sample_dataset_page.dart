@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/chrome.dart';
 import '../../shared/widgets/content.dart';
 import '../../shared/widgets/layout.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SampleDatasetPage extends StatelessWidget {
   const SampleDatasetPage({
@@ -41,7 +42,7 @@ class SampleDatasetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final assets = previewAssets;
-    final displayAssets = assets.isEmpty ? _samplePreviewPlaceholders : assets;
+    final displayAssets = assets.isEmpty ? _samplePreviewPlaceholders(context) : assets;
     final samplePreviewOnly = assets.isEmpty;
     final counts = {
       "artwork": samplePreviewOnly ? _sampleArtworkCount : artworkCount,
@@ -52,11 +53,11 @@ class SampleDatasetPage extends StatelessWidget {
     final effectiveTagCount = samplePreviewOnly ? _sampleTagCount : tagCount;
 
     return PageFrame(
-      title: '示例数据集',
-      subtitle: '使用隐私安全的虚拟素材，快速体验 KidMemory 的素材库、创作台和导出流程。',
+      title: AppLocalizations.of(context)!.sampleDatasetPageTitle,
+      subtitle: AppLocalizations.of(context)!.sampleDatasetPageSubtitle,
       leading: onBack == null
           ? null
-          : PageBackButton(tooltip: '返回孩子档案', onPressed: onBack!),
+          : PageBackButton(tooltip: AppLocalizations.of(context)!.sampleDatasetBackTooltip, onPressed: onBack!),
       child: SingleChildScrollView(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,39 +67,39 @@ class SampleDatasetPage extends StatelessWidget {
                 children: [
                   MetricStrip(
                     metrics: [
-                      ('素材总数', '$totalCount 项'),
-                      ('儿童画', '${counts['artwork']} 张'),
-                      ('手工作品', '${counts['craft']} 件'),
-                      ('素材许可', 'CC0'),
-                      ('照片', '${counts['photo']} 张'),
+                      (AppLocalizations.of(context)!.contentMetricTotalLabel, '$totalCount 项'),
+                      (AppLocalizations.of(context)!.contentCategoryArtworkLabel, '${counts['artwork']} 张'),
+                      (AppLocalizations.of(context)!.contentCategoryCraftLabel, '${counts['craft']} 件'),
+                      (AppLocalizations.of(context)!.contentLicenseLabel, 'CC0'),
+                      (AppLocalizations.of(context)!.contentAssetTypePhotoLabel, '${counts['photo']} 张'),
                     ],
                   ),
                   const SizedBox(height: 20),
                   AssetPreviewGrid(compact: true, items: displayAssets),
                   const SizedBox(height: 28),
-                  const Row(
+                  Row(
                     children: [
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: infoIconAsset,
-                          title: '数据说明',
-                          text: '虚拟脱敏素材，仅用于功能演示。可随时重置为干净状态。',
+                          title: AppLocalizations.of(context)!.sampleDatasetInfoCardTitle,
+                          text: AppLocalizations.of(context)!.sampleDatasetInfoCardDescription,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: uploadIconAsset,
-                          title: '导入步骤',
-                          text: '确认数据，点击导入，等待完成，然后继续探索生成流程。',
+                          title: AppLocalizations.of(context)!.sampleDatasetImportStepsTitle,
+                          text: AppLocalizations.of(context)!.sampleDatasetImportStepsDescription,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: pdfIconAsset,
-                          title: '预期输出',
-                          text: '手动导入素材与标签后，可继续体验创作台与样例 PDF。',
+                          title: AppLocalizations.of(context)!.sampleDatasetExpectedOutputTitle,
+                          text: AppLocalizations.of(context)!.sampleDatasetExpectedOutputDescription,
                         ),
                       ),
                     ],
@@ -112,7 +113,7 @@ class SampleDatasetPage extends StatelessWidget {
               child: Column(
                 children: [
                   SidePanel(
-                    title: '导入后将包含',
+                    title: AppLocalizations.of(context)!.sampleDatasetAfterImportDescriptionTitle,
                     artworkCount: counts['artwork'] ?? 0,
                     craftCount: counts['craft'] ?? 0,
                     photoCount: counts['photo'] ?? 0,
@@ -139,64 +140,67 @@ class SampleDatasetPage extends StatelessWidget {
   }
 }
 
-const List<AssetPreviewItem> _samplePreviewPlaceholders = [
-  AssetPreviewItem(
-    label: '阳光花园',
+List<AssetPreviewItem> _samplePreviewPlaceholders(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return [
+    AssetPreviewItem(
+    label: l10n.sampleDatasetPlaceholderSunlightGardenLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/阳光花园.png',
+    path: l10n.sampleDatasetPlaceholderSunlightGardenPath,
   ),
   AssetPreviewItem(
-    label: '草地男孩',
+    label: l10n.sampleDatasetPlaceholderGrassFieldLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/草地男孩.png',
+    path: l10n.sampleDatasetPlaceholderGrassFieldPath,
   ),
   AssetPreviewItem(
-    label: '生日蛋糕',
+    label: l10n.sampleDatasetPlaceholderBirthdayCakeLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/生日蛋糕.png',
+    path: l10n.sampleDatasetPlaceholderBirthdayCakePath,
   ),
   AssetPreviewItem(
-    label: '生日男孩',
+    label: l10n.sampleDatasetPlaceholderBirthdayBoyLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/生日男孩.png',
+    path: l10n.sampleDatasetPlaceholderBirthdayBoyPath,
   ),
   AssetPreviewItem(
-    label: '海底世界',
+    label: l10n.sampleDatasetPlaceholderOceanWorldLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/海底世界.png',
+    path: l10n.sampleDatasetPlaceholderOceanWorldPath,
   ),
   AssetPreviewItem(
-    label: '恐龙世界',
+    label: l10n.sampleDatasetPlaceholderDinosaurWorldLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/恐龙世界.png',
+    path: l10n.sampleDatasetPlaceholderDinosaurWorldPath,
   ),
   AssetPreviewItem(
-    label: '幸福一家',
+    label: l10n.sampleDatasetPlaceholderHappinessFamilyLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/幸福一家.png',
+    path: l10n.sampleDatasetPlaceholderHappinessFamilyPath,
   ),
   AssetPreviewItem(
-    label: '小熊画',
+    label: l10n.sampleDatasetPlaceholderDrawingLabel,
     icon: Icons.photo_camera_rounded,
-    typeLabel: '照片',
+    typeLabel: l10n.contentAssetTypePhotoLabel,
     iconAsset: cameraIconAsset,
-    path: 'asset://assets/sample_dataset/raster/小熊画.png',
+    path: l10n.sampleDatasetPlaceholderDrawingPath,
   ),
 ];
+}
 
 const _sampleAssetCount = 17;
 const _sampleArtworkCount = 6;
@@ -230,21 +234,21 @@ class _SampleActionPanel extends StatelessWidget {
     if (importing) {
       return Column(
         children: [
-          const _SampleStatusCard(
+          _SampleStatusCard(
             iconAsset: uploadIconAsset,
-            title: '正在导入示例数据...',
-            text: '创建示例孩子档案、导入示例素材并写入标签。',
+            title: AppLocalizations.of(context)!.sampleDatasetImportingStatusTitle,
+            text: AppLocalizations.of(context)!.sampleDatasetImportingStatusDescription,
           ),
           const SizedBox(height: 10),
           PrimaryButton(
-            label: '导入中...',
+            label: AppLocalizations.of(context)!.sampleDatasetImportingActionLabel,
             icon: Icons.hourglass_top_rounded,
             iconAsset: uploadIconAsset,
             onPressed: null,
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '查看示例 PDF',
+            label: AppLocalizations.of(context)!.sampleDatasetViewPdfLabel,
             icon: Icons.picture_as_pdf_rounded,
             iconAsset: pdfIconAsset,
             fullWidth: true,
@@ -258,14 +262,14 @@ class _SampleActionPanel extends StatelessWidget {
     if (imported) {
       return Column(
         children: [
-          const _SampleStatusCard(
+          _SampleStatusCard(
             iconAsset: completeIconAsset,
-            title: '示例数据已导入',
-            text: '你可以继续浏览示例素材，或体验生成流程。',
+            title: AppLocalizations.of(context)!.sampleDatasetImportedTitle,
+            text: AppLocalizations.of(context)!.sampleDatasetImportedStatusText,
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '浏览示例素材',
+            label: AppLocalizations.of(context)!.sampleDatasetBrowseAssetsLabel,
             icon: Icons.grid_view_rounded,
             iconAsset: gridIconAsset,
             fullWidth: true,
@@ -274,7 +278,7 @@ class _SampleActionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '生成示例绘本',
+            label: AppLocalizations.of(context)!.sampleDatasetGenerateSampleBookLabel,
             icon: Icons.auto_awesome_rounded,
             iconAsset: wandIconAsset,
             fullWidth: true,
@@ -283,7 +287,7 @@ class _SampleActionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '查看示例 PDF',
+            label: AppLocalizations.of(context)!.sampleDatasetViewPdfLabel,
             icon: Icons.picture_as_pdf_rounded,
             iconAsset: pdfIconAsset,
             fullWidth: true,
@@ -292,7 +296,7 @@ class _SampleActionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '重置数据',
+            label: AppLocalizations.of(context)!.sampleDatasetResetDataLabel,
             icon: Icons.refresh_rounded,
             iconAsset: refreshIconAsset,
             fullWidth: true,
@@ -306,21 +310,21 @@ class _SampleActionPanel extends StatelessWidget {
     if (importFailed) {
       return Column(
         children: [
-          const _SampleStatusCard(
+          _SampleStatusCard(
             iconAsset: infoIconAsset,
-            title: '导入失败',
-            text: '请检查本地数据库和示例素材文件。',
+            title: AppLocalizations.of(context)!.sampleDatasetImportFailedTitle,
+            text: AppLocalizations.of(context)!.sampleDatasetResetDataHint,
           ),
           const SizedBox(height: 10),
           PrimaryButton(
-            label: '重试导入',
+            label: AppLocalizations.of(context)!.sampleDatasetRetryImportButtonLabel,
             icon: Icons.refresh_rounded,
             iconAsset: refreshIconAsset,
             onPressed: onImport,
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: '查看示例 PDF',
+            label: AppLocalizations.of(context)!.sampleDatasetViewPdfLabel,
             icon: Icons.picture_as_pdf_rounded,
             iconAsset: pdfIconAsset,
             fullWidth: true,
@@ -333,21 +337,21 @@ class _SampleActionPanel extends StatelessWidget {
 
     return Column(
       children: [
-        const _SampleStatusCard(
+        _SampleStatusCard(
           iconAsset: infoIconAsset,
-          title: '状态：未导入',
-          text: '点击导入后，示例素材会写入本地数据库。',
+          title: AppLocalizations.of(context)!.sampleDatasetNotImportedTitle,
+          text: AppLocalizations.of(context)!.sampleDatasetImportInstructionText,
         ),
         const SizedBox(height: 10),
         PrimaryButton(
-          label: '导入示例数据集',
+          label: AppLocalizations.of(context)!.sampleDatasetImportButtonLabel,
           icon: Icons.upload_rounded,
           iconAsset: uploadIconAsset,
           onPressed: onImport,
         ),
         const SizedBox(height: 10),
         SecondaryButton(
-          label: '查看示例 PDF',
+          label: AppLocalizations.of(context)!.sampleDatasetViewPdfLabel,
           icon: Icons.picture_as_pdf_rounded,
           iconAsset: pdfIconAsset,
           fullWidth: true,

@@ -11,15 +11,16 @@ import '../../shared/models/library_models.dart';
 import '../web_companion/direct_upload/direct_upload_entry.dart';
 import '../web_companion/trusted_upload/trusted_upload_entry.dart';
 import '../../core/sidecar/sidecar_api.dart';
+import '../../../l10n/app_localizations.dart';
 
 part 'asset_library_widgets.dart';
 part 'asset_library_state.dart';
 
-const _assetSortOptions = [
-  {'value': 'created_desc', 'label': '创建时间（最新）'},
-  {'value': 'created_asc', 'label': '创建时间（最早）'},
-  {'value': 'type', 'label': '种类（绘画/照片/手工）'},
-  {'value': 'title', 'label': '标题（A-Z）'},
+List<Map<String, String>> _assetSortOptions(BuildContext context) => [
+  {'value': 'created_desc', 'label': AppLocalizations.of(context)!.assetLibraryPageS285},
+  {'value': 'created_asc', 'label': AppLocalizations.of(context)!.assetLibraryPageS286},
+  {'value': 'type', 'label': AppLocalizations.of(context)!.assetLibraryPageS786},
+  {'value': 'title', 'label': AppLocalizations.of(context)!.assetLibraryPageS631},
 ];
 
 class AssetImportReport {
@@ -144,8 +145,8 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
   bool semanticSearchActive = false;
   bool semanticSearching = false;
   bool refreshingIndex = false;
-  String searchStatusMessage = '输入关键词可本地筛选，也可以使用语义搜索';
-  String indexingMessage = '语义索引待加载';
+  String searchStatusMessage = '';
+  String indexingMessage = '';
   bool draggingFiles = false;
   bool metadataDirty = false;
   bool savingMetadata = false;
@@ -154,6 +155,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
   bool deleteBusy = false;
   bool inspectorCollapsed = false;
   int pageIndex = 0;
+  bool _localizedDefaultsInitialized = false;
 
   static const _pageSize = 6;
 
@@ -219,6 +221,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_localizedDefaultsInitialized) return;
+    _localizedDefaultsInitialized = true;
+    searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS879;
+    indexingMessage = AppLocalizations.of(context)!.assetLibraryPageS847;
+  }
+
+  @override
   void didUpdateWidget(covariant AssetLibraryPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.typeOptions != widget.typeOptions) {
@@ -234,7 +245,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (oldWidget.selectedChildId != widget.selectedChildId) {
       semanticSearchActive = false;
       semanticSearchResults = const [];
-      searchStatusMessage = '已切换孩子档案，可重新搜索';
+      searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS433;
       _refreshSearchIndexingStatus();
     }
     if (oldWidget.assets != widget.assets) _syncEditor();
@@ -287,11 +298,11 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final currentPage = pageWindow.currentPage;
     final pageAssets = pageWindow.pageAssets;
     return PageFrame(
-      title: '素材库',
+      title: AppLocalizations.of(context)!.assetLibraryTitle,
       subtitle:
           '管理${selectedChildName ?? '孩子'}的照片、绘画和手工作品。选择素材后可以生成绘本、回忆视频或成长纪念册。',
       status: _LibraryHeaderStatus(
-        childName: selectedChildName ?? '未选择孩子',
+        childName: selectedChildName ?? AppLocalizations.of(context)!.assetLibraryPageS599,
         assetCount: widget.assets.length,
         indexingMessage: indexingMessage,
       ),
@@ -338,7 +349,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                     onSearchChanged: (_) => setState(() {
                       semanticSearchActive = false;
                       semanticSearchResults = const [];
-                      searchStatusMessage = '正在本地筛选素材';
+                      searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS660;
                       pageIndex = 0;
                       selectedAssetId = null;
                       _syncEditor();
@@ -389,7 +400,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                     }),
                   ),
                   if (semanticSearchActive ||
-                      searchStatusMessage.contains('失败')) ...[
+                      searchStatusMessage.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel)) ...[
                     const SizedBox(height: 10),
                     _SearchStatusStrip(
                       text: semanticSearchActive
@@ -572,15 +583,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final query = searchController.text.trim();
     final childId = widget.selectedChildId;
     if (search == null) {
-      setState(() => searchStatusMessage = '当前环境暂未启用语义搜索');
+      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS483);
       return;
     }
     if (childId == null || childId.isEmpty) {
-      setState(() => searchStatusMessage = '请先选择孩子档案再搜索');
+      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS858);
       return;
     }
     if (query.isEmpty) {
-      setState(() => searchStatusMessage = '请输入标题、标签或自然语言描述');
+      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS867);
       return;
     }
     setState(() {
@@ -589,7 +600,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       semanticSearchResults = const [];
       selectedAssetId = null;
       pageIndex = 0;
-      searchStatusMessage = '正在语义搜索...';
+      searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS665;
     });
     try {
       final response = await search(
@@ -634,7 +645,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       if (!mounted) return;
       setState(() {
         refreshingIndex = false;
-        indexingMessage = '索引状态不可用';
+        indexingMessage = AppLocalizations.of(context)!.assetLibraryPageS825;
       });
     }
   }
@@ -645,7 +656,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       semanticSearchResults = const [];
       selectedAssetId = null;
       pageIndex = 0;
-      searchStatusMessage = '已回到素材库浏览';
+      searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS440;
       _syncEditor();
     });
   }
@@ -654,8 +665,8 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (displayedAssets.isEmpty) {
       AppToast.show(
         context,
-        title: '暂时无法挑选',
-        message: '当前没有可用素材，请先导入素材后再试。',
+        title: AppLocalizations.of(context)!.assetLibraryPageS572,
+        message: AppLocalizations.of(context)!.assetLibraryPageS481,
         tone: AppToastTone.info,
       );
       return;
@@ -675,12 +686,12 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('帮我挑素材'),
+              title: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('请选择本次目标：'),
+                  Text(AppLocalizations.of(context)!.assetLibraryPageS869)),
                   const SizedBox(height: 8),
                   RadioGroup<String>(
                     groupValue: target,
@@ -697,20 +708,20 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                       });
                     },
                     child: Column(
-                      children: const [
+                      children: [
                         RadioListTile<String>(
                           value: 'picture_book',
-                          title: Text('适合做绘本'),
+                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS902),
                           dense: true,
                         ),
                         RadioListTile<String>(
                           value: 'memory_album',
-                          title: Text('适合做成长纪念册'),
+                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS901),
                           dense: true,
                         ),
                         RadioListTile<String>(
                           value: 'memory_video',
-                          title: Text('适合做回忆录视频'),
+                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS900),
                           dense: true,
                         ),
                       ],
@@ -723,7 +734,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop('manual'),
-                  child: const Text('手动调整'),
+                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS503)),
                 ),
                 TextButton(
                   onPressed: () {
@@ -736,11 +747,11 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                       );
                     });
                   },
-                  child: const Text('重新挑选'),
+                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS919)),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogContext).pop('confirm'),
-                  child: const Text('确认使用'),
+                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS765)),
                 ),
               ],
             );
@@ -774,7 +785,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       _syncEditor();
       AppToast.show(
         context,
-        title: '智能挑选已应用',
+        title: AppLocalizations.of(context)!.assetLibraryPageS564,
         message: '已选 ${next.length} 张素材，可继续手动微调。',
         tone: AppToastTone.success,
       );
@@ -784,8 +795,8 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (action == 'manual') {
       AppToast.show(
         context,
-        title: '已保留当前选择',
-        message: '你可以继续手动勾选素材。',
+        title: AppLocalizations.of(context)!.assetLibraryPageS430,
+        message: AppLocalizations.of(context)!.assetLibraryPageS235,
         tone: AppToastTone.info,
       );
     }
@@ -891,7 +902,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 duplicates: 0,
                 failed: paths.length,
                 skipped: 0,
-                message: '拖入的路径暂时无法导入',
+                message: AppLocalizations.of(context)!.assetLibraryPageS531,
               ),
             ));
     if (!mounted) return;
@@ -909,10 +920,10 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final title =
         (report.title.isNotEmpty ? report.title : null) ??
         (report.failed > 0
-            ? (report.imported > 0 ? '导入部分完成' : '导入失败')
+            ? (report.imported > 0 ? AppLocalizations.of(context)!.assetLibraryPageS403 : AppLocalizations.of(context)!.sampleDatasetImportFailedTitle)
             : report.imported > 0
-            ? '导入完成'
-            : '未导入素材');
+            ? AppLocalizations.of(context)!.assetLibraryPageS392
+            : AppLocalizations.of(context)!.assetLibraryPageS581);
     final tone = report.failed > 0
         ? AppToastTone.error
         : report.imported > 0
@@ -926,16 +937,16 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('确认批量删除'),
+            title: Text(AppLocalizations.of(context)!.assetLibraryPageS767)),
             content: Text('将删除已选 ${widget.selectedAssets.length} 项素材，是否继续？'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.actionCancel)),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('删除'),
+                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
               ),
             ],
           ),
@@ -990,7 +1001,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
           const SizedBox(height: 12),
           Text(detailAsset.description),
           const SizedBox(height: 24),
-          const Text('标签', style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(AppLocalizations.of(context)!.contentTagLabel), style: TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -1000,46 +1011,46 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 .toList(),
           ),
           const SizedBox(height: 24),
-          const Text('来源', style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(AppLocalizations.of(context)!.assetLibraryPageS619), style: TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           SourceRow(
             icon: Icons.calendar_month,
             iconAsset: timeIconAsset,
-            label: '创建时间',
+            label: AppLocalizations.of(context)!.assetLibraryPageS284,
             value: detailAsset.capturedAt,
           ),
-          const SourceRow(
+          SourceRow(
             icon: Icons.person_outline,
             iconAsset: userIconAsset,
-            label: '创建者',
-            value: '示例档案',
+            label: AppLocalizations.of(context)!.assetLibraryPageS289,
+            value: AppLocalizations.of(context)!.assetLibraryPageS782,
           ),
-          const SourceRow(
+          SourceRow(
             icon: Icons.devices_other,
             iconAsset: bearHeadIconAsset,
-            label: '来源设备',
-            value: '内置示例',
+            label: AppLocalizations.of(context)!.assetLibraryPageS620,
+            value: AppLocalizations.of(context)!.assetLibraryPageS268,
           ),
-          const SourceRow(
+          SourceRow(
             icon: Icons.folder_outlined,
             iconAsset: folderIconAsset,
-            label: '存储位置',
-            value: '示例素材库',
+            label: AppLocalizations.of(context)!.assetLibraryPageS368,
+            value: AppLocalizations.of(context)!.assetLibraryPageS784,
           ),
           const SizedBox(height: 12),
           PrimaryButton(
             label: widget.selectedAssets.contains(detailAsset.id)
-                ? '从本次作品集移除'
-                : '加入本次作品集',
+                ? AppLocalizations.of(context)!.assetLibraryPageS225
+                : AppLocalizations.of(context)!.assetLibraryPageS308,
             iconAsset: widget.selectedAssets.contains(detailAsset.id)
                 ? deleteIconAsset
                 : addIconAsset,
             onPressed: () => widget.onToggle(detailAsset.id),
           ),
           const SizedBox(height: 12),
-          const Center(
+          Center(
             child: Text(
-              '仅用于本次生成，不会修改原始素材',
+              AppLocalizations.of(context)!.assetLibraryPageS221,
               style: TextStyle(color: Color(0xff6f8d72), fontSize: 12),
             ),
           ),
@@ -1106,15 +1117,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 ),
                 if (metadataDirty) ...[
                   const SizedBox(height: 10),
-                  const _SoftStatusChip(
+                  _SoftStatusChip(
                     icon: Icons.edit_outlined,
-                    text: '有未保存修改',
+                    text: AppLocalizations.of(context)!.assetLibraryPageS575,
                   ),
                 ],
                 const SizedBox(height: 18),
                 TextField(
                   controller: titleController,
-                  decoration: _fieldDecoration('标题', hint: '例如：春游里的泡泡'),
+                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS630, hint: AppLocalizations.of(context)!.assetLibraryPageS242),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
@@ -1133,41 +1144,41 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                         value ?? _defaultTypeFromOptions(widget.typeOptions);
                     metadataDirty = true;
                   }),
-                  decoration: _fieldDecoration('类型'),
+                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS806),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: capturedAtController,
                   onChanged: (value) => capturedAt = value,
                   decoration: _fieldDecoration(
-                    '日期',
-                    hint: '2026-05-17 或 2026年5月17日',
+                    AppLocalizations.of(context)!.assetLibraryPageS558,
+                    hint: AppLocalizations.of(context)!.assetLibraryPageS95,
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: tagsController,
-                  decoration: _fieldDecoration('标签', hint: '户外、泡泡、春游'),
+                  decoration: _fieldDecoration(AppLocalizations.of(context)!.contentTagLabel, hint: AppLocalizations.of(context)!.assetLibraryPageS498),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: descriptionController,
                   minLines: 3,
                   maxLines: 4,
-                  decoration: _fieldDecoration('描述', hint: '记录这份素材背后的故事'),
+                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS535, hint: AppLocalizations.of(context)!.assetLibraryPageS843),
                 ),
                 const SizedBox(height: 18),
-                const Text('状态', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text(AppLocalizations.of(context)!.generateExportS708), style: TextStyle(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 10),
                 SourceRow(
                   icon: Icons.cloud_done_outlined,
                   iconAsset: cloudUploadIconAsset,
-                  label: '本地状态',
+                  label: AppLocalizations.of(context)!.assetLibraryPageS614,
                   value: _storageStatusLabel(detailAsset.storageStatus),
                 ),
                 SourceRow(
                   icon: Icons.manage_search_rounded,
-                  label: '索引状态',
+                  label: AppLocalizations.of(context)!.assetLibraryPageS824,
                   value: indexingMessage,
                 ),
                 if (widget.onSyncAsset != null) ...[
@@ -1181,8 +1192,8 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 ExpansionTile(
                   tilePadding: EdgeInsets.zero,
                   childrenPadding: EdgeInsets.zero,
-                  title: const Text(
-                    '技术信息',
+                  title: Text(
+                    AppLocalizations.of(context)!.assetLibraryPageS528,
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                   children: [
@@ -1194,17 +1205,17 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                     SourceRow(
                       icon: Icons.image_outlined,
                       iconAsset: imageFileIconAsset,
-                      label: '原始文件',
+                      label: AppLocalizations.of(context)!.assetLibraryPageS316,
                       value: detailAsset.originalFilename.isEmpty
-                          ? '本地素材'
+                          ? AppLocalizations.of(context)!.assetLibraryPageS615
                           : detailAsset.originalFilename,
                     ),
                     SourceRow(
                       icon: Icons.folder_outlined,
                       iconAsset: folderIconAsset,
-                      label: '本地路径',
+                      label: AppLocalizations.of(context)!.assetLibraryPageS616,
                       value: detailAsset.imagePath.isEmpty
-                          ? '未记录'
+                          ? AppLocalizations.of(context)!.assetLibraryPageS597
                           : detailAsset.imagePath,
                     ),
                   ],
@@ -1231,7 +1242,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 children: [
                   Expanded(
                     child: PrimaryButton(
-                      label: savingMetadata ? '保存中...' : '保存修改',
+                      label: savingMetadata ? AppLocalizations.of(context)!.assetLibraryPageS246 : AppLocalizations.of(context)!.assetLibraryPageS247,
                       iconAsset: completeIconAsset,
                       height: 46,
                       onPressed: savingMetadata
@@ -1242,7 +1253,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: SecondaryButton(
-                      label: '放弃修改',
+                      label: AppLocalizations.of(context)!.assetLibraryPageS546,
                       height: 46,
                       onPressed: metadataDirty
                           ? () => setState(_syncEditor)
@@ -1256,7 +1267,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 children: [
                   Expanded(
                     child: SecondaryButton(
-                      label: '打开原图',
+                      label: AppLocalizations.of(context)!.assetLibraryPageS516,
                       icon: Icons.open_in_new_rounded,
                       height: 42,
                       onPressed: detailAsset.imagePath.isEmpty
@@ -1267,7 +1278,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: SecondaryButton(
-                      label: '删除素材',
+                      label: AppLocalizations.of(context)!.assetLibraryPageS304,
                       iconAsset: deleteIconAsset,
                       height: 42,
                       onPressed: () => _confirmDeleteAsset(detailAsset),
@@ -1278,8 +1289,8 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
               const SizedBox(height: 10),
               PrimaryButton(
                 label: widget.selectedAssets.contains(detailAsset.id)
-                    ? '从本次作品集移除'
-                    : '加入本次作品集',
+                    ? AppLocalizations.of(context)!.assetLibraryPageS225
+                    : AppLocalizations.of(context)!.assetLibraryPageS308,
                 iconAsset: widget.selectedAssets.contains(detailAsset.id)
                     ? deleteIconAsset
                     : addIconAsset,
@@ -1320,15 +1331,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final technicalId = RegExp(r'^(cld|asset)[-_]?\w+', caseSensitive: false);
     if (title.isNotEmpty && !technicalId.hasMatch(title)) return title;
     return switch (asset.type) {
-      'photo' => '未命名照片',
-      'craft' => '未命名手工',
-      _ => '未命名绘画',
+      'photo' => AppLocalizations.of(context)!.contentUnnamedPhotoLabel,
+      'craft' => AppLocalizations.of(context)!.contentUnnamedCraftLabel,
+      _ => AppLocalizations.of(context)!.contentUnnamedDrawingLabel,
     };
   }
 
   String _formatChineseDate(String value) {
     final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value.trim().isEmpty ? '未填写日期' : value;
+    if (parsed == null) return value.trim().isEmpty ? AppLocalizations.of(context)!.contentDateMissingLabel : value;
     final local = parsed.toLocal();
     return '${local.year}年${local.month}月${local.day}日';
   }
@@ -1358,7 +1369,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     });
     AppToast.show(
       context,
-      message: ok ? '保存成功' : '保存失败',
+      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS249 : AppLocalizations.of(context)!.assetLibraryPageS248,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
@@ -1368,16 +1379,16 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('确认删除素材'),
-            content: const Text('删除后将从本地素材库移除，是否继续？'),
+            title: Text(AppLocalizations.of(context)!.assetLibraryPageS766)),
+            content: Text(AppLocalizations.of(context)!.assetLibraryPageS298)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('取消'),
+                child: Text(AppLocalizations.of(context)!.actionCancel)),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('删除'),
+                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
               ),
             ],
           ),
@@ -1388,7 +1399,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (!mounted) return;
     AppToast.show(
       context,
-      message: ok ? '已删除' : '删除失败',
+      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS434 : AppLocalizations.of(context)!.assetLibraryPageS299,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
@@ -1399,7 +1410,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     try {
       await Process.start('open', [path]);
       if (!mounted) return;
-      AppToast.show(context, message: '已打开原图', tone: AppToastTone.success);
+      AppToast.show(context, message: AppLocalizations.of(context)!.assetLibraryPageS447, tone: AppToastTone.success);
     } catch (error) {
       if (!mounted) return;
       AppToast.show(
@@ -1417,7 +1428,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (!mounted) return;
     AppToast.show(
       context,
-      message: ok ? '已加入同步队列' : '同步入队失败，请检查 Supabase Storage 配置',
+      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS437 : AppLocalizations.of(context)!.assetLibraryPageS338,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }

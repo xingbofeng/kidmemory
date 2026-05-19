@@ -61,16 +61,16 @@ extension _DesktopShellExportFlow on _DesktopShellState {
       ),
     );
     if (jobId == null) {
-      _setShellState(() => statusMessage = '请先完成生成，再导出');
-      _appendLog('导出失败：缺少 jobId');
+      _setShellState(() => statusMessage = AppLocalizations.of(context)!.exportPageS851);
+      _appendLog(AppLocalizations.of(context)!.exportPageS410);
       api.clearRequestContext();
       return;
     }
     final target = _exportTargetFromLabel(generationExportTarget);
     final exportLabel = _exportLabel(target);
 
-    _setShellState(() => statusMessage = '正在准备导出目录...');
-    _appendLog('点击导出，准备读取当前导出目录');
+    _setShellState(() => statusMessage = AppLocalizations.of(context)!.exportPageS649);
+    _appendLog(AppLocalizations.of(context)!.exportPageS702);
 
     final defaultPaths = _defaultKidMemoryPaths();
     final targetDirectoryPath = _resolveConfiguredPath(

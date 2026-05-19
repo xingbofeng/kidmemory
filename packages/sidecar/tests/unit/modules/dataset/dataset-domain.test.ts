@@ -125,3 +125,34 @@ test("dataset domain resets sample assets and related indexes", async () => {
   assert.equal((await db.getAssets({ childId: "sample-child-001" })).length, 0);
   assert.equal((await service.getSearchIndexingStatus("sample-child-001")).pending, 0);
 });
+
+test("dataset domain enriches imported asset metadata with inferred tags and description", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-domain-enrich-"));
+  const image = path.join(root, "unknown.png");
+  await fs.writeFile(image, "fake-image-content");
+
+  const db = new MemoryDatasetDb();
+  await db.upsertChild({ id: "child-1", name: "测试孩子" });
+  const datasetState = new DatasetState(db, async () => db);
+  const service = createDatasetService({
+    datasetState: datasetState as any,
+    config: { config: { paths: { dataDir: path.join(root, "data") } } } as any,
+    inferAssetMetadata: async () => ({
+      title: "猫咪在草地上",
+      tags: ["猫", "宠物"],
+      description: "一只橘猫在草地上晒太阳",
+    }),
+  });
+
+  const result = await service.importAssets({
+    childId: "child-1",
+    paths: [image],
+  });
+
+  assert.equal(result.imported.length, 1);
+  const importedId = result.imported[0].id;
+  const asset = await db.getAsset(importedId);
+  assert.equal(asset?.title, "猫咪在草地上");
+  assert.deepEqual(asset?.tags, ["猫", "宠物"]);
+  assert.equal(asset?.description, "一只橘猫在草地上晒太阳");
+});

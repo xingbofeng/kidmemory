@@ -15,7 +15,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
   Future<void> _openDirectory(String path) async {
     final trimmed = path.trim();
     if (trimmed.isEmpty) {
-      _showSnackBar('目录路径为空，无法打开');
+      _showSnackBar(AppLocalizations.of(context)!.datasetExternalS760);
       return;
     }
     final normalized = _normalizeDirectoryPath(trimmed);
@@ -27,7 +27,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
     } catch (_) {
       // Keep user-facing failure messages coming from the open attempt if needed.
     }
-    await _safeOpenExternalTarget(normalized, '目录');
+    await _safeOpenExternalTarget(normalized, AppLocalizations.of(context)!.contentDirectoryLabel);
   }
 
   String _normalizeDirectoryPath(String input) {
@@ -79,7 +79,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
         await Process.run('cmd', ['/c', 'start', '', target]);
         return;
       }
-      throw UnsupportedError('当前平台不支持打开本地路径');
+      throw UnsupportedError(AppLocalizations.of(context)!.datasetExternalS478);
     }
 
     final parsed = Uri.tryParse(target);
@@ -98,7 +98,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
       await Process.run('cmd', ['/c', 'start', '', target]);
       return;
     }
-    throw UnsupportedError('当前平台不支持外部打开');
+    throw UnsupportedError(AppLocalizations.of(context)!.datasetExternalS477);
   }
 
   Future<void> _copyTextToClipboardDefault(String text) async {

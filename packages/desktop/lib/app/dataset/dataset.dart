@@ -57,7 +57,7 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
 
   Future<String> refreshSearchIndexingMessage() async {
     final childId = selectedChildId;
-    if (childId == null || childId.isEmpty) return '请先选择孩子档案';
+    if (childId == null || childId.isEmpty) return AppLocalizations.of(context)!.datasetS857;
     final data = await gateway.getIndexingStatusDto(childId: childId);
     final indexing =
         data.pendingValue + data.runningValue + data.retryWaitValue;
@@ -71,8 +71,8 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
       sampleImporting = true;
       sampleImportFailed = false;
     });
-    _appendLog('开始导入示例数据集');
-    _showSnackBar('正在导入示例数据集...');
+    _appendLog(AppLocalizations.of(context)!.datasetS469);
+    _showSnackBar(AppLocalizations.of(context)!.datasetS657);
     try {
       final result = await gateway.importSampleDatasetDto();
       if (!mounted) return;
@@ -81,8 +81,8 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
           sampleImported = false;
           sampleImportFailed = true;
         });
-        _appendLog('示例数据集导入失败：sidecar 无响应或数据库未就绪');
-        _showSnackBar('导入失败：Sidecar 未连接或数据库未就绪');
+        _appendLog(AppLocalizations.of(context)!.datasetS776);
+        _showSnackBar(AppLocalizations.of(context)!.datasetS391);
         return;
       }
       final imported = result.okValue || result.childIdValue.isNotEmpty;
@@ -100,7 +100,7 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
             ? '示例数据集导入完成：${result.assetCountValue} 个素材'
             : '示例数据集导入未完成：${jsonEncode(result.raw)}',
       );
-      _showSnackBar(imported ? '示例数据集已导入，素材库已刷新' : '示例数据集导入未完成，请检查 sidecar');
+      _showSnackBar(imported ? AppLocalizations.of(context)!.datasetS781 : AppLocalizations.of(context)!.datasetS779);
     } catch (error) {
       if (!mounted) return;
       _setShellState(() {

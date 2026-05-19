@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 
 import { AppConfigService, loadConfigFromEnv } from "../../../../src/infrastructure/config/app-config.service.ts";
@@ -80,4 +83,105 @@ test("DatasetService composes a fresh storage provider for each new instance", a
 
   assert.equal(calls.storage, 2, `each new DatasetService instance should rebuild the storage provider, got ${calls.storage}`);
   assert.equal(calls.sync, 2, `each new DatasetService instance should rebuild the sync service, got ${calls.sync}`);
+});
+
+test("DatasetService uses configured OpenAI-compatible endpoint to infer imported asset metadata", async () => {
+  const db = new MemoryDatasetDb();
+  const datasetState = new DatasetState(db, async () => db);
+  const config = new AppConfigService(loadConfigFromEnv({}));
+  config.updateOpenAIConfig({
+    baseUrl: "https://openai-compatible.example.test/v1",
+    apiKey: "sk-test",
+    model: "gpt-4.1-mini",
+  });
+  const service = new DatasetService(datasetState as any, config);
+  await db.upsertChild({ id: "child-1", name: "测试孩子" });
+
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-dataset-service-infer-"));
+  const imagePath = path.join(root, "upload.png");
+  await fs.writeFile(imagePath, "fake-image-content");
+
+  const originalFetch = globalThis.fetch;
+  let called = 0;
+  globalThis.fetch = (async () => {
+    called += 1;
+    return {
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: "草地上的猫",
+                tags: ["猫", "宠物"],
+                description: "一只猫在草地上休息",
+              }),
+            },
+          },
+        ],
+      }),
+    } as any;
+  }) as typeof fetch;
+
+  try {
+    const result = await service.importAssets({ childId: "child-1", paths: [imagePath] });
+    assert.equal(result.imported.length, 1);
+    assert.equal(called, 1);
+
+    const asset = await db.getAsset(result.imported[0].id);
+    assert.equal(asset?.title, "草地上的猫");
+    assert.deepEqual(asset?.tags, ["猫", "宠物"]);
+    assert.equal(asset?.description, "一只猫在草地上休息");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("DatasetService picks up OpenAI config updates after service construction", async () => {
+  const db = new MemoryDatasetDb();
+  const datasetState = new DatasetState(db, async () => db);
+  const config = new AppConfigService(loadConfigFromEnv({}));
+  const service = new DatasetService(datasetState as any, config);
+  await db.upsertChild({ id: "child-1", name: "测试孩子" });
+  await service.listChildren();
+
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-dataset-service-infer-late-config-"));
+  const imagePath = path.join(root, "upload.png");
+  await fs.writeFile(imagePath, "fake-image-content");
+
+  config.updateOpenAIConfig({
+    baseUrl: "https://openai-compatible.example.test/v1",
+    apiKey: "sk-test",
+    model: "gpt-4.1-mini",
+  });
+
+  const originalFetch = globalThis.fetch;
+  let called = 0;
+  globalThis.fetch = (async () => {
+    called += 1;
+    return {
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                title: "晚配置也生效",
+                tags: ["动态配置"],
+                description: "服务启动后配置也应被读取",
+              }),
+            },
+          },
+        ],
+      }),
+    } as any;
+  }) as typeof fetch;
+
+  try {
+    const result = await service.importAssets({ childId: "child-1", paths: [imagePath] });
+    assert.equal(result.imported.length, 1);
+    assert.equal(called, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

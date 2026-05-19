@@ -27,6 +27,7 @@ import 'app_step.dart';
 import '../shared/widgets/chrome.dart';
 import '../shared/widgets/content.dart';
 import '../shared/widgets/status.dart';
+import '../../l10n/app_localizations.dart';
 
 // Types & defaults
 part 'desktop_shell_types.dart';
@@ -144,27 +145,22 @@ class _DesktopShellState extends State<DesktopShell> {
   String? jobId;
   String traceId = '';
   String requestId = '';
-  String statusMessage = '等待生成';
+  String statusMessage = '';
   String readinessMessage = _sidecarDisconnectedMessage;
-  List<SetupCheckVm> readinessChecks = _disconnectedSetupChecks();
-  List<Map<String, String>> searchTypeOptions = _defaultSearchTypeOptions;
+  List<SetupCheckVm> readinessChecks = const [];
+  List<Map<String, String>> searchTypeOptions = const [];
   List<String> generationTemplates = _defaultGenerationTemplates;
-  List<String> generationPageSizes = _defaultGenerationPageSizes;
-  List<String> generationStyles = _defaultGenerationStyles;
-  List<String> generationExportTargets = _defaultGenerationExportTargets;
-  String generationTemplate = '温暖童趣';
-  String generationPageSize = 'A4 竖版  210 × 297 mm';
-  String generationStyle = '温暖童趣  亲切温暖，适合儿童阅读';
-  String generationExportTarget = 'PDF 文件  高质量 PDF（打印级别）';
+  List<String> generationPageSizes = const [];
+  List<String> generationStyles = const [];
+  List<String> generationExportTargets = const [];
+  String generationTemplate = '';
+  String generationPageSize = '';
+  String generationStyle = '';
+  String generationExportTarget = '';
   SupabaseStorageVm supabaseStorage = SupabaseStorageVm.empty;
   ExportResultVm? exportResult;
   final selectedAssets = <String>{};
-  final activityLog = <String>[
-    '11:05:12  准备素材并构建 workspace',
-    '11:05:18  调用 sidecar 生成任务',
-    '11:05:28  校验 book.json 与 book.html',
-    '11:05:52  等待预览 / PDF 导出',
-  ];
+  final activityLog = <String>[];
   List<ChildVm> children = const [];
   List<AssetVm> assets = const [];
   String? selectedChildId;
@@ -186,6 +182,7 @@ class _DesktopShellState extends State<DesktopShell> {
   late final DesktopLogger desktopLogger;
   late final DesktopLogCleanupWorker desktopLogCleanupWorker;
   int _bundledPostgresPort = _pgDefaultPort;
+  bool _localizedDefaultsInitialized = false;
 
   @override
   void initState() {
@@ -231,6 +228,29 @@ class _DesktopShellState extends State<DesktopShell> {
       ),
     );
     unawaited(_bootstrapSidecarAndRefresh());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_localizedDefaultsInitialized) return;
+    _localizedDefaultsInitialized = true;
+    readinessChecks = _disconnectedSetupChecks(context);
+    statusMessage = AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel;
+    searchTypeOptions = _defaultSearchTypeOptions(context);
+    generationPageSizes = _defaultGenerationPageSizes(context);
+    generationStyles = _defaultGenerationStyles(context);
+    generationExportTargets = _defaultGenerationExportTargets(context);
+    generationTemplate = AppLocalizations.of(context)!.desktopShellS696;
+    generationPageSize = AppLocalizations.of(context)!.desktopShellS101;
+    generationStyle = AppLocalizations.of(context)!.desktopShellS697;
+    generationExportTarget = AppLocalizations.of(context)!.desktopShellS129;
+    activityLog.addAll([
+      AppLocalizations.of(context)!.desktopShellS89,
+      AppLocalizations.of(context)!.desktopShellS90,
+      AppLocalizations.of(context)!.desktopShellS91,
+      AppLocalizations.of(context)!.desktopShellS92,
+    ]);
   }
 
   void _setShellState(VoidCallback fn) => setState(fn);

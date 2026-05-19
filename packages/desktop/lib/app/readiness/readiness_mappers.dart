@@ -10,7 +10,7 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
   }
 
   String _openAiReadinessDescription() {
-    return '提供文本生成、标签与提示词能力。请配置 Base URL、模型与 API Key。';
+    return AppLocalizations.of(context)!.setupOpenAiDescription;
   }
 
   String _stringOrDefault(Object? value, String fallback) {
@@ -28,22 +28,22 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
     );
     final generationPageSizes = _nonEmptyOr(
       uiConfig.pageSizes,
-      _defaultGenerationPageSizes,
+      _defaultGenerationPageSizes(context),
     );
     final generationStyles = _nonEmptyOr(
       uiConfig.styles,
-      _defaultGenerationStyles,
+      _defaultGenerationStyles(context),
     );
     final generationExportTargets = _nonEmptyOr(
       uiConfig.exportTargets,
-      _defaultGenerationExportTargets,
+      _defaultGenerationExportTargets(context),
     );
 
     return _UiConfigSnapshot(
-      setupChecks: _nonEmptyOr(setupChecks, _disconnectedSetupChecks()),
+      setupChecks: _nonEmptyOr(setupChecks, _disconnectedSetupChecks(context)),
       searchTypeOptions: _nonEmptyOr(
         searchTypeOptions,
-        _defaultSearchTypeOptions,
+        _defaultSearchTypeOptions(context),
       ),
       generationTemplates: generationTemplates,
       generationPageSizes: generationPageSizes,
@@ -75,11 +75,11 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
     final checks = <SetupCheckVm>[];
     for (final item in rawChecks) {
       final title = _normalizeSetupTitle(
-        item.title.isNotEmpty ? item.title : '配置项',
+        item.title.isNotEmpty ? item.title : AppLocalizations.of(context)!.setupItemTitle,
       );
-      final sourceBody = item.body.isEmpty ? '等待配置读取' : item.body;
-      final normalizedBody = title == '大模型接口配置'
-          ? '提供文本生成、标签与提示词能力。请配置 Base URL、模型与 API Key。'
+      final sourceBody = item.body.isEmpty ? AppLocalizations.of(context)!.setupWaitingConfigLoad : item.body;
+      final normalizedBody = title == AppLocalizations.of(context)!.setupOpenAiTitle
+          ? AppLocalizations.of(context)!.setupOpenAiDescription
           : (item.purpose.isNotEmpty
                 ? item.purpose
                 : _extractSetupPurpose(sourceBody));
@@ -89,10 +89,10 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
           title: title,
           body: normalizedBody,
           action: _setupActionForTitle(item.action, title),
-          state: item.state.isNotEmpty ? item.state : '待检测',
+          state: item.state.isNotEmpty ? item.state : AppLocalizations.of(context)!.setupPending,
           ok: item.ok,
-          secondaryActionLabel: title == '大模型接口配置' ? '修改配置' : null,
-          secondaryActionPath: title == '大模型接口配置' ? '__action__:配置' : null,
+          secondaryActionLabel: title == AppLocalizations.of(context)!.setupOpenAiTitle ? AppLocalizations.of(context)!.actionEditConfig : null,
+          secondaryActionPath: title == AppLocalizations.of(context)!.setupOpenAiTitle ? AppLocalizations.of(context)!.actionConfigurePathToken : null,
         ),
       );
     }
@@ -115,15 +115,13 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
 
   String _readinessState(ReadinessCheckDto result) {
     final ok = result.okOrNull;
-    if (ok == true) return '正常';
-    if (ok == false) return '需处理';
-    return '待检测';
+    if (ok == true) return AppLocalizations.of(context)!.setupHealthy;
+    if (ok == false) return AppLocalizations.of(context)!.setupNeedsAction;
+    return AppLocalizations.of(context)!.setupPending;
   }
 
   String _normalizeSetupTitle(String title) {
-    return switch (title) {
-      'Sidecar 本地服务' => _sidecarSetupTitle,
-      _ => title,
-    };
+    if (title == AppLocalizations.of(context)!.setupSidecarServiceTitle) return _sidecarSetupTitle;
+    return title;
   }
 }

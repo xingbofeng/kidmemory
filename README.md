@@ -77,6 +77,17 @@ KidMemory 是一个本地优先的 AI 家庭记忆出版系统。它面向真实
 - **工具权限隔离**：Agent 不能直接访问数据库、`.env`、Supabase service role key 或本机任意文件；需要通过 sidecar 提供的 API 和 MCP 工具间接读取受控数据。
 - **桌面端可观测**：Flutter 侧负责展示 Agent 配置状态、生成进度、预览结果、导出结果和失败信息，便于家长在发布前检查。
 
+## 协作开发工作流
+
+本仓库使用 GitHub Issue 驱动的 Hermes + 本地 Harness + Codex 协作流程：
+
+- Hermes 负责和用户澄清需求，并按模板创建 `status:ready` Issue。
+- 本地 Harness 负责轮询 Issue、创建 worktree、启动 Codex goal 和更新状态。
+- Codex 只执行 ready Issue，并产出一个 commit 和一个 PR。
+- 前期由用户人工 review PR，稳定后再考虑 Reviewer Agent。
+
+详细流程、Issue 模板和 agent 提示词见 [`docs/agent-workflow/`](docs/agent-workflow/)。
+
 ## 本地开发快速开始
 
 ### 环境要求

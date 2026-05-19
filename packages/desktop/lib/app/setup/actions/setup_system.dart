@@ -107,7 +107,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     Duration timeout = _setupCommandTimeout,
     Map<String, String>? environment,
   }) async {
-    final process = await Process.start(
+    final process = await Process.tart(
       executable,
       arguments,
       environment: {
@@ -116,15 +116,15 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
         ...?environment,
       },
     );
-    final stdoutDone = process.stdout
+    final stdoutDone = process.tdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) => onOutput(line, _StreamKind.stdout))
+        .listen((line) => onOutput(line, _StreamKind.tdout))
         .asFuture<void>();
-    final stderrDone = process.stderr
+    final stderrDone = process.tderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) => onOutput(line, _StreamKind.stderr))
+        .listen((line) => onOutput(line, _StreamKind.tderr))
         .asFuture<void>();
 
     var timedOut = false;
@@ -132,7 +132,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       timeout,
       onTimeout: () {
         timedOut = true;
-        process.kill(ProcessSignal.sigterm);
+        process.kill(ProcessSignal.igterm);
         return -1;
       },
     );
@@ -162,7 +162,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     if (pgCtl == null || initdb == null || createdb == null || psql == null) {
       _finishSetupProgress(
         title,
-        '未找到可用 PostgreSQL runtime，请确认 Resources/postgres 或设置 KIDMEMORY_POSTGRES_RUNTIME_DIR。',
+        AppLocalizations.of(context)!.setupNoPostgresRuntimeFound,
         ok: false,
       );
       return false;
@@ -199,7 +199,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
 
     final versionFile = File('${dataDir.path}/PG_VERSION');
     if (!versionFile.existsSync()) {
-      _setSetupProgress(title, 0.12, '初始化内置 PostgreSQL 数据目录', state: '初始化');
+      _setSetupProgress(title, 0.12, AppLocalizations.of(context)!.setupInitBuiltinDataDir, state: AppLocalizations.of(context)!.setupInitStarted);
       await _runBundledPostgresCommand(
         initdb,
         [
@@ -216,7 +216,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       );
     }
 
-    _setSetupProgress(title, 0.30, '启动内置 PostgreSQL 服务', state: '启动中');
+    _setSetupProgress(title, 0.30, AppLocalizations.of(context)!.setupStartBuiltinPostgres, state: AppLocalizations.of(context)!.setupStatusStarting);
     await _runBundledPostgresCommand(
       pgCtl,
       [
@@ -240,7 +240,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     ownerFile.parent.createSync(recursive: true);
     ownerFile.writeAsStringSync('$pid', flush: true);
 
-    _setSetupProgress(title, 0.42, '创建 KidMemory 本地资料库', state: '初始化');
+    _setSetupProgress(title, 0.42, AppLocalizations.of(context)!.setupCreateLocalDatabase, state: AppLocalizations.of(context)!.setupInitStarted);
     await _runBundledPostgresCommand(
       createdb,
       [
@@ -257,7 +257,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       onOutput: (line, kind) => _appendLog('createdb: $line'),
     );
 
-    _setSetupProgress(title, 0.50, '启用 vector 扩展', state: '初始化');
+    _setSetupProgress(title, 0.50, AppLocalizations.of(context)!.setupEnableVectorExtension, state: AppLocalizations.of(context)!.setupInitStarted);
     await _runBundledPostgresCommand(
       psql,
       [

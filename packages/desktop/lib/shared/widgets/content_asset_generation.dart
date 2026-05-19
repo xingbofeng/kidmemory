@@ -60,8 +60,9 @@ class AssetCard extends StatelessWidget {
         : asset.thumbnailPath.isNotEmpty
         ? asset.thumbnailPath
         : asset.imagePath;
-    final typeStyle = _typeBadgeStyle(asset.type);
-    final title = _displayAssetTitle(asset.title, asset.type);
+    final l10n = AppLocalizations.of(context)!;
+    final typeStyle = _typeBadgeStyle(l10n, asset.type);
+    final title = _displayAssetTitle(l10n, asset.title, asset.type);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -82,7 +83,7 @@ class AssetCard extends StatelessWidget {
                     child: AssetArtworkPreview(
                       path: previewPath,
                       fallbackIcon: asset.icon,
-                      fallbackAssetPath: _assetPreviewIconAsset(asset.type),
+                      fallbackAssetPath: _assetPreviewIconAsset(l10n, asset.type),
                       label: '',
                       height: double.infinity,
                       width: double.infinity,
@@ -164,7 +165,7 @@ class AssetCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _formatAssetDate(asset.date),
+                      _formatAssetDate(l10n, asset.date),
                       style: const TextStyle(color: Color(0xff8c7663)),
                     ),
                     const SizedBox(height: 8),
@@ -197,8 +198,8 @@ class AssetCard extends StatelessWidget {
                             .toList(),
                       )
                     else
-                      const Text(
-                        '待补充标签',
+                      Text(
+                        AppLocalizations.of(context)!.contentNoTagReasonHint,
                         style: TextStyle(
                           color: Color(0xffa89785),
                           fontSize: 12,
@@ -249,42 +250,46 @@ class AssetCard extends StatelessWidget {
     );
   }
 
-  String _formatAssetDate(String value) {
+  String _formatAssetDate(AppLocalizations l10n, String value) {
     final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value.isEmpty ? '未填写日期' : value;
+    if (parsed == null) return value.isEmpty ? l10n.contentDateMissingLabel : value;
     final local = parsed.toLocal();
     return '${local.year}年${local.month}月${local.day}日';
   }
 
-  String _displayAssetTitle(String value, String type) {
+  String _displayAssetTitle(AppLocalizations l10n, String value, String type) {
     final title = value.trim();
     final technicalId = RegExp(r'^(cld|asset)[-_]?\w+', caseSensitive: false);
     if (title.isNotEmpty && !technicalId.hasMatch(title)) return title;
-    return switch (type) {
-      '照片' || 'photo' => '未命名照片',
-      '手工' || 'craft' => '未命名手工',
-      _ => '未命名绘画',
-    };
+    if (type == 'photo' || type == l10n.contentAssetTypePhotoLabel) {
+      return l10n.contentUnnamedPhotoLabel;
+    }
+    if (type == 'craft' || type == l10n.contentAssetTypeCraftLabel) {
+      return l10n.contentUnnamedCraftLabel;
+    }
+    return l10n.contentUnnamedDrawingLabel;
   }
 
-  (Color, Color, Color) _typeBadgeStyle(String type) {
-    return switch (type) {
-      '照片' || 'photo' => (
+  (Color, Color, Color) _typeBadgeStyle(AppLocalizations l10n, String type) {
+    if (type == 'photo' || type == l10n.contentAssetTypePhotoLabel) {
+      return (
         const Color(0xffedf4ff),
         const Color(0xffb9cde8),
         const Color(0xff355b8c),
-      ),
-      '手工' || 'craft' => (
+      );
+    }
+    if (type == 'craft' || type == l10n.contentAssetTypeCraftLabel) {
+      return (
         const Color(0xfffff3ea),
         const Color(0xfff4c7a1),
         const Color(0xffc96e2d),
-      ),
-      _ => (
-        const Color(0xffedf8ee),
-        const Color(0xffb8dfc1),
-        const Color(0xff2b7d4a),
-      ),
-    };
+      );
+    }
+    return (
+      const Color(0xffedf8ee),
+      const Color(0xffb8dfc1),
+      const Color(0xff2b7d4a),
+    );
   }
 }
 
@@ -312,17 +317,17 @@ class StatusStack extends StatelessWidget {
       child: Column(
         children: [
           StatusPill(
-            text: generated ? '生成完成     $pageCount/$pageCount 页' : '等待生成',
+            text: generated ? '生成完成     $pageCount/$pageCount 页' : AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel,
             color: const Color(0xffeaf7ee),
           ),
           const SizedBox(height: 10),
           StatusPill(
-            text: generated ? '预览完成     可预览全部内容' : '预览等待     生成后可查看',
+            text: generated ? AppLocalizations.of(context)!.contentPreviewCompletedLabel : AppLocalizations.of(context)!.contentPreviewWaitingLabel,
             color: const Color(0xffeef6ff),
           ),
           const SizedBox(height: 10),
           StatusPill(
-            text: exported ? '已导出      文件完成' : '可导出      生成后选择格式',
+            text: exported ? AppLocalizations.of(context)!.contentExportCompletedFileLabel : AppLocalizations.of(context)!.contentExportFormatSelectionHint,
             color: const Color(0xfffff4df),
           ),
         ],
@@ -394,9 +399,9 @@ class SelectedAssetsStrip extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: count == 0
-                  ? const [
+                  ? [
                       Text(
-                        '暂无已选素材',
+                        AppLocalizations.of(context)!.contentNoSelectedAssetsHint,
                         style: TextStyle(color: Color(0xff77685e)),
                       ),
                     ]
@@ -415,7 +420,7 @@ class SelectedAssetsStrip extends StatelessWidget {
                           ),
                         ),
                       SecondaryButton(
-                        label: '查看全部',
+                        label: AppLocalizations.of(context)!.contentViewAllLabel,
                         onPressed: onViewAll ?? () {},
                       ),
                     ],
@@ -440,11 +445,11 @@ class PagePreviewPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageCount = _estimatedPageCount(selectedCount);
-    final title = generated ? '页面预览（共 $pageCount 页）' : '页面预览（等待生成）';
-    const generatedPreviews = [
-      (bookIconAsset, Icons.auto_stories_outlined, '1 封面'),
-      (paletteIconAsset, Icons.palette_outlined, '2 素材故事'),
-      (bearDocumentIconAsset, Icons.description_outlined, '3 成长记录'),
+    final title = generated ? '页面预览（共 $pageCount 页）' : AppLocalizations.of(context)!.contentPreviewWaitingTitle;
+    final generatedPreviews = [
+      (bookIconAsset, Icons.auto_stories_outlined, AppLocalizations.of(context)!.contentSectionCoverLabel),
+      (paletteIconAsset, Icons.palette_outlined, AppLocalizations.of(context)!.contentSectionStoriesLabel),
+      (bearDocumentIconAsset, Icons.description_outlined, AppLocalizations.of(context)!.contentSectionGrowthRecordsLabel),
     ];
     return SurfaceCard(
       child: SizedBox(
@@ -460,8 +465,8 @@ class PagePreviewPanel extends StatelessWidget {
                 ),
                 if (!generated) ...[
                   const SizedBox(width: 12),
-                  const Text(
-                    '预览会在生成完成后显示',
+                  Text(
+                    AppLocalizations.of(context)!.contentPreviewAvailableAfterGenerationHint,
                     style: TextStyle(fontSize: 12, color: Color(0xff8c7663)),
                   ),
                 ],
@@ -487,12 +492,12 @@ class PagePreviewPanel extends StatelessWidget {
                       if (index != generatedPreviews.length - 1)
                         const SizedBox(width: 16),
                     ],
-                  ] else ...const [
+                  ] else ...[
                     Expanded(
                       child: PreviewPlaceholder(
                         icon: Icons.article_outlined,
                         iconAsset: bearDocumentIconAsset,
-                        label: '封面将在生成后出现',
+                        label: AppLocalizations.of(context)!.contentCoverAppearsAfterGenerationLabel,
                       ),
                     ),
                     SizedBox(width: 16),
@@ -500,7 +505,7 @@ class PagePreviewPanel extends StatelessWidget {
                       child: PreviewPlaceholder(
                         icon: Icons.image_outlined,
                         iconAsset: imageIconAsset,
-                        label: '故事页面等待生成',
+                        label: AppLocalizations.of(context)!.contentStoryPagesWaitingLabel,
                       ),
                     ),
                     SizedBox(width: 16),
@@ -508,7 +513,7 @@ class PagePreviewPanel extends StatelessWidget {
                       child: PreviewPlaceholder(
                         icon: Icons.subject_rounded,
                         iconAsset: pdfIconAsset,
-                        label: '导出前先完成预览',
+                        label: AppLocalizations.of(context)!.contentExportBeforePreviewHint,
                       ),
                     ),
                   ],
@@ -623,8 +628,8 @@ class AgentLogPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '任务进度日志',
+              Text(
+                AppLocalizations.of(context)!.contentTaskProgressLogTitle,
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 8),
@@ -647,7 +652,7 @@ class AgentLogPanel extends StatelessWidget {
           children: [
             const Text('阶段：实时记录\n来源：本地任务中心'),
             const SizedBox(height: 12),
-            SecondaryButton(label: '查看详细日志', onPressed: onViewDetails ?? () {}),
+            SecondaryButton(label: AppLocalizations.of(context)!.contentViewDetailsLabel, onPressed: onViewDetails ?? () {}),
           ],
         ),
       ],
@@ -697,10 +702,12 @@ class ExportOption extends StatelessWidget {
   );
 }
 
-String _assetPreviewIconAsset(String type) {
-  return switch (type) {
-    '照片' || 'photo' => cameraIconAsset,
-    '手工' || 'craft' => bearDocumentIconAsset,
-    _ => paletteIconAsset,
-  };
+String _assetPreviewIconAsset(AppLocalizations l10n, String type) {
+  if (type == 'photo' || type == l10n.contentAssetTypePhotoLabel) {
+    return cameraIconAsset;
+  }
+  if (type == 'craft' || type == l10n.contentAssetTypeCraftLabel) {
+    return bearDocumentIconAsset;
+  }
+  return paletteIconAsset;
 }

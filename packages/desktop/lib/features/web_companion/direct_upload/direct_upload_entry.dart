@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Entry button surfacing the Supabase Direct Upload flow.
 class DirectUploadEntryButton extends StatelessWidget {
@@ -16,7 +17,7 @@ class DirectUploadEntryButton extends StatelessWidget {
     return FilledButton.icon(
       onPressed: enabled ? onTap : null,
       icon: const Icon(Icons.qr_code_2_outlined),
-      label: const Text('扫码上传 · Direct'),
+      label: Text(AppLocalizations.of(context)!.directUploadEntryButtonLabel),
     );
   }
 }

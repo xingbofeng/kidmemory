@@ -4,8 +4,8 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
   Future<void> _createChildProfile() async {
     if (!mounted) return;
     final saved = await _showChildProfileDialog(
-      title: '添加孩子档案',
-      actionLabel: '添加',
+      title: AppLocalizations.of(context)!.datasetChildrenS690,
+      actionLabel: AppLocalizations.of(context)!.datasetChildrenS688,
       actionIcon: const AppAssetIcon(addIconAsset, size: compactInlineIconSize),
     );
     if (saved == null) return;
@@ -18,7 +18,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
     );
     if (!mounted) return;
     if (!result.hasChild) {
-      _showSnackBar('添加失败：请确认 Sidecar 已启动');
+      _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS689);
       _appendLog('添加孩子档案失败：${jsonEncode(result.raw)}');
       return;
     }
@@ -31,12 +31,12 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
 
   Future<void> _editSelectedChildProfile(ChildVm current) async {
     if (current.id.trim().isEmpty) {
-      _showSnackBar('请先添加一个孩子再编辑资料');
+      _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS854);
       return;
     }
     final saved = await _showChildProfileDialog(
-      title: '编辑资料',
-      actionLabel: '保存',
+      title: AppLocalizations.of(context)!.datasetChildrenS835,
+      actionLabel: AppLocalizations.of(context)!.actionSave,
       initialValue: _ChildProfileFormData.fromChild(current),
     );
     if (saved == null) return;
@@ -54,18 +54,18 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
 
   Future<void> _deleteSelectedChildProfile(ChildVm current) async {
     if (current.id.trim().isEmpty) {
-      _showSnackBar('请先选择一个孩子档案');
+      _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS856);
       return;
     }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除孩子档案'),
+        title: Text(AppLocalizations.of(context)!.datasetChildrenS301)),
         content: Text('确定删除「${current.name}」吗？删除前需要先清空这个孩子关联的素材。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(AppLocalizations.of(context)!.actionCancel)),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -73,7 +73,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
               backgroundColor: const Color(0xffb84938),
               foregroundColor: Colors.white,
             ),
-            child: const Text('删除'),
+            child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
           ),
         ],
       ),
@@ -84,7 +84,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
       if (!mounted) return;
       if (!result.okValue) {
         _showSnackBar(
-          result.messageValue.isNotEmpty ? result.messageValue : '删除失败',
+          result.messageValue.isNotEmpty ? result.messageValue : AppLocalizations.of(context)!.assetLibraryPageS299,
         );
         return;
       }
@@ -97,7 +97,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
       _showSnackBar('已删除孩子档案：${current.name}');
     } catch (error) {
       if (!mounted) return;
-      _showSnackBar('删除失败：请先清空这个孩子关联的素材');
+      _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS300);
       _appendLog('删除孩子档案失败：${current.id} $error');
     }
   }
@@ -217,9 +217,9 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
       initialDate: initialDate.isBefore(firstDate) ? firstDate : initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
-      helpText: '选择生日',
-      cancelText: '取消',
-      confirmText: '确定',
+      helpText: AppLocalizations.of(context)!.datasetChildrenS906,
+      cancelText: AppLocalizations.of(context)!.actionCancel,
+      confirmText: AppLocalizations.of(context)!.datasetChildrenS762,
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -261,9 +261,9 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
                 readOnly: true,
                 showCursor: false,
                 enableInteractiveSelection: false,
-                decoration: const InputDecoration(
-                  labelText: '生日',
-                  hintText: '点按选择生日',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.datasetChildrenS748,
+                  hintText: AppLocalizations.of(context)!.datasetChildrenS703,
                   suffixIcon: Icon(Icons.calendar_month_outlined),
                 ),
                 onTap: _pickBirthday,
@@ -276,9 +276,9 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
-                decoration: const InputDecoration(
-                  labelText: '备注',
-                  hintText: '兴趣、性格、记录偏好等',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.datasetChildrenS356,
+                  hintText: AppLocalizations.of(context)!.datasetChildrenS263,
                   alignLabelWithHint: true,
                 ),
               ),
@@ -289,7 +289,7 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(AppLocalizations.of(context)!.actionCancel)),
         ),
         widget.actionIcon == null
             ? ElevatedButton(

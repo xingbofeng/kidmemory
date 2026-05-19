@@ -31,23 +31,23 @@ extension _DesktopShellFeedback on _DesktopShellState {
   }
 
   AppToastTone _toastTone(String message) {
-    if (message.contains('失败') ||
-        message.contains('无法') ||
-        message.contains('未找到') ||
-        message.contains('没有') ||
-        message.contains('超时')) {
+    if (message.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS555) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS583) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS673) ||
+        message.contains(AppLocalizations.of(context)!.generateExportS875)) {
       return AppToastTone.error;
     }
-    if (message.contains('未就绪') ||
+    if (message.contains(AppLocalizations.of(context)!.feedbackPageS582) ||
         message.contains('请') ||
-        message.contains('取消')) {
+        message.contains(AppLocalizations.of(context)!.actionCancel)) {
       return AppToastTone.warning;
     }
-    if (message.contains('成功') ||
-        message.contains('完成') ||
-        message.contains('已配置') ||
-        message.contains('已保存') ||
-        message.contains('已更新')) {
+    if (message.contains(AppLocalizations.of(context)!.success) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS383) ||
+        message.contains(AppLocalizations.of(context)!.setupConfigured) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS429) ||
+        message.contains(AppLocalizations.of(context)!.feedbackPageS448)) {
       return AppToastTone.success;
     }
     return AppToastTone.info;

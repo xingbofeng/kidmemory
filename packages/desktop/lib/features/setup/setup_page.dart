@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/widgets/content.dart';
 import '../../shared/widgets/layout.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SetupCheckVm {
   const SetupCheckVm({
@@ -138,29 +139,31 @@ class SetupPage extends StatelessWidget {
   final VoidCallback onConfigureSupabaseStorage;
   final VoidCallback onTestSupabaseStorage;
 
-  static const pendingChecks = [
-    SetupCheckVm(
-      index: '1',
-      title: '大模型接口配置',
-      body: '提供文本生成、标签与提示词能力。请配置 Base URL、模型与 API Key。',
-      action: '测试连接',
-      state: '需配置',
-      secondaryActionLabel: '修改配置',
-      secondaryActionPath: '__action__:配置',
-      actionEnabled: false,
-    ),
-  ];
+  static List<SetupCheckVm> pendingChecks(BuildContext context) => [
+        SetupCheckVm(
+          index: '1',
+          title: AppLocalizations.of(context)!.setupOpenAiTitle,
+          body: AppLocalizations.of(context)!.setupOpenAiDescription,
+          action: AppLocalizations.of(context)!.actionTestConnection,
+          state: AppLocalizations.of(context)!.setupNeedsConfiguration,
+          secondaryActionLabel:
+              AppLocalizations.of(context)!.actionEditConfig,
+          secondaryActionPath:
+              AppLocalizations.of(context)!.actionConfigurePathToken,
+          actionEnabled: false,
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
-    final visibleChecks = checks.isEmpty ? pendingChecks : checks;
+    final visibleChecks = checks.isEmpty ? pendingChecks(context) : checks;
     return PageFrame(
-      title: '设置',
-      subtitle: '完成以下配置以启用 AI 能力与本地数据存储。我们会帮你检测环境并确保一切就绪。',
+      title: AppLocalizations.of(context)!.setupPageTitle,
+      subtitle: AppLocalizations.of(context)!.setupIntroAiStorageMessage,
       status: null,
       child: Column(
         children: [
-          _readinessBanner(readinessMessage, onRefreshReadiness),
+          _readinessBanner(context, readinessMessage, onRefreshReadiness),
           const SizedBox(height: 18),
           Expanded(
             child: LayoutBuilder(
@@ -192,7 +195,7 @@ class SetupPage extends StatelessWidget {
                               progress: check.progress,
                               progressLabel: check.progressLabel,
                               actionEnabled: check.actionEnabled,
-                              onAction: check.action == '重新连接'
+                              onAction: check.action == AppLocalizations.of(context)!.actionReconnect
                                   ? onRefreshReadiness
                                   : () => onSetupAction(check),
                               secondaryActionLabel: check.secondaryActionLabel,
@@ -271,7 +274,7 @@ class _SupabaseStoragePanel extends StatelessWidget {
     final borderColor = configured
         ? const Color(0xffbfe4c6)
         : const Color(0xffe7e2da);
-    final description = '用于保存导出结果与分享文件。';
+    final description = AppLocalizations.of(context)!.setupExportDescriptionHint;
 
     return SurfaceCard(
       backgroundColor: backgroundColor,
@@ -295,8 +298,8 @@ class _SupabaseStoragePanel extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Storage 配置',
+                    Text(
+                      AppLocalizations.of(context)!.setupStorageConfigTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -306,7 +309,7 @@ class _SupabaseStoragePanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      configured ? '已配置' : '未配置',
+                      configured ? AppLocalizations.of(context)!.setupConfigured : AppLocalizations.of(context)!.setupNotConfigured,
                       style: TextStyle(
                         color: foregroundColor,
                         fontSize: 15,
@@ -332,7 +335,7 @@ class _SupabaseStoragePanel extends StatelessWidget {
             children: [
               Expanded(
                 child: SecondaryButton(
-                  label: '修改配置',
+                  label: AppLocalizations.of(context)!.actionEditConfig,
                   icon: Icons.settings_outlined,
                   fullWidth: true,
                   height: 52,
@@ -342,7 +345,7 @@ class _SupabaseStoragePanel extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: SecondaryButton(
-                  label: '测试连接',
+                  label: AppLocalizations.of(context)!.actionTestConnection,
                   icon: Icons.link_rounded,
                   fullWidth: true,
                   height: 52,
@@ -357,14 +360,18 @@ class _SupabaseStoragePanel extends StatelessWidget {
   }
 }
 
-Widget _readinessBanner(String message, VoidCallback onRefreshReadiness) {
-  final disconnected = message.startsWith('Sidecar 未连接');
+Widget _readinessBanner(
+  BuildContext context,
+  String message,
+  VoidCallback onRefreshReadiness,
+) {
+  final disconnected = message.startsWith(AppLocalizations.of(context)!.setupSidecarDisconnected);
   final ready = _readinessComplete(message);
-  final title = disconnected ? '本地服务准备中' : (ready ? '环境已就绪' : '环境检测中');
-  final actionLabel = disconnected ? '重新连接' : '刷新检测';
+  final title = disconnected ? AppLocalizations.of(context)!.setupLocalServicePreparing : (ready ? AppLocalizations.of(context)!.setupEnvironmentReady : AppLocalizations.of(context)!.setupEnvironmentChecking);
+  final actionLabel = disconnected ? AppLocalizations.of(context)!.actionReconnect : AppLocalizations.of(context)!.actionRefreshChecks;
   final body = disconnected
-      ? 'KidMemory 的本地服务负责配置、检测和数据任务。通常会随应用自动准备。'
-      : (ready ? '环境检测已通过，可进入正式创作流程。' : '集中检查初始化依赖是否可用。');
+      ? AppLocalizations.of(context)!.setupLocalServiceResponsibilities
+      : (ready ? AppLocalizations.of(context)!.setupEnvironmentReadyForCreation : AppLocalizations.of(context)!.setupCheckDependencyHint);
   final backgroundColor = const Color(0xfff5f8f6);
   final borderColor = const Color(0xffdce8df);
   final foregroundColor = disconnected || !ready

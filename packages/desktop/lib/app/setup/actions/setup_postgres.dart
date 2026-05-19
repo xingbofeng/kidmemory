@@ -7,19 +7,19 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
     if (!_bundledPostgresRuntimeAvailable()) {
       _finishSetupProgress(
         title,
-        '未检测到 PostgreSQL runtime，请确认 Resources/postgres 或仓库 third_party/postgres/macos 可用。',
+        AppLocalizations.of(context)!.setupPostgresRuntimeNotDetected,
         ok: false,
       );
-      _showSnackBar('未检测到内置 PostgreSQL runtime');
+      _showSnackBar(AppLocalizations.of(context)!.setupBundledPostgresRuntimeMissing);
       return false;
     }
-    _appendLog('检测到内置 PostgreSQL runtime，开始初始化。');
+    _appendLog(AppLocalizations.of(context)!.setupRuntimeFoundInitialize);
     return _ensureBundledPostgresReady(title);
   }
 
   Future<void> _runPostgresSetupWorkflow() async {
     const title = 'PostgreSQL 配置';
-    _appendLog('开始 PostgreSQL 安装与配置流程');
+    _appendLog(AppLocalizations.of(context)!.setupStartPostgresWorkflow);
 
     try {
       if (Platform.isMacOS) {
@@ -34,8 +34,8 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
         return;
       }
 
-      _setSetupProgress(title, 1, 'PostgreSQL 已配置完成', state: '已配置');
-      _showSnackBar('PostgreSQL 已配置完成');
+      _setSetupProgress(title, 1, AppLocalizations.of(context)!.setupPostgresConfigured, state: AppLocalizations.of(context)!.setupConfigured);
+      _showSnackBar(AppLocalizations.of(context)!.setupPostgresConfigured);
       await refreshReadiness();
     } catch (error) {
       final message = _friendlySetupError(
@@ -51,39 +51,39 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
     _setSetupProgress(
       _sidecarSetupTitle,
       0.15,
-      '正在启动 Sidecar...',
-      state: '启动中',
+      AppLocalizations.of(context)!.setupSidecarStarting,
+      state: AppLocalizations.of(context)!.setupStatusStarting,
     );
     final sidecarReady = await _ensureSidecarRunning();
     if (!sidecarReady) {
       _finishSetupProgress(
         _sidecarSetupTitle,
-        'Sidecar 未能启动，请检查 Node.js 或 bundled sidecar',
+        AppLocalizations.of(context)!.setupSidecarStartFailedNodeOrBundled,
         ok: false,
       );
-      _showSnackBar('PostgreSQL 已处理，但 Sidecar 未能启动');
+      _showSnackBar(AppLocalizations.of(context)!.setupPostgresHandledButSidecarNotStarted);
       return false;
     }
-    _finishSetupProgress(_sidecarSetupTitle, 'Sidecar 已启动', ok: true);
+    _finishSetupProgress(_sidecarSetupTitle, AppLocalizations.of(context)!.setupSidecarStarted, ok: true);
 
-    _setSetupProgress(title, 0.78, '检测 PostgreSQL 服务', state: '检测中');
+    _setSetupProgress(title, 0.78, AppLocalizations.of(context)!.setupCheckPostgresService, state: AppLocalizations.of(context)!.setupChecking);
     final postgres = await gateway.checkPostgresDto();
     if (postgres.okOrNull != true) {
-      _finishSetupProgress(title, '未检测到 PostgreSQL，请确认本机服务已安装并启动', ok: false);
-      _showSnackBar('PostgreSQL 还未就绪，请启动本机服务后重试');
+      _finishSetupProgress(title, AppLocalizations.of(context)!.setupPostgresNotDetected, ok: false);
+      _showSnackBar(AppLocalizations.of(context)!.setupPostgresNotReadyStartLocalService);
       return false;
     }
 
-    _setSetupProgress(title, 0.92, '初始化 KidMemory 数据库结构', state: '初始化');
+    _setSetupProgress(title, 0.92, AppLocalizations.of(context)!.setupInitDatabaseSchema, state: AppLocalizations.of(context)!.setupInitStarted);
     final schema = await gateway.initSchemaDto();
     if (schema.okOrNull == false) {
       final schemaMessage = schema.message ?? '';
       _finishSetupProgress(
         title,
-        schemaMessage.isNotEmpty ? schemaMessage : '数据库结构初始化失败',
+        schemaMessage.isNotEmpty ? schemaMessage : AppLocalizations.of(context)!.setupInitDatabaseSchemaFailed,
         ok: false,
       );
-      _showSnackBar('数据库结构初始化失败');
+      _showSnackBar(AppLocalizations.of(context)!.setupInitDatabaseSchemaFailed);
       return false;
     }
     return true;

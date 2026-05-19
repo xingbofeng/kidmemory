@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'trusted_upload_controller.dart';
 import 'trusted_upload_models.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Trusted Upload 对话框
 ///
@@ -116,9 +117,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
   Widget build(BuildContext context) {
     final session = widget.controller.session;
     if (session == null) {
-      return const AlertDialog(
-        title: Text('错误'),
-        content: Text('会话未创建'),
+      return AlertDialog(
+        title: Text(AppLocalizations.of(context)!.errorTitle),
+        content: Text(AppLocalizations.of(context)!.trustedUploadSessionNotReadyMessage),
       );
     }
 
@@ -135,8 +136,8 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
               children: [
                 const Icon(Icons.qr_code_2, size: 32),
                 const SizedBox(width: 12),
-                const Text(
-                  '扫码上传',
+                Text(
+                  AppLocalizations.of(context)!.trustedUploadDialogTitle,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -156,13 +157,13 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.blue.shade200),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.info_outline, color: Colors.blue),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '后端可信上传：使用 signed upload、自动回拉入库',
+                      AppLocalizations.of(context)!.trustedUploadDescription,
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
@@ -221,8 +222,8 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '手机扫码或复制链接:',
+          Text(
+            AppLocalizations.of(context)!.trustedUploadCopyOrScanLabel,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -270,8 +271,8 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            '请确保手机可以访问上方 URL 所在的桌面端网络地址。',
+          Text(
+            AppLocalizations.of(context)!.trustedUploadNetworkHint,
             style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
         ],
@@ -282,17 +283,41 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
   Widget _buildStatusSummary(TrustedUploadStatus status) {
     return Row(
       children: [
-        _buildStatusChip('总计', status.totalCount, Colors.grey),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusTotalLabel,
+          status.totalCount,
+          Colors.grey,
+        ),
         const SizedBox(width: 8),
-        _buildStatusChip('等待', status.pendingCount, Colors.orange),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusWaitingLabel,
+          status.pendingCount,
+          Colors.orange,
+        ),
         const SizedBox(width: 8),
-        _buildStatusChip('上传中', status.uploadingCount, Colors.blue),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusUploadingLabel,
+          status.uploadingCount,
+          Colors.blue,
+        ),
         const SizedBox(width: 8),
-        _buildStatusChip('回拉中', status.pullingCount, Colors.purple),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusPullingLabel,
+          status.pullingCount,
+          Colors.purple,
+        ),
         const SizedBox(width: 8),
-        _buildStatusChip('已入库', status.readyCount, Colors.green),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusReadyLabel,
+          status.readyCount,
+          Colors.green,
+        ),
         const SizedBox(width: 8),
-        _buildStatusChip('失败', status.failedCount, Colors.red),
+        _buildStatusChip(
+          AppLocalizations.of(context)!.uploadStatusFailedLabel,
+          status.failedCount,
+          Colors.red,
+        ),
       ],
     );
   }
@@ -317,7 +342,7 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetchStatus,
-              child: const Text('重试'),
+              child: Text(AppLocalizations.of(context)!.actionRetryLabel),
             ),
           ],
         ),

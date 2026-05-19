@@ -3,7 +3,7 @@ part of '../../desktop_shell.dart';
 extension _DesktopShellImportFlow on _DesktopShellState {
   Future<String?> _pickDataDirectoryPath() async {
     return getDirectoryPath(
-      confirmButtonText: '选择本地数据目录',
+      confirmButtonText: AppLocalizations.of(context)!.importPageS905,
       canCreateDirectories: true,
     );
   }
@@ -13,11 +13,11 @@ extension _DesktopShellImportFlow on _DesktopShellState {
       label: 'images',
       extensions: const ['jpg', 'jpeg', 'png', 'webp', 'zip'],
     );
-    return openFiles(acceptedTypeGroups: [group], confirmButtonText: '导入图片');
+    return openFiles(acceptedTypeGroups: [group], confirmButtonText: AppLocalizations.of(context)!.assetLibraryImportPhotoLabel);
   }
 
   Future<String?> _pickImportFolderPath() {
-    return getDirectoryPath(confirmButtonText: '选择文件夹');
+    return getDirectoryPath(confirmButtonText: AppLocalizations.of(context)!.importPageS904);
   }
 
   Future<AssetImportReport> importFiles() => _importFilesReport();
@@ -80,7 +80,7 @@ extension _DesktopShellImportFlow on _DesktopShellState {
   Future<String?> _ensureImportChild() async {
     if (selectedChildId != null) return selectedChildId;
     const fallbackChildId = 'child-default';
-    final result = await gateway.ensureChildDto(id: fallbackChildId, name: '孩子');
+    final result = await gateway.ensureChildDto(id: fallbackChildId, name: AppLocalizations.of(context)!.assetLibraryChildLabel);
     final childId = result.hasChild ? result.childId : fallbackChildId;
     await refreshDataset();
     if (!mounted) return null;
@@ -88,20 +88,20 @@ extension _DesktopShellImportFlow on _DesktopShellState {
     return childId;
   }
 
-  AssetImportReport _importBlockedReport() => const AssetImportReport(
+  AssetImportReport _importBlockedReport() => AssetImportReport(
     imported: 0,
     duplicates: 0,
     skipped: 0,
     failed: 1,
-    message: '导入前需要一个孩子档案，请先检查 sidecar 连接',
+    message: AppLocalizations.of(context)!.importPageS386,
   );
 
-  AssetImportReport _importStagingFailedReport() => const AssetImportReport(
+  AssetImportReport _importStagingFailedReport() => AssetImportReport(
     imported: 0,
     duplicates: 0,
     skipped: 0,
     failed: 1,
-    message: '没有可读取的本地文件，请确认选择的是图片、zip 或可访问的文件夹',
+    message: AppLocalizations.of(context)!.importPageS674,
   );
 
 }

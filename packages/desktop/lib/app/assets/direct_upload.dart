@@ -4,13 +4,13 @@ extension _DesktopShellDirectUpload on _DesktopShellState {
   Future<void> _openDirectUploadDialog() async {
     final childId = selectedChildId;
     if (childId == null || childId.isEmpty) {
-      _showSnackBar('请先选择一个孩子再创建扫码上传会话');
+      _showSnackBar(AppLocalizations.of(context)!.directUploadS855);
       return;
     }
 
     final controller = DirectUploadController(api: api);
     try {
-      _showSnackBar('正在创建 Direct Upload 扫码会话...');
+      _showSnackBar(AppLocalizations.of(context)!.directUploadS650);
       final config = await controller.createSession(childId);
       if (!mounted) return;
 

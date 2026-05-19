@@ -47,7 +47,7 @@ extension _DesktopShellSetupDialogStorageSubmit on _DesktopShellState {
       );
     });
     _showSnackBar(
-      result.okValue ? 'Supabase Storage 配置已保存' : 'Supabase Storage 配置保存失败',
+      result.okValue ? AppLocalizations.of(context)!.setupStorageConfigSaved : AppLocalizations.of(context)!.setupStorageConfigSaveFailed,
     );
     await refreshReadiness();
   }

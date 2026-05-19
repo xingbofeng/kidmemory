@@ -5,6 +5,7 @@ import type {
   SearchFilters,
   SearchRecallResult,
 } from "../../../infrastructure/dataset-state/memory-dataset-db.ts";
+import path from "node:path";
 import type { DatasetStateService } from "../../../infrastructure/dataset-state/dataset-state.service.ts";
 import type { AppConfigService } from "../../../infrastructure/config/app-config.service.ts";
 import { importLocalAssets } from "./asset-import.ts";
@@ -20,10 +21,16 @@ type DatasetDependencies = {
   datasetState: DatasetStateService;
   config?: AppConfigService;
   embedText?: (text: string) => Promise<number[]>;
+  inferAssetMetadata?: (input: { assetId: string; imagePath: string; childId: string }) => Promise<{
+    title?: string;
+    description?: string;
+    tags?: string[];
+  } | null>;
 };
 
 export function createDatasetService(dependencies: DatasetDependencies) {
   const embedText = dependencies.embedText || deterministicEmbedText;
+  const inferAssetMetadata = dependencies.inferAssetMetadata;
   const dataDir = dependencies.config?.config.paths.dataDir || ".kidmemory/data";
 
   return {
@@ -96,6 +103,34 @@ export function createDatasetService(dependencies: DatasetDependencies) {
         ...input,
         dataDir,
       });
+      if (inferAssetMetadata) {
+        for (const imported of report.imported) {
+          const current = await db.getAsset(imported.id);
+          if (!current) continue;
+          const inferred = await inferAssetMetadata({
+            assetId: imported.id,
+            imagePath: imported.path,
+            childId: input.childId,
+          });
+          if (!inferred) continue;
+          const nextTitle = String(inferred.title || "").trim();
+          const nextDescription = String(inferred.description || "").trim();
+          const nextTags = (inferred.tags || []).map((tag) => String(tag).trim()).filter(Boolean);
+          const updates: { title?: string; description?: string; tags?: string[] } = {};
+          const currentTitle = String(current.title || "").trim();
+          const originalFilename = String(current.originalFilename || "").trim();
+          const filenameStem = originalFilename
+            ? path.basename(originalFilename, path.extname(originalFilename)).trim()
+            : "";
+          const titleIsDefaultFilename = currentTitle && filenameStem && currentTitle === filenameStem;
+          if ((!currentTitle || titleIsDefaultFilename) && nextTitle) updates.title = nextTitle;
+          if (!current.description?.trim() && nextDescription) updates.description = nextDescription;
+          if ((!current.tags || current.tags.length === 0) && nextTags.length > 0) updates.tags = nextTags;
+          if (updates.title || updates.description || updates.tags) {
+            await db.updateAssetMetadata?.(imported.id, updates);
+          }
+        }
+      }
       for (const imported of report.imported) {
         await enqueueAssetIndexing(db, imported.id);
       }

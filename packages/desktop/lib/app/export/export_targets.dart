@@ -29,8 +29,8 @@ extension _DesktopShellExportTargets on _DesktopShellState {
   String _exportLabel(_ExportTarget target) {
     return switch (target) {
       _ExportTarget.pdf => 'PDF',
-      _ExportTarget.longImagePng => '长图 PNG',
-      _ExportTarget.longImageJpg => '长图 JPG',
+      _ExportTarget.longImagePng => AppLocalizations.of(context)!.generateExportS934,
+      _ExportTarget.longImageJpg => AppLocalizations.of(context)!.generateExportS931,
     };
   }
 

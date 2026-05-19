@@ -6,15 +6,15 @@ extension _DesktopShellSetupPathsState on _DesktopShellState {
     _KidMemoryPathSet paths, {
     required String state,
   }) {
-    final checks = source.isEmpty ? _disconnectedSetupChecks() : source;
+    final checks = source.isEmpty ? _disconnectedSetupChecks(context) : source;
     return checks.map((check) {
-      if (check.title == '本地数据目录') {
+      if (check.title == AppLocalizations.of(context)!.setupLocalDataDirTitle) {
         return SetupCheckVm(
           index: check.index,
           title: check.title,
           body: _localDataDirectoryDescription(paths),
           action: check.action,
-          secondaryActionLabel: '打开目录',
+          secondaryActionLabel: AppLocalizations.of(context)!.actionOpenDirectory,
           secondaryActionPath: paths.dataDir,
           state: state,
           ok: true,

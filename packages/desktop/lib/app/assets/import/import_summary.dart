@@ -8,7 +8,7 @@ extension _DesktopShellImportSummary on _DesktopShellState {
     if (!result.hasCounters && result.messageValue.isEmpty) {
       if (fallbackImportedCount > 0) {
         return AssetImportReport(
-          title: '导入完成',
+          title: AppLocalizations.of(context)!.assetLibraryPageS392,
           imported: fallbackImportedCount,
           duplicates: 0,
           failed: 0,
@@ -16,13 +16,13 @@ extension _DesktopShellImportSummary on _DesktopShellState {
           message: '素材库已刷新，新增 $fallbackImportedCount 项；sidecar 未返回完整导入统计',
         );
       }
-      return const AssetImportReport(
-        title: '导入结果未返回',
+      return AssetImportReport(
+        title: AppLocalizations.of(context)!.importSummaryS402,
         imported: 0,
         duplicates: 0,
         failed: 0,
         skipped: 0,
-        message: '没有收到 sidecar 导入统计，请检查本地服务状态',
+        message: AppLocalizations.of(context)!.importSummaryS676,
       );
     }
 

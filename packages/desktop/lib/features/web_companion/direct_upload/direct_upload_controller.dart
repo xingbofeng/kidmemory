@@ -58,7 +58,7 @@ class DirectUploadController {
       if (code is String && code.trim().isNotEmpty) {
         throw StateError('Sidecar 返回错误：$code');
       }
-      throw StateError('Sidecar 返回错误，无法继续 Direct Upload');
+      throw StateError('Sidecar 返回错误');
     }
   }
 

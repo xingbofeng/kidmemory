@@ -79,34 +79,34 @@ String _resolveConfiguredPath(String configured, String fallbackAbsolute) {
   );
 }
 
-List<SetupCheckVm> _disconnectedSetupChecks() {
+List<SetupCheckVm> _disconnectedSetupChecks(BuildContext context) {
   final paths = _defaultKidMemoryPaths();
   return [
     SetupCheckVm(
       index: '1',
-      title: '大模型接口配置',
-      body: '提供文本生成、标签与提示词能力。请配置 Base URL、模型与 API Key。',
-      action: '测试连接',
-      secondaryActionLabel: '修改配置',
-      secondaryActionPath: '__action__:配置',
-      state: '需配置',
+      title: AppLocalizations.of(context)!.setupOpenAiTitle,
+      body: AppLocalizations.of(context)!.setupOpenAiDescription,
+      action: AppLocalizations.of(context)!.actionTestConnection,
+      secondaryActionLabel: AppLocalizations.of(context)!.actionEditConfig,
+      secondaryActionPath: AppLocalizations.of(context)!.actionConfigurePathToken,
+      state: AppLocalizations.of(context)!.setupNeedsConfiguration,
       ok: false,
       actionEnabled: false,
     ),
     SetupCheckVm(
       index: '2',
-      title: '本地数据目录',
-      body: _localDataDirectoryDescription(paths),
-      action: '配置目录',
-      secondaryActionLabel: '打开目录',
+      title: AppLocalizations.of(context)!.setupLocalDataDirTitle,
+      body: _localDataDirectoryDescription(context, paths),
+      action: AppLocalizations.of(context)!.actionConfigureDirectory,
+      secondaryActionLabel: AppLocalizations.of(context)!.actionOpenDirectory,
       secondaryActionPath: paths.dataDir,
-      state: '已配置',
+      state: AppLocalizations.of(context)!.setupConfigured,
       ok: true,
       actionEnabled: true,
     ),
   ];
 }
 
-String _localDataDirectoryDescription(_KidMemoryPathSet paths) {
-  return '为 KidMemory 提供核心数据库连接，保存孩子资料、素材和生成历史。';
+String _localDataDirectoryDescription(BuildContext context, _KidMemoryPathSet paths) {
+  return AppLocalizations.of(context)!.setupLocalDataDirectoryDescription;
 }
