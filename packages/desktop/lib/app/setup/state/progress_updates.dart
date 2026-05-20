@@ -44,7 +44,9 @@ extension _DesktopShellSetupProgressUpdates on _DesktopShellState {
           title: check.title,
           body: check.body,
           action: check.action,
-          state: ok ? AppLocalizations.of(context)!.setupConfigured : AppLocalizations.of(context)!.setupNeedsAction,
+          state: ok
+              ? AppLocalizations.of(context)!.setupConfigured
+              : AppLocalizations.of(context)!.setupNeedsAction,
           ok: ok,
           secondaryActionLabel: check.secondaryActionLabel,
           secondaryActionPath: check.secondaryActionPath,

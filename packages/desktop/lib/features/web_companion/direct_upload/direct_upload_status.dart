@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'direct_upload_models.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/chrome.dart';
 
 /// Renders the pull-back status rows produced by the sidecar status
 /// endpoint. Each row reflects one of the four states defined by the
@@ -108,12 +109,10 @@ class _DirectUploadStatusRow extends StatelessWidget {
     switch (item.status) {
       case 'pending_remote':
         return _RowDescriptor(
-          leading: const Icon(
-            Icons.cloud_queue_outlined,
-            color: Color(0xff6f8d72),
-            size: 22,
-          ),
-          statusLabel: AppLocalizations.of(context)!.uploadStatusPendingPullbackLabel,
+          leading: const AppAssetIcon(cloudDownloadIconAsset, size: 22),
+          statusLabel: AppLocalizations.of(
+            context,
+          )!.uploadStatusPendingPullbackLabel,
           statusColor: const Color(0xff6f8d72),
           identifier: item.displayName,
         );
@@ -124,47 +123,50 @@ class _DirectUploadStatusRow extends StatelessWidget {
             height: 22,
             child: CircularProgressIndicator(strokeWidth: 2.5),
           ),
-          statusLabel: AppLocalizations.of(context)!.uploadStatusDownloadingLabel,
+          statusLabel: AppLocalizations.of(
+            context,
+          )!.uploadStatusDownloadingLabel,
           statusColor: const Color(0xff2f80ed),
           identifier: item.displayName,
         );
       case 'ready':
         return _RowDescriptor(
-          leading: const Icon(
-            Icons.check_circle_outline,
-            color: Color(0xff2faa61),
-            size: 22,
-          ),
+          leading: const AppAssetIcon(completeIconAsset, size: 22),
           statusLabel: AppLocalizations.of(context)!.uploadStatusReadyLabel,
           statusColor: const Color(0xff2faa61),
           identifier: item.displayName,
         );
       case 'failed':
         return _RowDescriptor(
-          leading: const Icon(
-            Icons.error_outline,
-            color: Color(0xffc0392b),
-            size: 22,
-          ),
+          leading: const AppAssetIcon(stopIconAsset, size: 22),
           statusLabel: AppLocalizations.of(context)!.uploadStatusFailedLabel,
           statusColor: const Color(0xffc0392b),
           identifier: item.displayName,
-          detail: item.errorMessage ??
-              item.errorCode ??
-              AppLocalizations.of(context)!.uploadStatusUnknownErrorLabel,
+          detail: _ordinaryDetail(context, item),
         );
       default:
         return _RowDescriptor(
-          leading: const Icon(
-            Icons.info_outline,
-            color: Color(0xff6f8d72),
-            size: 22,
-          ),
+          leading: const AppAssetIcon(infoIconAsset, size: 22),
           statusLabel: item.status,
           statusColor: const Color(0xff324737),
           identifier: item.displayName,
         );
     }
+  }
+
+  String _ordinaryDetail(BuildContext context, DirectUploadStatusItem item) {
+    final fallback = AppLocalizations.of(context)!.uploadStatusUnknownErrorLabel;
+    final detail = item.errorMessage ?? item.errorCode ?? fallback;
+    final lower = detail.toLowerCase();
+    if (lower.contains('supabase') ||
+        lower.contains('sidecar') ||
+        lower.contains('requestid') ||
+        lower.contains('jobid') ||
+        lower.contains('anon_key') ||
+        lower.contains('service_role')) {
+      return fallback;
+    }
+    return detail;
   }
 }
 

@@ -8,7 +8,9 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       final runtime = Directory(explicitDir);
       if (_isValidPostgresRuntime(runtime)) return runtime;
       _appendLog(
-        'KIDMEMORY_POSTGRES_RUNTIME_DIR 无效（需包含 bin/lib/share）：$explicitDir',
+        AppLocalizations.of(
+          context,
+        )!.setupInvalidPostgresRuntimeDir(explicitDir),
       );
     }
 
@@ -84,7 +86,9 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     if (!dataDir.existsSync()) return;
     final ownerFile = File(_bundledPostgresOwnerPath());
     if (!force) {
-      final ownerPid = ownerFile.existsSync() ? ownerFile.readAsStringSync().trim() : '';
+      final ownerPid = ownerFile.existsSync()
+          ? ownerFile.readAsStringSync().trim()
+          : '';
       if (ownerPid != '$pid') return;
     }
     try {
@@ -107,7 +111,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     Duration timeout = _setupCommandTimeout,
     Map<String, String>? environment,
   }) async {
-    final process = await Process.tart(
+    final process = await Process.start(
       executable,
       arguments,
       environment: {
@@ -116,15 +120,15 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
         ...?environment,
       },
     );
-    final stdoutDone = process.tdout
+    final stdoutDone = process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) => onOutput(line, _StreamKind.tdout))
+        .listen((line) => onOutput(line, _StreamKind.stdout))
         .asFuture<void>();
-    final stderrDone = process.tderr
+    final stderrDone = process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) => onOutput(line, _StreamKind.tderr))
+        .listen((line) => onOutput(line, _StreamKind.stderr))
         .asFuture<void>();
 
     var timedOut = false;
@@ -132,7 +136,7 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       timeout,
       onTimeout: () {
         timedOut = true;
-        process.kill(ProcessSignal.igterm);
+        process.kill(ProcessSignal.sigterm);
         return -1;
       },
     );
@@ -170,7 +174,11 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
 
     _stopBundledPostgresIfRunning(force: true);
     _bundledPostgresPort = await _reserveLocalPostgresPort();
-    _appendLog('内置 PostgreSQL 将使用端口 $_bundledPostgresPort');
+    _appendLog(
+      AppLocalizations.of(
+        context,
+      )!.setupBundledPostgresPortLog(_bundledPostgresPort),
+    );
 
     final dataDir = Directory(_bundledPostgresDataDir());
     final logFile = File(_bundledPostgresLogPath());
@@ -199,7 +207,12 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
 
     final versionFile = File('${dataDir.path}/PG_VERSION');
     if (!versionFile.existsSync()) {
-      _setSetupProgress(title, 0.12, AppLocalizations.of(context)!.setupInitBuiltinDataDir, state: AppLocalizations.of(context)!.setupInitStarted);
+      _setSetupProgress(
+        title,
+        0.12,
+        AppLocalizations.of(context)!.setupInitBuiltinDataDir,
+        state: AppLocalizations.of(context)!.setupInitStarted,
+      );
       await _runBundledPostgresCommand(
         initdb,
         [
@@ -216,7 +229,12 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       );
     }
 
-    _setSetupProgress(title, 0.30, AppLocalizations.of(context)!.setupStartBuiltinPostgres, state: AppLocalizations.of(context)!.setupStatusStarting);
+    _setSetupProgress(
+      title,
+      0.30,
+      AppLocalizations.of(context)!.setupStartBuiltinPostgres,
+      state: AppLocalizations.of(context)!.setupStatusStarting,
+    );
     await _runBundledPostgresCommand(
       pgCtl,
       [
@@ -240,7 +258,12 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     ownerFile.parent.createSync(recursive: true);
     ownerFile.writeAsStringSync('$pid', flush: true);
 
-    _setSetupProgress(title, 0.42, AppLocalizations.of(context)!.setupCreateLocalDatabase, state: AppLocalizations.of(context)!.setupInitStarted);
+    _setSetupProgress(
+      title,
+      0.42,
+      AppLocalizations.of(context)!.setupCreateLocalDatabase,
+      state: AppLocalizations.of(context)!.setupInitStarted,
+    );
     await _runBundledPostgresCommand(
       createdb,
       [
@@ -257,7 +280,12 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       onOutput: (line, kind) => _appendLog('createdb: $line'),
     );
 
-    _setSetupProgress(title, 0.50, AppLocalizations.of(context)!.setupEnableVectorExtension, state: AppLocalizations.of(context)!.setupInitStarted);
+    _setSetupProgress(
+      title,
+      0.50,
+      AppLocalizations.of(context)!.setupEnableVectorExtension,
+      state: AppLocalizations.of(context)!.setupInitStarted,
+    );
     await _runBundledPostgresCommand(
       psql,
       [
@@ -277,5 +305,4 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     );
     return true;
   }
-
 }

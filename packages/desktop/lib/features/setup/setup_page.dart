@@ -140,19 +140,19 @@ class SetupPage extends StatelessWidget {
   final VoidCallback onTestSupabaseStorage;
 
   static List<SetupCheckVm> pendingChecks(BuildContext context) => [
-        SetupCheckVm(
-          index: '1',
-          title: AppLocalizations.of(context)!.setupOpenAiTitle,
-          body: AppLocalizations.of(context)!.setupOpenAiDescription,
-          action: AppLocalizations.of(context)!.actionTestConnection,
-          state: AppLocalizations.of(context)!.setupNeedsConfiguration,
-          secondaryActionLabel:
-              AppLocalizations.of(context)!.actionEditConfig,
-          secondaryActionPath:
-              AppLocalizations.of(context)!.actionConfigurePathToken,
-          actionEnabled: false,
-        ),
-      ];
+    SetupCheckVm(
+      index: '1',
+      title: AppLocalizations.of(context)!.setupOpenAiTitle,
+      body: AppLocalizations.of(context)!.setupOpenAiDescription,
+      action: AppLocalizations.of(context)!.actionTestConnection,
+      state: AppLocalizations.of(context)!.setupNeedsConfiguration,
+      secondaryActionLabel: AppLocalizations.of(context)!.actionEditConfig,
+      secondaryActionPath: AppLocalizations.of(
+        context,
+      )!.actionConfigurePathToken,
+      actionEnabled: false,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +195,11 @@ class SetupPage extends StatelessWidget {
                               progress: check.progress,
                               progressLabel: check.progressLabel,
                               actionEnabled: check.actionEnabled,
-                              onAction: check.action == AppLocalizations.of(context)!.actionReconnect
+                              onAction:
+                                  check.action ==
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.actionReconnect
                                   ? onRefreshReadiness
                                   : () => onSetupAction(check),
                               secondaryActionLabel: check.secondaryActionLabel,
@@ -274,7 +278,9 @@ class _SupabaseStoragePanel extends StatelessWidget {
     final borderColor = configured
         ? const Color(0xffbfe4c6)
         : const Color(0xffe7e2da);
-    final description = AppLocalizations.of(context)!.setupExportDescriptionHint;
+    final description = AppLocalizations.of(
+      context,
+    )!.setupExportDescriptionHint;
 
     return SurfaceCard(
       backgroundColor: backgroundColor,
@@ -309,7 +315,9 @@ class _SupabaseStoragePanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      configured ? AppLocalizations.of(context)!.setupConfigured : AppLocalizations.of(context)!.setupNotConfigured,
+                      configured
+                          ? AppLocalizations.of(context)!.setupConfigured
+                          : AppLocalizations.of(context)!.setupNotConfigured,
                       style: TextStyle(
                         color: foregroundColor,
                         fontSize: 15,
@@ -365,13 +373,23 @@ Widget _readinessBanner(
   String message,
   VoidCallback onRefreshReadiness,
 ) {
-  final disconnected = message.startsWith(AppLocalizations.of(context)!.setupSidecarDisconnected);
+  final disconnected = message.startsWith(
+    AppLocalizations.of(context)!.setupSidecarDisconnected,
+  );
   final ready = _readinessComplete(message);
-  final title = disconnected ? AppLocalizations.of(context)!.setupLocalServicePreparing : (ready ? AppLocalizations.of(context)!.setupEnvironmentReady : AppLocalizations.of(context)!.setupEnvironmentChecking);
-  final actionLabel = disconnected ? AppLocalizations.of(context)!.actionReconnect : AppLocalizations.of(context)!.actionRefreshChecks;
+  final title = disconnected
+      ? AppLocalizations.of(context)!.setupLocalServicePreparing
+      : (ready
+            ? AppLocalizations.of(context)!.setupEnvironmentReady
+            : AppLocalizations.of(context)!.setupEnvironmentChecking);
+  final actionLabel = disconnected
+      ? AppLocalizations.of(context)!.actionReconnect
+      : AppLocalizations.of(context)!.actionRefreshChecks;
   final body = disconnected
       ? AppLocalizations.of(context)!.setupLocalServiceResponsibilities
-      : (ready ? AppLocalizations.of(context)!.setupEnvironmentReadyForCreation : AppLocalizations.of(context)!.setupCheckDependencyHint);
+      : (ready
+            ? AppLocalizations.of(context)!.setupEnvironmentReadyForCreation
+            : AppLocalizations.of(context)!.setupCheckDependencyHint);
   final backgroundColor = const Color(0xfff5f8f6);
   final borderColor = const Color(0xffdce8df);
   final foregroundColor = disconnected || !ready
@@ -473,7 +491,7 @@ class _SetupLeadingBadge extends StatelessWidget {
 }
 
 bool _readinessComplete(String value) {
-  final match = RegExp(r'已完成\s+(\d+)\s*/\s*(\d+)').firstMatch(value);
+  final match = RegExp(r'(\d+)\s*/\s*(\d+)').firstMatch(value);
   if (match == null) return false;
   final done = int.tryParse(match.group(1) ?? '');
   final total = int.tryParse(match.group(2) ?? '');

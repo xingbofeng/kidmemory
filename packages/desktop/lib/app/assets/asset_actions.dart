@@ -6,6 +6,7 @@ extension _DesktopShellAssetActions on _DesktopShellState {
       selectedChildId = childId;
       selectedAssets.clear();
     });
+    _invalidateCreationPlanForInputChange();
     await refreshDataset();
   }
 
@@ -15,6 +16,7 @@ extension _DesktopShellAssetActions on _DesktopShellState {
           ? selectedAssets.remove(id)
           : selectedAssets.add(id);
     });
+    _invalidateCreationPlanForInputChange();
   }
 
   void _replaceSelectedAssets(Set<String> ids) {
@@ -23,6 +25,7 @@ extension _DesktopShellAssetActions on _DesktopShellState {
         ..clear()
         ..addAll(ids);
     });
+    _invalidateCreationPlanForInputChange();
   }
 
   Future<bool> _updateAssetFromLibrary(
@@ -46,6 +49,7 @@ extension _DesktopShellAssetActions on _DesktopShellState {
   Future<bool> _deleteSingleAssetFromLibrary(String id) async {
     final result = await gateway.deleteAssetDto(assetId: id);
     selectedAssets.remove(id);
+    _invalidateCreationPlanForInputChange();
     await refreshDataset();
     return result.okValue;
   }
@@ -60,6 +64,9 @@ extension _DesktopShellAssetActions on _DesktopShellState {
         selectedAssets.remove(id);
         deletedCount++;
       }
+    }
+    if (deletedCount > 0) {
+      _invalidateCreationPlanForInputChange();
     }
     await refreshDataset();
     return deletedCount;

@@ -6,8 +6,12 @@ extension _DesktopShellSetupLocalDataPicker on _DesktopShellState {
       return await pickDataDirectoryPath();
     } catch (error) {
       if (!mounted) return null;
-      _showSnackBar('打开目录选择器失败：$error');
-      _appendLog('本地数据目录选择失败：$error');
+      _showSnackBar(
+        AppLocalizations.of(context)!.setupOpenDirectoryPickerFailed(error),
+      );
+      _appendLog(
+        AppLocalizations.of(context)!.setupLocalDataDirPickFailedLog(error),
+      );
       return null;
     }
   }

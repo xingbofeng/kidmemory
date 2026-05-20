@@ -5,6 +5,8 @@ import 'package:kidmemory_desktop/shared/models/library_models.dart';
 import 'package:kidmemory_desktop/features/generate_export/generate_export_page.dart';
 import 'package:kidmemory_desktop/features/setup/setup_page.dart';
 
+import 'localized_test_app.dart';
+
 void main() {
   Future<void> setDesktopSurface(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1200, 820));
@@ -126,6 +128,7 @@ void main() {
           generated: true,
           generating: false,
           exported: true,
+          creationPhase: CreationWorkflowPhase.published,
           statusMessage: '长图 JPG 已导出：/tmp/kidmemory/job_123456.jpg',
           requestId: 'req_123456',
           logLines: const [
@@ -154,7 +157,7 @@ void main() {
                 'KidMemory 作品集：https://project.supabase.co/signed/job_123456.jpg\n链接有效期：3600 秒',
           ),
           onGenerate: () {},
-          onGenerateSkipCover: () {},
+          onConfirmPlan: () {},
           onExport: () {},
           onExportTargetChanged: (_) {},
           onOpenExportFolder: () {},
@@ -173,22 +176,22 @@ void main() {
 }
 
 Widget _pageHarness(Widget child) {
-  return MaterialApp(home: Scaffold(body: child));
+  return localizedTestApp(home: Scaffold(body: child));
 }
 
 const _readyChecks = [
   SetupCheckVm(
     index: '1',
-    title: 'PostgreSQL 配置',
-    body: '本地数据库连接正常。',
+    title: '本地资料库',
+    body: '本地资料库连接正常。',
     action: '重新检测',
     state: '正常',
     ok: true,
   ),
   SetupCheckVm(
     index: '2',
-    title: 'Sidecar 本地服务',
-    body: '负责配置检测、数据库初始化、素材导入和生成任务。',
+    title: 'KidMemory 本地服务',
+    body: '负责配置检测、资料库初始化、素材导入和生成任务。',
     action: '重新连接',
     state: '已启动',
     ok: true,

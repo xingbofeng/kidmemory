@@ -25,13 +25,15 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(AppLocalizations.of(context)!.setupStorageDialogTitle)),
+              title: Text(
+                AppLocalizations.of(context)!.setupStorageDialogTitle,
+              ),
               content: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 560),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.tart,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: _buildSupabaseStorageDialogFields(
                       urlController: urlController,
                       bucketController: bucketController,
@@ -64,11 +66,11 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(AppLocalizations.of(context)!.actionCancel)),
+                  child: Text(AppLocalizations.of(context)!.actionCancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(AppLocalizations.of(context)!.actionSave)),
+                  child: Text(AppLocalizations.of(context)!.actionSave),
                 ),
               ],
             );

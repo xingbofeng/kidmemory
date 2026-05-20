@@ -5,6 +5,7 @@ extension _DesktopShellImportSummary on _DesktopShellState {
     ImportAssetsResultDto result, {
     int fallbackImportedCount = 0,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     if (!result.hasCounters && result.messageValue.isEmpty) {
       if (fallbackImportedCount > 0) {
         return AssetImportReport(
@@ -13,7 +14,9 @@ extension _DesktopShellImportSummary on _DesktopShellState {
           duplicates: 0,
           failed: 0,
           skipped: 0,
-          message: '素材库已刷新，新增 $fallbackImportedCount 项；sidecar 未返回完整导入统计',
+          message: l10n.importSummaryFallbackImportedMessage(
+            fallbackImportedCount,
+          ),
         );
       }
       return AssetImportReport(
@@ -29,8 +32,16 @@ extension _DesktopShellImportSummary on _DesktopShellState {
     final message = result.messageValue.isNotEmpty
         ? result.messageValue
         : (result.failedReasons.isEmpty
-            ? null
-            : '成功 ${result.importedCount} · 重复 ${result.duplicatesCount} · 跳过 ${result.skippedCount} · 失败 ${result.failedCount}：${result.failedReasons.join('、')}');
+              ? null
+              : l10n.importSummaryCountersWithFailures(
+                  result.importedCount,
+                  result.duplicatesCount,
+                  result.skippedCount,
+                  result.failedCount,
+                  result.failedReasons.join(
+                    l10n.importSummaryFailedReasonSeparator,
+                  ),
+                ));
     return AssetImportReport(
       imported: result.importedCount,
       duplicates: result.duplicatesCount,

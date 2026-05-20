@@ -5,6 +5,7 @@ import { TraceRequestLoggingMiddleware } from "./infrastructure/http/trace-reque
 import { BooksModule } from "./modules/books/books.module.ts";
 import { AgentConfigModule } from "./modules/agent-config/agent-config.module.ts";
 import { ConfigModule } from "./modules/config/config.module.ts";
+import { CreationModule } from "./modules/creation/creation.module.ts";
 import { DatasetModule } from "./modules/dataset/dataset.module.ts";
 import { SidecarMcpModule } from "./modules/mcp/mcp.module.ts";
 import { SkillsModule } from "./modules/skills/skills.module.ts";
@@ -23,6 +24,7 @@ Module({
     ConfigModule,
     AgentConfigModule,
     DatasetModule,
+    CreationModule,
     BooksModule,
     SkillsModule,
     WebCompanionModule,

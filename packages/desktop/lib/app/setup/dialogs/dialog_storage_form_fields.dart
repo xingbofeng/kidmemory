@@ -10,7 +10,7 @@ const _supabaseApiKeysDocsUrl = 'https://supabase.com/docs/guides/api/api-keys';
 
 extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
   void _selectAllText(TextEditingController controller) {
-    controller.election = TextSelection(
+    controller.selection = TextSelection(
       baseOffset: 0,
       extentOffset: controller.text.length,
     );
@@ -23,7 +23,9 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       await openExternalTarget(url);
     } catch (error) {
       if (!mounted) return;
-      _showSnackBar('打开 Supabase 官方说明失败：$error');
+      _showSnackBar(
+        AppLocalizations.of(context)!.setupOpenSupabaseDocsFailed(error),
+      );
     }
   }
 
@@ -36,7 +38,7 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-      icon: const Icon(Icons.open_in_new_rounded, size: 16),
+      icon: const AppAssetIcon(viewIconAsset, size: 16),
       onPressed: () => _openStorageDocs(url),
     );
   }
@@ -84,18 +86,18 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
     String? helpTooltip,
     String? helpUrl,
   }) {
-    final suffixIcons = <Widget>[
+    final suffixWidgets = <Widget>[
       if (helpUrl != null && helpTooltip != null)
         _storageDialogDocsButton(tooltip: helpTooltip, url: helpUrl),
       IconButton(
-        tooltip: visible ? AppLocalizations.of(context)!.actionHide : AppLocalizations.of(context)!.actionShow,
+        tooltip: visible
+            ? AppLocalizations.of(context)!.actionHide
+            : AppLocalizations.of(context)!.actionShow,
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
         onPressed: onToggle,
-        icon: Icon(
-          visible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-        ),
+        icon: AppAssetIcon(visible ? lockIconAsset : viewIconAsset, size: 20),
       ),
     ];
     return TextField(
@@ -110,11 +112,11 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         hintText: hintText,
         helperText: helperText,
         suffixIcon: SizedBox(
-          width: suffixIcons.length == 2 ? 84 : 44,
+          width: suffixWidgets.length == 2 ? 84 : 44,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
-            children: suffixIcons,
+            children: suffixWidgets,
           ),
         ),
       ),
@@ -260,8 +262,7 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         visible: showS3SecretKey,
         onToggle: onToggleS3SecretKey,
         hintText: AppLocalizations.of(context)!.setupInputSecretAccessKey,
-        helperText:
-            AppLocalizations.of(context)!.setupStorageS3SecretKeyHint,
+        helperText: AppLocalizations.of(context)!.setupStorageS3SecretKeyHint,
         helpUrl: _supabaseStorageS3AuthDocsUrl,
         helpTooltip: AppLocalizations.of(context)!.setupOpenS3AuthHelp,
       ),
@@ -293,7 +294,9 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       _storageDialogGap(),
       _storageDialogField(
         controller: publicBaseUrlController,
-        label: AppLocalizations.of(context)!.setupStoragePublicAccessPrefixLabel,
+        label: AppLocalizations.of(
+          context,
+        )!.setupStoragePublicAccessPrefixLabel,
         hintText: AppLocalizations.of(context)!.setupStoragePublicPrefixHint,
         helperText: AppLocalizations.of(context)!.setupPublicBucketOptionalHint,
       ),
@@ -312,8 +315,9 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
         visible: showServiceRoleKey,
         onToggle: onToggleServiceRoleKey,
         hintText: AppLocalizations.of(context)!.setupInputServiceRoleKey,
-        helperText:
-            AppLocalizations.of(context)!.setupStorageApiKeyHelpServiceRole,
+        helperText: AppLocalizations.of(
+          context,
+        )!.setupStorageApiKeyHelpServiceRole,
         helpUrl: _supabaseApiKeysDocsUrl,
         helpTooltip: AppLocalizations.of(context)!.setupOpenApiKeysHelp,
       ),

@@ -56,8 +56,12 @@ void main() {
 
   testWidgets('dialog shows the direct upload risk banner', (tester) async {
     await pumpDialog(tester);
-    expect(find.textContaining('Supabase 直传验证版'), findsWidgets);
-    expect(find.textContaining('对象需电脑端回拉后才算入库'), findsWidgets);
+    expect(find.textContaining('上传完成后需在电脑端拉回'), findsWidgets);
+    expect(find.textContaining('素材才会正式入库'), findsWidgets);
+    expect(find.textContaining('Supabase'), findsNothing);
+    expect(find.textContaining('sidecar'), findsNothing);
+    expect(find.textContaining('requestId'), findsNothing);
+    expect(find.textContaining('jobId'), findsNothing);
   });
 
   testWidgets('dialog has a close affordance', (tester) async {
@@ -122,7 +126,6 @@ void main() {
         home: Scaffold(body: DirectUploadEntryButton(onTap: () => taps += 1)),
       ),
     );
-    expect(find.textContaining('Direct'), findsOneWidget);
     expect(find.textContaining('扫码上传'), findsOneWidget);
     await tester.tap(find.byType(DirectUploadEntryButton));
     await tester.pumpAndSettle();

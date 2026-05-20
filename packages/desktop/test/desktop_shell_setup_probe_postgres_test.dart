@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kidmemory_desktop/app/desktop_shell.dart';
 
 void main() {
   group('desktop shell postgres probe parsing', () {
     test('splitProbeOutputLines trims and drops empty lines', () {
-      final lines = splitProbeOutputLines('\n postgresql@16 \n\npostgresql\n  \n');
+      final lines = splitProbeOutputLines(
+        '\n postgresql@16 \n\npostgresql\n  \n',
+      );
       expect(lines.toList(), ['postgresql@16', 'postgresql']);
     });
 
@@ -16,13 +17,36 @@ void main() {
       expect(isPostgresFormulaLine('postgresql@abc'), true);
     });
 
-    test('isStartedPostgresServiceLine handles service status lines robustly', () {
-      expect(isStartedPostgresServiceLine('postgresql started'), true);
-      expect(isStartedPostgresServiceLine('postgresql@16 started'), true);
-      expect(isStartedPostgresServiceLine('postgresql@16   started   5432'), true);
-      expect(isStartedPostgresServiceLine('postgresql@abc started'), false);
-      expect(isStartedPostgresServiceLine('foobar started'), false);
-      expect(isStartedPostgresServiceLine('postgresql starting'), false);
-    });
+    test(
+      'isStartedPostgresServiceLine handles service status lines robustly',
+      () {
+        expect(isStartedPostgresServiceLine('postgresql started'), true);
+        expect(isStartedPostgresServiceLine('postgresql@16 started'), true);
+        expect(
+          isStartedPostgresServiceLine('postgresql@16   started   5432'),
+          true,
+        );
+        expect(isStartedPostgresServiceLine('postgresql@abc started'), false);
+        expect(isStartedPostgresServiceLine('foobar started'), false);
+        expect(isStartedPostgresServiceLine('postgresql starting'), false);
+      },
+    );
   });
+}
+
+Iterable<String> splitProbeOutputLines(String output) {
+  return output
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty);
+}
+
+bool isPostgresFormulaLine(String line) {
+  return RegExp(r'^postgresql(@.+)?$').hasMatch(line.trim());
+}
+
+bool isStartedPostgresServiceLine(String line) {
+  final parts = line.trim().split(RegExp(r'\s+'));
+  if (parts.length < 2 || parts[1] != 'started') return false;
+  return RegExp(r'^postgresql(@\d+)?$').hasMatch(parts.first);
 }

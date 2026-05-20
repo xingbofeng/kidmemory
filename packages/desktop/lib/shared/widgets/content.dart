@@ -45,7 +45,8 @@ class SetupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final needsAttention = healthy == false || _setupNeedsAttention(l10n, state);
+    final needsAttention =
+        healthy == false || _setupNeedsAttention(l10n, state);
     final backgroundColor = switch ((healthy, needsAttention)) {
       (true, _) => const Color(0xffedf7ee),
       (_, true) => const Color(0xfffff1dd),
@@ -172,7 +173,9 @@ class SetupCard extends StatelessWidget {
 
   String _primaryActionLabel(AppLocalizations l10n) {
     if (actionEnabled) return action;
-    if (progress != null) return progressLabel ?? l10n.contentProcessingStatusLabel;
+    if (progress != null) {
+      return progressLabel ?? l10n.contentProcessingStatusLabel;
+    }
     return action;
   }
 
@@ -184,13 +187,16 @@ class SetupCard extends StatelessWidget {
   }
 
   IconData _actionIcon(AppLocalizations l10n, String label) {
-    if (label.contains(l10n.contentTestLabel) || label.contains(l10n.contentCheckLabel)) {
+    if (label.contains(l10n.contentTestLabel) ||
+        label.contains(l10n.contentCheckLabel)) {
       return Icons.link_rounded;
     }
-    if (label.contains(l10n.contentConfigureLabel) || label.contains(l10n.contentModifyLabel)) {
+    if (label.contains(l10n.contentConfigureLabel) ||
+        label.contains(l10n.contentModifyLabel)) {
       return Icons.settings_outlined;
     }
-    if (label.contains(l10n.contentDirectoryLabel) || label.contains(l10n.contentOpenLabel)) {
+    if (label.contains(l10n.contentDirectoryLabel) ||
+        label.contains(l10n.contentOpenLabel)) {
       return Icons.folder_open_rounded;
     }
     if (label.contains(l10n.contentConnectLabel)) {
@@ -287,9 +293,7 @@ class InfoHero extends StatelessWidget {
             ],
           ),
         ),
-        if (trailing != null) ...[
-          trailing!,
-        ],
+        if (trailing != null) ...[trailing!],
       ],
     ),
   );
@@ -564,25 +568,31 @@ class SidePanel extends StatelessWidget {
         DatasetLine(
           iconAsset: paletteIconAsset,
           title: AppLocalizations.of(context)!.contentCategoryArtworkLabel,
-          value: '$artworkCount 张',
+          value: AppLocalizations.of(
+            context,
+          )!.contentMetricImageCount(artworkCount),
           text: AppLocalizations.of(context)!.contentArtworkDescriptionText,
         ),
         DatasetLine(
           iconAsset: bearDocumentIconAsset,
           title: AppLocalizations.of(context)!.contentCategoryCraftLabel,
-          value: '$craftCount 件',
+          value: AppLocalizations.of(
+            context,
+          )!.contentMetricCraftCount(craftCount),
           text: AppLocalizations.of(context)!.contentCraftDescriptionText,
         ),
         DatasetLine(
           iconAsset: cameraIconAsset,
           title: AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
-          value: '$photoCount 张',
+          value: AppLocalizations.of(
+            context,
+          )!.contentMetricImageCount(photoCount),
           text: AppLocalizations.of(context)!.contentPhotoDescriptionText,
         ),
         DatasetLine(
           iconAsset: tagIconAsset,
           title: AppLocalizations.of(context)!.contentTagLabel,
-          value: '$tagCount 个',
+          value: AppLocalizations.of(context)!.contentMetricTagCount(tagCount),
           text: AppLocalizations.of(context)!.contentTagInfoText,
         ),
       ],
@@ -657,8 +667,8 @@ class DatasetLine extends StatelessWidget {
 
 class WarmPicture extends StatelessWidget {
   const WarmPicture({
-    required this.icon,
     required this.label,
+    this.icon,
     this.height = 150,
     this.width,
     this.assetPath,
@@ -667,7 +677,7 @@ class WarmPicture extends StatelessWidget {
     super.key,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final double height;
   final double? width;
@@ -692,7 +702,7 @@ class WarmPicture extends StatelessWidget {
         final iconSize = rawIcon.clamp(18.0, 72.0).toDouble();
         final child = (assetPath?.trim().isNotEmpty ?? false)
             ? AppAssetIcon(assetPath, fallbackIcon: icon, size: iconSize * 1.45)
-            : Icon(icon, size: iconSize, color: const Color(0xffe89933));
+            : AppAssetIcon(null, fallbackIcon: icon, size: iconSize);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -826,7 +836,9 @@ Future<void> showAssetArtworkPreviewDialog({
   String? fallbackAssetPath,
   String? path,
 }) {
-  final title = label.trim().isEmpty ? AppLocalizations.of(context)!.contentAssetPreviewFallbackTitle : label.trim();
+  final title = label.trim().isEmpty
+      ? AppLocalizations.of(context)!.contentAssetPreviewFallbackTitle
+      : label.trim();
   return showDialog<void>(
     context: context,
     builder: (dialogContext) {
@@ -907,7 +919,10 @@ class MetricPanel extends StatelessWidget {
         const SizedBox(height: 18),
         MetricStrip(
           metrics: [
-            (AppLocalizations.of(context)!.contentMetricTotalLabel, AppLocalizations.of(context)!.contentCollectionTotalCountLabel),
+            (
+              AppLocalizations.of(context)!.contentMetricTotalLabel,
+              AppLocalizations.of(context)!.contentCollectionTotalCountLabel,
+            ),
             (AppLocalizations.of(context)!.contentDrawingCountLabel, '612'),
             (AppLocalizations.of(context)!.contentPhotoCountLabel, '213'),
             (AppLocalizations.of(context)!.contentGeneratedPdfLabel, '13'),
@@ -955,7 +970,11 @@ class RecentWorksPanel extends StatelessWidget {
         const SizedBox(height: 18),
         Expanded(
           child: titles.isEmpty
-              ? const Center(child: Text('暂无最近作品'))
+              ? Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.contentNoRecentWorksMessage,
+                  ),
+                )
               : Row(
                   children: titles
                       .take(3)
@@ -1010,13 +1029,13 @@ class TimelinePanel extends StatelessWidget {
   Widget build(BuildContext context) => SurfaceCard(
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: const [
-        Text('😊\n出生'),
-        Text('🖍️\n第一次微笑'),
-        Text('🎨\n第一次画画'),
-        Text('🏫\n幼儿园入学'),
-        Text('🚲\n学会骑车'),
-        Text('🏮\n新年画作'),
+      children: [
+        Text(AppLocalizations.of(context)!.contentTimelineBirth),
+        Text(AppLocalizations.of(context)!.contentTimelineFirstSmile),
+        Text(AppLocalizations.of(context)!.contentTimelineFirstDrawing),
+        Text(AppLocalizations.of(context)!.contentTimelineDaycare),
+        Text(AppLocalizations.of(context)!.contentTimelineBicycle),
+        Text(AppLocalizations.of(context)!.contentTimelineNewYearArtwork),
       ],
     ),
   );
@@ -1031,24 +1050,22 @@ class ProfileAside extends StatelessWidget {
       Expanded(
         child: SurfaceCard(
           child: Text(
-            '档案信息\n\n性别                 男孩\n出生地               上海市\n星座                 双子座\n血型                 A型\n创建时间             2024-06-18\n最后更新             2025-05-30\n\n成长里程碑\n第一次画画     2022-03-15\n幼儿园入学     2023-09-01\n第一次画展     2024-05-20\n学会骑自行车   2024-10-12',
+            AppLocalizations.of(context)!.contentProfileSampleDetails,
             style: TextStyle(height: 2.0),
           ),
         ),
       ),
       SizedBox(height: 18),
-      SuccessBanner(title: AppLocalizations.of(context)!.contentBannerHeaderTitle, text: AppLocalizations.of(context)!.contentBannerHeaderSubtitle),
+      SuccessBanner(
+        title: AppLocalizations.of(context)!.contentBannerHeaderTitle,
+        text: AppLocalizations.of(context)!.contentBannerHeaderSubtitle,
+      ),
     ],
   );
 }
 
 class SearchBox extends StatelessWidget {
-  SearchBox({
-    this.controller,
-    this.onChanged,
-    this.hintText,
-    super.key,
-  });
+  const SearchBox({this.controller, this.onChanged, this.hintText, super.key});
 
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -1063,7 +1080,8 @@ class SearchBox extends StatelessWidget {
         padding: EdgeInsets.all(12),
         child: AppAssetIcon(searchIconAsset, size: inlineIconSize),
       ),
-      hintText: hintText ?? AppLocalizations.of(context)!.contentAssetSearchHint,
+      hintText:
+          hintText ?? AppLocalizations.of(context)!.contentAssetSearchHint,
       filled: true,
       fillColor: const Color(0xfffffbf5),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -1080,7 +1098,7 @@ class SearchBox extends StatelessWidget {
 }
 
 class FilterChips extends StatelessWidget {
-  FilterChips({
+  const FilterChips({
     this.typeOptions,
     this.selectedType = 'all',
     this.onChanged,
@@ -1093,12 +1111,25 @@ class FilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedTypeOptions = typeOptions ??
+    final resolvedTypeOptions =
+        typeOptions ??
         [
-          {'value': 'all', 'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel},
-          {'value': 'artwork', 'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel},
-          {'value': 'photo', 'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel},
-          {'value': 'craft', 'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel},
+          {
+            'value': 'all',
+            'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel,
+          },
+          {
+            'value': 'artwork',
+            'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel,
+          },
+          {
+            'value': 'photo',
+            'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
+          },
+          {
+            'value': 'craft',
+            'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel,
+          },
         ];
     final items = resolvedTypeOptions.where(
       (option) =>
@@ -1181,7 +1212,9 @@ class PaginationBar extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          '第 ${currentPage + 1} / $totalPages 页 · 每页 $pageSize 条',
+          AppLocalizations.of(
+            context,
+          )!.contentPaginationStatus(currentPage + 1, totalPages, pageSize),
           style: const TextStyle(color: Color(0xff5d5148)),
         ),
       ],

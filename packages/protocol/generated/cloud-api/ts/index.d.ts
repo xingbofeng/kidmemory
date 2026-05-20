@@ -314,7 +314,145 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: Record<string, any>;
+    schemas: {
+        RegisterDeviceRequestDto: {
+            machineId: string;
+            deviceName?: string;
+            platform?: string;
+        };
+        DeviceResponseDto: {
+            id: string;
+            machineId: string;
+            deviceName?: string;
+            platform?: string;
+            lastHeartbeat: string;
+            createdAt: string;
+            updatedAt: string;
+        };
+        UploadItemResponseDto: {
+            id: string;
+            sessionId: string;
+            childId?: string;
+            deviceId?: string;
+            objectKey: string;
+            fileName: string;
+            fileSize?: string;
+            mimeType?: string;
+            /** @enum {string} */
+            status: "pending" | "uploaded" | "synced" | "failed";
+            uploadedAt?: string;
+            syncedAt?: string;
+            errorMessage?: string;
+            createdAt: string;
+            updatedAt: string;
+        };
+        UpdateSyncStatusRequestDto: {
+            /** @enum {string} */
+            status: "uploaded" | "synced" | "failed";
+            syncedAt?: string;
+            errorMessage?: string;
+        };
+        JobResponseDto: {
+            id: string;
+            deviceId?: string;
+            /** @enum {string} */
+            type: "book_generation" | "asset_processing" | "export_pdf" | "export_long_image" | "import" | "sync" | "export" | "cleanup";
+            payload: {
+                [key: string]: unknown;
+            } | null;
+            /** @enum {string} */
+            status: "pending" | "claimed" | "processing" | "completed" | "failed";
+            priority: number;
+            claimedAt?: string;
+            completedAt?: string;
+            errorMessage?: string;
+            createdAt: string;
+            updatedAt: string;
+        };
+        UpdateJobStatusRequestDto: {
+            /** @enum {string} */
+            status: "pending" | "claimed" | "processing" | "completed" | "failed";
+            claimedAt?: string;
+            completedAt?: string;
+            errorMessage?: string;
+        };
+        DirectUploadConfigResponseDto: {
+            anonKey: string;
+        };
+        SessionSummaryResponseDto: {
+            sessionId: string;
+            status: string;
+            child: Record<string, never>;
+            expiresAt: string;
+            maxItems: number;
+            usedItems: number;
+            providers: Record<string, never>;
+        };
+        CreateUploadFileDto: {
+            clientFileId: string;
+            filename: string;
+            contentType: string;
+            sizeBytes: number;
+        };
+        CreateUploadItemsRequestDto: {
+            token: string;
+            /** @enum {string} */
+            provider?: "lan" | "supabase";
+            files: components["schemas"]["CreateUploadFileDto"][];
+        };
+        SignedUploadTargetDto: {
+            method: string;
+            url: string;
+            headers: {
+                [key: string]: string;
+            };
+            expiresAt?: string;
+        };
+        CreatedUploadItemDto: {
+            clientFileId: string;
+            uploadItemId: string;
+            assetId: string;
+            objectKey: string;
+            status: string;
+            signedUpload?: components["schemas"]["SignedUploadTargetDto"];
+        };
+        CreateUploadItemsResponseDto: {
+            items: components["schemas"]["CreatedUploadItemDto"][];
+        };
+        CommitUploadItemRequestDto: {
+            token: string;
+            objectKey: string;
+            contentType: string;
+            sizeBytes: number;
+            uploadToken?: string;
+            checksumSha256?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        CommitUploadItemResponseDto: {
+            uploadItemId: string;
+            status: string;
+        };
+        ShareTokenValidationResponseDto: {
+            isValid: boolean;
+            error?: string;
+            shareToken?: Record<string, never>;
+        };
+        SharedAssetDto: {
+            id: string;
+            title: string;
+            type: string;
+            createdAt: string;
+        };
+        SharedBookDto: {
+            id: string;
+            title: string;
+            childId: string;
+            createdAt: string;
+            status: string;
+        };
+    };
     responses: Record<string, unknown>;
     parameters: Record<string, unknown>;
     requestBodies: Record<string, unknown>;
@@ -384,14 +522,20 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterDeviceRequestDto"];
+            };
+        };
         responses: {
             /** @description Device registered successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeviceResponseDto"];
+                };
             };
             /** @description Invalid request */
             400: {
@@ -418,7 +562,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeviceResponseDto"];
+                };
             };
             /** @description Device not found */
             404: {
@@ -445,7 +591,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeviceResponseDto"];
+                };
             };
             /** @description Device not found */
             404: {
@@ -477,7 +625,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UploadItemResponseDto"][];
+                };
             };
         };
     };
@@ -490,14 +640,20 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSyncStatusRequestDto"];
+            };
+        };
         responses: {
             /** @description Status updated */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UploadItemResponseDto"];
+                };
             };
             /** @description Invalid status transition */
             400: {
@@ -534,7 +690,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["JobResponseDto"][];
+                };
             };
         };
     };
@@ -547,14 +705,20 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateJobStatusRequestDto"];
+            };
+        };
         responses: {
             /** @description Status updated */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["JobResponseDto"];
+                };
             };
             /** @description Invalid status transition */
             400: {
@@ -587,7 +751,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DirectUploadConfigResponseDto"];
+                };
             };
         };
     };
@@ -606,7 +772,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SessionSummaryResponseDto"];
+                };
             };
         };
     };
@@ -629,7 +797,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CreateUploadItemsResponseDto"];
+                };
             };
         };
     };
@@ -653,7 +823,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CommitUploadItemResponseDto"];
+                };
             };
         };
     };
@@ -675,7 +847,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ShareTokenValidationResponseDto"];
+                };
             };
         };
     };
@@ -696,7 +870,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SharedAssetDto"][];
+                };
             };
         };
     };
@@ -717,7 +893,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SharedBookDto"];
+                };
             };
         };
     };

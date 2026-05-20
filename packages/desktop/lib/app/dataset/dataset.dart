@@ -7,6 +7,7 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
     );
     final assetItems = snapshot.assetRows.map(_assetFromRecord).toList();
     if (!mounted) return;
+    final previousSelectedAssets = Set<String>.from(selectedAssets);
     _setShellState(() {
       children = snapshot.children;
       selectedChildId = snapshot.activeChildId;
@@ -18,6 +19,14 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
       final visibleAssetIds = assetItems.map((asset) => asset.id).toSet();
       selectedAssets.removeWhere((id) => !visibleAssetIds.contains(id));
     });
+    if (!_setEquals(previousSelectedAssets, selectedAssets)) {
+      _invalidateCreationPlanForInputChange();
+    }
+  }
+
+  bool _setEquals(Set<String> left, Set<String> right) {
+    if (left.length != right.length) return false;
+    return left.containsAll(right);
   }
 
   bool _hasSampleChild(List<ChildVm> childItems) {
@@ -51,18 +60,28 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
         .toList();
     final status = data.codeValue.isNotEmpty
         ? (data.messageValue.isNotEmpty ? data.messageValue : data.codeValue)
-        : '搜索完成，共 ${data.totalValue} 条';
+        : AppLocalizations.of(
+            context,
+          )!.datasetSearchCompletedStatus(data.totalValue);
     return AssetSearchResult(assets: results, statusMessage: status);
   }
 
   Future<String> refreshSearchIndexingMessage() async {
     final childId = selectedChildId;
-    if (childId == null || childId.isEmpty) return AppLocalizations.of(context)!.datasetS857;
+    if (childId == null || childId.isEmpty) {
+      return AppLocalizations.of(context)!.datasetS857;
+    }
     final data = await gateway.getIndexingStatusDto(childId: childId);
     final indexing =
         data.pendingValue + data.runningValue + data.retryWaitValue;
-    final base = '可语义搜索 ${data.searchableValue} · 索引中 $indexing';
-    return data.failedValue > 0 ? '$base · 失败 ${data.failedValue}' : base;
+    final base = AppLocalizations.of(
+      context,
+    )!.datasetSearchIndexingBaseStatus(data.searchableValue, indexing);
+    return data.failedValue > 0
+        ? AppLocalizations.of(
+            context,
+          )!.datasetSearchIndexingFailedStatus(base, data.failedValue)
+        : base;
   }
 
   Future<void> importSampleDataset() async {
@@ -97,17 +116,29 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
       if (!mounted) return;
       _appendLog(
         imported
-            ? '示例数据集导入完成：${result.assetCountValue} 个素材'
-            : '示例数据集导入未完成：${jsonEncode(result.raw)}',
+            ? AppLocalizations.of(
+                context,
+              )!.datasetSampleImportCompletedLog(result.assetCountValue)
+            : AppLocalizations.of(
+                context,
+              )!.datasetSampleImportIncompleteLog(jsonEncode(result.raw)),
       );
-      _showSnackBar(imported ? AppLocalizations.of(context)!.datasetS781 : AppLocalizations.of(context)!.datasetS779);
+      _showSnackBar(
+        imported
+            ? AppLocalizations.of(context)!.datasetS781
+            : AppLocalizations.of(context)!.datasetS779,
+      );
     } catch (error) {
       if (!mounted) return;
       _setShellState(() {
         sampleImportFailed = true;
       });
-      _appendLog('示例数据集导入异常：$error');
-      _showSnackBar('示例数据集导入失败：$error');
+      _appendLog(
+        AppLocalizations.of(context)!.datasetSampleImportExceptionLog(error),
+      );
+      _showSnackBar(
+        AppLocalizations.of(context)!.datasetSampleImportFailedWithError(error),
+      );
     } finally {
       if (mounted) _setShellState(() => sampleImporting = false);
     }

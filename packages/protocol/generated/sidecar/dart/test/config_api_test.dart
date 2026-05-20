@@ -22,11 +22,6 @@ void main() {
       // TODO
     });
 
-    //Future configControllerOpenAIReadiness() async
-    test('test configControllerOpenAIReadiness', () async {
-      // TODO
-    });
-
     //Future configControllerPgVectorReadiness() async
     test('test configControllerPgVectorReadiness', () async {
       // TODO
@@ -49,11 +44,6 @@ void main() {
 
     //Future configControllerUiConfig() async
     test('test configControllerUiConfig', () async {
-      // TODO
-    });
-
-    //Future configControllerUpdateOpenAI() async
-    test('test configControllerUpdateOpenAI', () async {
       // TODO
     });
 

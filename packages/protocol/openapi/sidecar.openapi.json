@@ -99,20 +99,6 @@
         ]
       }
     },
-    "/config/openai": {
-      "post": {
-        "operationId": "ConfigController_updateOpenAI",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Config"
-        ]
-      }
-    },
     "/config/supabase-storage": {
       "post": {
         "operationId": "ConfigController_updateSupabaseStorage",
@@ -144,20 +130,6 @@
     "/config/check/postgres": {
       "post": {
         "operationId": "ConfigController_postgresReadiness",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Config"
-        ]
-      }
-    },
-    "/config/check/openai": {
-      "post": {
-        "operationId": "ConfigController_openAIReadiness",
         "parameters": [],
         "responses": {
           "201": {
@@ -730,6 +702,154 @@
           "Dataset"
         ]
       }
+    },
+    "/creation/jobs/plan": {
+      "post": {
+        "operationId": "CreationController_createPlan",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      }
+    },
+    "/creation/jobs": {
+      "post": {
+        "operationId": "CreationController_createJob",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      }
+    },
+    "/creation/jobs/{jobId}/events": {
+      "get": {
+        "operationId": "CreationController_getEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/creation/jobs/{jobId}/preview": {
+      "get": {
+        "operationId": "CreationController_preview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/creation/jobs/{jobId}": {
+      "get": {
+        "operationId": "CreationController_getJob",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/creation/jobs/{jobId}/export": {
+      "post": {
+        "operationId": "CreationController_exportJob",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/creation/jobs/{jobId}/share": {
+      "post": {
+        "operationId": "CreationController_shareJob",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "jobId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     },
     "/books/jobs": {
       "post": {

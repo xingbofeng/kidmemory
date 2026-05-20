@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import type { AgentConfig } from "../domain/agent-config.entity.ts";
 import type { AgentTestingPort } from "../ports/agent-config.ports.ts";
 
-type OpenAIClientFactory = (input: { apiKey: string; baseURL?: string }) => OpenAI;
+type OpenAICompatibleClient = Pick<OpenAI, "responses" | "chat">;
+type OpenAIClientFactory = (input: { apiKey: string; baseURL?: string }) => OpenAICompatibleClient;
 
 export class AgentTestingService implements AgentTestingPort {
   private readonly fetchImpl: typeof fetch;
@@ -37,6 +38,20 @@ export class AgentTestingService implements AgentTestingPort {
       apiKey,
       baseURL: config.baseUrl || undefined,
     });
+
+    if (config.provider === "custom") {
+      const response = await client.chat.completions.create({
+        model: config.model,
+        messages: [{ role: "user", content: testPrompt }],
+        max_tokens: Math.min(config.maxTokens, 64),
+      });
+      return {
+        success: true,
+        modelUsed: config.model,
+        tokensUsed: response.usage?.total_tokens,
+      };
+    }
+
     const response = await client.responses.create({
       model: config.model,
       input: testPrompt,

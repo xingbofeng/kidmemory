@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'direct_upload_models.dart';
 import 'direct_upload_status.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/chrome.dart';
 
 /// Direct Upload session dialog.
 ///
@@ -63,10 +64,14 @@ class DirectUploadDialog extends StatelessWidget {
                         children: [
                           ElevatedButton.icon(
                             onPressed: busy ? null : () => onPullback(),
-                            icon: const Icon(Icons.cloud_download_outlined),
+                            icon: const AppAssetIcon(
+                              cloudDownloadIconAsset,
+                              size: 18,
+                            ),
                             label: Text(
-                              AppLocalizations.of(context)!
-                                  .directUploadPullBackActionLabel,
+                              AppLocalizations.of(
+                                context,
+                              )!.directUploadPullBackActionLabel,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -117,7 +122,7 @@ class _DialogHeader extends StatelessWidget {
         ),
         IconButton(
           tooltip: AppLocalizations.of(context)!.actionCloseLabel,
-          icon: const Icon(Icons.close),
+          icon: const AppAssetIcon(stopIconAsset, size: 18),
           onPressed: onClose,
         ),
       ],
@@ -140,7 +145,7 @@ class _RiskBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_outlined, color: Color(0xffb38018)),
+          AppAssetIcon(infoIconAsset, size: 22),
           SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -174,7 +179,9 @@ class _InfoSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '孩子：${config.childId}',
+                AppLocalizations.of(
+                  context,
+                )!.directUploadChildIdLine(config.childId),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -201,7 +208,9 @@ class _InfoSection extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                '建议每次≤${config.recommendedClientLimit}张 · 仅为体验约束，并非安全约束',
+                AppLocalizations.of(
+                  context,
+                )!.directUploadClientLimitHint(config.recommendedClientLimit),
                 style: const TextStyle(color: Color(0xff6f8d72), fontSize: 12),
               ),
             ],

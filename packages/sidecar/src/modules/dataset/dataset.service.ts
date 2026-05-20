@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
-import type { SampleDb } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
+import type { ExportArtifact, SampleDb } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
 import {
   createSupabaseStorageProvider,
   type SupabaseStorageProvider,
@@ -124,6 +124,10 @@ export class DatasetService {
     return this.delegate.removeSearchCandidatePoolItems(input);
   }
   resetSampleAssets(childId?: string) { return this.delegate.resetSampleAssets(childId); }
+  async recordExportArtifact(artifact: ExportArtifact) {
+    const db = await this.readDb();
+    return db.upsertExportArtifact?.(artifact);
+  }
   async enqueueAssetStorageSync(assetId: string) {
     return (await this.storageDelegate()).enqueueAssetSync(assetId);
   }

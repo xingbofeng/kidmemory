@@ -33,13 +33,14 @@ extension _DesktopShellImportStaging on _DesktopShellState {
     String targetDir,
     int index,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final name = _basename(sourcePath);
       final targetPath = '$targetDir${Platform.pathSeparator}${index}_$name';
       await File(sourcePath).copy(targetPath);
       return targetPath;
     } catch (error) {
-      _appendLog('导入暂存失败：$sourcePath ($error)');
+      _appendLog(l10n.importStagingFailedLog(sourcePath, error));
       return null;
     }
   }
@@ -48,6 +49,7 @@ extension _DesktopShellImportStaging on _DesktopShellState {
     String sourcePath,
     String targetDir,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     await for (final entity in Directory(sourcePath).list(recursive: true)) {
       if (entity is! File) continue;
       final relative = entity.path
@@ -59,7 +61,7 @@ extension _DesktopShellImportStaging on _DesktopShellState {
       try {
         await entity.copy(targetPath);
       } catch (error) {
-        _appendLog('导入暂存失败：${entity.path} ($error)');
+        _appendLog(l10n.importStagingFailedLog(entity.path, error));
       }
     }
   }

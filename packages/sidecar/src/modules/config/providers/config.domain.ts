@@ -4,7 +4,6 @@ import type { PrismaService } from "../../../infrastructure/database/prisma.serv
 import { redactConfig } from "../../../infrastructure/config/app-config.service.ts";
 import {
   checkClaudeReadiness,
-  checkOpenAIReadiness,
   checkPgVector,
   checkPostgres,
 } from "./readiness.ts";
@@ -106,9 +105,6 @@ export function createConfigReadinessService(
     },
     postgresReadiness() {
       return checkPostgres(dependencies.config.postgres);
-    },
-    openAIReadiness() {
-      return checkOpenAIReadiness(dependencies.config.openai);
     },
     claudeReadiness() {
       return checkClaudeReadiness(dependencies.config.claude);

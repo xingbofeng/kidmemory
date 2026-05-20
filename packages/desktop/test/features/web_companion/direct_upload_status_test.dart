@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/features/web_companion/direct_upload/direct_upload_models.dart';
 import 'package:kidmemory_desktop/features/web_companion/direct_upload/direct_upload_status.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   Future<void> pumpList(
     WidgetTester tester, {
@@ -12,7 +14,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(960, 720));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: DirectUploadStatusList(
             items: items,
@@ -70,29 +72,51 @@ void main() {
     expect(find.textContaining('baz.jpg'), findsOneWidget);
   });
 
-  testWidgets('failed items render the error message verbatim and a retry button', (
+  testWidgets(
+    'failed items render the error message verbatim and a retry button',
+    (tester) async {
+      String? retried;
+      await pumpList(
+        tester,
+        items: [
+          DirectUploadStatusItem(
+            objectKey: 'web-companion-uploads/sess/oops.jpg',
+            status: 'failed',
+            errorCode: 'download_failed',
+            errorMessage: '网络中断，请稍后再试',
+          ),
+        ],
+        onRetry: (key) async {
+          retried = key;
+        },
+      );
+      expect(find.text('网络中断，请稍后再试'), findsOneWidget);
+      final retry = find.text('重试');
+      expect(retry, findsOneWidget);
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+      expect(retried, 'web-companion-uploads/sess/oops.jpg');
+    },
+  );
+
+  testWidgets('failed items hide technical storage and request labels', (
     tester,
   ) async {
-    String? retried;
     await pumpList(
       tester,
       items: [
         DirectUploadStatusItem(
           objectKey: 'web-companion-uploads/sess/oops.jpg',
           status: 'failed',
-          errorCode: 'download_failed',
-          errorMessage: '网络中断，请稍后再试',
+          errorMessage:
+              'Supabase sidecar requestId=req_1 jobId=job_1 SUPABASE_ANON_KEY',
         ),
       ],
-      onRetry: (key) async {
-        retried = key;
-      },
     );
-    expect(find.text('网络中断，请稍后再试'), findsOneWidget);
-    final retry = find.text('重试');
-    expect(retry, findsOneWidget);
-    await tester.tap(retry);
-    await tester.pumpAndSettle();
-    expect(retried, 'web-companion-uploads/sess/oops.jpg');
+    expect(find.text('未知错误'), findsOneWidget);
+    expect(find.textContaining('Supabase'), findsNothing);
+    expect(find.textContaining('sidecar'), findsNothing);
+    expect(find.textContaining('requestId'), findsNothing);
+    expect(find.textContaining('jobId'), findsNothing);
   });
 }

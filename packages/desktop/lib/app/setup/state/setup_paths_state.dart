@@ -12,9 +12,11 @@ extension _DesktopShellSetupPathsState on _DesktopShellState {
         return SetupCheckVm(
           index: check.index,
           title: check.title,
-          body: _localDataDirectoryDescription(paths),
+          body: _localDataDirectoryDescription(context, paths),
           action: check.action,
-          secondaryActionLabel: AppLocalizations.of(context)!.actionOpenDirectory,
+          secondaryActionLabel: AppLocalizations.of(
+            context,
+          )!.actionOpenDirectory,
           secondaryActionPath: paths.dataDir,
           state: state,
           ok: true,

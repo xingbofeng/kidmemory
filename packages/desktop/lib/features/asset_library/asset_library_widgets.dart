@@ -45,8 +45,8 @@ class _AssetStorageAction extends StatelessWidget {
     final reason = synced
         ? AppLocalizations.of(context)!.assetLibrarySyncedToStorageText
         : running
-            ? AppLocalizations.of(context)!.assetLibrarySyncRunningOrRetryText
-            : AppLocalizations.of(context)!.assetLibraryLocalSyncFallbackText;
+        ? AppLocalizations.of(context)!.assetLibrarySyncRunningOrRetryText
+        : AppLocalizations.of(context)!.assetLibraryLocalSyncFallbackText;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,15 +71,23 @@ class _AssetStorageAction extends StatelessWidget {
   }
 }
 
-String _storageStatusLabel(String status) {
+String _storageStatusLabel(BuildContext context, String status) {
   final normalized = status.trim();
-  if (normalized == 'synced') return AppLocalizations.of(context)!.assetLibraryStatusSynced;
+  if (normalized == 'synced') {
+    return AppLocalizations.of(context)!.assetLibraryStatusSynced;
+  }
   if (normalized == 'pending' || normalized == 'running') {
     return AppLocalizations.of(context)!.assetLibraryStatusSyncing;
   }
-  if (normalized == 'retry_wait') return AppLocalizations.of(context)!.assetLibraryStatusRetryWaiting;
-  if (normalized == 'failed') return AppLocalizations.of(context)!.assetLibraryStatusFailed;
-  if (normalized.isEmpty || normalized == 'local_only' || normalized == 'ready') {
+  if (normalized == 'retry_wait') {
+    return AppLocalizations.of(context)!.assetLibraryStatusRetryWaiting;
+  }
+  if (normalized == 'failed') {
+    return AppLocalizations.of(context)!.assetLibraryStatusFailed;
+  }
+  if (normalized.isEmpty ||
+      normalized == 'local_only' ||
+      normalized == 'ready') {
     return AppLocalizations.of(context)!.assetLibraryStatusLocalOnly;
   }
   return normalized;
@@ -104,23 +112,27 @@ class _LibraryHeaderStatus extends StatelessWidget {
       alignment: WrapAlignment.end,
       children: [
         _SoftStatusChip(
-          icon: Icons.child_care_rounded,
-          text: '当前孩子：$childName',
+          iconAsset: childIconAsset,
+          text: AppLocalizations.of(
+            context,
+          )!.assetLibraryCurrentChildChip(childName),
         ),
-        _SoftStatusChip(icon: Icons.grid_view_rounded, text: '素材 $assetCount'),
         _SoftStatusChip(
-          icon: Icons.check_circle_outline_rounded,
-          text: indexingMessage,
+          iconAsset: gridIconAsset,
+          text: AppLocalizations.of(
+            context,
+          )!.assetLibraryAssetCountChip(assetCount),
         ),
+        _SoftStatusChip(iconAsset: completeIconAsset, text: indexingMessage),
       ],
     );
   }
 }
 
 class _SoftStatusChip extends StatelessWidget {
-  const _SoftStatusChip({required this.icon, required this.text});
+  const _SoftStatusChip({required this.iconAsset, required this.text});
 
-  final IconData icon;
+  final String iconAsset;
   final String text;
 
   @override
@@ -136,7 +148,7 @@ class _SoftStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: _AssetLibraryPalette.successAction),
+          AppAssetIcon(iconAsset, size: 16),
           const SizedBox(width: 6),
           Text(
             text,
@@ -384,7 +396,9 @@ class _LibraryToolbar extends StatelessWidget {
                       child: SearchBox(
                         controller: searchController,
                         onChanged: onSearchChanged,
-                        hintText: AppLocalizations.of(context)!.assetLibrarySearchHintText,
+                        hintText: AppLocalizations.of(
+                          context,
+                        )!.assetLibrarySearchHintText,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -395,7 +409,15 @@ class _LibraryToolbar extends StatelessWidget {
                         onPressed: semanticSearching || importBusy
                             ? null
                             : onSemanticSearch,
-                        child: Text(semanticSearching ? AppLocalizations.of(context)!.assetLibrarySearchingLabel : AppLocalizations.of(context)!.assetLibrarySearchButtonLabel),
+                        child: Text(
+                          semanticSearching
+                              ? AppLocalizations.of(
+                                  context,
+                                )!.assetLibrarySearchingLabel
+                              : AppLocalizations.of(
+                                  context,
+                                )!.assetLibrarySearchButtonLabel,
+                        ),
                       ),
                     ),
                   ],
@@ -407,8 +429,10 @@ class _LibraryToolbar extends StatelessWidget {
                   height: 46,
                   child: OutlinedButton.icon(
                     onPressed: onSmartPick,
-                    icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
+                    icon: const AppAssetIcon(wandIconAsset, size: 18),
+                    label: Text(
+                      AppLocalizations.of(context)!.assetLibrarySmartPickLabel,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: _AssetLibraryPalette.successAction,
                       backgroundColor: _AssetLibraryPalette.successSoft,
@@ -423,16 +447,26 @@ class _LibraryToolbar extends StatelessWidget {
                 ),
                 if (showImportActions)
                   _ToolbarButton(
-                    icon: Icons.add_photo_alternate_outlined,
                     iconAsset: imageIconAsset,
-                    label: importBusy ? AppLocalizations.of(context)!.sampleDatasetImportingActionLabel : AppLocalizations.of(context)!.assetLibraryImportPhotoLabel,
+                    label: importBusy
+                        ? AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetImportingActionLabel
+                        : AppLocalizations.of(
+                            context,
+                          )!.assetLibraryImportPhotoLabel,
                     onPressed: importBusy ? null : onImportFiles,
                   ),
                 if (showImportActions)
                   _ToolbarButton(
-                    icon: Icons.folder_open_outlined,
                     iconAsset: folderIconAsset,
-                    label: importBusy ? AppLocalizations.of(context)!.sampleDatasetImportingActionLabel : AppLocalizations.of(context)!.assetLibraryImportFolderLabel,
+                    label: importBusy
+                        ? AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetImportingActionLabel
+                        : AppLocalizations.of(
+                            context,
+                          )!.assetLibraryImportFolderLabel,
                     onPressed: importBusy ? null : onImportFolder,
                   ),
               ];
@@ -472,9 +506,10 @@ class _LibraryToolbar extends StatelessWidget {
                   width: 188,
                   child: children.isEmpty
                       ? _ReadonlyToolbarField(
-                          icon: Icons.child_care,
                           iconAsset: childIconAsset,
-                          label: AppLocalizations.of(context)!.assetLibraryNoChildProfileText,
+                          label: AppLocalizations.of(
+                            context,
+                          )!.assetLibraryNoChildProfileText,
                         )
                       : DropdownButtonFormField<String>(
                           initialValue: selectedChildId ?? children.first.id,
@@ -516,8 +551,14 @@ class _LibraryToolbar extends StatelessWidget {
                 ),
               ),
               _InlineStatusChip(
-                icon: Icons.refresh_rounded,
-                label: refreshingIndex ? AppLocalizations.of(context)!.assetLibraryIndexRefreshingLabel : AppLocalizations.of(context)!.assetLibraryRefreshIndexLabel,
+                iconAsset: refreshIconAsset,
+                label: refreshingIndex
+                    ? AppLocalizations.of(
+                        context,
+                      )!.assetLibraryIndexRefreshingLabel
+                    : AppLocalizations.of(
+                        context,
+                      )!.assetLibraryRefreshIndexLabel,
                 onPressed: refreshingIndex ? null : onRefreshSearchIndexing,
               ),
               if (showImportActions) ...[
@@ -575,7 +616,7 @@ class _IndexingStatusPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle_outline_rounded, size: 16),
+          const AppAssetIcon(completeIconAsset, size: 16),
           const SizedBox(width: 8),
           Text(
             text,
@@ -638,7 +679,12 @@ class _SearchStatusStrip extends StatelessWidget {
             ),
           ),
           if (onClear != null)
-            TextButton(onPressed: onClear, child: Text(AppLocalizations.of(context)!.assetLibraryClearSearchLabel))),
+            TextButton(
+              onPressed: onClear,
+              child: Text(
+                AppLocalizations.of(context)!.assetLibraryClearSearchLabel,
+              ),
+            ),
         ],
       ),
     );
@@ -676,7 +722,9 @@ class _SelectionBasket extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '本次作品集素材 $selectedCount 项',
+                  AppLocalizations.of(
+                    context,
+                  )!.assetLibraryCollectionSelectedCount(selectedCount),
                   style: const TextStyle(
                     color: _AssetLibraryPalette.successText,
                     fontWeight: FontWeight.w900,
@@ -702,7 +750,7 @@ class _SelectionBasket extends StatelessWidget {
                 for (final asset in previewAssets)
                   Chip(
                     avatar: AppAssetIcon(
-                      _assetIconAsset(asset.type),
+                      _assetIconAsset(context, asset.type),
                       size: compactInlineIconSize,
                     ),
                     label: Text(asset.title, overflow: TextOverflow.ellipsis),
@@ -735,25 +783,22 @@ class _SelectionBasket extends StatelessWidget {
   }
 }
 
-String _assetIconAsset(String type) {
-  if (type == 'photo' || type == AppLocalizations.of(context)!.contentAssetTypePhotoLabel) {
+String _assetIconAsset(BuildContext context, String type) {
+  if (type == 'photo' ||
+      type == AppLocalizations.of(context)!.contentAssetTypePhotoLabel) {
     return cameraIconAsset;
   }
-  if (type == 'craft' || type == AppLocalizations.of(context)!.contentAssetTypeCraftLabel) {
+  if (type == 'craft' ||
+      type == AppLocalizations.of(context)!.contentAssetTypeCraftLabel) {
     return bearDocumentIconAsset;
   }
   return paletteIconAsset;
 }
 
 class _ReadonlyToolbarField extends StatelessWidget {
-  const _ReadonlyToolbarField({
-    required this.icon,
-    required this.label,
-    this.iconAsset,
-  });
+  const _ReadonlyToolbarField({required this.iconAsset, required this.label});
 
-  final IconData icon;
-  final String? iconAsset;
+  final String iconAsset;
   final String label;
 
   @override
@@ -768,12 +813,7 @@ class _ReadonlyToolbarField extends StatelessWidget {
       ),
       child: Row(
         children: [
-          AppAssetIcon(
-            iconAsset,
-            fallbackIcon: icon,
-            size: compactInlineIconSize,
-            opacity: 0.86,
-          ),
+          AppAssetIcon(iconAsset, size: compactInlineIconSize, opacity: 0.86),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -826,12 +866,12 @@ class _ToolbarLabeledField extends StatelessWidget {
 
 class _InlineStatusChip extends StatelessWidget {
   const _InlineStatusChip({
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     this.onPressed,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final String label;
   final VoidCallback? onPressed;
 
@@ -841,7 +881,7 @@ class _InlineStatusChip extends StatelessWidget {
       height: 40,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 17),
+        icon: AppAssetIcon(iconAsset, size: 17),
         label: Text(label),
         style: OutlinedButton.styleFrom(
           foregroundColor: _AssetLibraryPalette.bodyStrong,
@@ -859,14 +899,12 @@ class _InlineStatusChip extends StatelessWidget {
 
 class _ToolbarButton extends StatelessWidget {
   const _ToolbarButton({
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     required this.onPressed,
-    this.iconAsset,
   });
 
-  final IconData icon;
-  final String? iconAsset;
+  final String iconAsset;
   final String label;
   final Future<void> Function()? onPressed;
 
@@ -876,11 +914,7 @@ class _ToolbarButton extends StatelessWidget {
       height: 46,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: AppAssetIcon(
-          iconAsset,
-          fallbackIcon: icon,
-          size: compactInlineIconSize,
-        ),
+        icon: AppAssetIcon(iconAsset, size: compactInlineIconSize),
         label: Text(label),
         style: OutlinedButton.styleFrom(
           foregroundColor: _AssetLibraryPalette.successAction,
@@ -928,21 +962,49 @@ class _BatchActionBar extends StatelessWidget {
           const AppAssetIcon(completeIconAsset, size: 24),
           const SizedBox(width: 10),
           Text(
-            '已选择 $selectedCount 项素材',
+            AppLocalizations.of(
+              context,
+            )!.assetLibrarySelectedAssetsCount(selectedCount),
             style: const TextStyle(
               fontWeight: FontWeight.w900,
               color: _AssetLibraryPalette.successText,
             ),
           ),
           const Spacer(),
-          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGeneratePictureBookLabel, onPressed: onGoToGenerate),
-          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGenerateVideoLabel, onPressed: onGoToGenerate),
-          _BatchTextButton(label: AppLocalizations.of(context)!.assetLibraryBatchGenerateAlbumLabel, onPressed: onGoToGenerate),
-          TextButton(onPressed: onClearSelection, child: Text(AppLocalizations.of(context)!.assetLibraryClearSelectionLabel))),
+          _BatchTextButton(
+            label: AppLocalizations.of(
+              context,
+            )!.assetLibraryBatchGeneratePictureBookLabel,
+            onPressed: onGoToGenerate,
+          ),
+          _BatchTextButton(
+            label: AppLocalizations.of(
+              context,
+            )!.assetLibraryBatchGenerateVideoLabel,
+            onPressed: onGoToGenerate,
+          ),
+          _BatchTextButton(
+            label: AppLocalizations.of(
+              context,
+            )!.assetLibraryBatchGenerateAlbumLabel,
+            onPressed: onGoToGenerate,
+          ),
+          TextButton(
+            onPressed: onClearSelection,
+            child: Text(
+              AppLocalizations.of(context)!.assetLibraryClearSelectionLabel,
+            ),
+          ),
           TextButton.icon(
             onPressed: onDeleteSelected,
-            icon: const Icon(Icons.delete_outline_rounded, size: 18),
-            label: Text(deleteBusy ? AppLocalizations.of(context)!.assetLibraryBatchDeletingLabel : AppLocalizations.of(context)!.assetLibraryBatchDeleteButtonLabel),
+            icon: const AppAssetIcon(deleteIconAsset, size: 18),
+            label: Text(
+              deleteBusy
+                  ? AppLocalizations.of(context)!.assetLibraryBatchDeletingLabel
+                  : AppLocalizations.of(
+                      context,
+                    )!.assetLibraryBatchDeleteButtonLabel,
+            ),
             style: TextButton.styleFrom(
               foregroundColor: _AssetLibraryPalette.dangerText,
             ),
@@ -1022,16 +1084,18 @@ class EmptyAssetLibrary extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _ToolbarButton(
-                    icon: Icons.add_photo_alternate_outlined,
                     iconAsset: imageIconAsset,
-                    label: AppLocalizations.of(context)!.assetLibraryImportPhotoLabel,
+                    label: AppLocalizations.of(
+                      context,
+                    )!.assetLibraryImportPhotoLabel,
                     onPressed: onImportFiles,
                   ),
                   const SizedBox(width: 12),
                   _ToolbarButton(
-                    icon: Icons.folder_open_outlined,
                     iconAsset: folderIconAsset,
-                    label: AppLocalizations.of(context)!.assetLibraryImportFolderLabel,
+                    label: AppLocalizations.of(
+                      context,
+                    )!.assetLibraryImportFolderLabel,
                     onPressed: onImportFolder,
                   ),
                 ],
@@ -1063,11 +1127,7 @@ class _EmptySearchResults extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.search_off_rounded,
-                size: 54,
-                color: _AssetLibraryPalette.bodyMuted,
-              ),
+              const AppAssetIcon(searchIconAsset, size: 54),
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.assetLibraryEmptySearchTitle,
@@ -1088,12 +1148,18 @@ class _EmptySearchResults extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: onClearSearch,
-                    child: Text(AppLocalizations.of(context)!.assetLibraryClearSearchActionLabel)),
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.assetLibraryClearSearchActionLabel,
+                    ),
                   ),
                   FilledButton.icon(
                     onPressed: onSmartPick,
-                    icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                    label: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
+                    icon: const AppAssetIcon(wandIconAsset, size: 18),
+                    label: Text(
+                      AppLocalizations.of(context)!.assetLibrarySmartPickLabel,
+                    ),
                   ),
                 ],
               ),
@@ -1125,11 +1191,7 @@ class _InspectorEmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               border: Border.all(color: _AssetLibraryPalette.successBorder),
             ),
-            child: const Icon(
-              Icons.touch_app_outlined,
-              color: _AssetLibraryPalette.successAction,
-              size: 34,
-            ),
+            child: const AppAssetIcon(viewIconAsset, size: 34),
           ),
           const SizedBox(height: 18),
           Text(
@@ -1148,8 +1210,10 @@ class _InspectorEmptyState extends StatelessWidget {
           const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: onSmartPick,
-            icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-            label: Text(AppLocalizations.of(context)!.assetLibrarySmartOrganizeLabel)),
+            icon: const AppAssetIcon(wandIconAsset, size: 18),
+            label: Text(
+              AppLocalizations.of(context)!.assetLibrarySmartOrganizeLabel,
+            ),
           ),
         ],
       ),

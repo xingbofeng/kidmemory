@@ -74,41 +74,6 @@ export async function checkPgVector(
   }
 }
 
-export async function checkOpenAIReadiness(config: { provider: "openai"; baseUrl: string; apiKey: string; model: string }, fetcher: typeof fetch = fetch) {
-  if (!config.baseUrl.trim() || !config.model.trim() || !config.apiKey.trim()) {
-    return { ok: false, service: "openai", blocksGeneration: false, message: "大模型接口未配置。", action: "请先在设置页配置 Base URL、Model 和 API Key，开启可选的模型可用性检测。" };
-  }
-  try {
-    const probeUrls = buildOpenAIProbeUrls(config.baseUrl, config.model);
-    let lastFailure: { status: number; body: string; url: string } | null = null;
-    for (const url of probeUrls) {
-      const response = await fetcher(url, {
-        headers: { Authorization: `Bearer ${config.apiKey}` },
-      });
-      if (response.ok) {
-        return {
-          ok: true,
-          service: "openai",
-          blocksGeneration: false,
-          message: "OpenAI readiness check passed",
-        };
-      }
-      const body = await safeReadBody(response);
-      lastFailure = { status: response.status, body, url };
-    }
-    const bodyHint = lastFailure?.body ? ` (${lastFailure.body})` : "";
-    return {
-      ok: false,
-      service: "openai",
-      blocksGeneration: false,
-      message: `OpenAI readiness check returned HTTP ${lastFailure?.status ?? 0}${bodyHint}`,
-      action: "Check the configured Base URL, API key and model, then retry.",
-    };
-  } catch (error) {
-    return { ok: false, service: "openai", blocksGeneration: false, message: `OpenAI readiness check failed: ${sanitizeError(error)}`, action: "Check network access and the configured OpenAI-compatible credentials, then retry." };
-  }
-}
-
 export async function checkClaudeReadiness(config: { apiKey: string; model: string; baseUrl?: string }, fetcher: typeof fetch = fetch) {
   if (!config.apiKey) {
     return { ok: false, service: "claude", message: "Claude API key is not configured.", action: "Set CLAUDE_API_KEY in .env before running the real Agent runner." };
@@ -160,35 +125,6 @@ function postgresConnectionUrl(config: { host: string; port: number; database: s
     ? `${encodeURIComponent(config.user)}:${encodeURIComponent(config.password)}`
     : encodeURIComponent(config.user);
   return `postgresql://${credentials}@${config.host}:${config.port}/${config.database}`;
-}
-
-function normalizeUrl(url: string) {
-  return url.replace(/\/+$/, "");
-}
-
-function buildOpenAIProbeUrls(baseUrl: string, model: string) {
-  const normalized = normalizeUrl(baseUrl);
-  const candidateBases = new Set<string>([
-    normalized,
-    normalized.replace(/\/(chat\/completions|responses)$/i, ""),
-  ]);
-  const urls: string[] = [];
-  for (const base of candidateBases) {
-    if (!base) continue;
-    urls.push(`${base}/models/${encodeURIComponent(model)}`);
-    urls.push(`${base}/models`);
-  }
-  return Array.from(new Set(urls));
-}
-
-async function safeReadBody(response: Response) {
-  try {
-    const body = await response.text();
-    if (!body) return "";
-    return sanitizeError(body).slice(0, 180);
-  } catch {
-    return "";
-  }
 }
 
 function sanitizeError(error: unknown) {

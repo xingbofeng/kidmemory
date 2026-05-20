@@ -7,6 +7,7 @@ import 'sidecar_api.dart';
 import '../../../l10n/app_localizations.dart';
 
 typedef ExecutableFinder = String? Function(String name);
+typedef SidecarLocalizationsProvider = AppLocalizations? Function();
 
 class SidecarLauncher {
   const SidecarLauncher({
@@ -16,6 +17,7 @@ class SidecarLauncher {
     required this.onLog,
     this.onReadinessMessage,
     this.extraEnvironment,
+    this.localizationsProvider,
   });
 
   final SidecarApi api;
@@ -24,12 +26,26 @@ class SidecarLauncher {
   final void Function(String message) onLog;
   final void Function(String message)? onReadinessMessage;
   final Map<String, String> Function()? extraEnvironment;
+  final SidecarLocalizationsProvider? localizationsProvider;
+
+  String _localized(
+    String Function(AppLocalizations l10n) selector,
+    String fallback,
+  ) {
+    final l10n = localizationsProvider?.call();
+    return l10n == null ? fallback : selector(l10n);
+  }
 
   Future<bool> ensureRunning({bool forceRestart = false}) async {
     // In test environments the sidecar API is mocked; never attempt
     // socket connection or process launch (both block FakeAsync).
     if (Platform.environment['FLUTTER_TEST'] == 'true') {
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS679);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS679,
+          'Test environment detected; skipped sidecar auto-start.',
+        ),
+      );
       return true;
     }
 
@@ -39,22 +55,44 @@ class SidecarLauncher {
       return true;
     }
     if (await _sidecarReachable()) {
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS98);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS98,
+          'Port 4317 is already in use, but KidMemory sidecar health did not respond.',
+        ),
+      );
       return false;
     }
 
     final sidecarDir = _resolveSidecarDirectory();
     if (sidecarDir == null) {
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS584);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS584,
+          'Sidecar runtime directory was not found. Confirm the app bundle contains Resources/sidecar, or set KIDMEMORY_SIDECAR_DIR.',
+        ),
+      );
       return false;
     }
 
-    onLog(AppLocalizations.of(context)!.sidecarLauncherS146);
-    onReadinessMessage?.call(AppLocalizations.of(context)!.sidecarLauncherS141);
+    onLog(
+      _localized(
+        (l10n) => l10n.sidecarLauncherS146,
+        'Sidecar is not ready; attempting automatic start.',
+      ),
+    );
+    onReadinessMessage?.call(
+      _localized((l10n) => l10n.sidecarLauncherS141, 'Starting Sidecar'),
+    );
     if (!await ensureNodeAvailable()) return false;
     final node = _bundledNodePath(sidecarDir) ?? findExecutable('node');
     if (node == null) {
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS592);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS592,
+          'No Node.js runtime was found for starting sidecar.',
+        ),
+      );
       return false;
     }
 
@@ -63,12 +101,23 @@ class SidecarLauncher {
       nodeExecutable: node,
     );
     if (launch == null) {
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS591);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS591,
+          'No runnable sidecar entry point was found; skipped automatic start.',
+        ),
+      );
       return false;
     }
 
     try {
-      onLog('启动 sidecar 命令：${launch.$1} ${launch.$2.join(' ')}');
+      final launchCommand = '${launch.$1} ${launch.$2.join(' ')}';
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherLaunchCommandLog(launchCommand),
+          'Starting sidecar command: $launchCommand',
+        ),
+      );
       final launchEnv = buildSidecarLaunchEnvironment(
         platformEnv: Platform.environment,
         extraEnvironment: extraEnvironment?.call(),
@@ -89,7 +138,12 @@ class SidecarLauncher {
         environment: launchEnv,
         mode: ProcessStartMode.normal,
       );
-      onLog('Sidecar 进程启动成功：PID ${process.pid}');
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherStartedPidLog(process.pid),
+          'Sidecar process started successfully: PID ${process.pid}',
+        ),
+      );
       process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -99,13 +153,28 @@ class SidecarLauncher {
           .transform(const LineSplitter())
           .listen((line) => onLog('sidecar stderr: $line'));
       if (await waitForApiReady(attempts: 120)) {
-        onLog(AppLocalizations.of(context)!.sidecarLauncherS140);
+        onLog(
+          _localized(
+            (l10n) => l10n.sidecarLauncherS140,
+            'Sidecar initialized successfully.',
+          ),
+        );
         return true;
       }
-      onLog(AppLocalizations.of(context)!.sidecarLauncherS193);
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherS193,
+          'Sidecar start failed: service did not pass the health check in time.',
+        ),
+      );
     } catch (error) {
       debugPrint('KidMemory sidecar auto-start failed: $error');
-      onLog('sidecar 启动失败：$error');
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherStartFailedLog(error),
+          'Sidecar start failed: $error',
+        ),
+      );
     }
     return false;
   }
@@ -152,7 +221,12 @@ class SidecarLauncher {
       for (final pid in pids) {
         final killResult = await Process.run('/bin/kill', ['-TERM', pid]);
         if (killResult.exitCode == 0) {
-          onLog('已终止旧 sidecar 进程 PID=$pid（端口 4317）');
+          onLog(
+            _localized(
+              (l10n) => l10n.sidecarLauncherTerminatedOldPidLog(pid),
+              'Terminated old sidecar process PID=$pid on port 4317',
+            ),
+          );
         }
       }
       if (await _waitUntilSidecarPortFree()) return;
@@ -161,12 +235,22 @@ class SidecarLauncher {
       for (final pid in remainingPids) {
         final killResult = await Process.run('/bin/kill', ['-KILL', pid]);
         if (killResult.exitCode == 0) {
-          onLog('旧 sidecar 进程未及时退出，已强制终止 PID=$pid（端口 4317）');
+          onLog(
+            _localized(
+              (l10n) => l10n.sidecarLauncherForceTerminatedOldPidLog(pid),
+              'Old sidecar process did not exit in time; force terminated PID=$pid on port 4317',
+            ),
+          );
         }
       }
       await _waitUntilSidecarPortFree();
     } catch (error) {
-      onLog('终止旧 sidecar 进程失败：$error');
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherTerminateOldFailedLog(error),
+          'Failed to terminate old sidecar process: $error',
+        ),
+      );
     }
   }
 
@@ -192,13 +276,31 @@ class SidecarLauncher {
   }
 
   Directory? _resolveSidecarDirectory() {
-    onLog('sidecar 目录探测: cwd=${Directory.current.path}');
-    onLog('sidecar 目录探测: executable=${Platform.resolvedExecutable}');
+    onLog(
+      _localized(
+        (l10n) =>
+            l10n.sidecarLauncherDirectoryProbeCwdLog(Directory.current.path),
+        'Sidecar directory probe: cwd=${Directory.current.path}',
+      ),
+    );
+    onLog(
+      _localized(
+        (l10n) => l10n.sidecarLauncherDirectoryProbeExecutableLog(
+          Platform.resolvedExecutable,
+        ),
+        'Sidecar directory probe: executable=${Platform.resolvedExecutable}',
+      ),
+    );
     final explicitDir = Platform.environment['KIDMEMORY_SIDECAR_DIR']?.trim();
     if (explicitDir != null && explicitDir.isNotEmpty) {
       final candidate = Directory(explicitDir);
       if (_hasDistEntry(candidate)) return candidate;
-      onLog('KIDMEMORY_SIDECAR_DIR 未包含可运行 sidecar（缺少 dist/main.js）：$explicitDir');
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherInvalidExplicitDirLog(explicitDir),
+          'KIDMEMORY_SIDECAR_DIR does not contain a runnable sidecar (missing dist/main.js): $explicitDir',
+        ),
+      );
     }
 
     // Dev fallback: deterministic workspace-relative lookup without broad scan.
@@ -211,7 +313,16 @@ class SidecarLauncher {
     for (final path in cwdCandidates) {
       final candidate = Directory(path);
       final ok = _hasDistEntry(candidate);
-      onLog('sidecar 目录探测: ${candidate.path} => ${ok ? 'OK' : 'MISS'}');
+      final status = ok ? 'OK' : 'MISS';
+      onLog(
+        _localized(
+          (l10n) => l10n.sidecarLauncherDirectoryProbeCandidateLog(
+            candidate.path,
+            status,
+          ),
+          'Sidecar directory probe: ${candidate.path} => $status',
+        ),
+      );
       if (ok) return candidate;
     }
 
@@ -237,13 +348,23 @@ class SidecarLauncher {
     for (var depth = 0; depth <= maxDepth; depth++) {
       final packaged = Directory('${current.path}/sidecar');
       if (_hasDistEntry(packaged)) {
-        onLog('sidecar 目录探测: 命中 ${packaged.path}');
+        onLog(
+          _localized(
+            (l10n) => l10n.sidecarLauncherDirectoryProbeFoundLog(packaged.path),
+            'Sidecar directory probe: found ${packaged.path}',
+          ),
+        );
         return packaged;
       }
 
       final monorepo = Directory('${current.path}/packages/sidecar');
       if (_hasDistEntry(monorepo)) {
-        onLog('sidecar 目录探测: 命中 ${monorepo.path}');
+        onLog(
+          _localized(
+            (l10n) => l10n.sidecarLauncherDirectoryProbeFoundLog(monorepo.path),
+            'Sidecar directory probe: found ${monorepo.path}',
+          ),
+        );
         return monorepo;
       }
 
@@ -262,7 +383,12 @@ class SidecarLauncher {
     if (distEntry.existsSync()) {
       return (nodeExecutable, [distEntry.path]);
     }
-    onLog(AppLocalizations.of(context)!.sidecarLauncherS194);
+    onLog(
+      _localized(
+        (l10n) => l10n.sidecarLauncherS194,
+        'Sidecar start failed: runtime directory is missing dist/main.js.',
+      ),
+    );
     return null;
   }
 
@@ -297,7 +423,6 @@ class SidecarLauncher {
       return null;
     }
   }
-
 }
 
 Map<String, String> buildSidecarLaunchEnvironment({
@@ -327,7 +452,8 @@ Map<String, String> buildSidecarLaunchEnvironment({
     final credentials = password.isEmpty
         ? Uri.encodeComponent(user!)
         : '${Uri.encodeComponent(user!)}:${Uri.encodeComponent(password)}';
-    final connectionUrl = 'postgresql://$credentials@${host!}:${port!}/${database!}';
+    final connectionUrl =
+        'postgresql://$credentials@${host!}:${port!}/${database!}';
     env['DATABASE_URL'] = connectionUrl;
     env['POSTGRES_URL'] = connectionUrl;
   }

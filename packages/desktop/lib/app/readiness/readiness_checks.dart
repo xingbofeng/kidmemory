@@ -34,7 +34,9 @@ extension _DesktopShellReadinessChecks on _DesktopShellState {
         body: _openAiReadinessDescription(),
         action: AppLocalizations.of(context)!.actionTestConnection,
         secondaryActionLabel: AppLocalizations.of(context)!.actionEditConfig,
-        secondaryActionPath: AppLocalizations.of(context)!.actionConfigurePathToken,
+        secondaryActionPath: AppLocalizations.of(
+          context,
+        )!.actionConfigurePathToken,
         state: _readinessState(openai),
         ok: openai.okOrNull,
       ),

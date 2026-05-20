@@ -142,10 +142,10 @@ class _EmptyProfileTitleBlock extends StatelessWidget {
   const _EmptyProfileTitleBlock();
 
   @override
-  Widget build(BuildContext context) => const Column(
+  Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Row(
+      const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           AppAssetIcon(leafIconAsset, size: 25),
@@ -161,10 +161,10 @@ class _EmptyProfileTitleBlock extends StatelessWidget {
           ),
         ],
       ),
-      SizedBox(height: 42),
+      const SizedBox(height: 42),
       Text(
         AppLocalizations.of(context)!.childProfileTitle,
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xff28170f),
           fontSize: 46,
           fontWeight: FontWeight.w900,
@@ -172,10 +172,10 @@ class _EmptyProfileTitleBlock extends StatelessWidget {
           letterSpacing: -1.4,
         ),
       ),
-      SizedBox(height: 24),
+      const SizedBox(height: 24),
       Text(
         AppLocalizations.of(context)!.childProfileS715,
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xff8a8177),
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -388,7 +388,7 @@ class _EmptyHeroCopy extends StatelessWidget {
           ),
           SizedBox(height: compact ? 18 : 24),
           Text(
-            '先添加孩子，再开始记录素材、成长时间轴\n和作品集，珍藏每一个值得记住的瞬间。',
+            AppLocalizations.of(context)!.childProfileEmptyDescription,
             style: TextStyle(
               color: const Color(0xff766b61),
               fontSize: compact ? 15 : 18,
@@ -419,12 +419,16 @@ class _EmptyHeroCopy extends StatelessWidget {
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _WhiteCircleIcon(icon: Icons.add_rounded),
-                        SizedBox(width: 10),
-                        Flexible(child: Text(AppLocalizations.of(context)!.childProfileS693)),
+                        const _WhiteCircleIcon(icon: Icons.add_rounded),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            AppLocalizations.of(context)!.childProfileS693,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -448,12 +452,16 @@ class _EmptyHeroCopy extends StatelessWidget {
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        AppAssetIcon(gridIconAsset, size: 20),
-                        SizedBox(width: 10),
-                        Flexible(child: Text(AppLocalizations.of(context)!.childProfileS625)),
+                        const AppAssetIcon(gridIconAsset, size: 20),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            AppLocalizations.of(context)!.childProfileS625,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -512,7 +520,11 @@ class _EmptyFeatureStrip extends StatelessWidget {
             text: AppLocalizations.of(context)!.childProfileS925,
           ),
           _FeatureDivider(),
-          _FeaturePill(iconAsset: starIconAsset, title: AppLocalizations.of(context)!.childProfileS231, text: AppLocalizations.of(context)!.childProfileS714),
+          _FeaturePill(
+            iconAsset: starIconAsset,
+            title: AppLocalizations.of(context)!.childProfileS231,
+            text: AppLocalizations.of(context)!.childProfileS714,
+          ),
         ],
       );
     },
@@ -735,14 +747,14 @@ class _DataOwnershipBanner extends StatelessWidget {
         ),
       ],
     ),
-    child: const Row(
+    child: Row(
       children: [
-        AppAssetIcon(shieldIconAsset, size: 28),
-        SizedBox(width: 12),
+        const AppAssetIcon(shieldIconAsset, size: 28),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             AppLocalizations.of(context)!.childProfileS238,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xff58a05a),
               fontSize: 15,
               fontWeight: FontWeight.w900,
@@ -1197,13 +1209,14 @@ class _ChildProfileContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final childName = child.name;
     final artworkCount = assets
         .where((asset) => asset.type == 'artwork')
         .length;
     final photoCount = assets.where((asset) => asset.type == 'photo').length;
     final craftCount = assets.where((asset) => asset.type == 'craft').length;
-    final profileImage = _profileImageAsset(assets);
+    final profileImage = _profileImageAsset(assets, l10n);
     Widget buildActionButtons(double maxWidth) => ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: Wrap(
@@ -1284,12 +1297,18 @@ class _ChildProfileContent extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text('已关联素材：${assets.length} 项'),
+                              Text(
+                                l10n.childProfileLinkedAssets(assets.length),
+                              ),
                               const SizedBox(height: 18),
                               Text(
                                 assets.isEmpty
-                                    ? AppLocalizations.of(context)!.childProfileS401
-                                    : AppLocalizations.of(context)!.childProfileS486,
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.childProfileS401
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.childProfileS486,
                                 style: TextStyle(color: Colors.brown.shade600),
                               ),
                               const SizedBox(height: 16),
@@ -1297,9 +1316,23 @@ class _ChildProfileContent extends StatelessWidget {
                                 spacing: 10,
                                 runSpacing: 10,
                                 children: [
-                                  Chip(label: Text('素材 ${assets.length}')),
-                                  Chip(label: Text('绘画 $artworkCount')),
-                                  Chip(label: Text('照片 $photoCount')),
+                                  Chip(
+                                    label: Text(
+                                      l10n.childProfileAssetChip(assets.length),
+                                    ),
+                                  ),
+                                  Chip(
+                                    label: Text(
+                                      l10n.childProfileArtworkChip(
+                                        artworkCount,
+                                      ),
+                                    ),
+                                  ),
+                                  Chip(
+                                    label: Text(
+                                      l10n.childProfilePhotoChip(photoCount),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -1423,7 +1456,12 @@ class _DeleteChildButton extends StatelessWidget {
           size: compact ? 15 : buttonIconSize,
         ),
         SizedBox(width: compact ? 6 : 8),
-        const Flexible(child: Text('删除', overflow: TextOverflow.ellipsis)),
+        Flexible(
+          child: Text(
+            AppLocalizations.of(context)!.assetLibraryPageS296,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     ),
   );
@@ -1553,14 +1591,14 @@ class _ProfileHeaderScene extends StatelessWidget {
   }
 }
 
-AssetVm? _profileImageAsset(List<AssetVm> assets) {
+AssetVm? _profileImageAsset(List<AssetVm> assets, AppLocalizations l10n) {
   bool looksLikeChildPortrait(AssetVm asset) {
     final text = '${asset.title} ${asset.description} ${asset.tags.join(' ')}';
-    return text.contains(AppLocalizations.of(context)!.childProfileS757) ||
-        text.contains(AppLocalizations.of(context)!.childProfileS366) ||
-        text.contains(AppLocalizations.of(context)!.assetLibraryChildLabel) ||
-        text.contains(AppLocalizations.of(context)!.childProfileS425) ||
-        text.contains('笑') ||
+    return text.contains(l10n.childProfileS757) ||
+        text.contains(l10n.childProfileS366) ||
+        text.contains(l10n.assetLibraryChildLabel) ||
+        text.contains(l10n.childProfileS425) ||
+        text.contains(l10n.childProfilePortraitSmileKeyword) ||
         text.toLowerCase().contains('child');
   }
 
@@ -1596,38 +1634,56 @@ class _GrowthStatsPanel extends StatelessWidget {
   final int craftCount;
 
   @override
-  Widget build(BuildContext context) => SurfaceCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionHeader(iconAsset: gridIconAsset, title: '成长统计'),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricTile(label: AppLocalizations.of(context)!.contentMetricTotalLabel, value: '$assetCount'),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricTile(label: AppLocalizations.of(context)!.contentCategoryDrawingLabel, value: '$artworkCount'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricTile(label: AppLocalizations.of(context)!.contentAssetTypePhotoLabel, value: '$photoCount'),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricTile(label: AppLocalizations.of(context)!.contentAssetTypeCraftLabel, value: '$craftCount'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            iconAsset: gridIconAsset,
+            title: l10n.childProfileGrowthStatsTitle,
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: l10n.contentMetricTotalLabel,
+                  value: '$assetCount',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MetricTile(
+                  label: l10n.contentCategoryDrawingLabel,
+                  value: '$artworkCount',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: l10n.contentAssetTypePhotoLabel,
+                  value: '$photoCount',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MetricTile(
+                  label: l10n.contentAssetTypeCraftLabel,
+                  value: '$craftCount',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DistributionPanel extends StatelessWidget {
@@ -1642,51 +1698,57 @@ class _DistributionPanel extends StatelessWidget {
   final int craftCount;
 
   @override
-  Widget build(BuildContext context) => SurfaceCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionHeader(iconAsset: paletteIconAsset, title: '素材分布'),
-        const SizedBox(height: 18),
-        SizedBox(
-          height: 100,
-          child: Row(
-            children: [
-              _DistributionChart(
-                artworkCount: artworkCount,
-                photoCount: photoCount,
-                craftCount: craftCount,
-              ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _LegendRow(
-                      iconAsset: paletteIconAsset,
-                      label: AppLocalizations.of(context)!.contentCategoryDrawingLabel,
-                      value: artworkCount,
-                    ),
-                    _LegendRow(
-                      iconAsset: cameraIconAsset,
-                      label: AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
-                      value: photoCount,
-                    ),
-                    _LegendRow(
-                      iconAsset: bearDocumentIconAsset,
-                      label: AppLocalizations.of(context)!.contentAssetTypeCraftLabel,
-                      value: craftCount,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(
+            iconAsset: paletteIconAsset,
+            title: l10n.childProfileAssetDistributionTitle,
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(height: 18),
+          SizedBox(
+            height: 100,
+            child: Row(
+              children: [
+                _DistributionChart(
+                  artworkCount: artworkCount,
+                  photoCount: photoCount,
+                  craftCount: craftCount,
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LegendRow(
+                        iconAsset: paletteIconAsset,
+                        label: l10n.contentCategoryDrawingLabel,
+                        value: artworkCount,
+                      ),
+                      _LegendRow(
+                        iconAsset: cameraIconAsset,
+                        label: l10n.contentAssetTypePhotoLabel,
+                        value: photoCount,
+                      ),
+                      _LegendRow(
+                        iconAsset: bearDocumentIconAsset,
+                        label: l10n.contentAssetTypeCraftLabel,
+                        value: craftCount,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DistributionChart extends StatelessWidget {
@@ -1765,12 +1827,16 @@ class _RecentAssetsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final recentAssets = assets.take(3).toList();
     return SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionHeader(iconAsset: imageIconAsset, title: '最近作品'),
+          _SectionHeader(
+            iconAsset: imageIconAsset,
+            title: l10n.childProfileRecentWorksTitle,
+          ),
           const SizedBox(height: 18),
           Expanded(
             child: recentAssets.isEmpty
@@ -1828,7 +1894,10 @@ class _CollectionRecordsPanel extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(iconAsset: bookIconAsset, title: AppLocalizations.of(context)!.contentPortfolioRecordTitle),
+        _SectionHeader(
+          iconAsset: bookIconAsset,
+          title: AppLocalizations.of(context)!.contentPortfolioRecordTitle,
+        ),
         SizedBox(height: 18),
         Expanded(
           child: _EmptyPanelHint(
@@ -1849,18 +1918,33 @@ class _ActivityTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final timelineItems = assets.isEmpty
-        ? const [
-            _TimelineItem(AppLocalizations.of(context)!.childProfileS287, AppLocalizations.of(context)!.childProfileS222, childIconAsset),
-            _TimelineItem(AppLocalizations.of(context)!.childProfileS399, AppLocalizations.of(context)!.childProfileS487, imageIconAsset),
-            _TimelineItem(AppLocalizations.of(context)!.childProfileS720, AppLocalizations.of(context)!.childProfileS487, bookIconAsset),
+        ? [
+            _TimelineItem(
+              l10n.childProfileS287,
+              l10n.childProfileS222,
+              childIconAsset,
+            ),
+            _TimelineItem(
+              l10n.childProfileS399,
+              l10n.childProfileS487,
+              imageIconAsset,
+            ),
+            _TimelineItem(
+              l10n.childProfileS720,
+              l10n.childProfileS487,
+              bookIconAsset,
+            ),
           ]
         : assets
               .take(5)
               .map(
                 (asset) => _TimelineItem(
                   asset.title,
-                  asset.capturedAt.isEmpty ? AppLocalizations.of(context)!.contentDateMissingLabel : asset.capturedAt,
+                  asset.capturedAt.isEmpty
+                      ? l10n.contentDateMissingLabel
+                      : asset.capturedAt,
                   _assetIconAsset(asset.type),
                 ),
               )
@@ -1870,7 +1954,10 @@ class _ActivityTimeline extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionHeader(iconAsset: timelineIconAsset, title: '成长时间轴'),
+          _SectionHeader(
+            iconAsset: timelineIconAsset,
+            title: l10n.childProfileGrowthTimelineTitle,
+          ),
           const SizedBox(height: 18),
           Row(
             children: [
@@ -1900,49 +1987,52 @@ class _ProfileAsidePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
+      final l10n = AppLocalizations.of(context)!;
       final showRail = constraints.maxHeight >= 760;
       return Column(
         children: [
           Expanded(
             child: SurfaceCard(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SectionHeader(
-                      iconAsset: infoIconAsset,
-                      title: AppLocalizations.of(context)!.childProfileS633,
-                    ),
-                    const SizedBox(height: 16),
-                    _InfoRow(
-                      iconAsset: childIconAsset,
-                      label: AppLocalizations.of(context)!.childProfileS367,
-                      value: child.name,
-                    ),
-                    _InfoRow(
-                      iconAsset: gridIconAsset,
-                      label: AppLocalizations.of(context)!.contentMetricTotalLabel,
-                      value: '${assets.length} 项',
-                    ),
-                    _InfoRow(
-                      iconAsset: imageIconAsset,
-                      label: AppLocalizations.of(context)!.childProfileS574,
-                      value: assets.isEmpty ? AppLocalizations.of(context)!.childProfileS566 : assets.first.title,
-                    ),
-                    const Divider(height: 24),
-                    _SectionHeader(
-                      iconAsset: bearHeadIconAsset,
-                      title: AppLocalizations.of(context)!.childProfileS497,
-                    ),
-                    const SizedBox(height: 12),
-                    _MilestoneRow(
-                      text: assets.isEmpty ? AppLocalizations.of(context)!.childProfileS799 : AppLocalizations.of(context)!.childProfileS446,
-                    ),
-                    const _MilestoneRow(text: '时间线按素材日期自动更新'),
-                    const _MilestoneRow(text: '作品集记录保存在本地'),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(
+                    iconAsset: infoIconAsset,
+                    title: AppLocalizations.of(context)!.childProfileS633,
+                  ),
+                  const SizedBox(height: 16),
+                  _InfoRow(
+                    iconAsset: childIconAsset,
+                    label: AppLocalizations.of(context)!.childProfileS367,
+                    value: child.name,
+                  ),
+                  _InfoRow(
+                    iconAsset: gridIconAsset,
+                    label: l10n.contentMetricTotalLabel,
+                    value: l10n.childProfileAssetCountValue(assets.length),
+                  ),
+                  _InfoRow(
+                    iconAsset: imageIconAsset,
+                    label: AppLocalizations.of(context)!.childProfileS574,
+                    value: assets.isEmpty
+                        ? AppLocalizations.of(context)!.childProfileS566
+                        : assets.first.title,
+                  ),
+                  const Divider(height: 24),
+                  _SectionHeader(
+                    iconAsset: bearHeadIconAsset,
+                    title: AppLocalizations.of(context)!.childProfileS497,
+                  ),
+                  const SizedBox(height: 12),
+                  _MilestoneRow(
+                    text: assets.isEmpty
+                        ? AppLocalizations.of(context)!.childProfileS799
+                        : AppLocalizations.of(context)!.childProfileS446,
+                  ),
+                  _MilestoneRow(text: l10n.childProfileTimelineAutoUpdate),
+                  _MilestoneRow(text: l10n.childProfilePortfolioSavedLocally),
+                ],
               ),
             ),
           ),
@@ -2138,13 +2228,13 @@ class _EmptyPanelHint extends StatelessWidget {
 }
 
 Color _softAccent(String key) {
-  if (key.contains('camera') || key.contains(AppLocalizations.of(context)!.contentAssetTypePhotoLabel)) {
+  if (key.contains('camera') || key.contains('photo')) {
     return const Color(0xff5d9be8);
   }
-  if (key.contains('palette') || key.contains(AppLocalizations.of(context)!.childProfileS872)) {
+  if (key.contains('palette') || key.contains('artwork')) {
     return const Color(0xffffbd54);
   }
-  if (key.contains('book') || key.contains(AppLocalizations.of(context)!.childProfileS217)) {
+  if (key.contains('book') || key.contains('portfolio')) {
     return const Color(0xff6f9af8);
   }
   return const Color(0xff2faa61);

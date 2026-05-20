@@ -25,7 +25,7 @@ void main() {
     expect(find.text('查看示例'), findsOneWidget);
     expect(
       tester.getCenter(find.text('从一份档案开始')).dx,
-      greaterThan(tester.getCenter(find.text('添加档案')).dx),
+      greaterThan(tester.getCenter(find.text('添加孩子档案')).dx),
     );
     expect(tester.takeException(), isNull);
   });
@@ -42,7 +42,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('还没有孩子档案'), findsOneWidget);
-    expect(find.text('添加档案'), findsOneWidget);
+    expect(find.text('添加孩子档案'), findsOneWidget);
     expect(find.text('查看示例'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

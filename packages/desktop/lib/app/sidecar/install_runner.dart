@@ -7,8 +7,9 @@ extension _DesktopShellInstallRunner on _DesktopShellState {
     String action, {
     String? workingDirectory,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
-      _appendLog('正在尝试：$action');
+      _appendLog(l10n.installRunnerAttemptLog(action));
       final process = await Process.start(
         executable,
         args,
@@ -36,18 +37,23 @@ extension _DesktopShellInstallRunner on _DesktopShellState {
       final err = output[1];
 
       if (exitCode == 0) {
-        _appendLog('安装命令成功：$action');
+        _appendLog(l10n.installRunnerCommandSucceededLog(action));
         return true;
       }
       if (timedOut) {
-        _appendLog('安装超时（$action），已终止进程。');
+        _appendLog(l10n.installRunnerTimeoutLog(action));
         return false;
       }
       final details = err.trim().isNotEmpty ? err : out;
-      _appendLog('安装失败（$action）：${_shortProcessOutput(details)}');
+      _appendLog(
+        l10n.installRunnerFailedWithOutputLog(
+          action,
+          _shortProcessOutput(details),
+        ),
+      );
       return false;
     } catch (error) {
-      _appendLog('安装失败（$action）：$error');
+      _appendLog(l10n.installRunnerFailedWithErrorLog(action, error));
       return false;
     }
   }

@@ -71,6 +71,8 @@ third_party/
 packages/protocol/openapi/*.openapi.enhanced.json
 packages/protocol/openapi/*.preview.html
 packages/protocol/openapi/*.preview.zh.html
-
+.playwright-mcp/
+.agent-task/
+tmp/
 implementation-notes.md
 HANDOFF.md

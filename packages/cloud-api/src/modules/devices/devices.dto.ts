@@ -1,4 +1,37 @@
-import type { components } from '@kidmemory/protocol/generated/cloud-api/ts';
+import { ApiProperty } from '@nestjs/swagger';
 
-export type RegisterDeviceDto = components['schemas']['RegisterDeviceRequestDto'];
-export type DeviceResponseDto = components['schemas']['DeviceResponseDto'];
+export class RegisterDeviceRequestDto {
+  @ApiProperty({ type: String })
+  machineId: string;
+
+  @ApiProperty({ type: String, required: false })
+  deviceName?: string;
+
+  @ApiProperty({ type: String, required: false })
+  platform?: string;
+}
+
+export type RegisterDeviceDto = RegisterDeviceRequestDto;
+
+export class DeviceResponseDto {
+  @ApiProperty({ type: String })
+  id: string;
+
+  @ApiProperty({ type: String })
+  machineId: string;
+
+  @ApiProperty({ type: String, required: false })
+  deviceName?: string;
+
+  @ApiProperty({ type: String, required: false })
+  platform?: string;
+
+  @ApiProperty({ type: String })
+  lastHeartbeat: string;
+
+  @ApiProperty({ type: String })
+  createdAt: string;
+
+  @ApiProperty({ type: String })
+  updatedAt: string;
+}

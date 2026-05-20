@@ -13,7 +13,6 @@ import { createConfigReadinessService } from "./providers/config.domain.ts";
 
 type ConfigReadinessDelegate = ReturnType<typeof createConfigReadinessService>;
 export const CONFIG_STORAGE_FETCH = Symbol("CONFIG_STORAGE_FETCH");
-const OPENAI_RUNTIME_CONFIG_KEY = "openai";
 const SUPABASE_STORAGE_RUNTIME_CONFIG_KEY = "supabaseStorage";
 
 @Injectable()
@@ -78,15 +77,6 @@ export class ConfigService {
     });
     return { ok: true, config };
   }
-  async updateOpenAI(body: Record<string, unknown> = {}) {
-    const config = this.config.updateOpenAIConfig({
-      baseUrl: stringFromBody(body.baseUrl),
-      apiKey: stringFromBody(body.apiKey),
-      model: stringFromBody(body.model),
-    });
-    await this.persistRuntimeConfig(OPENAI_RUNTIME_CONFIG_KEY, config);
-    return { ok: true, config };
-  }
   async updateSupabaseStorage(body: Record<string, unknown> = {}) {
     this.config.updateSupabaseStorageConfig({
       url: stringFromBody(body.url),
@@ -118,10 +108,6 @@ export class ConfigService {
     }).testConnection();
   }
   postgresReadiness() { return this.delegate.postgresReadiness(); }
-  async openAIReadiness() {
-    await this.hydrateRuntimeConfig();
-    return this.delegate.openAIReadiness();
-  }
   claudeReadiness() { return this.delegate.claudeReadiness(); }
   pgVectorReadiness() { return this.delegate.pgVectorReadiness(); }
   initializeSchema() { return this.delegate.initializeSchema(); }
@@ -140,18 +126,12 @@ export class ConfigService {
         where: {
           key: {
             in: [
-              OPENAI_RUNTIME_CONFIG_KEY,
               SUPABASE_STORAGE_RUNTIME_CONFIG_KEY,
             ],
           },
         },
       });
       for (const row of rows) {
-        if (row.key === OPENAI_RUNTIME_CONFIG_KEY) {
-          this.config.updateOpenAIConfig(
-            asRuntimeConfigObject(row.value) as Partial<AppConfig["openai"]>,
-          );
-        }
         if (row.key === SUPABASE_STORAGE_RUNTIME_CONFIG_KEY) {
           this.config.updateSupabaseStorageConfig(
             asRuntimeConfigObject(row.value) as SupabaseStorageUpdateConfig,

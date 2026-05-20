@@ -252,7 +252,7 @@ class ReadyStatus extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Text(
+            Text(
               AppLocalizations.of(context)!.setupEnvironmentReady,
               style: TextStyle(
                 color: Color(0xff168542),
@@ -326,11 +326,15 @@ class ReadinessStatus extends StatelessWidget {
   }
 
   bool _readinessComplete(String value) {
-    final match = RegExp(r'^已完成\s+(\d+)\s*/\s*(\d+)').firstMatch(value);
-    if (match == null) return false;
-    final done = int.tryParse(match.group(1) ?? '');
-    final total = int.tryParse(match.group(2) ?? '');
-    return done != null && total != null && total > 0 && done >= total;
+    final numbers = RegExp(r'\d+')
+        .allMatches(value)
+        .map((match) => int.tryParse(match.group(0) ?? ''))
+        .whereType<int>()
+        .toList(growable: false);
+    if (numbers.length < 2) return false;
+    final done = numbers[0];
+    final total = numbers[1];
+    return total > 0 && done >= total;
   }
 }
 

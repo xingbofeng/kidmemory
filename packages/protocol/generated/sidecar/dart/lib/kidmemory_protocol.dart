@@ -13,6 +13,7 @@ export 'package:kidmemory_protocol/src/auth/oauth.dart';
 export 'package:kidmemory_protocol/src/api/agent_config_api.dart';
 export 'package:kidmemory_protocol/src/api/books_api.dart';
 export 'package:kidmemory_protocol/src/api/config_api.dart';
+export 'package:kidmemory_protocol/src/api/creation_api.dart';
 export 'package:kidmemory_protocol/src/api/dataset_api.dart';
 export 'package:kidmemory_protocol/src/api/direct_upload_api.dart';
 export 'package:kidmemory_protocol/src/api/lan_receiver_api.dart';

@@ -5,6 +5,7 @@ build.yaml
 doc/AgentConfigApi.md
 doc/BooksApi.md
 doc/ConfigApi.md
+doc/CreationApi.md
 doc/DatasetApi.md
 doc/DirectUploadApi.md
 doc/LanReceiverApi.md
@@ -16,6 +17,7 @@ lib/src/api.dart
 lib/src/api/agent_config_api.dart
 lib/src/api/books_api.dart
 lib/src/api/config_api.dart
+lib/src/api/creation_api.dart
 lib/src/api/dataset_api.dart
 lib/src/api/direct_upload_api.dart
 lib/src/api/lan_receiver_api.dart
@@ -29,3 +31,4 @@ lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/deserialize.dart
 pubspec.yaml
+test/creation_api_test.dart

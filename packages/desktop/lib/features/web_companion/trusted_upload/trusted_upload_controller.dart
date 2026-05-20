@@ -3,16 +3,9 @@ import 'trusted_upload_models.dart';
 
 /// Trusted Upload controller.
 ///
-/// 负责：
-/// 1. 创建上传会话
-/// 2. 查询会话状态
-/// 3. 关闭会话
-/// 4. 重试失败项
+/// Creates sessions, polls status, closes sessions, and retries failed items.
 class TrustedUploadController {
-  TrustedUploadController({
-    required this.sidecarApi,
-    required this.childId,
-  });
+  TrustedUploadController({required this.sidecarApi, required this.childId});
 
   final SidecarApi sidecarApi;
   final String childId;
@@ -20,22 +13,19 @@ class TrustedUploadController {
   TrustedUploadSession? _session;
   TrustedUploadSession? get session => _session;
 
-  /// 创建上传会话
+  /// Creates an upload session.
   Future<void> createSession() async {
-    final response = await sidecarApi.post(
-      '/api/web-companion/sessions',
-      {
-        'childId': childId,
-        'expiresInMinutes': 180, // 3 小时
-        'maxItems': 200,
-        'preferredProviders': ['supabase'],
-      },
-    );
+    final response = await sidecarApi.post('/api/web-companion/sessions', {
+      'childId': childId,
+      'expiresInMinutes': 180,
+      'maxItems': 200,
+      'preferredProviders': ['supabase'],
+    });
 
     _session = TrustedUploadSession.fromJson(response);
   }
 
-  /// 查询会话状态
+  /// Fetches session status.
   Future<TrustedUploadStatus> fetchStatus() async {
     if (_session == null) {
       throw StateError('Session not created');
@@ -48,19 +38,17 @@ class TrustedUploadController {
     return TrustedUploadStatus.fromJson(response);
   }
 
-  /// 关闭会话
+  /// Closes the session.
   Future<void> closeSession() async {
     if (_session == null) return;
 
     await sidecarApi.post(
       '/api/web-companion/sessions/${_session!.sessionId}/close',
-      {
-        'token': _session!.token,
-      },
+      {'token': _session!.token},
     );
   }
 
-  /// 重试失败项
+  /// Retries a failed upload item.
   Future<void> retryItem(String uploadItemId) async {
     if (_session == null) {
       throw StateError('Session not created');
@@ -68,9 +56,7 @@ class TrustedUploadController {
 
     await sidecarApi.post(
       '/api/web-companion/sessions/${_session!.sessionId}/items/$uploadItemId/retry',
-      {
-        'token': _session!.token,
-      },
+      {'token': _session!.token},
     );
   }
 }

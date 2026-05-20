@@ -2,15 +2,21 @@ part of '../desktop_shell.dart';
 
 extension _DesktopShellDirectUpload on _DesktopShellState {
   Future<void> _openDirectUploadDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final childId = selectedChildId;
     if (childId == null || childId.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context)!.directUploadS855);
+      _showSnackBar(l10n.directUploadS855);
       return;
     }
 
-    final controller = DirectUploadController(api: api);
+    final controller = DirectUploadController(
+      api: api,
+      serviceUnavailableMessage: l10n.directUploadServiceUnavailableMessage,
+      sessionIncompleteMessage: l10n.directUploadSessionIncompleteMessage,
+      configIncompleteMessage: l10n.directUploadConfigIncompleteMessage,
+    );
     try {
-      _showSnackBar(AppLocalizations.of(context)!.directUploadS650);
+      _showSnackBar(l10n.directUploadS650);
       final config = await controller.createSession(childId);
       if (!mounted) return;
 
@@ -38,7 +44,9 @@ extension _DesktopShellDirectUpload on _DesktopShellState {
                   await refreshDataset();
                 } catch (error) {
                   if (mounted) {
-                    _showSnackBar('Direct Upload 回拉失败：$error');
+                    _showSnackBar(
+                      l10n.directUploadPullbackFailedMessage(error),
+                    );
                   }
                 } finally {
                   if (dialogContext.mounted) {
@@ -64,7 +72,7 @@ extension _DesktopShellDirectUpload on _DesktopShellState {
     } catch (error) {
       if (mounted) {
         final message = error is StateError ? error.message : error.toString();
-        _showSnackBar('创建 Direct Upload 会话失败：$message');
+        _showSnackBar(l10n.directUploadCreateSessionFailedMessage(message));
       }
     }
   }

@@ -9,26 +9,22 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
   }
 
   Future<void> _configureOpenAI() async {
-    final status = await gateway.getConfigStatusRaw();
+    final agentConfigApi = AgentConfigApi(api);
+    final currentConfig = await agentConfigApi.getDefaultAgentConfig();
     if (!mounted) return;
-    final openai = status['openai'] is Map<String, dynamic>
-        ? status['openai'] as Map<String, dynamic>
-        : const <String, dynamic>{};
 
     final baseUrlController = TextEditingController(
-      text: _stringOrDefault(openai['baseUrl'], ''),
+      text: currentConfig?.baseUrl ?? '',
     );
     final modelController = TextEditingController(
-      text: _stringOrDefault(openai['model'], ''),
+      text: currentConfig?.model ?? '',
     );
     final apiKeyController = TextEditingController(
-      text: resolveOpenAiApiKeyForEditor(
-        openai,
-        cachedApiKey: _openAiApiKeyCache ?? '',
-      ),
+      text: _openAiApiKeyCache ?? '',
     );
 
     var showApiKey = false;
+    final shellL10n = AppLocalizations.of(context)!;
 
     final shouldSave = await showDialog<bool>(
       context: context,
@@ -61,19 +57,21 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
                       onTap: () => _selectAllText(apiKeyController),
                       decoration: InputDecoration(
                         labelText: 'OPENAI_API_KEY',
-                        hintText: AppLocalizations.of(context)!.setupInputApiKey,
-                        helperText:
-                            AppLocalizations.of(context)!.setupApiKeyVisibilityHint,
+                        hintText: AppLocalizations.of(
+                          context,
+                        )!.setupInputApiKey,
+                        helperText: AppLocalizations.of(
+                          context,
+                        )!.setupApiKeyVisibilityHint,
                         suffixIcon: IconButton(
                           tooltip: showApiKey
                               ? AppLocalizations.of(context)!.actionHide
                               : AppLocalizations.of(context)!.actionShow,
                           onPressed: () =>
                               setDialogState(() => showApiKey = !showApiKey),
-                          icon: Icon(
-                            showApiKey
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
+                          icon: AppAssetIcon(
+                            showApiKey ? lockIconAsset : viewIconAsset,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -107,29 +105,68 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
       model: modelController,
       apiKey: apiKeyController,
     );
-    final result = await gateway.configureOpenAiRaw(
-      payload: {
-        'baseUrl': draft.baseUrl,
-        'model': draft.model,
-        'apiKey': draft.apiKey,
-      },
-    );
-    if (result.okValue) {
+    var saved = false;
+    try {
+      final provider = _agentProviderForBaseUrl(draft.baseUrl);
+      final model = draft.model.isEmpty ? 'gpt-4' : draft.model;
+      final name =
+          currentConfig?.name ??
+          (provider == 'openai' ? 'OpenAI' : '$model Agent');
+      final savedConfig = currentConfig == null
+          ? await agentConfigApi.createAgentConfig(
+              CreateAgentConfigInput(
+                name: name,
+                provider: provider,
+                model: model,
+                baseUrl: draft.baseUrl,
+                apiKey: draft.apiKey,
+                temperature: 0.7,
+                maxTokens: 4000,
+                isDefault: true,
+              ),
+            )
+          : await agentConfigApi.updateAgentConfig(
+              currentConfig.id,
+              UpdateAgentConfigInput(
+                name: name,
+                provider: provider,
+                model: model,
+                baseUrl: draft.baseUrl,
+                apiKey: draft.apiKey.isEmpty ? null : draft.apiKey,
+                temperature: currentConfig.temperature,
+                maxTokens: currentConfig.maxTokens,
+              ),
+            );
+      await agentConfigApi.setDefaultAgentConfig(savedConfig.id);
+      saved = true;
+    } catch (error) {
+      _appendLog('${shellL10n.setupOpenAiConfigUpdateFailed}: $error');
+    }
+    if (!mounted) return;
+
+    if (saved) {
       _setShellState(() => _openAiApiKeyCache = draft.apiKey);
     }
 
     _appendLog(
-      result.okValue
-          ? AppLocalizations.of(context)!.setupOpenAiConfigUpdated
-          : AppLocalizations.of(context)!.setupOpenAiConfigUpdateFailed,
+      saved
+          ? shellL10n.setupOpenAiConfigUpdated
+          : shellL10n.setupOpenAiConfigUpdateFailed,
     );
-    if (!mounted) return;
 
     _showSnackBar(
-      result.okValue
-          ? AppLocalizations.of(context)!.setupOpenAiConfigSaved
-          : AppLocalizations.of(context)!.setupOpenAiConfigSaveFailed,
+      saved
+          ? shellL10n.setupOpenAiConfigSaved
+          : shellL10n.setupOpenAiConfigSaveFailed,
     );
     await _DesktopShellReadiness(this).refreshReadiness();
+  }
+
+  String _agentProviderForBaseUrl(String baseUrl) {
+    final normalized = baseUrl.trim().toLowerCase();
+    if (normalized.isEmpty || normalized.contains('api.openai.com')) {
+      return 'openai';
+    }
+    return 'custom';
   }
 }

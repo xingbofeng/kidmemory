@@ -2,16 +2,20 @@ part of '../../desktop_shell.dart';
 
 extension _DesktopShellSetupTargetedChecks on _DesktopShellState {
   Future<void> _runTargetedSetupCheck(String checkTitle) async {
-    _appendLog('手动触发配置检测：$checkTitle');
+    _appendLog(
+      AppLocalizations.of(context)!.setupManualCheckTriggeredLog(checkTitle),
+    );
     final checkResult = await (() async {
       if (checkTitle == AppLocalizations.of(context)!.setupPostgresTitle) {
         return await gateway.checkPostgresDto();
       }
-      if (checkTitle == _sidecarSetupTitle) {
+      if (checkTitle == _sidecarSetupTitle(context)) {
         final ready = await _sidecarApiReady();
         return ReadinessCheckDto.fromJson({
           'ok': ready,
-          'message': ready ? AppLocalizations.of(context)!.setupSidecarConnected : AppLocalizations.of(context)!.setupSidecarDisconnected,
+          'message': ready
+              ? AppLocalizations.of(context)!.setupSidecarConnected
+              : AppLocalizations.of(context)!.setupSidecarDisconnected,
         });
       }
       if (checkTitle == AppLocalizations.of(context)!.setupPgvectorTitle) {
@@ -28,9 +32,17 @@ extension _DesktopShellSetupTargetedChecks on _DesktopShellState {
     } else {
       final success = checkResult.okOrNull == true;
       final displayMessage = message.trim().isEmpty
-          ? (success ? AppLocalizations.of(context)!.setupTestConnectionSuccess : AppLocalizations.of(context)!.setupTestConnectionFailed)
+          ? (success
+                ? AppLocalizations.of(context)!.setupTestConnectionSuccess
+                : AppLocalizations.of(context)!.setupTestConnectionFailed)
           : message.trim();
-      _showSnackBar(success ? displayMessage : '测试连接失败：$displayMessage');
+      _showSnackBar(
+        success
+            ? displayMessage
+            : AppLocalizations.of(
+                context,
+              )!.setupTestConnectionFailedWithMessage(displayMessage),
+      );
     }
     await refreshReadiness();
   }

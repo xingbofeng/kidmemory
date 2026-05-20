@@ -2,10 +2,11 @@ part of '../desktop_shell.dart';
 
 extension _DesktopShellExportSync on _DesktopShellState {
   Future<_ExportSyncResult> _maybeSyncExportArtifact(String artifactId) async {
+    final l10n = AppLocalizations.of(context)!;
     if (artifactId.isEmpty) {
       return _ExportSyncResult(
         storageStatus: 'local_only',
-        errorReason: AppLocalizations.of(context)!.exportSyncS195,
+        errorReason: l10n.exportSyncS195,
       );
     }
     if (!supabaseStorage.configured) {
@@ -15,7 +16,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
     if (childId == null || childId.isEmpty) {
       return _ExportSyncResult(
         storageStatus: 'local_only',
-        errorReason: AppLocalizations.of(context)!.exportSyncS837,
+        errorReason: l10n.exportSyncS837,
       );
     }
 
@@ -28,7 +29,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
         storageStatus: 'failed',
         errorReason: enqueued.reasonValue.isNotEmpty
             ? enqueued.reasonValue
-            : AppLocalizations.of(context)!.exportSyncS337,
+            : l10n.exportSyncS337,
       );
     }
     final worker = await gateway.runStorageSyncDto(limit: 5);
@@ -37,7 +38,9 @@ extension _DesktopShellExportSync on _DesktopShellState {
         : worker.retriedValue > 0
         ? 'retry_wait'
         : 'synced';
-    final share = await gateway.getExportArtifactShareDto(artifactId: artifactId);
+    final share = await gateway.getExportArtifactShareDto(
+      artifactId: artifactId,
+    );
     return _ExportSyncResult(
       storageStatus: storageStatus,
       remoteUrl: share.urlValue.trim(),
@@ -46,7 +49,7 @@ extension _DesktopShellExportSync on _DesktopShellState {
           ? ''
           : _stringOrDefault(
               share.messageValue,
-              worker.failedValue > 0 ? AppLocalizations.of(context)!.exportSyncS157 : '',
+              worker.failedValue > 0 ? l10n.exportSyncS157 : '',
             ),
     );
   }

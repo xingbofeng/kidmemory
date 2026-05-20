@@ -54,7 +54,6 @@ export 'package:kidmemory_protocol/src/model/lan_upload_error_dto.dart';
 export 'package:kidmemory_protocol/src/model/lan_upload_response_dto.dart';
 export 'package:kidmemory_protocol/src/model/lan_upload_result_file_dto.dart';
 export 'package:kidmemory_protocol/src/model/list_direct_upload_objects_response_dto.dart';
-export 'package:kidmemory_protocol/src/model/open_ai_config_request_dto.dart';
 export 'package:kidmemory_protocol/src/model/open_ai_config_response_dto.dart';
 export 'package:kidmemory_protocol/src/model/operation_result_response_dto.dart';
 export 'package:kidmemory_protocol/src/model/path_config_response_dto.dart';

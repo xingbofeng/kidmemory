@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/chrome.dart';
 
-/// Entry button surfacing the Supabase Direct Upload flow.
+/// Entry button surfacing the QR upload flow.
 class DirectUploadEntryButton extends StatelessWidget {
   const DirectUploadEntryButton({
     required this.onTap,
@@ -16,7 +17,7 @@ class DirectUploadEntryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilledButton.icon(
       onPressed: enabled ? onTap : null,
-      icon: const Icon(Icons.qr_code_2_outlined),
+      icon: const AppAssetIcon(uploadIconAsset, size: 20),
       label: Text(AppLocalizations.of(context)!.directUploadEntryButtonLabel),
     );
   }

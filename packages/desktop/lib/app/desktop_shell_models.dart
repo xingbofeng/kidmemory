@@ -1,6 +1,6 @@
 part of 'desktop_shell.dart';
 
-enum _ExportTarget { pdf, longImagePng, longImageJpg }
+enum _ExportTarget { pdf, mp4, longImagePng, longImageJpg }
 
 class _ExportSyncResult {
   const _ExportSyncResult({

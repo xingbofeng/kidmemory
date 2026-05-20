@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,34 @@ import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 import 'package:kidmemory_desktop/shared/widgets/chrome.dart';
 import 'package:kidmemory_desktop/shared/widgets/content.dart';
 import 'package:kidmemory_desktop/shared/widgets/layout.dart';
+
+const _testPlanSteps = <Map<String, dynamic>>[
+  {
+    'stepId': 'compose',
+    'label': 'Compose selected assets',
+    'status': 'pending',
+  },
+  {
+    'stepId': 'plan',
+    'label': 'Confirm persisted agent plan',
+    'status': 'pending',
+  },
+  {'stepId': 'generate', 'label': 'Generate PDF draft', 'status': 'pending'},
+];
+
+const _testPlanRequirements = <String>[
+  'Selected assets',
+  'OpenAI Agent SDK configuration',
+  'Local export directory',
+];
+
+const _testStructuredPlanRequirements = <String, dynamic>{
+  'minAssets': 1,
+  'recommendedAssets': 6,
+  'needsCloudImage': true,
+  'needsHyperframes': false,
+  'needsFfmpeg': false,
+};
 
 void main() {
   Finder primaryButton(String label) => find.byWidgetPredicate(
@@ -48,8 +77,10 @@ void main() {
   }
 
   Future<void> selectOneAssetForGeneration(WidgetTester tester) async {
+    await tester.pumpAndSettle();
     await gotoStep(tester, '素材库');
     await tester.pumpAndSettle();
+    await pumpUntil(tester, () => find.byType(AssetCard).evaluate().isNotEmpty);
     final firstAsset = find.byType(AssetCard).first;
     await tester.ensureVisible(firstAsset);
     final center = tester.getCenter(firstAsset);
@@ -65,6 +96,27 @@ void main() {
     final center = tester.getCenter(card);
     await tester.tapAt(center);
     await tester.pumpAndSettle();
+  }
+
+  Future<void> confirmReadyCreationPlan(WidgetTester tester) async {
+    final confirmButton = primaryButton('确认计划并开始生成').last;
+    await tester.ensureVisible(confirmButton);
+    await tester.tap(confirmButton);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> generateStorybookFromPrimary(WidgetTester tester) async {
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
+    await confirmReadyCreationPlan(tester);
+  }
+
+  Future<void> generateMemoryVideoFromCard(WidgetTester tester) async {
+    await tester.ensureVisible(find.text('生成回忆录视频'));
+    await tester.tap(find.text('生成回忆录视频'));
+    await tester.pumpAndSettle();
+    await confirmReadyCreationPlan(tester);
   }
 
   testWidgets('desktop flow starts on child profile and exposes setup later', (
@@ -109,8 +161,8 @@ void main() {
 
     await gotoStep(tester, '创作台');
     await tester.pumpAndSettle();
-    expect(primaryButton('开始生成绘本'), findsOneWidget);
-    expect(find.text('Agent 活动'), findsOneWidget);
+    expect(primaryButton('开始规划'), findsOneWidget);
+    expect(find.text('Agent 活动'), findsNothing);
   });
 
   testWidgets('sample dataset is a child profile subpage with shared back', (
@@ -153,30 +205,396 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
-        MaterialApp(home: DesktopShell(api: _FakeSidecarApi())),
-      );
+      final api = _FakeSidecarApi();
+      await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
       await tester.pumpAndSettle();
 
       await selectOneAssetForGeneration(tester);
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      expect(find.text('生成儿童绘本'), findsOneWidget);
+      expect(find.text('生成儿童绘本'), findsWidgets);
       expect(find.text('生成成长纪念册'), findsOneWidget);
       expect(find.text('生成回忆录视频'), findsOneWidget);
 
-      await tester.tap(find.text('生成儿童绘本'));
+      await tester.tap(find.text('生成儿童绘本').first);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('将使用免费生图服务生成封面图'), findsOneWidget);
-      expect(find.text('继续生成'), findsOneWidget);
-      expect(find.text('跳过封面'), findsOneWidget);
+      expect(find.textContaining('将使用免费生图服务生成封面图'), findsNothing);
+      expect(api.lastPlanBody?['creationType'], 'storybook');
+      expect(api.lastJobBody, isNull);
+      expect(find.text('确认创作计划'), findsOneWidget);
+      expect(find.text('KidMemory storybook'), findsOneWidget);
+      expect(find.text('Compose selected assets'), findsOneWidget);
+      expect(find.text('Selected assets'), findsOneWidget);
+      expect(find.text('OpenAI Agent SDK configuration'), findsOneWidget);
+      expect(find.text('确认计划并开始生成'), findsWidgets);
+      await confirmReadyCreationPlan(tester);
+      expect(api.lastJobBody?['planId'], 'plan_123456');
     },
   );
 
+  testWidgets('memory album action sends memory_book creation type', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FakeSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('生成成长纪念册'));
+    await tester.tap(find.text('生成成长纪念册'));
+    await tester.pumpAndSettle();
+
+    expect(api.lastPlanBody?['creationType'], 'memory_book');
+    expect(find.text('确认创作计划'), findsOneWidget);
+  });
+
+  testWidgets('generation exposes planning and creating job workflow states', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SlowCreationSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('生成儿童绘本').first);
+    await tester.pump();
+
+    expect(find.text('规划中'), findsWidgets);
+    expect(find.textContaining('正在分析素材'), findsWidgets);
+    expect(find.text('分析素材'), findsWidgets);
+    expect(find.text('选择 Skill'), findsWidgets);
+    expect(find.text('生成计划'), findsWidgets);
+    expect(find.textContaining('正在读取 1 张素材'), findsWidgets);
+    expect(find.textContaining('正在匹配绘本'), findsWidgets);
+    expect(find.textContaining('正在组织故事结构'), findsWidgets);
+
+    api.completePlan();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('计划待确认'), findsWidgets);
+    expect(find.text('确认创作计划'), findsOneWidget);
+    expect(api.lastJobBody, isNull);
+
+    final confirmButton = primaryButton('确认计划并开始生成').last;
+    await tester.ensureVisible(confirmButton);
+    await tester.tap(confirmButton);
+    await tester.pump();
+
+    expect(find.text('创建任务中'), findsWidgets);
+    expect(find.textContaining('正在创建生成任务'), findsWidgets);
+    expect(api.lastJobBody?['planId'], 'plan_slow');
+
+    api.completeJob();
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('生成完成，可预览并导出 PDF'), findsWidgets);
+  });
+
+  testWidgets('changing selected assets invalidates the previous plan id', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SequencedPlanSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+
+    expect(api.createdPlanIds, ['plan_1']);
+    expect(api.jobPlanIds, ['plan_1']);
+    expect(find.textContaining('生成完成，可预览并导出 PDF'), findsWidgets);
+
+    await gotoStep(tester, '素材库');
+    await tester.pumpAndSettle();
+    await tapAssetCardByTitle(tester, '恐龙世界');
+    await tester.pumpAndSettle();
+    await tapAssetCardByTitle(tester, '恐龙世界');
+    await tester.pumpAndSettle();
+
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+    expect(primaryButton('开始规划'), findsOneWidget);
+
+    await generateStorybookFromPrimary(tester);
+
+    expect(api.createdPlanIds, ['plan_1', 'plan_2']);
+    expect(api.jobPlanIds, ['plan_1', 'plan_2']);
+    expect(api.lastPlanBody?['assetIds'], ['asset-dino-world']);
+  });
+
+  testWidgets('plan failure exposes retry edit and log actions', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _PlanFailureSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
+
+    expect(api.planAttempts, 1);
+    expect(find.text('生成失败'), findsWidgets);
+    expect(find.textContaining('规划服务暂时不可用'), findsWidgets);
+    expect(secondaryButton('重试'), findsOneWidget);
+    expect(secondaryButton('修改需求'), findsOneWidget);
+    expect(secondaryButton('查看日志'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('查看日志'));
+    await tester.tap(secondaryButton('查看日志').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('requestId: req_'), findsWidgets);
+
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(secondaryButton('重试'));
+    await tester.pumpAndSettle();
+
+    expect(api.planAttempts, 2);
+
+    await tester.ensureVisible(secondaryButton('修改需求'));
+    await tester.tap(secondaryButton('修改需求'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('素材库'), findsWidgets);
+  });
+
+  testWidgets('generation failure exposes failed step reason log and replan', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FailedCreationJobSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+
+    expect(api.planAttempts, 1);
+    expect(api.jobAttempts, 1);
+    expect(find.text('生成失败'), findsWidgets);
+    expect(find.textContaining('Skill runtime crashed'), findsWidgets);
+    expect(find.text('失败步骤：Generate PDF draft'), findsOneWidget);
+    expect(find.text('错误代码：E_SKILL_RUNTIME'), findsOneWidget);
+    expect(secondaryButton('重新规划'), findsOneWidget);
+    expect(secondaryButton('修改需求'), findsOneWidget);
+    expect(secondaryButton('查看日志'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('查看日志'));
+    await tester.tap(secondaryButton('查看日志').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('E_SKILL_RUNTIME'), findsWidgets);
+    expect(find.textContaining('Skill runtime crashed'), findsWidgets);
+    expect(find.textContaining('requestId: req_'), findsWidgets);
+    expect(find.textContaining('jobId: job_failed_1'), findsWidgets);
+
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('重新规划'));
+    await tester.tap(secondaryButton('重新规划'));
+    await tester.pumpAndSettle();
+
+    expect(api.planAttempts, 2);
+    expect(find.text('确认创作计划'), findsOneWidget);
+    expect(find.text('生成失败'), findsNothing);
+
+    await tester.ensureVisible(secondaryButton('修改需求'));
+    await tester.tap(secondaryButton('修改需求'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('素材库'), findsWidgets);
+  });
+
+  testWidgets('memoir video failure exposes MP4 reason log and regenerate', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FailedMemoirVideoCreationJobSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateMemoryVideoFromCard(tester);
+
+    expect(api.planAttempts, 1);
+    expect(api.jobAttempts, 1);
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(find.text('生成失败'), findsWidgets);
+    expect(find.textContaining('Hyperframes 未能成功生成 MP4'), findsWidgets);
+    expect(find.text('失败步骤：生成 MP4 视频'), findsOneWidget);
+    expect(find.text('错误代码：E_HYPERFRAMES_RENDER'), findsOneWidget);
+    expect(secondaryButton('重新生成'), findsOneWidget);
+    expect(secondaryButton('查看日志'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('查看日志'));
+    await tester.tap(secondaryButton('查看日志').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('E_HYPERFRAMES_RENDER'), findsWidgets);
+    expect(find.textContaining('jobId: job_video_failed_1'), findsWidgets);
+
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('重新生成'));
+    await tester.tap(secondaryButton('重新生成'));
+    await tester.pumpAndSettle();
+
+    expect(api.planAttempts, 2);
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(find.text('确认创作计划'), findsOneWidget);
+  });
+
+  testWidgets('memoir video creation shows video environment preparation', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SlowMemoirVideoCreationJobSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('生成回忆录视频'));
+    await tester.tap(find.text('生成回忆录视频'));
+    await tester.pumpAndSettle();
+
+    final confirmButton = primaryButton('确认计划并开始生成').last;
+    await tester.ensureVisible(confirmButton);
+    await tester.tap(confirmButton);
+    await tester.pump();
+    await tester.pump();
+
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.lastJobBody?['planId'], 'plan_video_slow');
+    expect(find.text('准备视频环境'), findsWidgets);
+    expect(find.textContaining('正在准备视频生成环境'), findsWidgets);
+
+    api.completeJob();
+    await tester.pumpAndSettle();
+
+    expect(find.text('打开视频预览'), findsOneWidget);
+  });
+
   testWidgets(
-    'cover failure exposes retry/skip/log actions and skip uses skip cover policy',
+    'creation job polls detail until completion and renders backend steps',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1440, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final api = _PollingCreationSidecarApi();
+      await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+      await tester.pumpAndSettle();
+
+      await selectOneAssetForGeneration(tester);
+      await gotoStep(tester, '创作台');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(primaryButton('开始规划'));
+      await tester.tap(primaryButton('开始规划'));
+      await tester.pumpAndSettle();
+      final confirmButton = primaryButton('确认计划并开始生成').last;
+      await tester.ensureVisible(confirmButton);
+      await tester.tap(confirmButton);
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.pollCount, 0);
+      expect(find.text('Generate PDF draft'), findsWidgets);
+      expect(find.text('Running skill workspace'), findsOneWidget);
+      expect(find.text('生成中'), findsWidgets);
+
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+
+      expect(api.pollCount, 1);
+      expect(find.text('Validate final artifact'), findsWidgets);
+      expect(find.text('Ready for review'), findsOneWidget);
+      expect(find.textContaining('生成完成，可预览并导出 PDF'), findsWidgets);
+    },
+  );
+
+  testWidgets('creation job polling stops when leaving the generate page', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _RunningCreationSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
+    final confirmButton = primaryButton('确认计划并开始生成').last;
+    await tester.ensureVisible(confirmButton);
+    await tester.tap(confirmButton);
+    await tester.pump();
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    expect(api.pollCount, 1);
+
+    await gotoStep(tester, '素材库');
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+
+    expect(api.pollCount, 1);
+  });
+
+  testWidgets(
+    'cover failure exposes retry/log actions without skip cover policy',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -189,23 +607,33 @@ void main() {
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('生成儿童绘本'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('继续生成'));
+      await tester.tap(find.text('生成儿童绘本').first);
       await tester.pumpAndSettle();
 
       expect(find.text('封面图生成失败'), findsWidgets);
       expect(secondaryButton('重试'), findsOneWidget);
-      expect(secondaryButton('跳过封面继续导出'), findsOneWidget);
+      expect(secondaryButton('跳过封面继续导出'), findsNothing);
+      expect(find.text('跳过封面'), findsNothing);
       expect(secondaryButton('查看日志'), findsOneWidget);
-      expect(find.textContaining('Request ID: req_'), findsWidgets);
+      expect(find.textContaining('Request ID: req_'), findsNothing);
 
-      await tester.ensureVisible(secondaryButton('跳过封面继续导出'));
-      await tester.tap(secondaryButton('跳过封面继续导出'));
+      await tester.ensureVisible(secondaryButton('查看日志'));
+      await tester.tap(secondaryButton('查看日志'));
+      await tester.pumpAndSettle();
+      expect(find.text('生成日志详情'), findsOneWidget);
+      expect(find.textContaining('requestId: req_'), findsWidgets);
+      await tester.tap(find.text('关闭'));
       await tester.pumpAndSettle();
 
-      expect(api.lastJobBody?['coverPolicy'], 'skip');
-      expect(find.textContaining('生成完成，可预览并导出 PDF'), findsOneWidget);
+      await tester.ensureVisible(secondaryButton('重试'));
+      await tester.tap(secondaryButton('重试'));
+      await tester.pumpAndSettle();
+
+      expect(
+        (api.lastPlanBody?['settings'] as Map?)?.containsKey('coverPolicy'),
+        false,
+      );
+      expect(find.text('封面图生成失败'), findsWidgets);
     },
   );
 
@@ -313,7 +741,7 @@ void main() {
 
     await tester.tap(find.text('添加孩子档案'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), '安安');
+    await tester.enterText(find.byType(TextField).first, '安安');
     await tester.tap(find.text('添加'));
     await tester.pumpAndSettle();
 
@@ -336,7 +764,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('大模型接口配置'), findsWidgets);
-      expect(find.text('Storage 配置'), findsOneWidget);
+      expect(find.text('云端分享设置'), findsOneWidget);
+      expect(find.text('Storage 配置'), findsNothing);
+      expect(find.textContaining('Sidecar'), findsNothing);
       expect(find.textContaining('未连接'), findsWidgets);
     },
   );
@@ -370,7 +800,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('大模型接口配置'), findsOneWidget);
-    expect(find.text('Storage 配置'), findsOneWidget);
+    expect(find.text('云端分享设置'), findsOneWidget);
+    expect(find.text('Storage 配置'), findsNothing);
     expect(find.textContaining('初始化成功'), findsWidgets);
     expect(find.text('正在安装...'), findsNothing);
     expect(find.text('请完成配置后开始使用KidMemory'), findsNothing);
@@ -388,7 +819,8 @@ void main() {
       await gotoStep(tester, '设置');
       await tester.pumpAndSettle();
 
-      expect(find.text('Storage 配置'), findsOneWidget);
+      expect(find.text('云端分享设置'), findsOneWidget);
+      expect(find.text('Storage 配置'), findsNothing);
       expect(find.text('已配置'), findsWidgets);
       expect(find.text('修改配置'), findsWidgets);
       expect(find.text('测试连接'), findsWidgets);
@@ -402,6 +834,28 @@ void main() {
       expect(find.textContaining('测试通过'), findsWidgets);
     },
   );
+
+  testWidgets('setup page storage test failure uses product language', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SupabaseStorageSidecarApi(failStorageTest: true);
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+    await gotoStep(tester, '设置');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('测试连接').last);
+    await tester.tap(secondaryButton('测试连接').last);
+    await tester.pumpAndSettle();
+
+    expect(api.storageTestCalls, 1);
+    expect(find.textContaining('测试连接失败'), findsWidgets);
+    expect(find.textContaining('云端分享连接不可用'), findsWidgets);
+    expect(find.textContaining('Supabase Storage'), findsNothing);
+  });
 
   testWidgets(
     'setup page configures Supabase S3 fields and toggles secret visibility',
@@ -435,13 +889,13 @@ void main() {
       await tester.pumpAndSettle();
 
       final dialog = find.byType(AlertDialog);
-      expect(find.text('配置 Supabase Storage'), findsOneWidget);
+      expect(find.text('配置云端分享'), findsOneWidget);
       final fields = find.descendant(
         of: dialog,
         matching: find.byType(TextField),
       );
       expect(fields, findsNWidgets(9));
-      expect(find.textContaining('先用 S3 方式最省事'), findsOneWidget);
+      expect(find.textContaining('推荐使用云端私有存储'), findsOneWidget);
 
       await tester.tap(find.byTooltip('打开 Supabase S3 官方说明'));
       await tester.pumpAndSettle();
@@ -455,14 +909,7 @@ void main() {
       expect(tester.widget<TextField>(s3AccessField).obscureText, isTrue);
       expect(tester.widget<TextField>(s3SecretField).obscureText, isTrue);
 
-      final s3AccessToggle = find.descendant(
-        of: find.byWidgetPredicate(
-          (widget) =>
-              widget is TextField &&
-              widget.decoration?.labelText == 'Access Key ID',
-        ),
-        matching: find.byIcon(Icons.visibility_outlined),
-      );
+      final s3AccessToggle = find.byTooltip('显示').first;
       expect(s3AccessToggle, findsOneWidget);
       await tester.tap(s3AccessToggle);
       await tester.pumpAndSettle();
@@ -511,14 +958,7 @@ void main() {
       expect(tester.widget<TextField>(reopenedAccessField).obscureText, isTrue);
       expect(tester.widget<TextField>(reopenedSecretField).obscureText, isTrue);
 
-      final reopenedAccessToggle = find.descendant(
-        of: find.byWidgetPredicate(
-          (widget) =>
-              widget is TextField &&
-              widget.decoration?.labelText == 'Access Key ID',
-        ),
-        matching: find.byIcon(Icons.visibility_outlined),
-      );
+      final reopenedAccessToggle = find.byTooltip('显示').first;
       await tester.tap(reopenedAccessToggle);
       await tester.pumpAndSettle();
       expect(
@@ -542,9 +982,7 @@ void main() {
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(primaryButton('开始生成绘本'));
-      await tester.tap(primaryButton('开始生成绘本'));
-      await tester.pumpAndSettle();
+      await generateStorybookFromPrimary(tester);
       expect(find.text('导出 PDF'), findsOneWidget);
 
       await tester.tap(find.text('导出 PDF'));
@@ -567,6 +1005,40 @@ void main() {
     },
   );
 
+  testWidgets('export flow exposes exporting phase while sidecar export runs', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SlowExportSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.lastExportBody != null);
+    await tester.pump();
+
+    expect(find.text('正在导出到本地'), findsWidgets);
+    expect(
+      find.textContaining('正在导出到 /tmp/kidmemory-exports/job_123456.pdf'),
+      findsWidgets,
+    );
+
+    api.completeExport();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('PDF 已导出：/tmp/kidmemory-exports/job_123456.pdf'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets(
     'export flow normalizes relative export directories before export',
     (tester) async {
@@ -581,9 +1053,7 @@ void main() {
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(primaryButton('开始生成绘本'));
-      await tester.tap(primaryButton('开始生成绘本'));
-      await tester.pumpAndSettle();
+      await generateStorybookFromPrimary(tester);
       await tester.tap(find.text('导出 PDF'));
       await pumpUntil(tester, () => api.lastExportBody != null);
       await tester.pumpAndSettle();
@@ -605,6 +1075,117 @@ void main() {
       );
     },
   );
+
+  testWidgets('memoir video export uses MP4 target in export directory', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FakeSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateMemoryVideoFromCard(tester);
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(find.text('导出 MP4'), findsOneWidget);
+
+    await tester.tap(find.text('导出 MP4'));
+    await pumpUntil(tester, () => api.lastExportBody != null);
+    await tester.pumpAndSettle();
+
+    expect(api.lastExportBody?['target'], 'mp4');
+    expect(
+      api.lastExportBody?['targetPath'],
+      '/tmp/kidmemory-exports/job_123456.mp4',
+    );
+    expect(
+      find.textContaining('MP4 已导出：/tmp/kidmemory-exports/job_123456.mp4'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('memoir video preview opens generated MP4 artifact', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SuccessfulMemoirVideoCreationJobSidecarApi();
+    String? openedTarget;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DesktopShell(
+          api: api,
+          openExternalTarget: (target) async {
+            openedTarget = target;
+          },
+        ),
+      ),
+    );
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateMemoryVideoFromCard(tester);
+
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(find.text('打开视频预览'), findsOneWidget);
+    expect(find.text('预览全部页面'), findsNothing);
+
+    await tester.ensureVisible(secondaryButton('打开视频预览'));
+    await tester.tap(secondaryButton('打开视频预览'));
+    await tester.pumpAndSettle();
+
+    expect(openedTarget, '/tmp/kidmemory-exports/job_video_success.mp4');
+  });
+
+  testWidgets('switching back to storybook restores PDF export target', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FakeSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('生成回忆录视频'));
+    await tester.tap(find.text('生成回忆录视频'));
+    await tester.pumpAndSettle();
+    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+
+    await tester.ensureVisible(secondaryButton('修改需求'));
+    await tester.tap(secondaryButton('修改需求'));
+    await tester.pumpAndSettle();
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('生成儿童绘本').first);
+    await tester.tap(find.text('生成儿童绘本').first);
+    await tester.pumpAndSettle();
+    await confirmReadyCreationPlan(tester);
+
+    expect(api.lastPlanBody?['creationType'], 'storybook');
+    expect(find.text('导出 PDF'), findsOneWidget);
+
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.lastExportBody != null);
+    await tester.pumpAndSettle();
+
+    expect(api.lastExportBody?['target'], 'pdf');
+    expect(
+      api.lastExportBody?['targetPath'],
+      '/tmp/kidmemory-exports/job_123456.pdf',
+    );
+  });
 
   testWidgets(
     'export flow supports JPG long image sync and private share copy',
@@ -629,14 +1210,12 @@ void main() {
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('PDF 文件  高质量 PDF（打印级别）').last);
+      await tester.tap(find.text('PDF 文件 高质量 PDF（打印级别）').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('长图 JPG  体积更小').last);
+      await tester.tap(find.text('长图 JPG 体积更小').last);
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(primaryButton('开始生成绘本'));
-      await tester.tap(primaryButton('开始生成绘本'));
-      await tester.pumpAndSettle();
+      await generateStorybookFromPrimary(tester);
       await tester.tap(primaryButton('导出 JPG 长图'));
       await pumpUntil(tester, () => api.lastLongImageExportBody != null);
       await tester.pumpAndSettle();
@@ -659,6 +1238,159 @@ void main() {
     },
   );
 
+  testWidgets('pdf share flow confirms before creating a web share link', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SlowShareSidecarApi();
+    final openedTargets = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DesktopShell(
+          api: api,
+          openExternalTarget: (target) async {
+            openedTargets.add(target);
+          },
+        ),
+      ),
+    );
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.lastExportBody != null);
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('创建分享链接'));
+    await tester.tap(secondaryButton('创建分享链接'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('创建 Web 分享链接'), findsOneWidget);
+    expect(find.text('这会将导出作品上传到云端，用于生成 Web 分享链接。'), findsOneWidget);
+    expect(api.shareRequests, 0);
+
+    await tester.tap(find.text('创建分享链接').last);
+    await pumpUntil(tester, () => api.lastShareBody != null);
+    await tester.pump();
+
+    expect(api.shareRequests, 1);
+    expect(api.lastShareBody?['artifactId'], 'artifact-job-pdf');
+    expect(find.text('正在创建 Web 分享链接...'), findsWidgets);
+
+    api.completeShare();
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Web 分享链接已创建'), findsWidgets);
+    expect(
+      find.textContaining('http://localhost:3001/share/share_job_123456'),
+      findsWidgets,
+    );
+
+    await tester.ensureVisible(secondaryButton('打开链接'));
+    await tester.tap(secondaryButton('打开链接'));
+    await tester.pumpAndSettle();
+
+    expect(openedTargets, ['http://localhost:3001/share/share_job_123456']);
+  });
+
+  testWidgets('pdf share failure exposes retry and log actions', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FailingShareSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.lastExportBody != null);
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('创建分享链接'));
+    await tester.tap(secondaryButton('创建分享链接'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('创建分享链接').last);
+    await pumpUntil(tester, () => api.shareRequests == 1);
+    await tester.pumpAndSettle();
+
+    expect(api.lastShareBody?['artifactId'], 'artifact-job-pdf');
+    expect(find.textContaining('分享链接创建失败'), findsWidgets);
+    expect(find.textContaining('分享服务暂时不可用'), findsWidgets);
+    expect(secondaryButton('重试创建'), findsOneWidget);
+    expect(secondaryButton('查看日志'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('查看日志').last);
+    await tester.tap(secondaryButton('查看日志').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('分享服务暂时不可用'), findsWidgets);
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(secondaryButton('重试创建'));
+    await tester.tap(secondaryButton('重试创建'));
+    await tester.pumpAndSettle();
+
+    expect(api.shareRequests, 1);
+    expect(find.text('创建 Web 分享链接'), findsOneWidget);
+    await tester.tap(find.text('创建分享链接').last);
+    await pumpUntil(tester, () => api.shareRequests == 2);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('分享链接创建失败'), findsWidgets);
+  });
+
+  testWidgets('pdf export failure exposes reason log and retry action', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FailingExportSidecarApi();
+    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.exportRequests == 1);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('PDF 导出异常'), findsWidgets);
+    expect(find.textContaining('导出服务暂时不可用'), findsWidgets);
+    expect(secondaryButton('查看日志'), findsWidgets);
+    expect(find.text('导出 PDF'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('查看日志').last);
+    await tester.tap(secondaryButton('查看日志').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('导出服务暂时不可用'), findsWidgets);
+    await tester.tap(find.text('关闭'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('导出 PDF'));
+    await pumpUntil(tester, () => api.exportRequests == 2);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('PDF 导出异常'), findsWidgets);
+  });
+
   testWidgets('generate page opens a full log dialog', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -670,15 +1402,17 @@ void main() {
     await selectOneAssetForGeneration(tester);
     await gotoStep(tester, '创作台');
     await tester.pumpAndSettle();
-    await tester.ensureVisible(primaryButton('开始生成绘本'));
-    await tester.tap(primaryButton('开始生成绘本'));
-    await tester.pumpAndSettle();
+    await generateStorybookFromPrimary(tester);
+    expect(find.textContaining('Request ID:'), findsNothing);
+    expect(find.textContaining('jobId:'), findsNothing);
     await tester.ensureVisible(secondaryButton('查看详细日志'));
     await tester.tap(secondaryButton('查看详细日志'));
     await tester.pumpAndSettle();
 
     expect(find.text('生成日志详情'), findsOneWidget);
     expect(find.textContaining('状态：'), findsWidgets);
+    expect(find.textContaining('requestId: req_'), findsWidgets);
+    expect(find.textContaining('jobId: job_123456'), findsWidgets);
   });
 
   testWidgets('preview all pages opens after generated job ready', (
@@ -704,16 +1438,63 @@ void main() {
     await gotoStep(tester, '创作台');
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('生成完成后，可以导出 PDF、长图或创建分享链接'), findsWidgets);
+    expect(find.textContaining('生成完成后，可以导出 PDF、长图或创建分享链接'), findsNothing);
     expect(secondaryButton('预览全部页面'), findsNothing);
 
-    await tester.ensureVisible(primaryButton('开始生成绘本'));
-    await tester.tap(primaryButton('开始生成绘本'));
-    await tester.pumpAndSettle();
+    await generateStorybookFromPrimary(tester);
     expect(secondaryButton('预览全部页面'), findsOneWidget);
+    await tester.ensureVisible(secondaryButton('预览全部页面'));
     await tester.tap(secondaryButton('预览全部页面'));
     await tester.pumpAndSettle();
-    expect(openedUrl, '${api.baseUrl}/books/jobs/job_123456/preview');
+    expect(openedUrl, '${api.baseUrl}/creation/jobs/job_123456/preview');
+  });
+
+  testWidgets('pdf preview failure exposes reason folder and log actions', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _FakeSidecarApi();
+    final openedTargets = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DesktopShell(
+          api: api,
+          openExternalTarget: (target) async {
+            if (target.endsWith('/preview')) {
+              throw StateError('preview route unavailable');
+            }
+            openedTargets.add(target);
+          },
+        ),
+      ),
+    );
+
+    await selectOneAssetForGeneration(tester);
+    await gotoStep(tester, '创作台');
+    await tester.pumpAndSettle();
+
+    await generateStorybookFromPrimary(tester);
+    await tester.ensureVisible(secondaryButton('预览全部页面'));
+    await tester.tap(secondaryButton('预览全部页面'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('PDF 预览失败'), findsOneWidget);
+    expect(find.textContaining('preview route unavailable'), findsWidgets);
+    expect(secondaryButton('打开导出文件夹'), findsWidgets);
+    expect(secondaryButton('查看日志'), findsWidgets);
+
+    await tester.ensureVisible(secondaryButton('打开导出文件夹').first);
+    await tester.tap(secondaryButton('打开导出文件夹').first);
+    await tester.pumpAndSettle();
+    expect(openedTargets, ['/tmp/kidmemory-exports']);
+
+    await tester.ensureVisible(secondaryButton('查看日志').first);
+    await tester.tap(secondaryButton('查看日志').first);
+    await tester.pumpAndSettle();
+    expect(find.text('生成日志详情'), findsOneWidget);
+    expect(find.textContaining('PDF 预览失败'), findsWidgets);
   });
 
   testWidgets('editing child profile posts updated name to children api', (
@@ -793,11 +1574,9 @@ void main() {
 
     await gotoStep(tester, '创作台');
     await tester.pumpAndSettle();
-    await tester.ensureVisible(primaryButton('开始生成绘本'));
-    await tester.tap(primaryButton('开始生成绘本'));
-    await tester.pumpAndSettle();
+    await generateStorybookFromPrimary(tester);
 
-    expect(api.lastJobBody?['childId'], 'child-2');
+    expect((api.lastJobBody?['settings'] as Map?)?['childId'], 'child-2');
   });
 
   testWidgets('bulk delete ignores assets hidden by the current child filter', (
@@ -989,6 +1768,7 @@ class _FakeSidecarApi extends SidecarApi {
   Map<String, dynamic>? lastExportBody;
   String? lastJobId;
   Map<String, dynamic>? lastJobBody;
+  Map<String, dynamic>? lastPlanBody;
   Map<String, dynamic>? lastPathBody;
 
   @override
@@ -997,6 +1777,24 @@ class _FakeSidecarApi extends SidecarApi {
       return {
         'ok': true,
         'paths': {'exportDir': '/tmp/kidmemory-exports'},
+      };
+    }
+    if (path == '/api/config/agent-configs/default') {
+      return {
+        'id': 'agent-config-default',
+        'name': 'Default Agent',
+        'provider': 'custom',
+        'model': 'mimo-v2-pro',
+        'baseUrl': 'https://api.xiaomimimo.com/v1',
+        'apiKeyConfigured': true,
+        'temperature': 0.7,
+        'maxTokens': 4096,
+        'toolsEnabled': <String>[],
+        'workspaceConfig': <String, dynamic>{},
+        'isDefault': true,
+        'isActive': true,
+        'createdAt': '2026-05-20T00:00:00.000Z',
+        'updatedAt': '2026-05-20T00:00:00.000Z',
       };
     }
     if (path == '/children') {
@@ -1028,8 +1826,50 @@ class _FakeSidecarApi extends SidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
+    if (path == '/api/config/agent-configs/agent-config-default/test') {
+      return {
+        'success': true,
+        'responseTime': 42,
+        'modelUsed': 'mimo-v2-pro',
+      };
+    }
     if (path.startsWith('/config/check/')) {
       return {'ok': true};
+    }
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      return {
+        'planId': 'plan_123456',
+        'creationType': body['creationType'] ?? 'storybook',
+        'summary': 'Create a PDF from selected assets',
+        'skillName': 'KidMemory storybook',
+        'steps': _testPlanSteps,
+        'requirements': _testStructuredPlanRequirements,
+        'requirementItems': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      lastJobId = 'job_123456';
+      return {
+        'jobId': lastJobId,
+        'planId': body['planId'],
+        'creationType': 'storybook',
+        'status': 'succeeded',
+        'currentStepId': 'publish',
+        'steps': const <Map<String, dynamic>>[],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': null,
+      };
+    }
+    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+      lastExportBody = body;
+      return {
+        'artifactId': 'artifact-job-pdf',
+        'kind': body['target'] ?? 'pdf',
+        'jobId': lastJobId,
+        'localPath': body['targetPath'],
+      };
     }
     if (path == '/books/jobs') {
       lastJobBody = body;
@@ -1044,6 +1884,523 @@ class _FakeSidecarApi extends SidecarApi {
       };
     }
     return {'ok': true};
+  }
+}
+
+class _SlowCreationSidecarApi extends _FakeSidecarApi {
+  final planCompleter = Completer<Map<String, dynamic>>();
+  final jobCompleter = Completer<Map<String, dynamic>>();
+
+  void completePlan() {
+    if (!planCompleter.isCompleted) {
+      planCompleter.complete({
+        'planId': 'plan_slow',
+        'creationType': 'storybook',
+        'summary': 'Slow creation plan is ready',
+        'skillName': 'KidMemory storybook',
+        'steps': _testPlanSteps,
+        'requirements': _testPlanRequirements,
+      });
+    }
+  }
+
+  void completeJob() {
+    if (!jobCompleter.isCompleted) {
+      lastJobId = 'job_slow';
+      jobCompleter.complete({
+        'jobId': lastJobId,
+        'planId': lastJobBody?['planId'],
+        'creationType': 'storybook',
+        'status': 'succeeded',
+        'currentStepId': 'publish',
+        'steps': const <Map<String, dynamic>>[],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': null,
+      });
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      return planCompleter.future;
+    }
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      return jobCompleter.future;
+    }
+    return super.post(path, body);
+  }
+}
+
+class _PlanFailureSidecarApi extends _FakeSidecarApi {
+  int planAttempts = 0;
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      planAttempts += 1;
+      lastPlanBody = body;
+      throw const SidecarApiException('计划失败：规划服务暂时不可用');
+    }
+    return super.post(path, body);
+  }
+}
+
+class _FailedCreationJobSidecarApi extends _FakeSidecarApi {
+  int planAttempts = 0;
+  int jobAttempts = 0;
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      planAttempts += 1;
+      lastPlanBody = body;
+      return {
+        'planId': 'plan_failed_$planAttempts',
+        'creationType': body['creationType'] ?? 'storybook',
+        'summary': 'Create a PDF from selected assets',
+        'skillName': 'KidMemory storybook',
+        'steps': _testPlanSteps,
+        'requirements': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      jobAttempts += 1;
+      lastJobBody = body;
+      lastJobId = 'job_failed_$jobAttempts';
+      return {
+        'jobId': lastJobId,
+        'planId': body['planId'],
+        'creationType': 'storybook',
+        'status': 'failed',
+        'currentStepId': 'generate',
+        'steps': const <Map<String, dynamic>>[
+          {
+            'stepId': 'compose',
+            'label': 'Compose selected assets',
+            'status': 'succeeded',
+          },
+          {
+            'stepId': 'plan',
+            'label': 'Confirm persisted agent plan',
+            'status': 'succeeded',
+          },
+          {
+            'stepId': 'generate',
+            'label': 'Generate PDF draft',
+            'status': 'failed',
+            'detail': 'Skill runtime crashed',
+          },
+        ],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': const {
+          'category': 'skill',
+          'message': 'Skill runtime crashed',
+          'stepId': 'generate',
+          'code': 'E_SKILL_RUNTIME',
+        },
+      };
+    }
+    return super.post(path, body);
+  }
+}
+
+class _FailedMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
+  int planAttempts = 0;
+  int jobAttempts = 0;
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      planAttempts += 1;
+      lastPlanBody = body;
+      return {
+        'planId': 'plan_video_failed_$planAttempts',
+        'creationType': body['creationType'] ?? 'memoir_video',
+        'summary': 'Create a memory video from selected assets',
+        'skillName': 'KidMemory Hyperframes memoir video',
+        'steps': const <Map<String, dynamic>>[
+          {'stepId': 'compose', 'label': '准备视频素材', 'status': 'pending'},
+          {'stepId': 'generate', 'label': '生成 MP4 视频', 'status': 'pending'},
+        ],
+        'requirements': const [
+          {'label': 'Hyperframes runtime', 'required': true},
+          {'label': 'FFmpeg available or auto-repaired', 'required': true},
+        ],
+      };
+    }
+    if (path == '/creation/jobs') {
+      jobAttempts += 1;
+      lastJobBody = body;
+      lastJobId = 'job_video_failed_$jobAttempts';
+      return {
+        'jobId': lastJobId,
+        'planId': body['planId'],
+        'creationType': 'memoir_video',
+        'status': 'failed',
+        'currentStepId': 'generate',
+        'steps': const <Map<String, dynamic>>[
+          {'stepId': 'compose', 'label': '准备视频素材', 'status': 'succeeded'},
+          {
+            'stepId': 'generate',
+            'label': '生成 MP4 视频',
+            'status': 'failed',
+            'detail': 'Hyperframes render exited before writing MP4',
+          },
+        ],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': const {
+          'category': 'hyperframes',
+          'message': 'Hyperframes 未能成功生成 MP4。',
+          'stepId': 'generate',
+          'code': 'E_HYPERFRAMES_RENDER',
+        },
+      };
+    }
+    return super.post(path, body);
+  }
+}
+
+class _SuccessfulMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      return {
+        'planId': 'plan_video_success',
+        'creationType': body['creationType'] ?? 'memoir_video',
+        'summary': 'Create a memory video from selected assets',
+        'skillName': 'KidMemory Hyperframes memoir video',
+        'steps': const <Map<String, dynamic>>[
+          {'stepId': 'compose', 'label': '准备视频素材', 'status': 'pending'},
+          {'stepId': 'generate', 'label': '生成 MP4 视频', 'status': 'pending'},
+        ],
+        'requirements': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      lastJobId = 'job_video_success';
+      return {
+        'jobId': lastJobId,
+        'planId': body['planId'],
+        'creationType': 'memoir_video',
+        'status': 'succeeded',
+        'currentStepId': 'review',
+        'steps': const <Map<String, dynamic>>[
+          {'stepId': 'compose', 'label': '准备视频素材', 'status': 'succeeded'},
+          {'stepId': 'generate', 'label': '生成 MP4 视频', 'status': 'succeeded'},
+          {'stepId': 'review', 'label': '视频预览', 'status': 'succeeded'},
+        ],
+        'artifacts': const <Map<String, dynamic>>[
+          {
+            'artifactId': 'artifact-video-success',
+            'kind': 'mp4',
+            'localPath': '/tmp/kidmemory-exports/job_video_success.mp4',
+          },
+        ],
+        'error': null,
+      };
+    }
+    return super.post(path, body);
+  }
+}
+
+class _SlowMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
+  final jobCompleter = Completer<Map<String, dynamic>>();
+
+  void completeJob() {
+    if (jobCompleter.isCompleted) return;
+    jobCompleter.complete({
+      'jobId': 'job_video_slow',
+      'planId': lastJobBody?['planId'],
+      'creationType': 'memoir_video',
+      'status': 'succeeded',
+      'currentStepId': 'review',
+      'steps': const <Map<String, dynamic>>[
+        {'stepId': 'compose', 'label': '准备视频素材', 'status': 'succeeded'},
+        {'stepId': 'generate', 'label': '生成 MP4 视频', 'status': 'succeeded'},
+        {'stepId': 'review', 'label': '视频预览', 'status': 'succeeded'},
+      ],
+      'artifacts': const <Map<String, dynamic>>[
+        {
+          'artifactId': 'artifact-video-slow',
+          'kind': 'mp4',
+          'localPath': '/tmp/kidmemory-exports/job_video_slow.mp4',
+        },
+      ],
+      'error': null,
+    });
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      return {
+        'planId': 'plan_video_slow',
+        'creationType': body['creationType'] ?? 'memoir_video',
+        'summary': 'Create a memory video from selected assets',
+        'skillName': 'KidMemory Hyperframes memoir video',
+        'steps': const <Map<String, dynamic>>[
+          {'stepId': 'compose', 'label': '准备视频素材', 'status': 'pending'},
+          {'stepId': 'generate', 'label': '生成 MP4 视频', 'status': 'pending'},
+        ],
+        'requirements': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      return jobCompleter.future;
+    }
+    return super.post(path, body);
+  }
+}
+
+class _RunningCreationSidecarApi extends _FakeSidecarApi {
+  int pollCount = 0;
+
+  Map<String, dynamic> runningJob({String detail = 'Running skill workspace'}) {
+    return {
+      'jobId': 'job_polling',
+      'planId': lastJobBody?['planId'],
+      'creationType': 'storybook',
+      'status': 'running',
+      'currentStepId': 'generate',
+      'steps': [
+        const {
+          'stepId': 'compose',
+          'label': 'Compose selected assets',
+          'status': 'succeeded',
+        },
+        const {
+          'stepId': 'plan',
+          'label': 'Confirm persisted agent plan',
+          'status': 'succeeded',
+        },
+        {
+          'stepId': 'generate',
+          'label': 'Generate PDF draft',
+          'status': 'running',
+          'detail': detail,
+        },
+      ],
+      'artifacts': const <Map<String, dynamic>>[],
+      'error': null,
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      lastJobId = 'job_polling';
+      return runningJob();
+    }
+    return super.post(path, body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> get(String path) async {
+    if (path == '/creation/jobs/job_polling') {
+      pollCount += 1;
+      return runningJob(detail: 'Still generating');
+    }
+    return super.get(path);
+  }
+}
+
+class _PollingCreationSidecarApi extends _RunningCreationSidecarApi {
+  @override
+  Future<Map<String, dynamic>> get(String path) async {
+    if (path == '/creation/jobs/job_polling') {
+      pollCount += 1;
+      return {
+        'jobId': 'job_polling',
+        'planId': lastJobBody?['planId'],
+        'creationType': 'storybook',
+        'status': 'succeeded',
+        'currentStepId': 'review',
+        'steps': const <Map<String, dynamic>>[
+          {
+            'stepId': 'compose',
+            'label': 'Compose selected assets',
+            'status': 'succeeded',
+          },
+          {
+            'stepId': 'generate',
+            'label': 'Generate PDF draft',
+            'status': 'succeeded',
+            'detail': 'Draft generated',
+          },
+          {
+            'stepId': 'review',
+            'label': 'Validate final artifact',
+            'status': 'succeeded',
+            'detail': 'Ready for review',
+          },
+        ],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': null,
+      };
+    }
+    return super.get(path);
+  }
+}
+
+class _SequencedPlanSidecarApi extends _FakeSidecarApi {
+  int _nextPlanNumber = 1;
+  final createdPlanIds = <String>[];
+  final jobPlanIds = <String>[];
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      final nextPlanId = 'plan_${_nextPlanNumber++}';
+      createdPlanIds.add(nextPlanId);
+      return {
+        'planId': nextPlanId,
+        'creationType': body['creationType'] ?? 'storybook',
+        'summary': 'Create a PDF from selected assets',
+        'skillName': 'KidMemory storybook',
+        'steps': _testPlanSteps,
+        'requirements': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      lastJobBody = body;
+      jobPlanIds.add('${body['planId'] ?? ''}');
+      lastJobId = 'job_${jobPlanIds.length}';
+      return {
+        'jobId': lastJobId,
+        'planId': body['planId'],
+        'creationType': 'storybook',
+        'status': 'succeeded',
+        'currentStepId': 'publish',
+        'steps': const <Map<String, dynamic>>[],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': null,
+      };
+    }
+    return super.post(path, body);
+  }
+}
+
+class _SlowExportSidecarApi extends _FakeSidecarApi {
+  final exportCompleter = Completer<Map<String, dynamic>>();
+
+  void completeExport() {
+    if (!exportCompleter.isCompleted) {
+      exportCompleter.complete({
+        'artifactId': 'artifact-job-pdf',
+        'kind': lastExportBody?['target'] ?? 'pdf',
+        'jobId': lastJobId,
+        'localPath': lastExportBody?['targetPath'],
+      });
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+      lastExportBody = body;
+      return exportCompleter.future;
+    }
+    return super.post(path, body);
+  }
+}
+
+class _FailingExportSidecarApi extends _FakeSidecarApi {
+  int exportRequests = 0;
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+      exportRequests += 1;
+      lastExportBody = body;
+      throw const SidecarApiException('导出服务暂时不可用');
+    }
+    return super.post(path, body);
+  }
+}
+
+class _SlowShareSidecarApi extends _FakeSidecarApi {
+  final shareCompleter = Completer<Map<String, dynamic>>();
+  Map<String, dynamic>? lastShareBody;
+  int shareRequests = 0;
+
+  void completeShare() {
+    if (!shareCompleter.isCompleted) {
+      shareCompleter.complete({
+        'shareId': 'share_job_123456',
+        'shareUrl': 'http://localhost:3001/share/share_job_123456',
+        'artifactId': lastShareBody?['artifactId'],
+      });
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path.startsWith('/creation/jobs/') && path.endsWith('/share')) {
+      shareRequests += 1;
+      lastShareBody = body;
+      return shareCompleter.future;
+    }
+    return super.post(path, body);
+  }
+}
+
+class _FailingShareSidecarApi extends _FakeSidecarApi {
+  Map<String, dynamic>? lastShareBody;
+  int shareRequests = 0;
+
+  @override
+  Future<Map<String, dynamic>> post(
+    String path, [
+    Map<String, dynamic> body = const {},
+  ]) async {
+    if (path.startsWith('/creation/jobs/') && path.endsWith('/share')) {
+      shareRequests += 1;
+      lastShareBody = body;
+      throw const SidecarApiException('分享服务暂时不可用');
+    }
+    return super.post(path, body);
   }
 }
 
@@ -1102,12 +2459,12 @@ class _CoverFailureSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
+    if (path == '/creation/jobs/plan') {
+      lastPlanBody = body;
+      throw const SidecarApiException('封面图生成失败：免费生图服务暂时不可用');
+    }
     if (path == '/books/jobs') {
       lastJobBody = body;
-      if (body['coverPolicy'] == 'skip') {
-        lastJobId = 'job_123456';
-        return {'id': lastJobId, 'status': 'generated'};
-      }
       return {
         'ok': false,
         'status': 'failed',
@@ -1119,6 +2476,9 @@ class _CoverFailureSidecarApi extends _FakeSidecarApi {
 }
 
 class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
+  _SupabaseStorageSidecarApi({this.failStorageTest = false});
+
+  final bool failStorageTest;
   Map<String, dynamic>? lastLongImageExportBody;
   Map<String, dynamic>? lastStorageConfigBody;
   final storageSyncArtifactIds = <String>[];
@@ -1196,6 +2556,13 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
     }
     if (path == '/config/supabase-storage/test') {
       storageTestCalls += 1;
+      if (failStorageTest) {
+        return {
+          'ok': false,
+          'message': '云端分享连接不可用',
+          'cleanup': {'ok': true},
+        };
+      }
       return {
         'ok': true,
         'message': '测试通过',
@@ -1295,23 +2662,10 @@ class _UnconfiguredSidecarApi extends _FakeSidecarApi {
         'openai': {'baseUrl': '', 'model': '', 'apiKeyConfigured': false},
       };
     }
-    return super.get(path);
-  }
-
-  @override
-  Future<Map<String, dynamic>> post(
-    String path, [
-    Map<String, dynamic> body = const {},
-  ]) async {
-    if (path == '/config/check/openai') {
-      return {
-        'ok': false,
-        'service': 'openai',
-        'blocksGeneration': false,
-        'message': '大模型接口未配置。',
-      };
+    if (path == '/api/config/agent-configs/default') {
+      return {};
     }
-    return super.post(path, body);
+    return super.get(path);
   }
 }
 
@@ -1439,14 +2793,6 @@ class _ToggleReadySidecarApi extends SidecarApi {
       };
     }
     if (path.startsWith('/config/check/')) {
-      if (path == '/config/check/openai') {
-        return {
-          'ok': false,
-          'service': 'openai',
-          'blocksGeneration': false,
-          'message': '大模型接口未配置。',
-        };
-      }
       return {'ok': true};
     }
     return {'ok': true};
@@ -1670,6 +3016,29 @@ class _MultiChildSidecarApi extends SidecarApi {
     if (path == '/books/jobs') {
       lastJobBody = body;
       return {'id': 'job_123456', 'status': 'generated'};
+    }
+    if (path == '/creation/jobs/plan') {
+      lastJobBody = body;
+      return {
+        'planId': 'plan_123456',
+        'creationType': body['creationType'] ?? 'storybook',
+        'summary': 'Create a PDF from selected assets',
+        'skillName': 'KidMemory storybook',
+        'steps': _testPlanSteps,
+        'requirements': _testPlanRequirements,
+      };
+    }
+    if (path == '/creation/jobs') {
+      return {
+        'jobId': 'job_123456',
+        'planId': body['planId'],
+        'creationType': 'storybook',
+        'status': 'succeeded',
+        'currentStepId': 'publish',
+        'steps': const <Map<String, dynamic>>[],
+        'artifacts': const <Map<String, dynamic>>[],
+        'error': null,
+      };
     }
     return {'ok': true};
   }

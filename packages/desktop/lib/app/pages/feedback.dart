@@ -31,7 +31,9 @@ extension _DesktopShellFeedback on _DesktopShellState {
   }
 
   AppToastTone _toastTone(String message) {
-    if (message.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel) ||
+    if (message.contains(
+          AppLocalizations.of(context)!.uploadStatusFailedLabel,
+        ) ||
         message.contains(AppLocalizations.of(context)!.feedbackPageS555) ||
         message.contains(AppLocalizations.of(context)!.feedbackPageS583) ||
         message.contains(AppLocalizations.of(context)!.feedbackPageS673) ||
@@ -39,7 +41,9 @@ extension _DesktopShellFeedback on _DesktopShellState {
       return AppToastTone.error;
     }
     if (message.contains(AppLocalizations.of(context)!.feedbackPageS582) ||
-        message.contains('请') ||
+        message.contains(
+          AppLocalizations.of(context)!.feedbackRequestKeyword,
+        ) ||
         message.contains(AppLocalizations.of(context)!.actionCancel)) {
       return AppToastTone.warning;
     }

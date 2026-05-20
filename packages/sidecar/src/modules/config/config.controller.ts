@@ -2,7 +2,6 @@ import { Body, Controller, Get, Inject, Post } from "@nestjs/common";
 
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
 import { ConfigService } from "./config.service.ts";
-import { UpdateOpenAIDtoSchema } from "./dto/update-openai.dto.ts";
 import { UpdatePathsDtoSchema } from "./dto/update-paths.dto.ts";
 import { UpdatePostgresDtoSchema } from "./dto/update-postgres.dto.ts";
 import {
@@ -34,12 +33,6 @@ export class ConfigController {
     return this.configService.updatePostgres(dto);
   }
 
-  @Post("config/openai")
-  updateOpenAI(@Body() body: unknown) {
-    const dto = parseDto(UpdateOpenAIDtoSchema, body, "config/openai");
-    return this.configService.updateOpenAI(dto);
-  }
-
   @Post("config/supabase-storage")
   updateSupabaseStorage(@Body() body: unknown) {
     const dto = parseDto(
@@ -55,9 +48,6 @@ export class ConfigController {
 
   @Post("config/check/postgres")
   postgresReadiness() { return this.configService.postgresReadiness(); }
-
-  @Post("config/check/openai")
-  openAIReadiness() { return this.configService.openAIReadiness(); }
 
   @Post("config/check/claude")
   claudeReadiness() { return this.configService.claudeReadiness(); }

@@ -116,6 +116,9 @@ class _EditDialogFakeSidecarApi extends SidecarApi {
     if (path.startsWith('/assets')) {
       return {'assets': <Map<String, dynamic>>[]};
     }
+    if (path == '/api/config/agent-configs/default') {
+      return {};
+    }
     return {'ok': true, 'data': {}};
   }
 
@@ -126,8 +129,7 @@ class _EditDialogFakeSidecarApi extends SidecarApi {
   ]) async {
     if (path == '/schema/init' ||
         path == '/config/check/postgres' ||
-        path == '/config/check/pgvector' ||
-        path == '/config/check/openai') {
+        path == '/config/check/pgvector') {
       return {'ok': true, 'message': 'ok'};
     }
     return {'ok': true, 'data': {}};

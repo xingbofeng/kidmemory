@@ -5,6 +5,8 @@ import 'package:kidmemory_desktop/features/child_profile/child_profile_page.dart
 import 'package:kidmemory_desktop/shared/models/library_models.dart';
 import 'package:kidmemory_desktop/shared/widgets/content.dart';
 
+import 'localized_test_app.dart';
+
 void main() {
   testWidgets('recent works thumbnails open a preview dialog', (
     WidgetTester tester,
@@ -13,7 +15,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: ChildProfilePage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -81,7 +83,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: ChildProfilePage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],

@@ -60,11 +60,11 @@
   "@generateExportTitle": {
     "description": "生成导出页面标题"
   },
-  "directUploadEntryButtonLabel": "扫码上传 · Direct",
+  "directUploadEntryButtonLabel": "扫码上传",
   "@directUploadEntryButtonLabel": {
     "description": "Direct upload 入口按钮文字"
   },
-  "directUploadDialogTitle": "扫码上传 · Direct",
+  "directUploadDialogTitle": "手机扫码上传",
   "@directUploadDialogTitle": {
     "description": "Direct upload 弹窗标题"
   },
@@ -80,7 +80,7 @@
   "@actionCloseLabel": {
     "description": "actionCloseLabel"
   },
-  "directUploadRiskNotice": "Supabase 直传验证版 — 对象需电脑端回拉后才算入库",
+  "directUploadRiskNotice": "上传完成后需在电脑端拉回，素材才会正式入库",
   "@directUploadRiskNotice": {
     "description": "Direct upload 风险说明"
   },
@@ -92,7 +92,7 @@
   "@uploadAccessLinkLabel": {
     "description": "Direct upload 链接信息标签"
   },
-  "directUploadQrCodeLabel": "Direct Upload 扫码链接二维码",
+  "directUploadQrCodeLabel": "扫码上传链接二维码",
   "@directUploadQrCodeLabel": {
     "description": "Direct upload 二维码无障碍标签"
   },
@@ -168,11 +168,12 @@
   "@uploadStatusPullingLabel": {
     "description": "上传状态汇总标签：回拉中"
   },
-  "setupPostgresTitle": "PostgreSQL 配置",
+  "setupPostgresTitle": "本地资料库",
   "setupPgvectorTitle": "pgvector 检测",
   "setupOpenAiTitle": "大模型接口配置",
   "setupLocalDataDirTitle": "本地数据目录",
-  "setupSidecarServiceTitle": "Sidecar 本地服务",
+  "setupSidecarServiceTitle": "KidMemory 本地服务",
+  "setupAgentServiceTitle": "Agent 服务配置",
   "setupItemTitle": "配置项",
   "setupWaitingConfigLoad": "等待配置读取",
   "setupPending": "待检测",
@@ -214,15 +215,15 @@
   "setupPostgresNotReadyStartLocalService": "PostgreSQL 还未就绪，请启动本机服务后重试",
   "setupStorageRestModeLabel": "REST 方式（可选）",
   "setupStorageS3ModeLabel": "S3 方式（推荐）",
-  "setupSidecarStarted": "Sidecar 已启动",
-  "setupSidecarStartedSchemaNotReady": "Sidecar 已启动，schema 初始化未完成",
-  "setupSidecarConnected": "Sidecar 已连接",
-  "setupSidecarStartFailed": "Sidecar 未能启动",
-  "setupSidecarStartFailedNodeOrBundled": "Sidecar 未能启动，请检查 Node.js 或 bundled sidecar",
-  "setupSidecarDisconnected": "Sidecar 未连接",
-  "setupStorageConfigTitle": "Storage 配置",
-  "setupStorageConfigSaveFailed": "Supabase Storage 配置保存失败",
-  "setupStorageConfigSaved": "Supabase Storage 配置已保存",
+  "setupSidecarStarted": "本地服务已启动",
+  "setupSidecarStartedSchemaNotReady": "本地服务已启动，资料库初始化未完成",
+  "setupSidecarConnected": "本地服务已连接",
+  "setupSidecarStartFailed": "本地服务未能启动",
+  "setupSidecarStartFailedNodeOrBundled": "本地服务未能启动，请检查运行环境或重新打开 KidMemory",
+  "setupSidecarDisconnected": "本地服务未连接",
+  "setupStorageConfigTitle": "云端分享设置",
+  "setupStorageConfigSaveFailed": "云端分享设置保存失败",
+  "setupStorageConfigSaved": "云端分享设置已保存",
   "setupPgvectorInitFailed": "pgvector 初始化失败",
   "setupPgvectorInitFailedExtMissing": "pgvector 初始化失败，请确认扩展已安装",
   "setupPgvectorNotReady": "pgvector 尚未就绪",
@@ -257,7 +258,7 @@
   "agentSettingsLocalStepDescription": "运行兼容 OpenAI API 的本地 Agent SDK 服务",
   "agentSettingsCustomEndpointStepTitle": "3. 自定义端点",
   "agentSettingsCustomEndpointStepDescription": "支持任何兼容 OpenAI API 格式的服务",
-  "setupStorageSectionIntro": "先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。",
+  "setupStorageSectionIntro": "推荐使用云端私有存储：接口地址、区域、存储空间名称和访问密钥都可以在云端控制台找到。存储空间建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。",
   "setupStoragePublicPrefixHint": "公开桶可填完整对象前缀",
   "setupStoragePublicAccessPrefixLabel": "公开访问前缀（可选）",
   "setupBuiltinPostgresNoPgvector": "内置 PostgreSQL runtime 未包含 pgvector 扩展",
@@ -317,7 +318,7 @@
   "setupRuntimeFoundInitialize": "检测到内置 PostgreSQL runtime，开始初始化。",
   "setupCheckRequestNoResult": "检测请求已发出，但 sidecar 未返回结果",
   "setupDownloading": "正在下载...",
-  "setupSidecarStarting": "正在启动 Sidecar...",
+  "setupSidecarStarting": "正在启动本地服务...",
   "setupInstallingSoftware": "正在安装...",
   "setupTestingConnection": "正在测试连接...",
   "setupFetchingResources": "正在获取资源...",
@@ -335,14 +336,14 @@
   "setupSignedUrlTTLLabel": "签名链接有效期（秒）",
   "setupPageTitle": "设置",
   "setupHomebrewPermissionRetryHint": "请修复 Homebrew 权限后重试。",
-  "setupConfigureStorageFirst": "请先配置 Supabase REST 或 S3 所需参数",
+  "setupConfigureStorageFirst": "请先填写云端分享所需参数",
   "setupHomebrewPermissionCommandHint": "请在终端执行以下命令修复权限后，再回到 KidMemory 重试：",
-  "setupSidecarConfigUnavailable": "读取 sidecar 配置失败，初始化未完成。",
+  "setupSidecarConfigUnavailable": "读取本地服务配置失败，初始化未完成。",
   "setupInputApiKey": "输入 API Key",
   "setupInputAccessKeyId": "输入或粘贴 Access Key ID",
   "setupInputSecretAccessKey": "输入或粘贴 Secret Access Key",
   "setupInputServiceRoleKey": "输入或粘贴 Service Role Key",
-  "setupStorageDialogTitle": "配置 Supabase Storage",
+  "setupStorageDialogTitle": "配置云端分享",
   "setupOpenAiDialogTitle": "配置大模型接口",
   "actionReconnect": "重新连接",
   "actionHide": "隐藏",
@@ -978,7 +979,7 @@
   "@generateExportS279": {
     "description": "generateExportS279"
   },
-  "generateExportS315": "原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。",
+  "generateExportS315": "原因：免费生图服务暂时不可用。请重试，或查看日志了解详情。",
   "@generateExportS315": {
     "description": "generateExportS315"
   },
@@ -1162,6 +1163,98 @@
   "@generateExportS624": {
     "description": "generateExportS624"
   },
+  "generateExportCreateShareDialogTitle": "创建 Web 分享链接",
+  "@generateExportCreateShareDialogTitle": {
+    "description": "Title for confirming web share link creation."
+  },
+  "generateExportCreateShareDialogBody": "这会将导出作品上传到云端，用于生成 Web 分享链接。",
+  "@generateExportCreateShareDialogBody": {
+    "description": "Confirmation copy before creating a web share link."
+  },
+  "generateExportCreateShareLinkLabel": "创建分享链接",
+  "@generateExportCreateShareLinkLabel": {
+    "description": "Button label for creating a web share link."
+  },
+  "generateExportShareCreatingStatus": "正在创建 Web 分享链接...",
+  "@generateExportShareCreatingStatus": {
+    "description": "Status shown while the web share link is being created."
+  },
+  "generateExportShareCreatedStatus": "Web 分享链接已创建",
+  "@generateExportShareCreatedStatus": {
+    "description": "Status shown after the web share link is created."
+  },
+  "generateExportShareFailedStatus": "分享链接创建失败",
+  "@generateExportShareFailedStatus": {
+    "description": "Status shown when web share link creation fails."
+  },
+  "generateExportShareReadyHint": "作品已导出，可以创建 Web 分享链接。",
+  "@generateExportShareReadyHint": {
+    "description": "Hint shown after export before a share link exists."
+  },
+  "generateExportCopyLinkLabel": "复制链接",
+  "@generateExportCopyLinkLabel": {
+    "description": "Button label for copying a web share link."
+  },
+  "generateExportOpenLinkLabel": "打开链接",
+  "@generateExportOpenLinkLabel": {
+    "description": "Button label for opening a web share link."
+  },
+  "generateExportRetryShareLabel": "重试创建",
+  "@generateExportRetryShareLabel": {
+    "description": "Button label for retrying web share link creation after failure."
+  },
+  "generateExportShareNotReady": "导出作品尚未准备好，暂不能创建分享链接。",
+  "@generateExportShareNotReady": {
+    "description": "Snackbar when share link creation cannot start."
+  },
+  "generateExportShareText": "KidMemory 作品：{shareUrl}",
+  "@generateExportShareText": {
+    "description": "Share text generated from a web share URL.",
+    "placeholders": {
+      "shareUrl": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportShareExceptionMessage": "分享链接创建失败：{error}",
+  "@generateExportShareExceptionMessage": {
+    "description": "Share link creation exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generateExportPreviewFailedTitle": "PDF 预览失败",
+  "@generateExportPreviewFailedTitle": {
+    "description": "Title shown when the generated PDF preview cannot be opened."
+  },
+  "generateExportPreviewFailedBody": "预览窗口没有打开。你可以查看失败原因，打开导出文件夹确认本地文件，或查看日志继续排查。",
+  "@generateExportPreviewFailedBody": {
+    "description": "Body shown when the generated PDF preview cannot be opened."
+  },
+  "generateExportPreviewFailureReason": "原因：{reason}",
+  "@generateExportPreviewFailureReason": {
+    "description": "Reason line for a PDF preview failure.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportPreviewFailedStatus": "PDF 预览失败：{error}",
+  "@generateExportPreviewFailedStatus": {
+    "description": "Status shown after PDF preview opening fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generateExportEditRequestLabel": "修改需求",
+  "@generateExportEditRequestLabel": {
+    "description": "Button label for editing the creation request after a planning or generation failure."
+  },
   "generateExportS627": "查看素材",
   "@generateExportS627": {
     "description": "generateExportS627"
@@ -1337,14 +1430,6 @@
   "generateExportS875": "超时",
   "@generateExportS875": {
     "description": "generateExportS875"
-  },
-  "generateExportS876": "跳过封面",
-  "@generateExportS876": {
-    "description": "generateExportS876"
-  },
-  "generateExportS877": "跳过封面继续导出",
-  "@generateExportS877": {
-    "description": "generateExportS877"
   },
   "generateExportS883": "输入目标或选择快捷类型，Agent 会按素材、故事、预览和导出组织创作流程。",
   "@generateExportS883": {
@@ -1714,7 +1799,7 @@
   "@assetLibraryPageS437": {
     "description": "assetLibraryPageS437"
   },
-  "assetLibraryPageS338": "同步入队失败，请检查 Supabase Storage 配置",
+  "assetLibraryPageS338": "同步入队失败，请检查云端分享设置",
   "@assetLibraryPageS338": {
     "description": "assetLibraryPageS338"
   },
@@ -1730,7 +1815,7 @@
   "@childProfileS887": {
     "description": "childProfileS887"
   },
-  "childProfileS693": "添加档案",
+  "childProfileS693": "添加孩子档案",
   "@childProfileS693": {
     "description": "childProfileS693"
   },
@@ -1810,7 +1895,7 @@
   "@childProfileS401": {
     "description": "childProfileS401"
   },
-  "childProfileS486": "当前素材库已连接到本地 sidecar，可用于生成成长作品集。",
+  "childProfileS486": "当前素材库已连接到本地服务，可用于生成成长作品集。",
   "@childProfileS486": {
     "description": "childProfileS486"
   },
@@ -2137,6 +2222,108 @@
   "@sidecarLauncherS194": {
     "description": "sidecarLauncherS194"
   },
+  "sidecarLauncherLaunchCommandLog": "启动 sidecar 命令：{command}",
+  "@sidecarLauncherLaunchCommandLog": {
+    "description": "Log entry for the sidecar launch command.",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherStartedPidLog": "Sidecar 进程启动成功：PID {pid}",
+  "@sidecarLauncherStartedPidLog": {
+    "description": "Log entry after the sidecar process starts.",
+    "placeholders": {
+      "pid": {
+        "type": "int"
+      }
+    }
+  },
+  "sidecarLauncherStartFailedLog": "sidecar 启动失败：{error}",
+  "@sidecarLauncherStartFailedLog": {
+    "description": "Log entry when sidecar start throws.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "sidecarLauncherTerminatedOldPidLog": "已终止旧 sidecar 进程 PID={pid}（端口 4317）",
+  "@sidecarLauncherTerminatedOldPidLog": {
+    "description": "Log entry when an old sidecar process is terminated.",
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherForceTerminatedOldPidLog": "旧 sidecar 进程未及时退出，已强制终止 PID={pid}（端口 4317）",
+  "@sidecarLauncherForceTerminatedOldPidLog": {
+    "description": "Log entry when an old sidecar process is force terminated.",
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherTerminateOldFailedLog": "终止旧 sidecar 进程失败：{error}",
+  "@sidecarLauncherTerminateOldFailedLog": {
+    "description": "Log entry when terminating old sidecar processes fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeCwdLog": "sidecar 目录探测: cwd={path}",
+  "@sidecarLauncherDirectoryProbeCwdLog": {
+    "description": "Sidecar directory probe current working directory log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeExecutableLog": "sidecar 目录探测: executable={path}",
+  "@sidecarLauncherDirectoryProbeExecutableLog": {
+    "description": "Sidecar directory probe executable path log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherInvalidExplicitDirLog": "KIDMEMORY_SIDECAR_DIR 未包含可运行 sidecar（缺少 dist/main.js）：{path}",
+  "@sidecarLauncherInvalidExplicitDirLog": {
+    "description": "Sidecar explicit directory invalid log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeCandidateLog": "sidecar 目录探测: {path} => {status}",
+  "@sidecarLauncherDirectoryProbeCandidateLog": {
+    "description": "Sidecar directory probe candidate status log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeFoundLog": "sidecar 目录探测: 命中 {path}",
+  "@sidecarLauncherDirectoryProbeFoundLog": {
+    "description": "Sidecar directory probe found a valid path.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "desktopShellS696": "温暖童趣",
   "@desktopShellS696": {
     "description": "desktopShellS696"
@@ -2153,7 +2340,7 @@
   "@desktopShellS129": {
     "description": "desktopShellS129"
   },
-  "desktopShellS89": "11:05:12 准备素材并构建 workspace",
+  "desktopShellS89": "11:05:12 准备素材并构建创作空间",
   "@desktopShellS89": {
     "description": "desktopShellS89"
   },
@@ -2281,7 +2468,7 @@
   "@exportActionsS414": {
     "description": "exportActionsS414"
   },
-  "exportActionsS416": "导出物尚未同步到 Supabase Storage，暂不能复制分享文案",
+  "exportActionsS416": "导出物尚未完成云端分享同步，暂不能复制分享文案",
   "@exportActionsS416": {
     "description": "exportActionsS416"
   },
@@ -2325,7 +2512,7 @@
   "@exportSyncS337": {
     "description": "exportSyncS337"
   },
-  "exportSyncS157": "Supabase Storage 同步失败",
+  "exportSyncS157": "云端分享同步失败",
   "@exportSyncS157": {
     "description": "exportSyncS157"
   },
@@ -2365,7 +2552,7 @@
   "@directUploadS855": {
     "description": "directUploadS855"
   },
-  "directUploadS650": "正在创建 Direct Upload 扫码会话...",
+  "directUploadS650": "正在创建扫码上传会话...",
   "@directUploadS650": {
     "description": "directUploadS650"
   },
@@ -2376,7 +2563,7 @@
   "@textUtilsS557": {
     "description": "textUtilsS557"
   },
-  "exportAssetSyncS862": "请先配置 Supabase Storage",
+  "exportAssetSyncS862": "请先配置云端分享设置",
   "@exportAssetSyncS862": {
     "description": "exportAssetSyncS862"
   },
@@ -2395,5 +2582,1712 @@
   "exportPageS702": "点击导出，准备读取当前导出目录",
   "@exportPageS702": {
     "description": "exportPageS702"
+  },
+  "setupLocalDataDirUpdatedLog": "本地数据目录已更新：{path}",
+  "@setupLocalDataDirUpdatedLog": {
+    "description": "Log entry when the local data directory is updated.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupSchemaInitIncompleteLog": "schema 初始化未完成：{message}",
+  "@setupSchemaInitIncompleteLog": {
+    "description": "Log entry when schema initialization is incomplete.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "setupReadinessCompleteMessage": "初始化成功，已完成 {done} / {total} 项 readiness 检测",
+  "@setupReadinessCompleteMessage": {
+    "description": "Readiness summary after initialization succeeds.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "setupInitializationFailed": "初始化失败：{error}",
+  "@setupInitializationFailed": {
+    "description": "Initialization failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupStorageTestPassed": "测试通过{cleanupMessage}",
+  "@setupStorageTestPassed": {
+    "description": "Supabase storage test success message.",
+    "placeholders": {
+      "cleanupMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "setupManualCheckTriggeredLog": "手动触发配置检测：{title}",
+  "@setupManualCheckTriggeredLog": {
+    "description": "Log entry for a manually triggered setup check.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupTestConnectionFailedWithMessage": "测试连接失败：{message}",
+  "@setupTestConnectionFailedWithMessage": {
+    "description": "Connection test failure with a detailed message.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "setupOpenDirectoryPickerFailed": "打开目录选择器失败：{error}",
+  "@setupOpenDirectoryPickerFailed": {
+    "description": "Directory picker open failure.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupLocalDataDirPickFailedLog": "本地数据目录选择失败：{error}",
+  "@setupLocalDataDirPickFailedLog": {
+    "description": "Log entry when local data directory picking fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupHomebrewNotWritableForPackage": "Homebrew 目录不可写，无法安装 {packageName}。",
+  "@setupHomebrewNotWritableForPackage": {
+    "description": "Homebrew prefix is not writable for a package installation.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupHomebrewBlockedPaths": "不可写路径：{paths}",
+  "@setupHomebrewBlockedPaths": {
+    "description": "Homebrew blocked paths summary.",
+    "placeholders": {
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
+  "setupPermissionDeniedInstallWithOutput": "当前用户没有安装权限，无法自动安装 {packageName}。",
+  "@setupPermissionDeniedInstallWithOutput": {
+    "description": "Permission denied install failure with command output.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupPermissionDeniedInstallRetry": "当前用户没有安装权限，无法自动安装 {packageName}。请修复 Homebrew 权限后重试。",
+  "@setupPermissionDeniedInstallRetry": {
+    "description": "Permission denied install failure retry instruction.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInstallCommandFailed": "安装命令失败：{output}",
+  "@setupInstallCommandFailed": {
+    "description": "Install command failed with short output.",
+    "placeholders": {
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInstallConfigureFailed": "安装与配置失败：{error}",
+  "@setupInstallConfigureFailed": {
+    "description": "Install and configure failure message.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCommandTimeoutMessage": "命令执行超过 {minutes} 分钟，已自动停止；请检查网络、Homebrew 或数据库服务状态后重试。",
+  "@setupCommandTimeoutMessage": {
+    "description": "Setup command timeout message.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "setupOpenSupabaseDocsFailed": "打开 Supabase 官方说明失败：{error}",
+  "@setupOpenSupabaseDocsFailed": {
+    "description": "Supabase docs open failure.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupAutoStartUnsupported": "暂不支持自动启动：{title}",
+  "@setupAutoStartUnsupported": {
+    "description": "Unsupported automatic start action.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupConfigItemRecorded": "配置项“{title}”已记录，稍后继续检测",
+  "@setupConfigItemRecorded": {
+    "description": "Setup config item recorded message.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInvalidPostgresRuntimeDir": "KIDMEMORY_POSTGRES_RUNTIME_DIR 无效（需包含 bin/lib/share）：{path}",
+  "@setupInvalidPostgresRuntimeDir": {
+    "description": "Invalid bundled PostgreSQL runtime directory log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupBundledPostgresPortLog": "内置 PostgreSQL 将使用端口 {port}",
+  "@setupBundledPostgresPortLog": {
+    "description": "Bundled PostgreSQL selected port log.",
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "setupPgvectorWorkflowStartedLog": "开始 pgvector 安装与配置流程（本地 pgvector: {localPgv}）",
+  "@setupPgvectorWorkflowStartedLog": {
+    "description": "pgvector setup workflow start log.",
+    "placeholders": {
+      "localPgv": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetSearchCompletedStatus": "搜索完成，共 {count} 条",
+  "@datasetSearchCompletedStatus": {
+    "description": "Asset search completed status.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSearchIndexingBaseStatus": "可语义搜索 {searchable} · 索引中 {indexing}",
+  "@datasetSearchIndexingBaseStatus": {
+    "description": "Search indexing status without failures.",
+    "placeholders": {
+      "searchable": {
+        "type": "int"
+      },
+      "indexing": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSearchIndexingFailedStatus": "{base} · 失败 {failed}",
+  "@datasetSearchIndexingFailedStatus": {
+    "description": "Search indexing status with failures.",
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSampleImportCompletedLog": "示例数据集导入完成：{count} 个素材",
+  "@datasetSampleImportCompletedLog": {
+    "description": "Sample dataset import completed log.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSampleImportIncompleteLog": "示例数据集导入未完成：{raw}",
+  "@datasetSampleImportIncompleteLog": {
+    "description": "Sample dataset import incomplete log.",
+    "placeholders": {
+      "raw": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetSampleImportExceptionLog": "示例数据集导入异常：{error}",
+  "@datasetSampleImportExceptionLog": {
+    "description": "Sample dataset import exception log.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetSampleImportFailedWithError": "示例数据集导入失败：{error}",
+  "@datasetSampleImportFailedWithError": {
+    "description": "Sample dataset import failed snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetChildAddFailedLog": "添加孩子档案失败：{raw}",
+  "@datasetChildAddFailedLog": {
+    "description": "Child profile add failed log.",
+    "placeholders": {
+      "raw": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildAddedLog": "添加孩子档案：{childId} {name}",
+  "@datasetChildAddedLog": {
+    "description": "Child profile added log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildAddedMessage": "已添加孩子档案：{name}",
+  "@datasetChildAddedMessage": {
+    "description": "Child profile added snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildEditedLog": "编辑资料：{childId} 更新为 {name}",
+  "@datasetChildEditedLog": {
+    "description": "Child profile edited log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildEditedMessage": "资料已更新为：{name}",
+  "@datasetChildEditedMessage": {
+    "description": "Child profile edited snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeleteConfirmMessage": "确定删除「{name}」吗？删除前需要先清空这个孩子关联的素材。",
+  "@datasetChildDeleteConfirmMessage": {
+    "description": "Child profile delete confirmation message.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeletedLog": "删除孩子档案：{childId} {name}",
+  "@datasetChildDeletedLog": {
+    "description": "Child profile deleted log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeletedMessage": "已删除孩子档案：{name}",
+  "@datasetChildDeletedMessage": {
+    "description": "Child profile deleted snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeleteFailedLog": "删除孩子档案失败：{childId} {error}",
+  "@datasetChildDeleteFailedLog": {
+    "description": "Child profile delete failed log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetChildNameLabel": "孩子名字",
+  "@datasetChildNameLabel": {
+    "description": "Child profile name field label."
+  },
+  "datasetExternalOpenSucceededLog": "{label} 打开成功：{target}",
+  "@datasetExternalOpenSucceededLog": {
+    "description": "External target opened successfully log.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetExternalOpenFailedMessage": "{label} 打开失败：{error}",
+  "@datasetExternalOpenFailedMessage": {
+    "description": "External target open failed message.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetSampleResetLog": "示例数据已重置：{childId}，移除 {count} 个素材",
+  "@datasetSampleResetLog": {
+    "description": "Sample dataset reset log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetPreviewOpenSampleAssetLog": "打开示例素材预览：{assetId}",
+  "@datasetPreviewOpenSampleAssetLog": {
+    "description": "Open sample asset preview log.",
+    "placeholders": {
+      "assetId": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewOpenHistoryLog": "打开历史作品预览：{jobId}",
+  "@datasetPreviewOpenHistoryLog": {
+    "description": "Open historical generated work preview log.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewLogStatusLine": "状态：{status}",
+  "@datasetPreviewLogStatusLine": {
+    "description": "Status line in generation log details.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewOpenPageLog": "打开预览页面：{jobId}",
+  "@datasetPreviewOpenPageLog": {
+    "description": "Open generated page preview log.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerAttemptLog": "正在尝试：{action}",
+  "@installRunnerAttemptLog": {
+    "description": "Install runner attempt log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerCommandSucceededLog": "安装命令成功：{action}",
+  "@installRunnerCommandSucceededLog": {
+    "description": "Install runner command succeeded log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerTimeoutLog": "安装超时（{action}），已终止进程。",
+  "@installRunnerTimeoutLog": {
+    "description": "Install runner timeout log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerFailedWithOutputLog": "安装失败（{action}）：{output}",
+  "@installRunnerFailedWithOutputLog": {
+    "description": "Install runner failure log with process output.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerFailedWithErrorLog": "安装失败（{action}）：{error}",
+  "@installRunnerFailedWithErrorLog": {
+    "description": "Install runner failure log with caught error.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportCreateDirectoryFailedMessage": "创建导出目录失败：{error}",
+  "@exportCreateDirectoryFailedMessage": {
+    "description": "Export directory creation failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportInProgressStatus": "正在导出到 {destinationPath}",
+  "@exportInProgressStatus": {
+    "description": "Export in-progress status with destination path.",
+    "placeholders": {
+      "destinationPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPreparingDestinationLog": "准备导出到 {destinationPath}",
+  "@exportPreparingDestinationLog": {
+    "description": "Export destination preparation log.",
+    "placeholders": {
+      "destinationPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportSucceededLog": "{exportLabel} 导出成功：{actualPath}",
+  "@exportSucceededLog": {
+    "description": "Export succeeded log.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "actualPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFailedLog": "{exportLabel} 导出失败",
+  "@exportFailedLog": {
+    "description": "Export failed log.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "exportExceptionMessage": "{exportLabel} 导出异常：{error}",
+  "@exportExceptionMessage": {
+    "description": "Export exception message.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportGenerationStartedLog": "开始生成，当前选中 {count} 张素材",
+  "@exportGenerationStartedLog": {
+    "description": "Generation started log with selected asset count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportGenerationCompletedLog": "生成完成，已获得 jobId: {jobId}",
+  "@exportGenerationCompletedLog": {
+    "description": "Generation completed log with job id.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "exportGenerationExceptionMessage": "生成异常：{error}",
+  "@exportGenerationExceptionMessage": {
+    "description": "Generation exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportResultSucceededStatus": "{exportLabel} 已导出：{actualPath}",
+  "@exportResultSucceededStatus": {
+    "description": "Export result success status.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "actualPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportResultFailedStatus": "{exportLabel} 导出失败，可重试",
+  "@exportResultFailedStatus": {
+    "description": "Export result failed status.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "directUploadPullbackFailedMessage": "扫码上传回拉失败：{error}",
+  "@directUploadPullbackFailedMessage": {
+    "description": "Direct Upload pullback failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "directUploadCreateSessionFailedMessage": "创建扫码上传会话失败：{message}",
+  "@directUploadCreateSessionFailedMessage": {
+    "description": "Direct Upload session creation failure message.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "importSummaryFallbackImportedMessage": "素材库已刷新，新增 {count} 项；sidecar 未返回完整导入统计",
+  "@importSummaryFallbackImportedMessage": {
+    "description": "Import fallback summary when sidecar counters are missing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryCountersWithFailures": "成功 {importedCount} · 重复 {duplicatesCount} · 跳过 {skippedCount} · 失败 {failedCount}：{failedReasons}",
+  "@importSummaryCountersWithFailures": {
+    "description": "Import counters summary with failure reasons.",
+    "placeholders": {
+      "importedCount": {
+        "type": "int"
+      },
+      "duplicatesCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      },
+      "failedCount": {
+        "type": "int"
+      },
+      "failedReasons": {
+        "type": "String"
+      }
+    }
+  },
+  "importSummaryFailedReasonSeparator": "、",
+  "@importSummaryFailedReasonSeparator": {
+    "description": "Separator for import failure reasons."
+  },
+  "importStagingFailedLog": "导入暂存失败：{path} ({error})",
+  "@importStagingFailedLog": {
+    "description": "Import staging copy failure log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generationTemplateWarmChildhood": "温暖童趣",
+  "@generationTemplateWarmChildhood": {
+    "description": "Default generation template option."
+  },
+  "generationTemplateFairyTaleMemory": "童话式成长记忆",
+  "@generationTemplateFairyTaleMemory": {
+    "description": "Default generation template option."
+  },
+  "generationTemplateSimpleDocumentary": "简约纪实",
+  "@generationTemplateSimpleDocumentary": {
+    "description": "Default generation template option."
+  },
+  "contentMetricItemCount": "{count} 项",
+  "@contentMetricItemCount": {
+    "description": "Count text for generic item metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentMetricImageCount": "{count} 张",
+  "@contentMetricImageCount": {
+    "description": "Count text for image metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentMetricCraftCount": "{count} 件",
+  "@contentMetricCraftCount": {
+    "description": "Count text for craft metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentSettingsConnectionTestFailedWithError": "连接测试失败: {error}",
+  "@agentSettingsConnectionTestFailedWithError": {
+    "description": "Agent settings connection test failure with error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "agentSettingsSaveFailedWithError": "保存配置失败: {error}",
+  "@agentSettingsSaveFailedWithError": {
+    "description": "Agent settings save failure with error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibrarySubtitle": "管理{childName}的照片、绘画和手工作品。选择素材后可以生成绘本、回忆视频或成长纪念册。",
+  "@assetLibrarySubtitle": {
+    "description": "Asset library page subtitle for the selected child.",
+    "placeholders": {
+      "childName": {
+        "type": "String"
+      }
+    }
+  },
+  "assetLibrarySearchResultsStatus": "{status} · 结果 {count} 项",
+  "@assetLibrarySearchResultsStatus": {
+    "description": "Semantic search status with result count.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySearchFailedStatus": "搜索失败：{error}",
+  "@assetLibrarySearchFailedStatus": {
+    "description": "Semantic search failed status.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibrarySmartPickedCount": "智能助手已为你挑选 {count} 张素材",
+  "@assetLibrarySmartPickedCount": {
+    "description": "Smart pick dialog selected asset count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySmartPickAppliedMessage": "已选 {count} 张素材，可继续手动微调。",
+  "@assetLibrarySmartPickAppliedMessage": {
+    "description": "Smart pick applied toast message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryImportFailedMessage": "导入失败：{error}",
+  "@assetLibraryImportFailedMessage": {
+    "description": "Asset import failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibraryImportSummaryMessage": "成功 {imported} · 重复 {duplicates} · 跳过 {skipped} · 失败 {failed}",
+  "@assetLibraryImportSummaryMessage": {
+    "description": "Asset import summary counters.",
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "duplicates": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDeleteSelectedConfirm": "将删除已选 {count} 项素材，是否继续？",
+  "@assetLibraryDeleteSelectedConfirm": {
+    "description": "Batch delete confirmation message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDeletedSelectedMessage": "已删除 {count} 项素材",
+  "@assetLibraryDeletedSelectedMessage": {
+    "description": "Batch delete success message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDateYmd": "{year}年{month}月{day}日",
+  "@assetLibraryDateYmd": {
+    "description": "Asset captured date formatted as year/month/day.",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryOpenOriginalFailedMessage": "打开原图失败：{error}",
+  "@assetLibraryOpenOriginalFailedMessage": {
+    "description": "Open original asset file failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibraryCurrentChildChip": "当前孩子：{childName}",
+  "@assetLibraryCurrentChildChip": {
+    "description": "Current child status chip text.",
+    "placeholders": {
+      "childName": {
+        "type": "String"
+      }
+    }
+  },
+  "assetLibraryAssetCountChip": "素材 {count}",
+  "@assetLibraryAssetCountChip": {
+    "description": "Asset count status chip text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryCollectionSelectedCount": "本次作品集素材 {count} 项",
+  "@assetLibraryCollectionSelectedCount": {
+    "description": "Selected assets count in collection preview.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySelectedAssetsCount": "已选择 {count} 项素材",
+  "@assetLibrarySelectedAssetsCount": {
+    "description": "Batch action selected assets count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryResyncLabel": "重新同步",
+  "@assetLibraryResyncLabel": {
+    "description": "Retry storage sync action label."
+  },
+  "assetLibrarySyncToStorageLabel": "同步到存储",
+  "@assetLibrarySyncToStorageLabel": {
+    "description": "Sync asset to storage action label."
+  },
+  "assetLibrarySyncedToStorageText": "已同步到存储。",
+  "@assetLibrarySyncedToStorageText": {
+    "description": "Storage sync completed helper text."
+  },
+  "assetLibrarySyncRunningOrRetryText": "同步正在进行或等待重试。",
+  "@assetLibrarySyncRunningOrRetryText": {
+    "description": "Storage sync pending/running helper text."
+  },
+  "assetLibraryLocalSyncFallbackText": "当前仅保存在本地，可同步到存储。",
+  "@assetLibraryLocalSyncFallbackText": {
+    "description": "Local-only storage sync helper text."
+  },
+  "assetLibraryStatusSynced": "已同步",
+  "@assetLibraryStatusSynced": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusSyncing": "同步中",
+  "@assetLibraryStatusSyncing": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusRetryWaiting": "等待重试",
+  "@assetLibraryStatusRetryWaiting": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusFailed": "同步失败",
+  "@assetLibraryStatusFailed": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusLocalOnly": "仅本地",
+  "@assetLibraryStatusLocalOnly": {
+    "description": "Storage status label."
+  },
+  "generateExportDefaultPageSize": "A4 竖版  210 × 297 mm",
+  "@generateExportDefaultPageSize": {
+    "description": "Default generation page size option."
+  },
+  "generateExportDefaultStyle": "温暖童趣  亲切温暖，适合儿童阅读",
+  "@generateExportDefaultStyle": {
+    "description": "Default generation style option."
+  },
+  "generateExportDefaultPdfTarget": "PDF 文件  高质量 PDF（打印级别）",
+  "@generateExportDefaultPdfTarget": {
+    "description": "Default export target option."
+  },
+  "generateExportExportedState": "{exportLabel} 已导出",
+  "@generateExportExportedState": {
+    "description": "Export target has already been exported.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportCoverConfirmBody": "将使用免费生图服务生成封面图。\n不会上传孩子照片，只会发送文字描述。",
+  "@generateExportCoverConfirmBody": {
+    "description": "Cover generation confirmation dialog body."
+  },
+  "generateExportSelectedAssetsLabel": "已选 {count} 张素材",
+  "@generateExportSelectedAssetsLabel": {
+    "description": "Selected assets label in generate export.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportTaskGoalLabel": "目标",
+  "@generateExportTaskGoalLabel": {
+    "description": "Task goal fact label."
+  },
+  "generateExportTaskGoalPictureBook": "儿童绘本",
+  "@generateExportTaskGoalPictureBook": {
+    "description": "Picture book goal value."
+  },
+  "generateExportSuggestedAssetsLabel": "建议素材",
+  "@generateExportSuggestedAssetsLabel": {
+    "description": "Suggested assets fact label."
+  },
+  "generateExportSuggestedAssetsValue": "至少 6 张",
+  "@generateExportSuggestedAssetsValue": {
+    "description": "Suggested minimum asset count."
+  },
+  "generateExportLongImageOption": "{sizeText} / 长图",
+  "@generateExportLongImageOption": {
+    "description": "Page size option paired with long image export.",
+    "placeholders": {
+      "sizeText": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportSummaryText": "素材数量          {selectedCount} 项\n生成状态          {generationState}\n文案风格          {styleText}\n页面尺寸          {sizeText}\n导出目标          {exportLabel}",
+  "@generateExportSummaryText": {
+    "description": "Generated work summary text.",
+    "placeholders": {
+      "selectedCount": {
+        "type": "int"
+      },
+      "generationState": {
+        "type": "String"
+      },
+      "styleText": {
+        "type": "String"
+      },
+      "sizeText": {
+        "type": "String"
+      },
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportSelectedAssetsShort": "已选择 {count} 张",
+  "@generateExportSelectedAssetsShort": {
+    "description": "Short selected assets count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportAssetInputSelectedTitle": "素材 · 已选择 {count} 张",
+  "@generateExportAssetInputSelectedTitle": {
+    "description": "Asset input title with selected count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportPagePreviewCount": "页面预览（约 {pageCount} 页）",
+  "@generateExportPagePreviewCount": {
+    "description": "Page preview title with approximate page count.",
+    "placeholders": {
+      "pageCount": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportActivityEmptyMessage": "点击“开始生成”后，这里会记录 Agent 分析素材、构建书稿、渲染预览与导出状态。\n当前状态：{statusMessage}",
+  "@generateExportActivityEmptyMessage": {
+    "description": "Activity timeline empty state body.",
+    "placeholders": {
+      "statusMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportCurrentStatusLine": "当前状态：{statusMessage}",
+  "@generateExportCurrentStatusLine": {
+    "description": "Current generation status line.",
+    "placeholders": {
+      "statusMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReasonLine": "原因：{reason}",
+  "@generateExportReasonLine": {
+    "description": "Failure reason line.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReadyToExportSubtitle": "生成完成后可预览或导出 {exportLabel}。",
+  "@generateExportReadyToExportSubtitle": {
+    "description": "Generate settings subtitle after generation.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportDirectoryHint": "导出将写入当前导出目录，完成后可在“打开导出文件夹”中查看 {exportLabel} 文件",
+  "@generateExportDirectoryHint": {
+    "description": "Export directory hint for generated work.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReadinessAssetRatio": "{selectedCount} / 建议 6+",
+  "@generateExportReadinessAssetRatio": {
+    "description": "Readiness selected assets count against suggestion.",
+    "placeholders": {
+      "selectedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportCloudShareLabel": "云端分享",
+  "@generateExportCloudShareLabel": {
+    "description": "Cloud sharing fact label."
+  },
+  "generateExportCloudShareValue": "生成后可上传",
+  "@generateExportCloudShareValue": {
+    "description": "Cloud sharing fact value."
+  },
+  "generateExportPreviewReadinessMessage": "准备完成：可继续开始导出",
+  "@generateExportPreviewReadinessMessage": {
+    "description": "Generate/export preview readiness message."
+  },
+  "generateExportPreviewSetupUrlTitle": "1. 配置 Supabase URL",
+  "@generateExportPreviewSetupUrlTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupUrlBody": "确认已填写项目 URL 与密钥。",
+  "@generateExportPreviewSetupUrlBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateDetected": "已检测",
+  "@generateExportPreviewStateDetected": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupBucketTitle": "2. 配置 Bucket",
+  "@generateExportPreviewSetupBucketTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupBucketBody": "确认导出数据 Bucket 已创建。",
+  "@generateExportPreviewSetupBucketBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewActionOpen": "前往",
+  "@generateExportPreviewActionOpen": {
+    "description": "Preview setup action label."
+  },
+  "generateExportPreviewStateConfigured": "已配置",
+  "@generateExportPreviewStateConfigured": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupPermissionTitle": "3. 存储权限",
+  "@generateExportPreviewSetupPermissionTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupPermissionBody": "确认服务角色密钥权限可用于存储读写。",
+  "@generateExportPreviewSetupPermissionBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStatePassed": "通过",
+  "@generateExportPreviewStatePassed": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupSignatureTitle": "4. 目录与签名",
+  "@generateExportPreviewSetupSignatureTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupSignatureBody": "确认 URL 签名有效期配置符合预期。",
+  "@generateExportPreviewSetupSignatureBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateNormal": "正常",
+  "@generateExportPreviewStateNormal": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupConnectionTitle": "5. 连接测试",
+  "@generateExportPreviewSetupConnectionTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupConnectionBody": "已成功尝试连接导出服务。",
+  "@generateExportPreviewSetupConnectionBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateConnected": "连接成功",
+  "@generateExportPreviewStateConnected": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSignedUrlPassed": "签名 URL 校验通过",
+  "@generateExportPreviewSignedUrlPassed": {
+    "description": "Preview Supabase signed URL test message."
+  },
+  "generateExportPreviewExportCompleted": "导出任务已完成",
+  "@generateExportPreviewExportCompleted": {
+    "description": "Preview export status message."
+  },
+  "generateExportPreviewLogReadingSamples": "正在读取样本",
+  "@generateExportPreviewLogReadingSamples": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewLogCoverGenerated": "已生成封面",
+  "@generateExportPreviewLogCoverGenerated": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewLogExportSubmitted": "导出任务提交成功",
+  "@generateExportPreviewLogExportSubmitted": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewExportImage": "导出为图片",
+  "@generateExportPreviewExportImage": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewExportPdf": "导出为 PDF",
+  "@generateExportPreviewExportPdf": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewExportLongImage": "导出为长图",
+  "@generateExportPreviewExportLongImage": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewSelectedPageSize": "A4 竖版",
+  "@generateExportPreviewSelectedPageSize": {
+    "description": "Preview selected page size."
+  },
+  "generateExportPreviewSelectedStyle": "自然温和",
+  "@generateExportPreviewSelectedStyle": {
+    "description": "Preview selected style."
+  },
+  "generateExportPreviewShareText": "KidMemory 作品集：{url}\n链接有效期：{seconds} 秒",
+  "@generateExportPreviewShareText": {
+    "description": "Preview share text.",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "directUploadChildIdLine": "孩子：{childId}",
+  "@directUploadChildIdLine": {
+    "description": "Direct Upload child id line.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      }
+    }
+  },
+  "directUploadClientLimitHint": "建议每次≤{count}张 · 仅为体验约束，并非安全约束",
+  "@directUploadClientLimitHint": {
+    "description": "Direct Upload recommended client limit hint.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadCreateSessionFailed": "创建上传会话失败: {error}",
+  "@trustedUploadCreateSessionFailed": {
+    "description": "Trusted Upload create session failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadCloseSessionFailed": "关闭会话失败: {error}",
+  "@trustedUploadCloseSessionFailed": {
+    "description": "Trusted Upload close session failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadRetryFailed": "重试失败: {error}",
+  "@trustedUploadRetryFailed": {
+    "description": "Trusted Upload retry failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadRemainingMinutes": "剩余时间: {minutes} 分钟",
+  "@trustedUploadRemainingMinutes": {
+    "description": "Trusted Upload remaining session minutes.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadMaxItems": "上限: {count} 张",
+  "@trustedUploadMaxItems": {
+    "description": "Trusted Upload maximum upload item count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadCopiedMessage": "已复制到剪贴板",
+  "@trustedUploadCopiedMessage": {
+    "description": "Trusted Upload copied link snackbar."
+  },
+  "trustedUploadLoadFailed": "加载失败: {error}",
+  "@trustedUploadLoadFailed": {
+    "description": "Trusted Upload load failure message.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedUploadNoItemsMessage": "暂无上传项\n请在手机端选择图片上传",
+  "@trustedUploadNoItemsMessage": {
+    "description": "Trusted Upload empty item list message."
+  },
+  "trustedUploadItemFailed": "失败: {message}",
+  "@trustedUploadItemFailed": {
+    "description": "Trusted Upload item failure status.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "contentMetricTagCount": "{count} 个",
+  "@contentMetricTagCount": {
+    "description": "Count text for tag metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentNoRecentWorksMessage": "暂无最近作品",
+  "@contentNoRecentWorksMessage": {
+    "description": "Empty recent works message."
+  },
+  "contentTimelineBirth": "😊\n出生",
+  "@contentTimelineBirth": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineFirstSmile": "🖍️\n第一次微笑",
+  "@contentTimelineFirstSmile": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineFirstDrawing": "🎨\n第一次画画",
+  "@contentTimelineFirstDrawing": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineDaycare": "🏫\n幼儿园入学",
+  "@contentTimelineDaycare": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineBicycle": "🚲\n学会骑车",
+  "@contentTimelineBicycle": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineNewYearArtwork": "🏮\n新年画作",
+  "@contentTimelineNewYearArtwork": {
+    "description": "Sample timeline milestone."
+  },
+  "contentProfileSampleDetails": "档案信息\n\n性别                 男孩\n出生地               上海市\n星座                 双子座\n血型                 A型\n创建时间             2024-06-18\n最后更新             2025-05-30\n\n成长里程碑\n第一次画画     2022-03-15\n幼儿园入学     2023-09-01\n第一次画展     2024-05-20\n学会骑自行车   2024-10-12",
+  "@contentProfileSampleDetails": {
+    "description": "Sample child profile detail block."
+  },
+  "contentPaginationStatus": "第 {currentPage} / {totalPages} 页 · 每页 {pageSize} 条",
+  "@contentPaginationStatus": {
+    "description": "Pagination status.",
+    "placeholders": {
+      "currentPage": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      },
+      "pageSize": {
+        "type": "int"
+      }
+    }
+  },
+  "contentGenerationCompletePages": "生成完成     {currentPage}/{totalPages} 页",
+  "@contentGenerationCompletePages": {
+    "description": "Generation complete status with page count.",
+    "placeholders": {
+      "currentPage": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      }
+    }
+  },
+  "contentFlowPrepareAssets": "🗂️  准备素材\n已选择 {count} 张素材",
+  "@contentFlowPrepareAssets": {
+    "description": "Asset preparation flow step.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentFlowAgentGenerated": "✅  Agent 生成结构\n已生成作品集内容",
+  "@contentFlowAgentGenerated": {
+    "description": "Agent generated flow step."
+  },
+  "contentFlowAgentWaiting": "⏳  Agent 生成结构\n等待生成",
+  "@contentFlowAgentWaiting": {
+    "description": "Agent waiting flow step."
+  },
+  "contentFlowExportCompleted": "📄  导出文件\n已生成高质量文件",
+  "@contentFlowExportCompleted": {
+    "description": "Export completed flow step."
+  },
+  "contentFlowExportWaiting": "📄  导出文件\n等待导出",
+  "@contentFlowExportWaiting": {
+    "description": "Export waiting flow step."
+  },
+  "contentSelectedAssetsTitle": "已选择素材（{count}）",
+  "@contentSelectedAssetsTitle": {
+    "description": "Selected assets strip title.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentPagePreviewCount": "页面预览（共 {pageCount} 页）",
+  "@contentPagePreviewCount": {
+    "description": "Generated page preview count title.",
+    "placeholders": {
+      "pageCount": {
+        "type": "int"
+      }
+    }
+  },
+  "contentTimelineSourceText": "阶段：实时记录\n来源：本地任务中心",
+  "@contentTimelineSourceText": {
+    "description": "Activity timeline source text."
+  },
+  "datasetChildrenClearBirthday": "清空生日",
+  "@datasetChildrenClearBirthday": {
+    "description": "Button label for clearing a child profile birthday."
+  },
+  "childProfileEmptyDescription": "先添加孩子，再开始记录素材、成长时间轴\n和作品集，珍藏每一个值得记住的瞬间。",
+  "@childProfileEmptyDescription": {
+    "description": "Empty child profile page description."
+  },
+  "childProfileLinkedAssets": "已关联素材：{count} 项",
+  "@childProfileLinkedAssets": {
+    "description": "Linked asset count on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileAssetChip": "素材 {count}",
+  "@childProfileAssetChip": {
+    "description": "Asset count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileArtworkChip": "绘画 {count}",
+  "@childProfileArtworkChip": {
+    "description": "Artwork count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfilePhotoChip": "照片 {count}",
+  "@childProfilePhotoChip": {
+    "description": "Photo count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfilePortraitSmileKeyword": "笑",
+  "@childProfilePortraitSmileKeyword": {
+    "description": "Keyword used to identify child portrait assets."
+  },
+  "childProfileGrowthStatsTitle": "成长统计",
+  "@childProfileGrowthStatsTitle": {
+    "description": "Child profile growth statistics section title."
+  },
+  "childProfileAssetDistributionTitle": "素材分布",
+  "@childProfileAssetDistributionTitle": {
+    "description": "Child profile asset distribution section title."
+  },
+  "childProfileRecentWorksTitle": "最近作品",
+  "@childProfileRecentWorksTitle": {
+    "description": "Child profile recent works section title."
+  },
+  "childProfileGrowthTimelineTitle": "成长时间轴",
+  "@childProfileGrowthTimelineTitle": {
+    "description": "Child profile growth timeline section title."
+  },
+  "childProfileAssetCountValue": "{count} 项",
+  "@childProfileAssetCountValue": {
+    "description": "Asset count value in the child profile side panel.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileTimelineAutoUpdate": "时间线按素材日期自动更新",
+  "@childProfileTimelineAutoUpdate": {
+    "description": "Child profile timeline milestone helper text."
+  },
+  "childProfilePortfolioSavedLocally": "作品集记录保存在本地",
+  "@childProfilePortfolioSavedLocally": {
+    "description": "Child profile portfolio milestone helper text."
+  },
+  "creationPhasePreparing": "准备创作",
+  "@creationPhasePreparing": {
+    "description": "Creation workflow phase label before generation starts."
+  },
+  "creationPhasePlanning": "规划中",
+  "@creationPhasePlanning": {
+    "description": "Creation workflow phase label while planning."
+  },
+  "creationPhasePlanReady": "计划待确认",
+  "@creationPhasePlanReady": {
+    "description": "Creation workflow phase label after a plan is ready for user confirmation."
+  },
+  "creationPhaseCreatingJob": "创建任务中",
+  "@creationPhaseCreatingJob": {
+    "description": "Creation workflow phase label while creating the generation job."
+  },
+  "creationPhaseEnvironmentPreparing": "准备视频环境",
+  "@creationPhaseEnvironmentPreparing": {
+    "description": "Creation workflow phase label while memoir video environment is being prepared."
+  },
+  "creationPhaseGenerating": "生成中",
+  "@creationPhaseGenerating": {
+    "description": "Creation workflow phase label while running generation."
+  },
+  "creationPhaseReviewing": "可预览",
+  "@creationPhaseReviewing": {
+    "description": "Creation workflow phase label after generation completes and before export."
+  },
+  "creationPhaseExporting": "正在导出到本地",
+  "@creationPhaseExporting": {
+    "description": "Creation workflow phase label while exporting locally."
+  },
+  "creationPhasePublished": "可发布",
+  "@creationPhasePublished": {
+    "description": "Creation workflow phase label after export is ready to share."
+  },
+  "creationPhaseFailed": "创作失败",
+  "@creationPhaseFailed": {
+    "description": "Creation workflow phase label after generation or export fails."
+  },
+  "creationPlanningStatus": "正在分析素材、选择 Skill 并生成计划",
+  "@creationPlanningStatus": {
+    "description": "Status text while creation planning is in progress."
+  },
+  "creationPlanningAnalyzeAssetsTitle": "分析素材",
+  "@creationPlanningAnalyzeAssetsTitle": {
+    "description": "Planning sub-step title for analyzing selected assets."
+  },
+  "creationPlanningAnalyzeAssetsBody": "正在读取 {count} 张素材的照片、画作和标签",
+  "@creationPlanningAnalyzeAssetsBody": {
+    "description": "Planning sub-step body for analyzing selected assets.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creationPlanningSelectSkillTitle": "选择 Skill",
+  "@creationPlanningSelectSkillTitle": {
+    "description": "Planning sub-step title for selecting a generation skill."
+  },
+  "creationPlanningSelectSkillBody": "正在匹配绘本、成长纪念册或回忆视频能力",
+  "@creationPlanningSelectSkillBody": {
+    "description": "Planning sub-step body for selecting a generation skill."
+  },
+  "creationPlanningGeneratePlanTitle": "生成计划",
+  "@creationPlanningGeneratePlanTitle": {
+    "description": "Planning sub-step title for generating a plan."
+  },
+  "creationPlanningGeneratePlanBody": "正在组织故事结构、步骤和前置条件",
+  "@creationPlanningGeneratePlanBody": {
+    "description": "Planning sub-step body for generating a plan."
+  },
+  "creationPlanReadyStatus": "创作计划已生成，请确认后开始生成。",
+  "@creationPlanReadyStatus": {
+    "description": "Status text after the creation plan has been returned and is waiting for user confirmation."
+  },
+  "creationPlanMissingStatus": "创作计划缺失，请重新规划。",
+  "@creationPlanMissingStatus": {
+    "description": "Status text when confirmation is attempted without an available plan id."
+  },
+  "creationPlanReadySubtitle": "请检查 Agent 计划、Skill 与前置条件，确认后再创建生成任务。",
+  "@creationPlanReadySubtitle": {
+    "description": "Sidebar subtitle when a creation plan is ready for confirmation."
+  },
+  "creationPlanConfirmationTitle": "确认创作计划",
+  "@creationPlanConfirmationTitle": {
+    "description": "Title for the creation plan confirmation panel."
+  },
+  "creationPlanSkillLabel": "使用 Skill",
+  "@creationPlanSkillLabel": {
+    "description": "Label for the skill used by the creation plan."
+  },
+  "creationPlanUnknownSkill": "等待后端返回",
+  "@creationPlanUnknownSkill": {
+    "description": "Fallback value when a creation plan does not include a skill name."
+  },
+  "creationPlanStepsLabel": "计划步骤",
+  "@creationPlanStepsLabel": {
+    "description": "Label above the creation plan step list."
+  },
+  "creationPlanRequirementsLabel": "前置条件",
+  "@creationPlanRequirementsLabel": {
+    "description": "Label above the creation plan requirements list."
+  },
+  "creationConfirmPlanAction": "确认计划并开始生成",
+  "@creationConfirmPlanAction": {
+    "description": "Primary action label for confirming a creation plan and creating a job."
+  },
+  "creationGenerationFailedWithStep": "生成失败：{step} 未能完成。{reason}",
+  "@creationGenerationFailedWithStep": {
+    "description": "Status text when a creation job fails at a backend step.",
+    "placeholders": {
+      "step": {},
+      "reason": {}
+    }
+  },
+  "creationFailureStepLine": "失败步骤：{step}",
+  "@creationFailureStepLine": {
+    "description": "Line showing the failed creation job step.",
+    "placeholders": {
+      "step": {}
+    }
+  },
+  "creationFailureCodeLine": "错误代码：{code}",
+  "@creationFailureCodeLine": {
+    "description": "Line showing a low-level creation job error code.",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "creationReplanAction": "重新规划",
+  "@creationReplanAction": {
+    "description": "Action label for planning again after a generation failure."
+  },
+  "creationCreatingJobStatus": "正在创建生成任务",
+  "@creationCreatingJobStatus": {
+    "description": "Status text while the creation job is being created."
+  },
+  "creationEnvironmentPreparingStatus": "正在准备视频生成环境",
+  "@creationEnvironmentPreparingStatus": {
+    "description": "Status shown while the memoir video job prepares FFmpeg and Hyperframes environment."
+  },
+  "creationPlanInvalidatedStatus": "创作设置已更新，请重新规划。",
+  "@creationPlanInvalidatedStatus": {
+    "description": "Status shown after changing assets or generation settings invalidates the current creation plan."
+  },
+  "creationGeneratingStatus": "正在执行生成任务",
+  "@creationGeneratingStatus": {
+    "description": "Status text while the creation job is running."
+  },
+  "generateExportCloudStorageLabel": "云端存储",
+  "@generateExportCloudStorageLabel": {
+    "description": "User-facing replacement label for cloud storage provider names in ordinary activity timelines."
+  },
+  "generateExportLocalServiceLabel": "本地服务",
+  "@generateExportLocalServiceLabel": {
+    "description": "User-facing replacement label for internal sidecar service names in ordinary activity timelines."
+  },
+  "generateExportMp4Target": "MP4 视频  回忆录视频",
+  "@generateExportMp4Target": {
+    "description": "Export target label for memoir video MP4 output."
+  },
+  "creationPhasePlanConfirm": "计划确认",
+  "@creationPhasePlanConfirm": {
+    "description": "Five-step creation flow label for plan confirmation."
+  },
+  "creationPhasePreviewResult": "结果预览",
+  "@creationPhasePreviewResult": {
+    "description": "Five-step creation flow label for result preview."
+  },
+  "creationPhaseExportShare": "导出分享",
+  "@creationPhaseExportShare": {
+    "description": "Five-step creation flow label for export and sharing."
+  },
+  "creationFlowTitle": "创作流程",
+  "@creationFlowTitle": {
+    "description": "Title above the five-step creation flow."
+  },
+  "generationBackendStepsTitle": "生成步骤",
+  "@generationBackendStepsTitle": {
+    "description": "Title for backend-provided generation steps."
+  },
+  "generationLocalProgressTitle": "创作进度",
+  "@generationLocalProgressTitle": {
+    "description": "Title for local creation progress fallback steps."
+  },
+  "generateExportStartPlanningAction": "开始规划",
+  "@generateExportStartPlanningAction": {
+    "description": "Primary action label to start creation planning."
+  },
+  "generateExportMp4Action": "导出 MP4",
+  "@generateExportMp4Action": {
+    "description": "Primary action label for MP4 export."
+  },
+  "generateExportOpenVideoPreviewAction": "打开视频预览",
+  "@generateExportOpenVideoPreviewAction": {
+    "description": "Action label for opening a generated memoir video MP4 preview."
+  },
+  "generateExportVideoPreviewUnavailable": "视频文件还未准备好，请重新生成或查看日志。",
+  "@generateExportVideoPreviewUnavailable": {
+    "description": "Status shown when the memoir video preview cannot be opened because no MP4 artifact path is available."
+  },
+  "generateExportVideoKeyword": "视频",
+  "@generateExportVideoKeyword": {
+    "description": "Keyword used to classify localized video export target labels."
+  },
+  "directUploadServiceUnavailableMessage": "扫码上传服务暂时不可用，请稍后重试",
+  "@directUploadServiceUnavailableMessage": {
+    "description": "Fallback error when direct upload service is unavailable."
+  },
+  "directUploadSessionIncompleteMessage": "扫码上传会话创建失败，请检查上传配置后重试",
+  "@directUploadSessionIncompleteMessage": {
+    "description": "Error when direct upload session payload is incomplete."
+  },
+  "directUploadConfigIncompleteMessage": "扫码上传配置未完成，请检查上传设置后重试",
+  "@directUploadConfigIncompleteMessage": {
+    "description": "User-facing replacement for technical direct upload configuration errors."
+  },
+  "feedbackRequestKeyword": "请",
+  "@feedbackRequestKeyword": {
+    "description": "Keyword used to classify request prompts as warning toasts."
   }
 }

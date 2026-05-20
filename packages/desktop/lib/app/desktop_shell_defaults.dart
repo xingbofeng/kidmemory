@@ -1,13 +1,29 @@
 part of 'desktop_shell.dart';
 
 List<Map<String, String>> _defaultSearchTypeOptions(BuildContext context) => [
-  {'value': 'all', 'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel},
-  {'value': 'artwork', 'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel},
-  {'value': 'photo', 'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel},
-  {'value': 'craft', 'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel},
+  {
+    'value': 'all',
+    'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel,
+  },
+  {
+    'value': 'artwork',
+    'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel,
+  },
+  {
+    'value': 'photo',
+    'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel,
+  },
+  {
+    'value': 'craft',
+    'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel,
+  },
 ];
 
-const _defaultGenerationTemplates = ['温暖童趣', '童话式成长记忆', '简约纪实'];
+List<String> _defaultGenerationTemplates(BuildContext context) => [
+  AppLocalizations.of(context)!.generationTemplateWarmChildhood,
+  AppLocalizations.of(context)!.generationTemplateFairyTaleMemory,
+  AppLocalizations.of(context)!.generationTemplateSimpleDocumentary,
+];
 
 List<String> _defaultGenerationPageSizes(BuildContext context) => [
   AppLocalizations.of(context)!.desktopShellDefaultsS101,

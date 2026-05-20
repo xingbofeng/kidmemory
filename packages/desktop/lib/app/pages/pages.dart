@@ -97,6 +97,7 @@ extension _DesktopShellPages on _DesktopShellState {
       generated: generated,
       generating: generating,
       exported: exported,
+      creationPhase: creationWorkflowPhase,
       statusMessage: statusMessage,
       requestId: requestId,
       logLines: activityLog,
@@ -108,18 +109,44 @@ extension _DesktopShellPages on _DesktopShellState {
       selectedPageSize: generationPageSize,
       selectedStyle: generationStyle,
       selectedExportTarget: generationExportTarget,
+      selectedCreationType: generationCreationType,
       onGenerate: () => unawaited(generateBook()),
-      onGenerateSkipCover: () => unawaited(generateBook(skipCover: true)),
+      onGeneratePictureBook: () =>
+          unawaited(generateBook(creationType: 'storybook')),
+      onGenerateMemoryAlbum: () =>
+          unawaited(generateBook(creationType: 'memory_book')),
+      onGenerateMemoryVideo: () =>
+          unawaited(generateBook(creationType: 'memoir_video')),
+      onConfirmPlan: () => unawaited(confirmCreationPlan()),
       onExport: exportPdf,
-      onExportTargetChanged: (target) =>
-          _setShellState(() => generationExportTarget = target),
+      onExportTargetChanged: _updateGenerationExportTarget,
+      shareCreating: shareCreating,
+      creationPlan: creationPlan,
+      creationFailure: creationFailure,
+      creationJobSteps: creationJobSteps,
       exportResult: exportResult,
+      previewFailureReason: previewFailureReason,
       onOpenExportFolder: () => unawaited(_openExportFolder()),
+      onOpenPreviewFailureFolder: () => unawaited(_openPreviewFailureFolder()),
+      onCreateShareLink: () => unawaited(_confirmAndCreateShareLink()),
       onCopyShareText: () => unawaited(_copyShareText()),
+      onOpenShareLink: () => unawaited(_openShareLink()),
       onCopyLongImage: () => unawaited(_copyLongImage()),
       onViewSelectedAssets: () => _setShellState(() => step = AppStep.assets),
       onViewLogDetails: () => unawaited(_showGenerationLogDetails()),
+      onEditCreationRequest: _editCreationRequest,
       onPreviewAllPages: () => unawaited(_previewAllPages()),
     );
+  }
+
+  void _editCreationRequest() {
+    _invalidateCreationPlanForInputChange();
+    _setShellState(() => step = AppStep.assets);
+  }
+
+  void _updateGenerationExportTarget(String target) {
+    if (target == generationExportTarget) return;
+    _setShellState(() => generationExportTarget = target);
+    _invalidateCreationPlanForInputChange();
   }
 }

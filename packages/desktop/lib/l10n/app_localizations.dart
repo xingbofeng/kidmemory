@@ -68,7 +68,12 @@ abstract class AppLocalizations {
   final String localeName;
 
   static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+    try {
+      return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+          AppLocalizationsZh();
+    } on FlutterError {
+      return AppLocalizationsZh();
+    }
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
@@ -191,13 +196,13 @@ abstract class AppLocalizations {
   /// Direct upload 入口按钮文字
   ///
   /// In zh, this message translates to:
-  /// **'扫码上传 · Direct'**
+  /// **'扫码上传'**
   String get directUploadEntryButtonLabel;
 
   /// Direct upload 弹窗标题
   ///
   /// In zh, this message translates to:
-  /// **'扫码上传 · Direct'**
+  /// **'手机扫码上传'**
   String get directUploadDialogTitle;
 
   /// Direct upload 回拉按钮文案
@@ -221,7 +226,7 @@ abstract class AppLocalizations {
   /// Direct upload 风险说明
   ///
   /// In zh, this message translates to:
-  /// **'Supabase 直传验证版 — 对象需电脑端回拉后才算入库'**
+  /// **'上传完成后需在电脑端拉回，素材才会正式入库'**
   String get directUploadRiskNotice;
 
   /// Direct upload 会话路径字段标签
@@ -239,7 +244,7 @@ abstract class AppLocalizations {
   /// Direct upload 二维码无障碍标签
   ///
   /// In zh, this message translates to:
-  /// **'Direct Upload 扫码链接二维码'**
+  /// **'扫码上传链接二维码'**
   String get directUploadQrCodeLabel;
 
   /// Direct upload 无对象提示
@@ -353,7 +358,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupPostgresTitle.
   ///
   /// In zh, this message translates to:
-  /// **'PostgreSQL 配置'**
+  /// **'本地资料库'**
   String get setupPostgresTitle;
 
   /// No description provided for @setupPgvectorTitle.
@@ -377,8 +382,14 @@ abstract class AppLocalizations {
   /// No description provided for @setupSidecarServiceTitle.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 本地服务'**
+  /// **'KidMemory 本地服务'**
   String get setupSidecarServiceTitle;
+
+  /// No description provided for @setupAgentServiceTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'Agent 服务配置'**
+  String get setupAgentServiceTitle;
 
   /// No description provided for @setupItemTitle.
   ///
@@ -629,55 +640,55 @@ abstract class AppLocalizations {
   /// No description provided for @setupSidecarStarted.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 已启动'**
+  /// **'本地服务已启动'**
   String get setupSidecarStarted;
 
   /// No description provided for @setupSidecarStartedSchemaNotReady.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 已启动，schema 初始化未完成'**
+  /// **'本地服务已启动，资料库初始化未完成'**
   String get setupSidecarStartedSchemaNotReady;
 
   /// No description provided for @setupSidecarConnected.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 已连接'**
+  /// **'本地服务已连接'**
   String get setupSidecarConnected;
 
   /// No description provided for @setupSidecarStartFailed.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 未能启动'**
+  /// **'本地服务未能启动'**
   String get setupSidecarStartFailed;
 
   /// No description provided for @setupSidecarStartFailedNodeOrBundled.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 未能启动，请检查 Node.js 或 bundled sidecar'**
+  /// **'本地服务未能启动，请检查运行环境或重新打开 KidMemory'**
   String get setupSidecarStartFailedNodeOrBundled;
 
   /// No description provided for @setupSidecarDisconnected.
   ///
   /// In zh, this message translates to:
-  /// **'Sidecar 未连接'**
+  /// **'本地服务未连接'**
   String get setupSidecarDisconnected;
 
   /// No description provided for @setupStorageConfigTitle.
   ///
   /// In zh, this message translates to:
-  /// **'Storage 配置'**
+  /// **'云端分享设置'**
   String get setupStorageConfigTitle;
 
   /// No description provided for @setupStorageConfigSaveFailed.
   ///
   /// In zh, this message translates to:
-  /// **'Supabase Storage 配置保存失败'**
+  /// **'云端分享设置保存失败'**
   String get setupStorageConfigSaveFailed;
 
   /// No description provided for @setupStorageConfigSaved.
   ///
   /// In zh, this message translates to:
-  /// **'Supabase Storage 配置已保存'**
+  /// **'云端分享设置已保存'**
   String get setupStorageConfigSaved;
 
   /// No description provided for @setupPgvectorInitFailed.
@@ -887,7 +898,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupStorageSectionIntro.
   ///
   /// In zh, this message translates to:
-  /// **'先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。'**
+  /// **'推荐使用云端私有存储：接口地址、区域、存储空间名称和访问密钥都可以在云端控制台找到。存储空间建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。'**
   String get setupStorageSectionIntro;
 
   /// No description provided for @setupStoragePublicPrefixHint.
@@ -1247,7 +1258,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupSidecarStarting.
   ///
   /// In zh, this message translates to:
-  /// **'正在启动 Sidecar...'**
+  /// **'正在启动本地服务...'**
   String get setupSidecarStarting;
 
   /// No description provided for @setupInstallingSoftware.
@@ -1355,7 +1366,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupConfigureStorageFirst.
   ///
   /// In zh, this message translates to:
-  /// **'请先配置 Supabase REST 或 S3 所需参数'**
+  /// **'请先填写云端分享所需参数'**
   String get setupConfigureStorageFirst;
 
   /// No description provided for @setupHomebrewPermissionCommandHint.
@@ -1367,7 +1378,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupSidecarConfigUnavailable.
   ///
   /// In zh, this message translates to:
-  /// **'读取 sidecar 配置失败，初始化未完成。'**
+  /// **'读取本地服务配置失败，初始化未完成。'**
   String get setupSidecarConfigUnavailable;
 
   /// No description provided for @setupInputApiKey.
@@ -1397,7 +1408,7 @@ abstract class AppLocalizations {
   /// No description provided for @setupStorageDialogTitle.
   ///
   /// In zh, this message translates to:
-  /// **'配置 Supabase Storage'**
+  /// **'配置云端分享'**
   String get setupStorageDialogTitle;
 
   /// No description provided for @setupOpenAiDialogTitle.
@@ -2387,7 +2398,7 @@ abstract class AppLocalizations {
   /// generateExportS315
   ///
   /// In zh, this message translates to:
-  /// **'原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。'**
+  /// **'原因：免费生图服务暂时不可用。请重试，或查看日志了解详情。'**
   String get generateExportS315;
 
   /// generateExportS324
@@ -2660,6 +2671,114 @@ abstract class AppLocalizations {
   /// **'查看日志'**
   String get generateExportS624;
 
+  /// Title for confirming web share link creation.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建 Web 分享链接'**
+  String get generateExportCreateShareDialogTitle;
+
+  /// Confirmation copy before creating a web share link.
+  ///
+  /// In zh, this message translates to:
+  /// **'这会将导出作品上传到云端，用于生成 Web 分享链接。'**
+  String get generateExportCreateShareDialogBody;
+
+  /// Button label for creating a web share link.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建分享链接'**
+  String get generateExportCreateShareLinkLabel;
+
+  /// Status shown while the web share link is being created.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在创建 Web 分享链接...'**
+  String get generateExportShareCreatingStatus;
+
+  /// Status shown after the web share link is created.
+  ///
+  /// In zh, this message translates to:
+  /// **'Web 分享链接已创建'**
+  String get generateExportShareCreatedStatus;
+
+  /// Status shown when web share link creation fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'分享链接创建失败'**
+  String get generateExportShareFailedStatus;
+
+  /// Hint shown after export before a share link exists.
+  ///
+  /// In zh, this message translates to:
+  /// **'作品已导出，可以创建 Web 分享链接。'**
+  String get generateExportShareReadyHint;
+
+  /// Button label for copying a web share link.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制链接'**
+  String get generateExportCopyLinkLabel;
+
+  /// Button label for opening a web share link.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开链接'**
+  String get generateExportOpenLinkLabel;
+
+  /// Button label for retrying web share link creation after failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试创建'**
+  String get generateExportRetryShareLabel;
+
+  /// Snackbar when share link creation cannot start.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出作品尚未准备好，暂不能创建分享链接。'**
+  String get generateExportShareNotReady;
+
+  /// Share text generated from a web share URL.
+  ///
+  /// In zh, this message translates to:
+  /// **'KidMemory 作品：{shareUrl}'**
+  String generateExportShareText(String shareUrl);
+
+  /// Share link creation exception message.
+  ///
+  /// In zh, this message translates to:
+  /// **'分享链接创建失败：{error}'**
+  String generateExportShareExceptionMessage(Object error);
+
+  /// Title shown when the generated PDF preview cannot be opened.
+  ///
+  /// In zh, this message translates to:
+  /// **'PDF 预览失败'**
+  String get generateExportPreviewFailedTitle;
+
+  /// Body shown when the generated PDF preview cannot be opened.
+  ///
+  /// In zh, this message translates to:
+  /// **'预览窗口没有打开。你可以查看失败原因，打开导出文件夹确认本地文件，或查看日志继续排查。'**
+  String get generateExportPreviewFailedBody;
+
+  /// Reason line for a PDF preview failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'原因：{reason}'**
+  String generateExportPreviewFailureReason(String reason);
+
+  /// Status shown after PDF preview opening fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'PDF 预览失败：{error}'**
+  String generateExportPreviewFailedStatus(Object error);
+
+  /// Button label for editing the creation request after a planning or generation failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改需求'**
+  String get generateExportEditRequestLabel;
+
   /// generateExportS627
   ///
   /// In zh, this message translates to:
@@ -2923,18 +3042,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'超时'**
   String get generateExportS875;
-
-  /// generateExportS876
-  ///
-  /// In zh, this message translates to:
-  /// **'跳过封面'**
-  String get generateExportS876;
-
-  /// generateExportS877
-  ///
-  /// In zh, this message translates to:
-  /// **'跳过封面继续导出'**
-  String get generateExportS877;
 
   /// generateExportS883
   ///
@@ -3491,7 +3598,7 @@ abstract class AppLocalizations {
   /// assetLibraryPageS338
   ///
   /// In zh, this message translates to:
-  /// **'同步入队失败，请检查 Supabase Storage 配置'**
+  /// **'同步入队失败，请检查云端分享设置'**
   String get assetLibraryPageS338;
 
   /// childProfileS715
@@ -3515,7 +3622,7 @@ abstract class AppLocalizations {
   /// childProfileS693
   ///
   /// In zh, this message translates to:
-  /// **'添加档案'**
+  /// **'添加孩子档案'**
   String get childProfileS693;
 
   /// childProfileS625
@@ -3635,7 +3742,7 @@ abstract class AppLocalizations {
   /// childProfileS486
   ///
   /// In zh, this message translates to:
-  /// **'当前素材库已连接到本地 sidecar，可用于生成成长作品集。'**
+  /// **'当前素材库已连接到本地服务，可用于生成成长作品集。'**
   String get childProfileS486;
 
   /// childProfileS480
@@ -4118,6 +4225,72 @@ abstract class AppLocalizations {
   /// **'sidecar 启动失败：运行目录缺少 dist/main.js。'**
   String get sidecarLauncherS194;
 
+  /// Log entry for the sidecar launch command.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动 sidecar 命令：{command}'**
+  String sidecarLauncherLaunchCommandLog(String command);
+
+  /// Log entry after the sidecar process starts.
+  ///
+  /// In zh, this message translates to:
+  /// **'Sidecar 进程启动成功：PID {pid}'**
+  String sidecarLauncherStartedPidLog(int pid);
+
+  /// Log entry when sidecar start throws.
+  ///
+  /// In zh, this message translates to:
+  /// **'sidecar 启动失败：{error}'**
+  String sidecarLauncherStartFailedLog(Object error);
+
+  /// Log entry when an old sidecar process is terminated.
+  ///
+  /// In zh, this message translates to:
+  /// **'已终止旧 sidecar 进程 PID={pid}（端口 4317）'**
+  String sidecarLauncherTerminatedOldPidLog(String pid);
+
+  /// Log entry when an old sidecar process is force terminated.
+  ///
+  /// In zh, this message translates to:
+  /// **'旧 sidecar 进程未及时退出，已强制终止 PID={pid}（端口 4317）'**
+  String sidecarLauncherForceTerminatedOldPidLog(String pid);
+
+  /// Log entry when terminating old sidecar processes fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'终止旧 sidecar 进程失败：{error}'**
+  String sidecarLauncherTerminateOldFailedLog(Object error);
+
+  /// Sidecar directory probe current working directory log.
+  ///
+  /// In zh, this message translates to:
+  /// **'sidecar 目录探测: cwd={path}'**
+  String sidecarLauncherDirectoryProbeCwdLog(String path);
+
+  /// Sidecar directory probe executable path log.
+  ///
+  /// In zh, this message translates to:
+  /// **'sidecar 目录探测: executable={path}'**
+  String sidecarLauncherDirectoryProbeExecutableLog(String path);
+
+  /// Sidecar explicit directory invalid log.
+  ///
+  /// In zh, this message translates to:
+  /// **'KIDMEMORY_SIDECAR_DIR 未包含可运行 sidecar（缺少 dist/main.js）：{path}'**
+  String sidecarLauncherInvalidExplicitDirLog(String path);
+
+  /// Sidecar directory probe candidate status log.
+  ///
+  /// In zh, this message translates to:
+  /// **'sidecar 目录探测: {path} => {status}'**
+  String sidecarLauncherDirectoryProbeCandidateLog(String path, String status);
+
+  /// Sidecar directory probe found a valid path.
+  ///
+  /// In zh, this message translates to:
+  /// **'sidecar 目录探测: 命中 {path}'**
+  String sidecarLauncherDirectoryProbeFoundLog(String path);
+
   /// desktopShellS696
   ///
   /// In zh, this message translates to:
@@ -4145,7 +4318,7 @@ abstract class AppLocalizations {
   /// desktopShellS89
   ///
   /// In zh, this message translates to:
-  /// **'11:05:12 准备素材并构建 workspace'**
+  /// **'11:05:12 准备素材并构建创作空间'**
   String get desktopShellS89;
 
   /// desktopShellS90
@@ -4337,7 +4510,7 @@ abstract class AppLocalizations {
   /// exportActionsS416
   ///
   /// In zh, this message translates to:
-  /// **'导出物尚未同步到 Supabase Storage，暂不能复制分享文案'**
+  /// **'导出物尚未完成云端分享同步，暂不能复制分享文案'**
   String get exportActionsS416;
 
   /// exportActionsS273
@@ -4403,7 +4576,7 @@ abstract class AppLocalizations {
   /// exportSyncS157
   ///
   /// In zh, this message translates to:
-  /// **'Supabase Storage 同步失败'**
+  /// **'云端分享同步失败'**
   String get exportSyncS157;
 
   /// exportGenerationStateS736
@@ -4463,7 +4636,7 @@ abstract class AppLocalizations {
   /// directUploadS650
   ///
   /// In zh, this message translates to:
-  /// **'正在创建 Direct Upload 扫码会话...'**
+  /// **'正在创建扫码上传会话...'**
   String get directUploadS650;
 
   /// textUtilsS557
@@ -4475,7 +4648,7 @@ abstract class AppLocalizations {
   /// exportAssetSyncS862
   ///
   /// In zh, this message translates to:
-  /// **'请先配置 Supabase Storage'**
+  /// **'请先配置云端分享设置'**
   String get exportAssetSyncS862;
 
   /// exportPageS851
@@ -4501,6 +4674,1511 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'点击导出，准备读取当前导出目录'**
   String get exportPageS702;
+
+  /// Log entry when the local data directory is updated.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地数据目录已更新：{path}'**
+  String setupLocalDataDirUpdatedLog(String path);
+
+  /// Log entry when schema initialization is incomplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'schema 初始化未完成：{message}'**
+  String setupSchemaInitIncompleteLog(String message);
+
+  /// Readiness summary after initialization succeeds.
+  ///
+  /// In zh, this message translates to:
+  /// **'初始化成功，已完成 {done} / {total} 项 readiness 检测'**
+  String setupReadinessCompleteMessage(int done, int total);
+
+  /// Initialization failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'初始化失败：{error}'**
+  String setupInitializationFailed(Object error);
+
+  /// Supabase storage test success message.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试通过{cleanupMessage}'**
+  String setupStorageTestPassed(String cleanupMessage);
+
+  /// Log entry for a manually triggered setup check.
+  ///
+  /// In zh, this message translates to:
+  /// **'手动触发配置检测：{title}'**
+  String setupManualCheckTriggeredLog(String title);
+
+  /// Connection test failure with a detailed message.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试连接失败：{message}'**
+  String setupTestConnectionFailedWithMessage(String message);
+
+  /// Directory picker open failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开目录选择器失败：{error}'**
+  String setupOpenDirectoryPickerFailed(Object error);
+
+  /// Log entry when local data directory picking fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地数据目录选择失败：{error}'**
+  String setupLocalDataDirPickFailedLog(Object error);
+
+  /// Homebrew prefix is not writable for a package installation.
+  ///
+  /// In zh, this message translates to:
+  /// **'Homebrew 目录不可写，无法安装 {packageName}。'**
+  String setupHomebrewNotWritableForPackage(String packageName);
+
+  /// Homebrew blocked paths summary.
+  ///
+  /// In zh, this message translates to:
+  /// **'不可写路径：{paths}'**
+  String setupHomebrewBlockedPaths(String paths);
+
+  /// Permission denied install failure with command output.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前用户没有安装权限，无法自动安装 {packageName}。'**
+  String setupPermissionDeniedInstallWithOutput(String packageName);
+
+  /// Permission denied install failure retry instruction.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前用户没有安装权限，无法自动安装 {packageName}。请修复 Homebrew 权限后重试。'**
+  String setupPermissionDeniedInstallRetry(String packageName);
+
+  /// Install command failed with short output.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装命令失败：{output}'**
+  String setupInstallCommandFailed(String output);
+
+  /// Install and configure failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装与配置失败：{error}'**
+  String setupInstallConfigureFailed(String error);
+
+  /// Setup command timeout message.
+  ///
+  /// In zh, this message translates to:
+  /// **'命令执行超过 {minutes} 分钟，已自动停止；请检查网络、Homebrew 或数据库服务状态后重试。'**
+  String setupCommandTimeoutMessage(int minutes);
+
+  /// Supabase docs open failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开 Supabase 官方说明失败：{error}'**
+  String setupOpenSupabaseDocsFailed(Object error);
+
+  /// Unsupported automatic start action.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂不支持自动启动：{title}'**
+  String setupAutoStartUnsupported(String title);
+
+  /// Setup config item recorded message.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置项“{title}”已记录，稍后继续检测'**
+  String setupConfigItemRecorded(String title);
+
+  /// Invalid bundled PostgreSQL runtime directory log.
+  ///
+  /// In zh, this message translates to:
+  /// **'KIDMEMORY_POSTGRES_RUNTIME_DIR 无效（需包含 bin/lib/share）：{path}'**
+  String setupInvalidPostgresRuntimeDir(String path);
+
+  /// Bundled PostgreSQL selected port log.
+  ///
+  /// In zh, this message translates to:
+  /// **'内置 PostgreSQL 将使用端口 {port}'**
+  String setupBundledPostgresPortLog(int port);
+
+  /// pgvector setup workflow start log.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始 pgvector 安装与配置流程（本地 pgvector: {localPgv}）'**
+  String setupPgvectorWorkflowStartedLog(String localPgv);
+
+  /// Asset search completed status.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索完成，共 {count} 条'**
+  String datasetSearchCompletedStatus(int count);
+
+  /// Search indexing status without failures.
+  ///
+  /// In zh, this message translates to:
+  /// **'可语义搜索 {searchable} · 索引中 {indexing}'**
+  String datasetSearchIndexingBaseStatus(int searchable, int indexing);
+
+  /// Search indexing status with failures.
+  ///
+  /// In zh, this message translates to:
+  /// **'{base} · 失败 {failed}'**
+  String datasetSearchIndexingFailedStatus(String base, int failed);
+
+  /// Sample dataset import completed log.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例数据集导入完成：{count} 个素材'**
+  String datasetSampleImportCompletedLog(int count);
+
+  /// Sample dataset import incomplete log.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例数据集导入未完成：{raw}'**
+  String datasetSampleImportIncompleteLog(String raw);
+
+  /// Sample dataset import exception log.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例数据集导入异常：{error}'**
+  String datasetSampleImportExceptionLog(Object error);
+
+  /// Sample dataset import failed snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例数据集导入失败：{error}'**
+  String datasetSampleImportFailedWithError(Object error);
+
+  /// Child profile add failed log.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加孩子档案失败：{raw}'**
+  String datasetChildAddFailedLog(String raw);
+
+  /// Child profile added log.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加孩子档案：{childId} {name}'**
+  String datasetChildAddedLog(String childId, String name);
+
+  /// Child profile added snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'已添加孩子档案：{name}'**
+  String datasetChildAddedMessage(String name);
+
+  /// Child profile edited log.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑资料：{childId} 更新为 {name}'**
+  String datasetChildEditedLog(String childId, String name);
+
+  /// Child profile edited snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'资料已更新为：{name}'**
+  String datasetChildEditedMessage(String name);
+
+  /// Child profile delete confirmation message.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定删除「{name}」吗？删除前需要先清空这个孩子关联的素材。'**
+  String datasetChildDeleteConfirmMessage(String name);
+
+  /// Child profile deleted log.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除孩子档案：{childId} {name}'**
+  String datasetChildDeletedLog(String childId, String name);
+
+  /// Child profile deleted snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除孩子档案：{name}'**
+  String datasetChildDeletedMessage(String name);
+
+  /// Child profile delete failed log.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除孩子档案失败：{childId} {error}'**
+  String datasetChildDeleteFailedLog(String childId, Object error);
+
+  /// Child profile name field label.
+  ///
+  /// In zh, this message translates to:
+  /// **'孩子名字'**
+  String get datasetChildNameLabel;
+
+  /// External target opened successfully log.
+  ///
+  /// In zh, this message translates to:
+  /// **'{label} 打开成功：{target}'**
+  String datasetExternalOpenSucceededLog(String label, String target);
+
+  /// External target open failed message.
+  ///
+  /// In zh, this message translates to:
+  /// **'{label} 打开失败：{error}'**
+  String datasetExternalOpenFailedMessage(String label, Object error);
+
+  /// Sample dataset reset log.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例数据已重置：{childId}，移除 {count} 个素材'**
+  String datasetSampleResetLog(String childId, int count);
+
+  /// Open sample asset preview log.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开示例素材预览：{assetId}'**
+  String datasetPreviewOpenSampleAssetLog(String assetId);
+
+  /// Open historical generated work preview log.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开历史作品预览：{jobId}'**
+  String datasetPreviewOpenHistoryLog(String jobId);
+
+  /// Status line in generation log details.
+  ///
+  /// In zh, this message translates to:
+  /// **'状态：{status}'**
+  String datasetPreviewLogStatusLine(String status);
+
+  /// Open generated page preview log.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开预览页面：{jobId}'**
+  String datasetPreviewOpenPageLog(String jobId);
+
+  /// Install runner attempt log.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在尝试：{action}'**
+  String installRunnerAttemptLog(String action);
+
+  /// Install runner command succeeded log.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装命令成功：{action}'**
+  String installRunnerCommandSucceededLog(String action);
+
+  /// Install runner timeout log.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装超时（{action}），已终止进程。'**
+  String installRunnerTimeoutLog(String action);
+
+  /// Install runner failure log with process output.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装失败（{action}）：{output}'**
+  String installRunnerFailedWithOutputLog(String action, String output);
+
+  /// Install runner failure log with caught error.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装失败（{action}）：{error}'**
+  String installRunnerFailedWithErrorLog(String action, Object error);
+
+  /// Export directory creation failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建导出目录失败：{error}'**
+  String exportCreateDirectoryFailedMessage(Object error);
+
+  /// Export in-progress status with destination path.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在导出到 {destinationPath}'**
+  String exportInProgressStatus(String destinationPath);
+
+  /// Export destination preparation log.
+  ///
+  /// In zh, this message translates to:
+  /// **'准备导出到 {destinationPath}'**
+  String exportPreparingDestinationLog(String destinationPath);
+
+  /// Export succeeded log.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 导出成功：{actualPath}'**
+  String exportSucceededLog(String exportLabel, String actualPath);
+
+  /// Export failed log.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 导出失败'**
+  String exportFailedLog(String exportLabel);
+
+  /// Export exception message.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 导出异常：{error}'**
+  String exportExceptionMessage(String exportLabel, Object error);
+
+  /// Generation started log with selected asset count.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始生成，当前选中 {count} 张素材'**
+  String exportGenerationStartedLog(int count);
+
+  /// Generation completed log with job id.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成完成，已获得 jobId: {jobId}'**
+  String exportGenerationCompletedLog(String jobId);
+
+  /// Generation exception message.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成异常：{error}'**
+  String exportGenerationExceptionMessage(Object error);
+
+  /// Export result success status.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 已导出：{actualPath}'**
+  String exportResultSucceededStatus(String exportLabel, String actualPath);
+
+  /// Export result failed status.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 导出失败，可重试'**
+  String exportResultFailedStatus(String exportLabel);
+
+  /// Direct Upload pullback failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫码上传回拉失败：{error}'**
+  String directUploadPullbackFailedMessage(Object error);
+
+  /// Direct Upload session creation failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建扫码上传会话失败：{message}'**
+  String directUploadCreateSessionFailedMessage(String message);
+
+  /// Import fallback summary when sidecar counters are missing.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材库已刷新，新增 {count} 项；sidecar 未返回完整导入统计'**
+  String importSummaryFallbackImportedMessage(int count);
+
+  /// Import counters summary with failure reasons.
+  ///
+  /// In zh, this message translates to:
+  /// **'成功 {importedCount} · 重复 {duplicatesCount} · 跳过 {skippedCount} · 失败 {failedCount}：{failedReasons}'**
+  String importSummaryCountersWithFailures(
+    int importedCount,
+    int duplicatesCount,
+    int skippedCount,
+    int failedCount,
+    String failedReasons,
+  );
+
+  /// Separator for import failure reasons.
+  ///
+  /// In zh, this message translates to:
+  /// **'、'**
+  String get importSummaryFailedReasonSeparator;
+
+  /// Import staging copy failure log.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入暂存失败：{path} ({error})'**
+  String importStagingFailedLog(String path, Object error);
+
+  /// Default generation template option.
+  ///
+  /// In zh, this message translates to:
+  /// **'温暖童趣'**
+  String get generationTemplateWarmChildhood;
+
+  /// Default generation template option.
+  ///
+  /// In zh, this message translates to:
+  /// **'童话式成长记忆'**
+  String get generationTemplateFairyTaleMemory;
+
+  /// Default generation template option.
+  ///
+  /// In zh, this message translates to:
+  /// **'简约纪实'**
+  String get generationTemplateSimpleDocumentary;
+
+  /// Count text for generic item metrics.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 项'**
+  String contentMetricItemCount(int count);
+
+  /// Count text for image metrics.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 张'**
+  String contentMetricImageCount(int count);
+
+  /// Count text for craft metrics.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 件'**
+  String contentMetricCraftCount(int count);
+
+  /// Agent settings connection test failure with error.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接测试失败: {error}'**
+  String agentSettingsConnectionTestFailedWithError(Object error);
+
+  /// Agent settings save failure with error.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存配置失败: {error}'**
+  String agentSettingsSaveFailedWithError(Object error);
+
+  /// Asset library page subtitle for the selected child.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理{childName}的照片、绘画和手工作品。选择素材后可以生成绘本、回忆视频或成长纪念册。'**
+  String assetLibrarySubtitle(String childName);
+
+  /// Semantic search status with result count.
+  ///
+  /// In zh, this message translates to:
+  /// **'{status} · 结果 {count} 项'**
+  String assetLibrarySearchResultsStatus(String status, int count);
+
+  /// Semantic search failed status.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索失败：{error}'**
+  String assetLibrarySearchFailedStatus(Object error);
+
+  /// Smart pick dialog selected asset count.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能助手已为你挑选 {count} 张素材'**
+  String assetLibrarySmartPickedCount(int count);
+
+  /// Smart pick applied toast message.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选 {count} 张素材，可继续手动微调。'**
+  String assetLibrarySmartPickAppliedMessage(int count);
+
+  /// Asset import failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入失败：{error}'**
+  String assetLibraryImportFailedMessage(Object error);
+
+  /// Asset import summary counters.
+  ///
+  /// In zh, this message translates to:
+  /// **'成功 {imported} · 重复 {duplicates} · 跳过 {skipped} · 失败 {failed}'**
+  String assetLibraryImportSummaryMessage(
+    int imported,
+    int duplicates,
+    int skipped,
+    int failed,
+  );
+
+  /// Batch delete confirmation message.
+  ///
+  /// In zh, this message translates to:
+  /// **'将删除已选 {count} 项素材，是否继续？'**
+  String assetLibraryDeleteSelectedConfirm(int count);
+
+  /// Batch delete success message.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除 {count} 项素材'**
+  String assetLibraryDeletedSelectedMessage(int count);
+
+  /// Asset captured date formatted as year/month/day.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year}年{month}月{day}日'**
+  String assetLibraryDateYmd(int year, int month, int day);
+
+  /// Open original asset file failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开原图失败：{error}'**
+  String assetLibraryOpenOriginalFailedMessage(Object error);
+
+  /// Current child status chip text.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前孩子：{childName}'**
+  String assetLibraryCurrentChildChip(String childName);
+
+  /// Asset count status chip text.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材 {count}'**
+  String assetLibraryAssetCountChip(int count);
+
+  /// Selected assets count in collection preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'本次作品集素材 {count} 项'**
+  String assetLibraryCollectionSelectedCount(int count);
+
+  /// Batch action selected assets count.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择 {count} 项素材'**
+  String assetLibrarySelectedAssetsCount(int count);
+
+  /// Retry storage sync action label.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新同步'**
+  String get assetLibraryResyncLabel;
+
+  /// Sync asset to storage action label.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步到存储'**
+  String get assetLibrarySyncToStorageLabel;
+
+  /// Storage sync completed helper text.
+  ///
+  /// In zh, this message translates to:
+  /// **'已同步到存储。'**
+  String get assetLibrarySyncedToStorageText;
+
+  /// Storage sync pending/running helper text.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步正在进行或等待重试。'**
+  String get assetLibrarySyncRunningOrRetryText;
+
+  /// Local-only storage sync helper text.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前仅保存在本地，可同步到存储。'**
+  String get assetLibraryLocalSyncFallbackText;
+
+  /// Storage status label.
+  ///
+  /// In zh, this message translates to:
+  /// **'已同步'**
+  String get assetLibraryStatusSynced;
+
+  /// Storage status label.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步中'**
+  String get assetLibraryStatusSyncing;
+
+  /// Storage status label.
+  ///
+  /// In zh, this message translates to:
+  /// **'等待重试'**
+  String get assetLibraryStatusRetryWaiting;
+
+  /// Storage status label.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步失败'**
+  String get assetLibraryStatusFailed;
+
+  /// Storage status label.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅本地'**
+  String get assetLibraryStatusLocalOnly;
+
+  /// Default generation page size option.
+  ///
+  /// In zh, this message translates to:
+  /// **'A4 竖版  210 × 297 mm'**
+  String get generateExportDefaultPageSize;
+
+  /// Default generation style option.
+  ///
+  /// In zh, this message translates to:
+  /// **'温暖童趣  亲切温暖，适合儿童阅读'**
+  String get generateExportDefaultStyle;
+
+  /// Default export target option.
+  ///
+  /// In zh, this message translates to:
+  /// **'PDF 文件  高质量 PDF（打印级别）'**
+  String get generateExportDefaultPdfTarget;
+
+  /// Export target has already been exported.
+  ///
+  /// In zh, this message translates to:
+  /// **'{exportLabel} 已导出'**
+  String generateExportExportedState(String exportLabel);
+
+  /// Cover generation confirmation dialog body.
+  ///
+  /// In zh, this message translates to:
+  /// **'将使用免费生图服务生成封面图。\n不会上传孩子照片，只会发送文字描述。'**
+  String get generateExportCoverConfirmBody;
+
+  /// Selected assets label in generate export.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选 {count} 张素材'**
+  String generateExportSelectedAssetsLabel(int count);
+
+  /// Task goal fact label.
+  ///
+  /// In zh, this message translates to:
+  /// **'目标'**
+  String get generateExportTaskGoalLabel;
+
+  /// Picture book goal value.
+  ///
+  /// In zh, this message translates to:
+  /// **'儿童绘本'**
+  String get generateExportTaskGoalPictureBook;
+
+  /// Suggested assets fact label.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议素材'**
+  String get generateExportSuggestedAssetsLabel;
+
+  /// Suggested minimum asset count.
+  ///
+  /// In zh, this message translates to:
+  /// **'至少 6 张'**
+  String get generateExportSuggestedAssetsValue;
+
+  /// Page size option paired with long image export.
+  ///
+  /// In zh, this message translates to:
+  /// **'{sizeText} / 长图'**
+  String generateExportLongImageOption(String sizeText);
+
+  /// Generated work summary text.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材数量          {selectedCount} 项\n生成状态          {generationState}\n文案风格          {styleText}\n页面尺寸          {sizeText}\n导出目标          {exportLabel}'**
+  String generateExportSummaryText(
+    int selectedCount,
+    String generationState,
+    String styleText,
+    String sizeText,
+    String exportLabel,
+  );
+
+  /// Short selected assets count.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择 {count} 张'**
+  String generateExportSelectedAssetsShort(int count);
+
+  /// Asset input title with selected count.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材 · 已选择 {count} 张'**
+  String generateExportAssetInputSelectedTitle(int count);
+
+  /// Page preview title with approximate page count.
+  ///
+  /// In zh, this message translates to:
+  /// **'页面预览（约 {pageCount} 页）'**
+  String generateExportPagePreviewCount(int pageCount);
+
+  /// Activity timeline empty state body.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击“开始生成”后，这里会记录 Agent 分析素材、构建书稿、渲染预览与导出状态。\n当前状态：{statusMessage}'**
+  String generateExportActivityEmptyMessage(String statusMessage);
+
+  /// Current generation status line.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前状态：{statusMessage}'**
+  String generateExportCurrentStatusLine(String statusMessage);
+
+  /// Failure reason line.
+  ///
+  /// In zh, this message translates to:
+  /// **'原因：{reason}'**
+  String generateExportReasonLine(String reason);
+
+  /// Generate settings subtitle after generation.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成完成后可预览或导出 {exportLabel}。'**
+  String generateExportReadyToExportSubtitle(String exportLabel);
+
+  /// Export directory hint for generated work.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出将写入当前导出目录，完成后可在“打开导出文件夹”中查看 {exportLabel} 文件'**
+  String generateExportDirectoryHint(String exportLabel);
+
+  /// Readiness selected assets count against suggestion.
+  ///
+  /// In zh, this message translates to:
+  /// **'{selectedCount} / 建议 6+'**
+  String generateExportReadinessAssetRatio(int selectedCount);
+
+  /// Cloud sharing fact label.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端分享'**
+  String get generateExportCloudShareLabel;
+
+  /// Cloud sharing fact value.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成后可上传'**
+  String get generateExportCloudShareValue;
+
+  /// Generate/export preview readiness message.
+  ///
+  /// In zh, this message translates to:
+  /// **'准备完成：可继续开始导出'**
+  String get generateExportPreviewReadinessMessage;
+
+  /// Preview setup check title.
+  ///
+  /// In zh, this message translates to:
+  /// **'1. 配置 Supabase URL'**
+  String get generateExportPreviewSetupUrlTitle;
+
+  /// Preview setup check body.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认已填写项目 URL 与密钥。'**
+  String get generateExportPreviewSetupUrlBody;
+
+  /// Preview setup state label.
+  ///
+  /// In zh, this message translates to:
+  /// **'已检测'**
+  String get generateExportPreviewStateDetected;
+
+  /// Preview setup check title.
+  ///
+  /// In zh, this message translates to:
+  /// **'2. 配置 Bucket'**
+  String get generateExportPreviewSetupBucketTitle;
+
+  /// Preview setup check body.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认导出数据 Bucket 已创建。'**
+  String get generateExportPreviewSetupBucketBody;
+
+  /// Preview setup action label.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往'**
+  String get generateExportPreviewActionOpen;
+
+  /// Preview setup state label.
+  ///
+  /// In zh, this message translates to:
+  /// **'已配置'**
+  String get generateExportPreviewStateConfigured;
+
+  /// Preview setup check title.
+  ///
+  /// In zh, this message translates to:
+  /// **'3. 存储权限'**
+  String get generateExportPreviewSetupPermissionTitle;
+
+  /// Preview setup check body.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认服务角色密钥权限可用于存储读写。'**
+  String get generateExportPreviewSetupPermissionBody;
+
+  /// Preview setup state label.
+  ///
+  /// In zh, this message translates to:
+  /// **'通过'**
+  String get generateExportPreviewStatePassed;
+
+  /// Preview setup check title.
+  ///
+  /// In zh, this message translates to:
+  /// **'4. 目录与签名'**
+  String get generateExportPreviewSetupSignatureTitle;
+
+  /// Preview setup check body.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认 URL 签名有效期配置符合预期。'**
+  String get generateExportPreviewSetupSignatureBody;
+
+  /// Preview setup state label.
+  ///
+  /// In zh, this message translates to:
+  /// **'正常'**
+  String get generateExportPreviewStateNormal;
+
+  /// Preview setup check title.
+  ///
+  /// In zh, this message translates to:
+  /// **'5. 连接测试'**
+  String get generateExportPreviewSetupConnectionTitle;
+
+  /// Preview setup check body.
+  ///
+  /// In zh, this message translates to:
+  /// **'已成功尝试连接导出服务。'**
+  String get generateExportPreviewSetupConnectionBody;
+
+  /// Preview setup state label.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接成功'**
+  String get generateExportPreviewStateConnected;
+
+  /// Preview Supabase signed URL test message.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名 URL 校验通过'**
+  String get generateExportPreviewSignedUrlPassed;
+
+  /// Preview export status message.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出任务已完成'**
+  String get generateExportPreviewExportCompleted;
+
+  /// Preview activity log line.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在读取样本'**
+  String get generateExportPreviewLogReadingSamples;
+
+  /// Preview activity log line.
+  ///
+  /// In zh, this message translates to:
+  /// **'已生成封面'**
+  String get generateExportPreviewLogCoverGenerated;
+
+  /// Preview activity log line.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出任务提交成功'**
+  String get generateExportPreviewLogExportSubmitted;
+
+  /// Preview export target option.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出为图片'**
+  String get generateExportPreviewExportImage;
+
+  /// Preview export target option.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出为 PDF'**
+  String get generateExportPreviewExportPdf;
+
+  /// Preview export target option.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出为长图'**
+  String get generateExportPreviewExportLongImage;
+
+  /// Preview selected page size.
+  ///
+  /// In zh, this message translates to:
+  /// **'A4 竖版'**
+  String get generateExportPreviewSelectedPageSize;
+
+  /// Preview selected style.
+  ///
+  /// In zh, this message translates to:
+  /// **'自然温和'**
+  String get generateExportPreviewSelectedStyle;
+
+  /// Preview share text.
+  ///
+  /// In zh, this message translates to:
+  /// **'KidMemory 作品集：{url}\n链接有效期：{seconds} 秒'**
+  String generateExportPreviewShareText(String url, int seconds);
+
+  /// Direct Upload child id line.
+  ///
+  /// In zh, this message translates to:
+  /// **'孩子：{childId}'**
+  String directUploadChildIdLine(String childId);
+
+  /// Direct Upload recommended client limit hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议每次≤{count}张 · 仅为体验约束，并非安全约束'**
+  String directUploadClientLimitHint(int count);
+
+  /// Trusted Upload create session failure snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建上传会话失败: {error}'**
+  String trustedUploadCreateSessionFailed(Object error);
+
+  /// Trusted Upload close session failure snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭会话失败: {error}'**
+  String trustedUploadCloseSessionFailed(Object error);
+
+  /// Trusted Upload retry failure snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试失败: {error}'**
+  String trustedUploadRetryFailed(Object error);
+
+  /// Trusted Upload remaining session minutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余时间: {minutes} 分钟'**
+  String trustedUploadRemainingMinutes(int minutes);
+
+  /// Trusted Upload maximum upload item count.
+  ///
+  /// In zh, this message translates to:
+  /// **'上限: {count} 张'**
+  String trustedUploadMaxItems(int count);
+
+  /// Trusted Upload copied link snackbar.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制到剪贴板'**
+  String get trustedUploadCopiedMessage;
+
+  /// Trusted Upload load failure message.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载失败: {error}'**
+  String trustedUploadLoadFailed(String error);
+
+  /// Trusted Upload empty item list message.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无上传项\n请在手机端选择图片上传'**
+  String get trustedUploadNoItemsMessage;
+
+  /// Trusted Upload item failure status.
+  ///
+  /// In zh, this message translates to:
+  /// **'失败: {message}'**
+  String trustedUploadItemFailed(String message);
+
+  /// Count text for tag metrics.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 个'**
+  String contentMetricTagCount(int count);
+
+  /// Empty recent works message.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无最近作品'**
+  String get contentNoRecentWorksMessage;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'😊\n出生'**
+  String get contentTimelineBirth;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'🖍️\n第一次微笑'**
+  String get contentTimelineFirstSmile;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'🎨\n第一次画画'**
+  String get contentTimelineFirstDrawing;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'🏫\n幼儿园入学'**
+  String get contentTimelineDaycare;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'🚲\n学会骑车'**
+  String get contentTimelineBicycle;
+
+  /// Sample timeline milestone.
+  ///
+  /// In zh, this message translates to:
+  /// **'🏮\n新年画作'**
+  String get contentTimelineNewYearArtwork;
+
+  /// Sample child profile detail block.
+  ///
+  /// In zh, this message translates to:
+  /// **'档案信息\n\n性别                 男孩\n出生地               上海市\n星座                 双子座\n血型                 A型\n创建时间             2024-06-18\n最后更新             2025-05-30\n\n成长里程碑\n第一次画画     2022-03-15\n幼儿园入学     2023-09-01\n第一次画展     2024-05-20\n学会骑自行车   2024-10-12'**
+  String get contentProfileSampleDetails;
+
+  /// Pagination status.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {currentPage} / {totalPages} 页 · 每页 {pageSize} 条'**
+  String contentPaginationStatus(int currentPage, int totalPages, int pageSize);
+
+  /// Generation complete status with page count.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成完成     {currentPage}/{totalPages} 页'**
+  String contentGenerationCompletePages(int currentPage, int totalPages);
+
+  /// Asset preparation flow step.
+  ///
+  /// In zh, this message translates to:
+  /// **'🗂️  准备素材\n已选择 {count} 张素材'**
+  String contentFlowPrepareAssets(int count);
+
+  /// Agent generated flow step.
+  ///
+  /// In zh, this message translates to:
+  /// **'✅  Agent 生成结构\n已生成作品集内容'**
+  String get contentFlowAgentGenerated;
+
+  /// Agent waiting flow step.
+  ///
+  /// In zh, this message translates to:
+  /// **'⏳  Agent 生成结构\n等待生成'**
+  String get contentFlowAgentWaiting;
+
+  /// Export completed flow step.
+  ///
+  /// In zh, this message translates to:
+  /// **'📄  导出文件\n已生成高质量文件'**
+  String get contentFlowExportCompleted;
+
+  /// Export waiting flow step.
+  ///
+  /// In zh, this message translates to:
+  /// **'📄  导出文件\n等待导出'**
+  String get contentFlowExportWaiting;
+
+  /// Selected assets strip title.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择素材（{count}）'**
+  String contentSelectedAssetsTitle(int count);
+
+  /// Generated page preview count title.
+  ///
+  /// In zh, this message translates to:
+  /// **'页面预览（共 {pageCount} 页）'**
+  String contentPagePreviewCount(int pageCount);
+
+  /// Activity timeline source text.
+  ///
+  /// In zh, this message translates to:
+  /// **'阶段：实时记录\n来源：本地任务中心'**
+  String get contentTimelineSourceText;
+
+  /// Button label for clearing a child profile birthday.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空生日'**
+  String get datasetChildrenClearBirthday;
+
+  /// Empty child profile page description.
+  ///
+  /// In zh, this message translates to:
+  /// **'先添加孩子，再开始记录素材、成长时间轴\n和作品集，珍藏每一个值得记住的瞬间。'**
+  String get childProfileEmptyDescription;
+
+  /// Linked asset count on the child profile header.
+  ///
+  /// In zh, this message translates to:
+  /// **'已关联素材：{count} 项'**
+  String childProfileLinkedAssets(int count);
+
+  /// Asset count chip on the child profile header.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材 {count}'**
+  String childProfileAssetChip(int count);
+
+  /// Artwork count chip on the child profile header.
+  ///
+  /// In zh, this message translates to:
+  /// **'绘画 {count}'**
+  String childProfileArtworkChip(int count);
+
+  /// Photo count chip on the child profile header.
+  ///
+  /// In zh, this message translates to:
+  /// **'照片 {count}'**
+  String childProfilePhotoChip(int count);
+
+  /// Keyword used to identify child portrait assets.
+  ///
+  /// In zh, this message translates to:
+  /// **'笑'**
+  String get childProfilePortraitSmileKeyword;
+
+  /// Child profile growth statistics section title.
+  ///
+  /// In zh, this message translates to:
+  /// **'成长统计'**
+  String get childProfileGrowthStatsTitle;
+
+  /// Child profile asset distribution section title.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材分布'**
+  String get childProfileAssetDistributionTitle;
+
+  /// Child profile recent works section title.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近作品'**
+  String get childProfileRecentWorksTitle;
+
+  /// Child profile growth timeline section title.
+  ///
+  /// In zh, this message translates to:
+  /// **'成长时间轴'**
+  String get childProfileGrowthTimelineTitle;
+
+  /// Asset count value in the child profile side panel.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 项'**
+  String childProfileAssetCountValue(int count);
+
+  /// Child profile timeline milestone helper text.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间线按素材日期自动更新'**
+  String get childProfileTimelineAutoUpdate;
+
+  /// Child profile portfolio milestone helper text.
+  ///
+  /// In zh, this message translates to:
+  /// **'作品集记录保存在本地'**
+  String get childProfilePortfolioSavedLocally;
+
+  /// Creation workflow phase label before generation starts.
+  ///
+  /// In zh, this message translates to:
+  /// **'准备创作'**
+  String get creationPhasePreparing;
+
+  /// Creation workflow phase label while planning.
+  ///
+  /// In zh, this message translates to:
+  /// **'规划中'**
+  String get creationPhasePlanning;
+
+  /// Creation workflow phase label after a plan is ready for user confirmation.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划待确认'**
+  String get creationPhasePlanReady;
+
+  /// Creation workflow phase label while creating the generation job.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建任务中'**
+  String get creationPhaseCreatingJob;
+
+  /// Creation workflow phase label while memoir video environment is being prepared.
+  ///
+  /// In zh, this message translates to:
+  /// **'准备视频环境'**
+  String get creationPhaseEnvironmentPreparing;
+
+  /// Creation workflow phase label while running generation.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成中'**
+  String get creationPhaseGenerating;
+
+  /// Creation workflow phase label after generation completes and before export.
+  ///
+  /// In zh, this message translates to:
+  /// **'可预览'**
+  String get creationPhaseReviewing;
+
+  /// Creation workflow phase label while exporting locally.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在导出到本地'**
+  String get creationPhaseExporting;
+
+  /// Creation workflow phase label after export is ready to share.
+  ///
+  /// In zh, this message translates to:
+  /// **'可发布'**
+  String get creationPhasePublished;
+
+  /// Creation workflow phase label after generation or export fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作失败'**
+  String get creationPhaseFailed;
+
+  /// Status text while creation planning is in progress.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在分析素材、选择 Skill 并生成计划'**
+  String get creationPlanningStatus;
+
+  /// Planning sub-step title for analyzing selected assets.
+  ///
+  /// In zh, this message translates to:
+  /// **'分析素材'**
+  String get creationPlanningAnalyzeAssetsTitle;
+
+  /// Planning sub-step body for analyzing selected assets.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在读取 {count} 张素材的照片、画作和标签'**
+  String creationPlanningAnalyzeAssetsBody(Object count);
+
+  /// Planning sub-step title for selecting a generation skill.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择 Skill'**
+  String get creationPlanningSelectSkillTitle;
+
+  /// Planning sub-step body for selecting a generation skill.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在匹配绘本、成长纪念册或回忆视频能力'**
+  String get creationPlanningSelectSkillBody;
+
+  /// Planning sub-step title for generating a plan.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成计划'**
+  String get creationPlanningGeneratePlanTitle;
+
+  /// Planning sub-step body for generating a plan.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在组织故事结构、步骤和前置条件'**
+  String get creationPlanningGeneratePlanBody;
+
+  /// Status text after the creation plan has been returned and is waiting for user confirmation.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作计划已生成，请确认后开始生成。'**
+  String get creationPlanReadyStatus;
+
+  /// Status text when confirmation is attempted without an available plan id.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作计划缺失，请重新规划。'**
+  String get creationPlanMissingStatus;
+
+  /// Sidebar subtitle when a creation plan is ready for confirmation.
+  ///
+  /// In zh, this message translates to:
+  /// **'请检查 Agent 计划、Skill 与前置条件，确认后再创建生成任务。'**
+  String get creationPlanReadySubtitle;
+
+  /// Title for the creation plan confirmation panel.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认创作计划'**
+  String get creationPlanConfirmationTitle;
+
+  /// Label for the skill used by the creation plan.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用 Skill'**
+  String get creationPlanSkillLabel;
+
+  /// Fallback value when a creation plan does not include a skill name.
+  ///
+  /// In zh, this message translates to:
+  /// **'等待后端返回'**
+  String get creationPlanUnknownSkill;
+
+  /// Label above the creation plan step list.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划步骤'**
+  String get creationPlanStepsLabel;
+
+  /// Label above the creation plan requirements list.
+  ///
+  /// In zh, this message translates to:
+  /// **'前置条件'**
+  String get creationPlanRequirementsLabel;
+
+  /// Primary action label for confirming a creation plan and creating a job.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认计划并开始生成'**
+  String get creationConfirmPlanAction;
+
+  /// Status text when a creation job fails at a backend step.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成失败：{step} 未能完成。{reason}'**
+  String creationGenerationFailedWithStep(Object step, Object reason);
+
+  /// Line showing the failed creation job step.
+  ///
+  /// In zh, this message translates to:
+  /// **'失败步骤：{step}'**
+  String creationFailureStepLine(Object step);
+
+  /// Line showing a low-level creation job error code.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误代码：{code}'**
+  String creationFailureCodeLine(Object code);
+
+  /// Action label for planning again after a generation failure.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新规划'**
+  String get creationReplanAction;
+
+  /// Status text while the creation job is being created.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在创建生成任务'**
+  String get creationCreatingJobStatus;
+
+  /// Status shown while the memoir video job prepares FFmpeg and Hyperframes environment.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在准备视频生成环境'**
+  String get creationEnvironmentPreparingStatus;
+
+  /// Status shown after changing assets or generation settings invalidates the current creation plan.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作设置已更新，请重新规划。'**
+  String get creationPlanInvalidatedStatus;
+
+  /// Status text while the creation job is running.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在执行生成任务'**
+  String get creationGeneratingStatus;
+
+  /// User-facing replacement label for cloud storage provider names in ordinary activity timelines.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端存储'**
+  String get generateExportCloudStorageLabel;
+
+  /// User-facing replacement label for internal sidecar service names in ordinary activity timelines.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地服务'**
+  String get generateExportLocalServiceLabel;
+
+  /// Export target label for memoir video MP4 output.
+  ///
+  /// In zh, this message translates to:
+  /// **'MP4 视频  回忆录视频'**
+  String get generateExportMp4Target;
+
+  /// Five-step creation flow label for plan confirmation.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划确认'**
+  String get creationPhasePlanConfirm;
+
+  /// Five-step creation flow label for result preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'结果预览'**
+  String get creationPhasePreviewResult;
+
+  /// Five-step creation flow label for export and sharing.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出分享'**
+  String get creationPhaseExportShare;
+
+  /// Title above the five-step creation flow.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作流程'**
+  String get creationFlowTitle;
+
+  /// Title for backend-provided generation steps.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成步骤'**
+  String get generationBackendStepsTitle;
+
+  /// Title for local creation progress fallback steps.
+  ///
+  /// In zh, this message translates to:
+  /// **'创作进度'**
+  String get generationLocalProgressTitle;
+
+  /// Primary action label to start creation planning.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始规划'**
+  String get generateExportStartPlanningAction;
+
+  /// Primary action label for MP4 export.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出 MP4'**
+  String get generateExportMp4Action;
+
+  /// Action label for opening a generated memoir video MP4 preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开视频预览'**
+  String get generateExportOpenVideoPreviewAction;
+
+  /// Status shown when the memoir video preview cannot be opened because no MP4 artifact path is available.
+  ///
+  /// In zh, this message translates to:
+  /// **'视频文件还未准备好，请重新生成或查看日志。'**
+  String get generateExportVideoPreviewUnavailable;
+
+  /// Keyword used to classify localized video export target labels.
+  ///
+  /// In zh, this message translates to:
+  /// **'视频'**
+  String get generateExportVideoKeyword;
+
+  /// Fallback error when direct upload service is unavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫码上传服务暂时不可用，请稍后重试'**
+  String get directUploadServiceUnavailableMessage;
+
+  /// Error when direct upload session payload is incomplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫码上传会话创建失败，请检查上传配置后重试'**
+  String get directUploadSessionIncompleteMessage;
+
+  /// User-facing replacement for technical direct upload configuration errors.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫码上传配置未完成，请检查上传设置后重试'**
+  String get directUploadConfigIncompleteMessage;
+
+  /// Keyword used to classify request prompts as warning toasts.
+  ///
+  /// In zh, this message translates to:
+  /// **'请'**
+  String get feedbackRequestKeyword;
 }
 
 class _AppLocalizationsDelegate

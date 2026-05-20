@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { checkClaudeReadiness, checkOpenAIReadiness, checkPgVector, checkPostgres } from "../../../../src/modules/config/providers/readiness.ts";
+import { checkClaudeReadiness, checkPgVector, checkPostgres } from "../../../../src/modules/config/providers/readiness.ts";
 
 test("returns actionable PostgreSQL errors without leaking credentials", async () => {
   const status = await checkPostgres(
@@ -49,55 +49,6 @@ test("pgvector check can report PostgreSQL connection failures as actionable rea
   assert.equal(status.service, "pgvector");
   assert.match(status.message, /PostgreSQL.*连接失败|连接失败.*PostgreSQL|pgvector 检测前 PostgreSQL 连接失败/);
   assert.match(status.action, /PostgreSQL/);
-});
-
-test("OpenAI readiness checks 通过模型接口做可达性检测", async () => {
-  const calls: string[] = [];
-  const status = await checkOpenAIReadiness(
-    { provider: "openai", baseUrl: "https://api.openai.com/v1", apiKey: "sk-test", model: "gpt-4o-mini" },
-    async (url) => {
-      calls.push(String(url));
-      return { ok: true, status: 200 } as Response;
-    },
-  );
-
-  assert.equal(status.ok, true);
-  assert.equal(status.blocksGeneration, false);
-  assert.equal(calls[0], "https://api.openai.com/v1/models/gpt-4o-mini");
-
-  const compatible = await checkOpenAIReadiness({
-    provider: "openai",
-    baseUrl: "https://example.com/v1",
-    apiKey: "sk-test",
-    model: "gpt-4o-mini",
-  }, async (url) => {
-    calls.push(String(url));
-    return { ok: false, status: 503 } as Response;
-  });
-  assert.equal(compatible.ok, false);
-  assert.match(compatible.message, /OpenAI readiness check returned HTTP 503/);
-  assert.equal(calls.length, 3);
-  assert.equal(calls[1], "https://example.com/v1/models/gpt-4o-mini");
-  assert.equal(calls[2], "https://example.com/v1/models");
-});
-
-test("OpenAI readiness normalizes baseUrl when users paste chat completion endpoint", async () => {
-  const calls: string[] = [];
-  const status = await checkOpenAIReadiness(
-    { provider: "openai", baseUrl: "https://api.openai.com/v1/chat/completions", apiKey: "sk-test", model: "gpt-4o-mini" },
-    async (url) => {
-      calls.push(String(url));
-      if (String(url) === "https://api.openai.com/v1/models/gpt-4o-mini") {
-        return { ok: true, status: 200 } as Response;
-      }
-      return { ok: false, status: 400 } as Response;
-    },
-  );
-
-  assert.equal(status.ok, true);
-  assert.equal(calls[0], "https://api.openai.com/v1/chat/completions/models/gpt-4o-mini");
-  assert.equal(calls[1], "https://api.openai.com/v1/chat/completions/models");
-  assert.equal(calls[2], "https://api.openai.com/v1/models/gpt-4o-mini");
 });
 
 test("Claude readiness reports missing key as actionable", async () => {

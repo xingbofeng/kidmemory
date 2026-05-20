@@ -50,9 +50,26 @@
       "post": {
         "operationId": "DevicesController_register",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Device registered successfully"
+            "description": "Device registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid request"
@@ -70,7 +87,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Heartbeat updated"
+            "description": "Heartbeat updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Device not found"
@@ -98,7 +122,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Device found"
+            "description": "Device found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Device not found"
@@ -152,7 +183,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Pending items retrieved"
+            "description": "Pending items retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadItemResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get pending sync upload items",
@@ -165,9 +206,26 @@
       "put": {
         "operationId": "UploadItemsController_updateSyncStatus",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSyncStatusRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Status updated"
+            "description": "Status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadItemResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid status transition"
@@ -215,7 +273,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Pending jobs retrieved"
+            "description": "Pending jobs retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get pending jobs for device",
@@ -228,9 +296,26 @@
       "put": {
         "operationId": "JobsController_updateStatus",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateJobStatusRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Status updated"
+            "description": "Status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid status transition"
@@ -261,7 +346,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectUploadConfigResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get direct upload config for trusted upload session",
@@ -286,7 +378,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSummaryResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get trusted upload session summary",
@@ -321,7 +420,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUploadItemsResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Create upload items for trusted upload session",
@@ -356,7 +462,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitUploadItemResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Commit upload item",
@@ -402,7 +515,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareTokenValidationResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Validate public share token",
@@ -436,7 +556,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SharedAssetDto"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Get public shared assets",
@@ -470,7 +600,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedBookDto"
+                }
+              }
+            }
           }
         },
         "summary": "Get public shared book metadata",
@@ -526,12 +663,304 @@
   ],
   "components": {
     "schemas": {
+      "RegisterDeviceRequestDto": {
+        "type": "object",
+        "properties": {
+          "machineId": {
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "machineId"
+        ]
+      },
+      "DeviceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "machineId": {
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "lastHeartbeat": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "machineId",
+          "lastHeartbeat",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UploadItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "childId": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "uploaded",
+              "synced",
+              "failed"
+            ]
+          },
+          "uploadedAt": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sessionId",
+          "objectKey",
+          "fileName",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateSyncStatusRequestDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "uploaded",
+              "synced",
+              "failed"
+            ]
+          },
+          "syncedAt": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "JobResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "book_generation",
+              "asset_processing",
+              "export_pdf",
+              "export_long_image",
+              "import",
+              "sync",
+              "export",
+              "cleanup"
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "claimed",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "priority": {
+            "type": "number"
+          },
+          "claimedAt": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "payload",
+          "status",
+          "priority",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateJobStatusRequestDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "claimed",
+              "processing",
+              "completed",
+              "failed"
+            ]
+          },
+          "claimedAt": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "DirectUploadConfigResponseDto": {
+        "type": "object",
+        "properties": {
+          "anonKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "anonKey"
+        ]
+      },
+      "SessionSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "child": {
+            "type": "object"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "maxItems": {
+            "type": "number"
+          },
+          "usedItems": {
+            "type": "number"
+          },
+          "providers": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "sessionId",
+          "status",
+          "child",
+          "expiresAt",
+          "maxItems",
+          "usedItems",
+          "providers"
+        ]
+      },
+      "CreateUploadFileDto": {
+        "type": "object",
+        "properties": {
+          "clientFileId": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "clientFileId",
+          "filename",
+          "contentType",
+          "sizeBytes"
+        ]
+      },
       "CreateUploadItemsRequestDto": {
         "type": "object",
-        "required": [
-          "token",
-          "files"
-        ],
         "properties": {
           "token": {
             "type": "string"
@@ -545,43 +974,99 @@
           },
           "files": {
             "type": "array",
-            "minItems": 1,
             "items": {
-              "type": "object",
-              "required": [
-                "clientFileId",
-                "filename",
-                "contentType",
-                "sizeBytes"
-              ],
-              "properties": {
-                "clientFileId": {
-                  "type": "string"
-                },
-                "filename": {
-                  "type": "string"
-                },
-                "contentType": {
-                  "type": "string"
-                },
-                "sizeBytes": {
-                  "type": "number"
-                }
-              }
+              "$ref": "#/components/schemas/CreateUploadFileDto"
             }
           }
-        }
+        },
+        "required": [
+          "token",
+          "files"
+        ]
+      },
+      "SignedUploadTargetDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "url",
+          "headers"
+        ]
+      },
+      "CreatedUploadItemDto": {
+        "type": "object",
+        "properties": {
+          "clientFileId": {
+            "type": "string"
+          },
+          "uploadItemId": {
+            "type": "string"
+          },
+          "assetId": {
+            "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "signedUpload": {
+            "$ref": "#/components/schemas/SignedUploadTargetDto"
+          }
+        },
+        "required": [
+          "clientFileId",
+          "uploadItemId",
+          "assetId",
+          "objectKey",
+          "status"
+        ]
+      },
+      "CreateUploadItemsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatedUploadItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
       },
       "CommitUploadItemRequestDto": {
         "type": "object",
-        "required": [
-          "token",
-          "uploadToken",
-          "sizeBytes"
-        ],
         "properties": {
           "token": {
             "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
           },
           "uploadToken": {
             "type": "string"
@@ -589,14 +1074,99 @@
           "checksumSha256": {
             "type": "string"
           },
-          "sizeBytes": {
-            "type": "number"
-          },
           "metadata": {
             "type": "object",
             "additionalProperties": true
           }
-        }
+        },
+        "required": [
+          "token",
+          "objectKey",
+          "contentType",
+          "sizeBytes"
+        ]
+      },
+      "CommitUploadItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "uploadItemId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadItemId",
+          "status"
+        ]
+      },
+      "ShareTokenValidationResponseDto": {
+        "type": "object",
+        "properties": {
+          "isValid": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "shareToken": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "isValid"
+        ]
+      },
+      "SharedAssetDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "type",
+          "createdAt"
+        ]
+      },
+      "SharedBookDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "childId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "childId",
+          "createdAt",
+          "status"
+        ]
       }
     }
   }

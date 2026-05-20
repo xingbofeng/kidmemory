@@ -17,10 +17,22 @@ part 'asset_library_widgets.dart';
 part 'asset_library_state.dart';
 
 List<Map<String, String>> _assetSortOptions(BuildContext context) => [
-  {'value': 'created_desc', 'label': AppLocalizations.of(context)!.assetLibraryPageS285},
-  {'value': 'created_asc', 'label': AppLocalizations.of(context)!.assetLibraryPageS286},
-  {'value': 'type', 'label': AppLocalizations.of(context)!.assetLibraryPageS786},
-  {'value': 'title', 'label': AppLocalizations.of(context)!.assetLibraryPageS631},
+  {
+    'value': 'created_desc',
+    'label': AppLocalizations.of(context)!.assetLibraryPageS285,
+  },
+  {
+    'value': 'created_asc',
+    'label': AppLocalizations.of(context)!.assetLibraryPageS286,
+  },
+  {
+    'value': 'type',
+    'label': AppLocalizations.of(context)!.assetLibraryPageS786,
+  },
+  {
+    'value': 'title',
+    'label': AppLocalizations.of(context)!.assetLibraryPageS631,
+  },
 ];
 
 class AssetImportReport {
@@ -116,7 +128,7 @@ class AssetLibraryPage extends StatefulWidget {
   final Future<bool> Function(String assetId)? onSyncAsset;
 
   /// Optional Web Companion Direct Upload entry. When provided, the
-  /// asset library toolbar surfaces a dedicated 「扫码上传 · Direct」
+  /// The asset library toolbar surfaces a dedicated Direct Upload entry.
   /// button next to the existing import actions. Leaving this `null` keeps
   /// the toolbar identical to the standard import-only behavior.
   final VoidCallback? onOpenDirectUpload;
@@ -297,12 +309,16 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final totalPages = pageWindow.totalPages;
     final currentPage = pageWindow.currentPage;
     final pageAssets = pageWindow.pageAssets;
+    final l10n = AppLocalizations.of(context)!;
     return PageFrame(
-      title: AppLocalizations.of(context)!.assetLibraryTitle,
-      subtitle:
-          '管理${selectedChildName ?? '孩子'}的照片、绘画和手工作品。选择素材后可以生成绘本、回忆视频或成长纪念册。',
+      title: l10n.assetLibraryTitle,
+      subtitle: l10n.assetLibrarySubtitle(
+        selectedChildName ?? l10n.assetLibraryPageS599,
+      ),
       status: _LibraryHeaderStatus(
-        childName: selectedChildName ?? AppLocalizations.of(context)!.assetLibraryPageS599,
+        childName:
+            selectedChildName ??
+            AppLocalizations.of(context)!.assetLibraryPageS599,
         assetCount: widget.assets.length,
         indexingMessage: indexingMessage,
       ),
@@ -349,7 +365,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                     onSearchChanged: (_) => setState(() {
                       semanticSearchActive = false;
                       semanticSearchResults = const [];
-                      searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS660;
+                      searchStatusMessage = AppLocalizations.of(
+                        context,
+                      )!.assetLibraryPageS660;
                       pageIndex = 0;
                       selectedAssetId = null;
                       _syncEditor();
@@ -400,11 +418,16 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                     }),
                   ),
                   if (semanticSearchActive ||
-                      searchStatusMessage.contains(AppLocalizations.of(context)!.uploadStatusFailedLabel)) ...[
+                      searchStatusMessage.contains(
+                        AppLocalizations.of(context)!.uploadStatusFailedLabel,
+                      )) ...[
                     const SizedBox(height: 10),
                     _SearchStatusStrip(
                       text: semanticSearchActive
-                          ? '$searchStatusMessage · 结果 ${semanticSearchResults.length} 项'
+                          ? l10n.assetLibrarySearchResultsStatus(
+                              searchStatusMessage,
+                              semanticSearchResults.length,
+                            )
                           : searchStatusMessage,
                       active: semanticSearchActive,
                       onClear: semanticSearchActive
@@ -579,19 +602,32 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
   }
 
   Future<void> _runSemanticSearch() async {
+    final l10n = AppLocalizations.of(context)!;
     final search = widget.onSemanticSearch;
     final query = searchController.text.trim();
     final childId = widget.selectedChildId;
     if (search == null) {
-      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS483);
+      setState(
+        () => searchStatusMessage = AppLocalizations.of(
+          context,
+        )!.assetLibraryPageS483,
+      );
       return;
     }
     if (childId == null || childId.isEmpty) {
-      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS858);
+      setState(
+        () => searchStatusMessage = AppLocalizations.of(
+          context,
+        )!.assetLibraryPageS858,
+      );
       return;
     }
     if (query.isEmpty) {
-      setState(() => searchStatusMessage = AppLocalizations.of(context)!.assetLibraryPageS867);
+      setState(
+        () => searchStatusMessage = AppLocalizations.of(
+          context,
+        )!.assetLibraryPageS867,
+      );
       return;
     }
     setState(() {
@@ -625,7 +661,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         semanticSearching = false;
         semanticSearchActive = false;
         semanticSearchResults = const [];
-        searchStatusMessage = '搜索失败：$error';
+        searchStatusMessage = l10n.assetLibrarySearchFailedStatus(error);
       });
     }
   }
@@ -686,12 +722,14 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel)),
+              title: Text(
+                AppLocalizations.of(context)!.assetLibrarySmartPickLabel,
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(AppLocalizations.of(context)!.assetLibraryPageS869)),
+                  Text(AppLocalizations.of(context)!.assetLibraryPageS869),
                   const SizedBox(height: 8),
                   RadioGroup<String>(
                     groupValue: target,
@@ -711,30 +749,42 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                       children: [
                         RadioListTile<String>(
                           value: 'picture_book',
-                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS902),
+                          title: Text(
+                            AppLocalizations.of(context)!.assetLibraryPageS902,
+                          ),
                           dense: true,
                         ),
                         RadioListTile<String>(
                           value: 'memory_album',
-                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS901),
+                          title: Text(
+                            AppLocalizations.of(context)!.assetLibraryPageS901,
+                          ),
                           dense: true,
                         ),
                         RadioListTile<String>(
                           value: 'memory_video',
-                          title: Text(AppLocalizations.of(context)!.assetLibraryPageS900),
+                          title: Text(
+                            AppLocalizations.of(context)!.assetLibraryPageS900,
+                          ),
                           dense: true,
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('智能助手已为你挑选 ${suggested.length} 张素材'),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.assetLibrarySmartPickedCount(suggested.length),
+                  ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop('manual'),
-                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS503)),
+                  child: Text(
+                    AppLocalizations.of(context)!.assetLibraryPageS503,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
@@ -747,11 +797,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                       );
                     });
                   },
-                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS919)),
+                  child: Text(
+                    AppLocalizations.of(context)!.assetLibraryPageS919,
+                  ),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogContext).pop('confirm'),
-                  child: Text(AppLocalizations.of(context)!.assetLibraryPageS765)),
+                  child: Text(
+                    AppLocalizations.of(context)!.assetLibraryPageS765,
+                  ),
                 ),
               ],
             );
@@ -786,7 +840,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       AppToast.show(
         context,
         title: AppLocalizations.of(context)!.assetLibraryPageS564,
-        message: '已选 ${next.length} 张素材，可继续手动微调。',
+        message: AppLocalizations.of(
+          context,
+        )!.assetLibrarySmartPickAppliedMessage(next.length),
         tone: AppToastTone.success,
       );
       return;
@@ -869,6 +925,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
   Future<void> _runImportWithMessage(
     Future<AssetImportReport> Function() action,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => importBusy = true);
     try {
       final report = await action();
@@ -882,7 +939,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
           duplicates: 0,
           skipped: 0,
           failed: 1,
-          message: '导入失败：$error',
+          message: l10n.assetLibraryImportFailedMessage(error),
         ),
       );
     } finally {
@@ -916,11 +973,20 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     final skipped = report.skipped;
     final message = report.message.isNotEmpty
         ? report.message
-        : '成功 $imported · 重复 $duplicates · 跳过 $skipped · 失败 $failed';
+        : AppLocalizations.of(context)!.assetLibraryImportSummaryMessage(
+            imported,
+            duplicates,
+            skipped,
+            failed,
+          );
     final title =
         (report.title.isNotEmpty ? report.title : null) ??
         (report.failed > 0
-            ? (report.imported > 0 ? AppLocalizations.of(context)!.assetLibraryPageS403 : AppLocalizations.of(context)!.sampleDatasetImportFailedTitle)
+            ? (report.imported > 0
+                  ? AppLocalizations.of(context)!.assetLibraryPageS403
+                  : AppLocalizations.of(
+                      context,
+                    )!.sampleDatasetImportFailedTitle)
             : report.imported > 0
             ? AppLocalizations.of(context)!.assetLibraryPageS392
             : AppLocalizations.of(context)!.assetLibraryPageS581);
@@ -937,16 +1003,20 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.assetLibraryPageS767)),
-            content: Text('将删除已选 ${widget.selectedAssets.length} 项素材，是否继续？'),
+            title: Text(AppLocalizations.of(context)!.assetLibraryPageS767),
+            content: Text(
+              AppLocalizations.of(context)!.assetLibraryDeleteSelectedConfirm(
+                widget.selectedAssets.length,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(AppLocalizations.of(context)!.actionCancel)),
+                child: Text(AppLocalizations.of(context)!.actionCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
+                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296),
               ),
             ],
           ),
@@ -959,7 +1029,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
       if (!mounted) return;
       AppToast.show(
         context,
-        message: '已删除 $deletedCount 项素材',
+        message: AppLocalizations.of(
+          context,
+        )!.assetLibraryDeletedSelectedMessage(deletedCount),
         tone: AppToastTone.success,
       );
     } finally {
@@ -1001,7 +1073,10 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
           const SizedBox(height: 12),
           Text(detailAsset.description),
           const SizedBox(height: 24),
-          Text(AppLocalizations.of(context)!.contentTagLabel), style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(
+            AppLocalizations.of(context)!.contentTagLabel,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -1011,28 +1086,31 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 .toList(),
           ),
           const SizedBox(height: 24),
-          Text(AppLocalizations.of(context)!.assetLibraryPageS619), style: TextStyle(fontWeight: FontWeight.w800)),
+          Text(
+            AppLocalizations.of(context)!.assetLibraryPageS619,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 10),
           SourceRow(
-            icon: Icons.calendar_month,
+            icon: null,
             iconAsset: timeIconAsset,
             label: AppLocalizations.of(context)!.assetLibraryPageS284,
             value: detailAsset.capturedAt,
           ),
           SourceRow(
-            icon: Icons.person_outline,
+            icon: null,
             iconAsset: userIconAsset,
             label: AppLocalizations.of(context)!.assetLibraryPageS289,
             value: AppLocalizations.of(context)!.assetLibraryPageS782,
           ),
           SourceRow(
-            icon: Icons.devices_other,
+            icon: null,
             iconAsset: bearHeadIconAsset,
             label: AppLocalizations.of(context)!.assetLibraryPageS620,
             value: AppLocalizations.of(context)!.assetLibraryPageS268,
           ),
           SourceRow(
-            icon: Icons.folder_outlined,
+            icon: null,
             iconAsset: folderIconAsset,
             label: AppLocalizations.of(context)!.assetLibraryPageS368,
             value: AppLocalizations.of(context)!.assetLibraryPageS784,
@@ -1051,7 +1129,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
           Center(
             child: Text(
               AppLocalizations.of(context)!.assetLibraryPageS221,
-              style: TextStyle(color: Color(0xff6f8d72), fontSize: 12),
+              style: const TextStyle(color: Color(0xff6f8d72), fontSize: 12),
             ),
           ),
         ],
@@ -1074,7 +1152,10 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   child: AssetArtworkPreview(
                     path: detailAsset.previewPath,
                     fallbackIcon: detailAsset.icon,
-                    fallbackAssetPath: _assetIconAsset(detailAsset.type),
+                    fallbackAssetPath: _assetIconAsset(
+                      context,
+                      detailAsset.type,
+                    ),
                     label: '',
                     height: double.infinity,
                     width: double.infinity,
@@ -1118,14 +1199,17 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 if (metadataDirty) ...[
                   const SizedBox(height: 10),
                   _SoftStatusChip(
-                    icon: Icons.edit_outlined,
+                    iconAsset: editIconAsset,
                     text: AppLocalizations.of(context)!.assetLibraryPageS575,
                   ),
                 ],
                 const SizedBox(height: 18),
                 TextField(
                   controller: titleController,
-                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS630, hint: AppLocalizations.of(context)!.assetLibraryPageS242),
+                  decoration: _fieldDecoration(
+                    AppLocalizations.of(context)!.assetLibraryPageS630,
+                    hint: AppLocalizations.of(context)!.assetLibraryPageS242,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
@@ -1144,7 +1228,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                         value ?? _defaultTypeFromOptions(widget.typeOptions);
                     metadataDirty = true;
                   }),
-                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS806),
+                  decoration: _fieldDecoration(
+                    AppLocalizations.of(context)!.assetLibraryPageS806,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -1158,26 +1244,39 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: tagsController,
-                  decoration: _fieldDecoration(AppLocalizations.of(context)!.contentTagLabel, hint: AppLocalizations.of(context)!.assetLibraryPageS498),
+                  decoration: _fieldDecoration(
+                    AppLocalizations.of(context)!.contentTagLabel,
+                    hint: AppLocalizations.of(context)!.assetLibraryPageS498,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: descriptionController,
                   minLines: 3,
                   maxLines: 4,
-                  decoration: _fieldDecoration(AppLocalizations.of(context)!.assetLibraryPageS535, hint: AppLocalizations.of(context)!.assetLibraryPageS843),
+                  decoration: _fieldDecoration(
+                    AppLocalizations.of(context)!.assetLibraryPageS535,
+                    hint: AppLocalizations.of(context)!.assetLibraryPageS843,
+                  ),
                 ),
                 const SizedBox(height: 18),
-                Text(AppLocalizations.of(context)!.generateExportS708), style: TextStyle(fontWeight: FontWeight.w800)),
+                Text(
+                  AppLocalizations.of(context)!.generateExportS708,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
                 const SizedBox(height: 10),
                 SourceRow(
-                  icon: Icons.cloud_done_outlined,
+                  icon: null,
                   iconAsset: cloudUploadIconAsset,
                   label: AppLocalizations.of(context)!.assetLibraryPageS614,
-                  value: _storageStatusLabel(detailAsset.storageStatus),
+                  value: _storageStatusLabel(
+                    context,
+                    detailAsset.storageStatus,
+                  ),
                 ),
                 SourceRow(
-                  icon: Icons.manage_search_rounded,
+                  icon: null,
+                  iconAsset: searchIconAsset,
                   label: AppLocalizations.of(context)!.assetLibraryPageS824,
                   value: indexingMessage,
                 ),
@@ -1198,12 +1297,13 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   ),
                   children: [
                     SourceRow(
-                      icon: Icons.fingerprint_rounded,
+                      icon: null,
+                      iconAsset: userShieldIconAsset,
                       label: 'Asset ID',
                       value: detailAsset.id,
                     ),
                     SourceRow(
-                      icon: Icons.image_outlined,
+                      icon: null,
                       iconAsset: imageFileIconAsset,
                       label: AppLocalizations.of(context)!.assetLibraryPageS316,
                       value: detailAsset.originalFilename.isEmpty
@@ -1211,7 +1311,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                           : detailAsset.originalFilename,
                     ),
                     SourceRow(
-                      icon: Icons.folder_outlined,
+                      icon: null,
                       iconAsset: folderIconAsset,
                       label: AppLocalizations.of(context)!.assetLibraryPageS616,
                       value: detailAsset.imagePath.isEmpty
@@ -1242,7 +1342,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                 children: [
                   Expanded(
                     child: PrimaryButton(
-                      label: savingMetadata ? AppLocalizations.of(context)!.assetLibraryPageS246 : AppLocalizations.of(context)!.assetLibraryPageS247,
+                      label: savingMetadata
+                          ? AppLocalizations.of(context)!.assetLibraryPageS246
+                          : AppLocalizations.of(context)!.assetLibraryPageS247,
                       iconAsset: completeIconAsset,
                       height: 46,
                       onPressed: savingMetadata
@@ -1268,7 +1370,7 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
                   Expanded(
                     child: SecondaryButton(
                       label: AppLocalizations.of(context)!.assetLibraryPageS516,
-                      icon: Icons.open_in_new_rounded,
+                      iconAsset: viewIconAsset,
                       height: 42,
                       onPressed: detailAsset.imagePath.isEmpty
                           ? null
@@ -1339,9 +1441,15 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
 
   String _formatChineseDate(String value) {
     final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value.trim().isEmpty ? AppLocalizations.of(context)!.contentDateMissingLabel : value;
+    if (parsed == null) {
+      return value.trim().isEmpty
+          ? AppLocalizations.of(context)!.contentDateMissingLabel
+          : value;
+    }
     final local = parsed.toLocal();
-    return '${local.year}年${local.month}月${local.day}日';
+    return AppLocalizations.of(
+      context,
+    )!.assetLibraryDateYmd(local.year, local.month, local.day);
   }
 
   Future<void> _saveMetadata(AssetVm detailAsset) async {
@@ -1369,7 +1477,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     });
     AppToast.show(
       context,
-      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS249 : AppLocalizations.of(context)!.assetLibraryPageS248,
+      message: ok
+          ? AppLocalizations.of(context)!.assetLibraryPageS249
+          : AppLocalizations.of(context)!.assetLibraryPageS248,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
@@ -1379,43 +1489,52 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
         await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.assetLibraryPageS766)),
-            content: Text(AppLocalizations.of(context)!.assetLibraryPageS298)),
+            title: Text(AppLocalizations.of(context)!.assetLibraryPageS766),
+            content: Text(AppLocalizations.of(context)!.assetLibraryPageS298),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(AppLocalizations.of(context)!.actionCancel)),
+                child: Text(AppLocalizations.of(context)!.actionCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
+                child: Text(AppLocalizations.of(context)!.assetLibraryPageS296),
               ),
             ],
           ),
         ) ??
         false;
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
     final ok = await widget.onDeleteAsset(detailAsset.id);
     if (!mounted) return;
     AppToast.show(
       context,
-      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS434 : AppLocalizations.of(context)!.assetLibraryPageS299,
+      message: ok
+          ? AppLocalizations.of(context)!.assetLibraryPageS434
+          : AppLocalizations.of(context)!.assetLibraryPageS299,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }
 
   Future<void> _openOriginalFile(AssetVm detailAsset) async {
+    final l10n = AppLocalizations.of(context)!;
     final path = detailAsset.imagePath.trim();
     if (path.isEmpty) return;
     try {
       await Process.start('open', [path]);
       if (!mounted) return;
-      AppToast.show(context, message: AppLocalizations.of(context)!.assetLibraryPageS447, tone: AppToastTone.success);
+      AppToast.show(
+        context,
+        message: l10n.assetLibraryPageS447,
+        tone: AppToastTone.success,
+      );
     } catch (error) {
       if (!mounted) return;
       AppToast.show(
         context,
-        message: '打开原图失败：$error',
+        message: l10n.assetLibraryOpenOriginalFailedMessage(error),
         tone: AppToastTone.error,
       );
     }
@@ -1428,7 +1547,9 @@ class _AssetLibraryPageState extends State<AssetLibraryPage> {
     if (!mounted) return;
     AppToast.show(
       context,
-      message: ok ? AppLocalizations.of(context)!.assetLibraryPageS437 : AppLocalizations.of(context)!.assetLibraryPageS338,
+      message: ok
+          ? AppLocalizations.of(context)!.assetLibraryPageS437
+          : AppLocalizations.of(context)!.assetLibraryPageS338,
       tone: ok ? AppToastTone.success : AppToastTone.error,
     );
   }

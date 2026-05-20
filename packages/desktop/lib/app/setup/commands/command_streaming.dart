@@ -25,9 +25,7 @@ extension _DesktopShellSetupCommandStreaming on _DesktopShellState {
     final process = await Process.start(
       executable,
       arguments,
-      environment: const {
-        'PATH': _setupCommandPath,
-      },
+      environment: const {'PATH': _setupCommandPath},
     );
 
     final stdoutDone = process.stdout
@@ -61,7 +59,9 @@ extension _DesktopShellSetupCommandStreaming on _DesktopShellState {
         exitCode,
         [
           ...recentOutput,
-          '命令执行超过 ${timeout.inMinutes} 分钟，已自动停止；请检查网络、Homebrew 或数据库服务状态后重试。',
+          AppLocalizations.of(
+            context,
+          )!.setupCommandTimeoutMessage(timeout.inMinutes),
         ].join('\n'),
       );
     }

@@ -4,8 +4,15 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
   Future<void> _openSamplePdf() async {
     if (assets.isNotEmpty) {
       final target = '${api.baseUrl}/assets/${assets.first.id}/preview';
-      _appendLog('打开示例素材预览：${assets.first.id}');
-      await _safeOpenExternalTarget(target, AppLocalizations.of(context)!.datasetPreviewS783);
+      _appendLog(
+        AppLocalizations.of(
+          context,
+        )!.datasetPreviewOpenSampleAssetLog(assets.first.id),
+      );
+      await _safeOpenExternalTarget(
+        target,
+        AppLocalizations.of(context)!.datasetPreviewS783,
+      );
       return;
     }
     if (jobId == null || !generated) {
@@ -13,9 +20,15 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       _appendLog(AppLocalizations.of(context)!.datasetPreviewS521);
       return;
     }
-    final previewUrl = '${api.baseUrl}/books/jobs/$jobId/preview';
-    _appendLog('打开历史作品预览：$jobId');
-    await _safeOpenExternalTarget(previewUrl, AppLocalizations.of(context)!.datasetPreviewS771);
+    final currentJobId = jobId!;
+    final previewUrl = '${api.baseUrl}/creation/jobs/$currentJobId/preview';
+    _appendLog(
+      AppLocalizations.of(context)!.datasetPreviewOpenHistoryLog(currentJobId),
+    );
+    await _safeOpenExternalTarget(
+      previewUrl,
+      AppLocalizations.of(context)!.datasetPreviewS771,
+    );
   }
 
   Future<void> _showGenerationLogDetails() async {
@@ -24,19 +37,26 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.datasetPreviewS743)),
+          title: Text(AppLocalizations.of(context)!.datasetPreviewS743),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
               child: Text(
-                <String>['状态：$statusMessage', ...activityLog].join('\n'),
+                <String>[
+                  AppLocalizations.of(
+                    context,
+                  )!.datasetPreviewLogStatusLine(statusMessage),
+                  if (jobId?.trim().isNotEmpty == true) 'jobId: $jobId',
+                  if (requestId.trim().isNotEmpty) 'requestId: $requestId',
+                  ...activityLog,
+                ].join('\n'),
               ),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppLocalizations.of(context)!.actionCloseLabel)),
+              child: Text(AppLocalizations.of(context)!.actionCloseLabel),
             ),
           ],
         );
@@ -50,8 +70,78 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       _appendLog(AppLocalizations.of(context)!.datasetPreviewS952);
       return;
     }
-    final previewUrl = '${api.baseUrl}/books/jobs/$jobId/preview';
-    _appendLog('打开预览页面：$jobId');
-    await _safeOpenExternalTarget(previewUrl, AppLocalizations.of(context)!.generateExportS943);
+    final currentJobId = jobId!;
+    if (generationCreationType == 'memoir_video') {
+      await _previewGeneratedVideo(currentJobId);
+      return;
+    }
+    final previewUrl = '${api.baseUrl}/creation/jobs/$currentJobId/preview';
+    _appendLog(
+      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentJobId),
+    );
+    try {
+      await openExternalTarget(previewUrl);
+      if (!mounted) return;
+      _setShellState(() => previewFailureReason = '');
+      _appendLog(
+        AppLocalizations.of(context)!.datasetExternalOpenSucceededLog(
+          AppLocalizations.of(context)!.generateExportS943,
+          previewUrl,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      final message = AppLocalizations.of(
+        context,
+      )!.generateExportPreviewFailedStatus(error);
+      _setShellState(() {
+        previewFailureReason = '$error';
+        statusMessage = message;
+      });
+      _showSnackBar(message);
+      _appendLog(message);
+    }
+  }
+
+  Future<void> _previewGeneratedVideo(String currentJobId) async {
+    final target = generatedArtifactPath.trim().isNotEmpty
+        ? generatedArtifactPath.trim()
+        : exportResult?.localPath.trim() ?? '';
+    if (target.isEmpty) {
+      final message =
+          AppLocalizations.of(context)!.generateExportVideoPreviewUnavailable;
+      _setShellState(() {
+        previewFailureReason = message;
+        statusMessage = message;
+      });
+      _showSnackBar(message);
+      _appendLog(message);
+      return;
+    }
+    _appendLog(
+      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentJobId),
+    );
+    try {
+      await openExternalTarget(target);
+      if (!mounted) return;
+      _setShellState(() => previewFailureReason = '');
+      _appendLog(
+        AppLocalizations.of(context)!.datasetExternalOpenSucceededLog(
+          AppLocalizations.of(context)!.generateExportOpenVideoPreviewAction,
+          target,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      final message = AppLocalizations.of(
+        context,
+      )!.generateExportPreviewFailedStatus(error);
+      _setShellState(() {
+        previewFailureReason = '$error';
+        statusMessage = message;
+      });
+      _showSnackBar(message);
+      _appendLog(message);
+    }
   }
 }

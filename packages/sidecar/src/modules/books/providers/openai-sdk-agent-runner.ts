@@ -1,10 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
-import { Agent, OpenAIProvider, Runner, run, tool } from '@openai/agents';
-import type { Tool } from '@openai/agents';
+import { Agent, OpenAIProvider, Runner, run, shellTool } from '@openai/agents';
+import type { Shell, ShellResult, ShellToolLocalSkill, Tool } from '@openai/agents';
 import OpenAI from 'openai';
 import { renderBookHtml, type BookOutput, type BookPage } from "./book.ts";
+
+const execFileAsync = promisify(execFile);
 
 type AgentConfigDto = {
   baseUrl?: string;
@@ -53,8 +57,9 @@ export interface OpenAIAgentRunnerConfig {
     name: string;
     description: string;
     parameters?: Record<string, any>;
-    handler?: (args: any) => Promise<any>;
   }>;
+  localSkills?: ShellToolLocalSkill[];
+  shell?: Shell;
 }
 
 export interface AgentRunInput {
@@ -130,7 +135,9 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
       temperature: config.temperature ?? this.config.temperature,
       maxTokens: config.maxTokens ?? this.config.maxTokens,
       systemPrompt: config.systemPrompt ?? this.config.systemPrompt,
-      tools: this.config.tools || OpenAISDKAgentRunner.buildToolsFromConfig(config.toolsEnabled || []),
+      tools: this.config.tools,
+      localSkills: this.config.localSkills,
+      shell: this.config.shell,
     }, this.dependencies);
 
     const result = await runner.run({
@@ -194,7 +201,7 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
       temperature: agentConfig.temperature,
       maxTokens: agentConfig.maxTokens,
       systemPrompt: agentConfig.systemPrompt,
-      tools: this.buildToolsFromConfig(agentConfig.toolsEnabled)
+      tools: []
     }, dependencies);
   }
 
@@ -366,76 +373,17 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
   }
 
   private buildAgentTools(input: AgentRunInput, executionLog: string[]): Tool[] {
-    const tools: Tool[] = [];
+    const tools: Tool[] = [...(this.config.tools || []) as Tool[]];
 
-    // Image analysis tool
-    if (this.config.tools?.some(t => t.name === 'image_analysis')) {
-      tools.push(tool({
-          name: 'analyze_asset',
-          description: '分析素材内容，提取关键信息用于故事创作',
-          parameters: {
-            type: 'object',
-            additionalProperties: true,
-            properties: {
-              asset_id: {
-                type: 'string',
-                description: '素材ID'
-              },
-              focus_areas: {
-                type: 'array',
-                items: { type: 'string' },
-                description: '需要重点分析的方面，如人物、场景、情感等'
-              }
-            },
-            required: ['asset_id']
-          },
-          strict: false,
-          execute: async (args: any) => {
-            executionLog.push(`Analyzed asset ${args.asset_id}`);
-            return this.config.tools?.find((candidate) => candidate.name === "image_analysis")?.handler?.(args)
-              || { asset_id: args.asset_id, analysis: "No image analysis handler configured." };
-          },
-        }));
-    }
-
-    // Story generation tool
-    if (this.config.tools?.some(t => t.name === 'text_generation')) {
-      tools.push(tool({
-          name: 'generate_story_segment',
-          description: '生成符合儿童阅读的故事片段',
-          parameters: {
-            type: 'object',
-            additionalProperties: true,
-            properties: {
-              theme: {
-                type: 'string',
-                description: '故事主题'
-              },
-              style: {
-                type: 'string',
-                enum: ['温馨', '有趣', '教育', '冒险'],
-                description: '写作风格'
-              },
-              length: {
-                type: 'string',
-                enum: ['短', '中', '长'],
-                description: '文本长度'
-              },
-              assets: {
-                type: 'array',
-                items: { type: 'string' },
-                description: '相关素材ID列表'
-              }
-            },
-            required: ['theme']
-          },
-          strict: false,
-          execute: async (args: any) => {
-            executionLog.push(`Generated story segment for ${args.theme}`);
-            return this.config.tools?.find((candidate) => candidate.name === "text_generation")?.handler?.(args)
-              || { theme: args.theme, generated_text: "" };
-          },
-        }));
+    if (this.config.localSkills && this.config.localSkills.length > 0) {
+      tools.push(shellTool({
+        shell: this.config.shell ?? new LocalCommandShell(),
+        environment: {
+          type: "local",
+          skills: this.config.localSkills,
+        },
+        needsApproval: async () => false,
+      }));
     }
 
     executionLog.push(`Built ${tools.length} agent tools`);
@@ -508,90 +456,65 @@ export class OpenAISDKAgentRunner implements UnifiedAgentRunner {
     return parseBookData(content, input, this.config.model, executionLog);
   }
 
-  private static buildToolsFromConfig(toolsEnabled: string[]): Array<{
-    name: string;
-    description: string;
-    parameters?: Record<string, any>;
-    handler?: (args: any) => Promise<any>;
-  }> {
-    const availableTools: Record<string, {
-      name: string;
-      description: string;
-      parameters?: Record<string, any>;
-      handler?: (args: any) => Promise<any>;
-    }> = {
-      'image_analysis': {
-        name: 'image_analysis',
-        description: '分析图片内容，提取关键信息用于故事创作',
-        parameters: {
-          type: 'object',
-          properties: {
-            asset_id: {
-              type: 'string',
-              description: '素材ID'
-            },
-            focus_areas: {
-              type: 'array',
-              items: { type: 'string' },
-              description: '需要重点分析的方面，如人物、场景、情感等'
-            }
-          },
-          required: ['asset_id']
-        },
-        handler: async (args: { asset_id: string; focus_areas?: string[] }) => {
-          // This would be implemented to actually analyze the asset
-          return {
-            asset_id: args.asset_id,
-            analysis: `分析了素材 ${args.asset_id}，重点关注: ${args.focus_areas?.join(', ') || '通用分析'}`,
-            elements: ['人物', '场景', '情感'],
-            suggestions: ['可用于封面', '适合作为故事背景', '体现成长主题']
-          };
-        }
-      },
-      'text_generation': {
-        name: 'text_generation',
-        description: '生成符合儿童阅读的故事文本',
-        parameters: {
-          type: 'object',
-          properties: {
-            theme: {
-              type: 'string',
-              description: '故事主题'
-            },
-            style: {
-              type: 'string',
-              enum: ['温馨', '有趣', '教育', '冒险'],
-              description: '写作风格'
-            },
-            length: {
-              type: 'string',
-              enum: ['短', '中', '长'],
-              description: '文本长度'
-            },
-            assets: {
-              type: 'array',
-              items: { type: 'string' },
-              description: '相关素材ID列表'
-            }
-          },
-          required: ['theme']
-        },
-        handler: async (args: { theme: string; style?: string; length?: string; assets?: string[] }) => {
-          // This would be implemented to generate story text
-          return {
-            theme: args.theme,
-            generated_text: `基于主题"${args.theme}"生成的${args.style || '温馨'}风格故事文本...`,
-            word_count: args.length === '长' ? 500 : args.length === '中' ? 300 : 150,
-            related_assets: args.assets || []
-          };
-        }
-      }
-    };
+}
 
-    return toolsEnabled
-      .map(toolName => availableTools[toolName])
-      .filter(Boolean);
+class LocalCommandShell implements Shell {
+  async run(action: { commands: string[]; timeoutMs?: number; maxOutputLength?: number }): Promise<ShellResult> {
+    const output: ShellResult["output"] = [];
+    for (const command of action.commands) {
+      const result = await runShellCommand(command, action.timeoutMs);
+      output.push(truncateShellOutput(result, action.maxOutputLength));
+    }
+    return {
+      output,
+      maxOutputLength: action.maxOutputLength,
+    };
   }
+}
+
+async function runShellCommand(command: string, timeoutMs?: number): Promise<ShellResult["output"][number]> {
+  try {
+    const result = await execFileAsync("/bin/zsh", ["-lc", command], {
+      timeout: timeoutMs,
+      maxBuffer: 1024 * 1024,
+    });
+    return {
+      stdout: result.stdout,
+      stderr: result.stderr,
+      outcome: {
+        type: "exit",
+        exitCode: 0,
+      },
+    };
+  } catch (error) {
+    const record = error as {
+      stdout?: string | Buffer;
+      stderr?: string | Buffer;
+      code?: number | null;
+      killed?: boolean;
+    };
+    return {
+      stdout: String(record.stdout ?? ""),
+      stderr: String(record.stderr ?? (error instanceof Error ? error.message : "")),
+      outcome: record.killed
+        ? { type: "timeout" }
+        : { type: "exit", exitCode: typeof record.code === "number" ? record.code : 1 },
+    };
+  }
+}
+
+function truncateShellOutput(
+  value: ShellResult["output"][number],
+  maxOutputLength?: number,
+): ShellResult["output"][number] {
+  if (!maxOutputLength || maxOutputLength <= 0) {
+    return value;
+  }
+  return {
+    ...value,
+    stdout: value.stdout.slice(0, maxOutputLength),
+    stderr: value.stderr.slice(0, maxOutputLength),
+  };
 }
 
 function getTotalTokens(result: any): number | undefined {

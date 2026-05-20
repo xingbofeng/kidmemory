@@ -60,11 +60,11 @@
   "@generateExportTitle": {
     "description": "Generate export page title"
   },
-  "directUploadEntryButtonLabel": "扫码上传 · Direct",
+  "directUploadEntryButtonLabel": "扫码上传",
   "@directUploadEntryButtonLabel": {
     "description": "Direct upload entry button text"
   },
-  "directUploadDialogTitle": "扫码上传 · Direct",
+  "directUploadDialogTitle": "手机扫码上传",
   "@directUploadDialogTitle": {
     "description": "Direct upload dialog title"
   },
@@ -80,7 +80,7 @@
   "@actionCloseLabel": {
     "description": "actionCloseLabel"
   },
-  "directUploadRiskNotice": "Supabase 直传验证版 — 对象需电脑端回拉后才算入库",
+  "directUploadRiskNotice": "上传完成后需在电脑端拉回，素材才会正式入库",
   "@directUploadRiskNotice": {
     "description": "Direct upload risk notice"
   },
@@ -92,7 +92,7 @@
   "@uploadAccessLinkLabel": {
     "description": "Direct upload copy link field label"
   },
-  "directUploadQrCodeLabel": "Direct Upload 扫码链接二维码",
+  "directUploadQrCodeLabel": "扫码上传链接二维码",
   "@directUploadQrCodeLabel": {
     "description": "Direct upload QR code accessibility label"
   },
@@ -168,11 +168,12 @@
   "@uploadStatusPullingLabel": {
     "description": "Upload status summary label: pulling"
   },
-  "setupPostgresTitle": "PostgreSQL 配置",
+  "setupPostgresTitle": "本地资料库",
   "setupPgvectorTitle": "pgvector 检测",
   "setupOpenAiTitle": "大模型接口配置",
   "setupLocalDataDirTitle": "本地数据目录",
-  "setupSidecarServiceTitle": "Sidecar 本地服务",
+  "setupSidecarServiceTitle": "KidMemory 本地服务",
+  "setupAgentServiceTitle": "Agent service configuration",
   "setupItemTitle": "配置项",
   "setupWaitingConfigLoad": "等待配置读取",
   "setupPending": "待检测",
@@ -214,15 +215,15 @@
   "setupPostgresNotReadyStartLocalService": "PostgreSQL 还未就绪，请启动本机服务后重试",
   "setupStorageRestModeLabel": "REST 方式（可选）",
   "setupStorageS3ModeLabel": "S3 方式（推荐）",
-  "setupSidecarStarted": "Sidecar 已启动",
-  "setupSidecarStartedSchemaNotReady": "Sidecar 已启动，schema 初始化未完成",
-  "setupSidecarConnected": "Sidecar 已连接",
-  "setupSidecarStartFailed": "Sidecar 未能启动",
-  "setupSidecarStartFailedNodeOrBundled": "Sidecar 未能启动，请检查 Node.js 或 bundled sidecar",
-  "setupSidecarDisconnected": "Sidecar 未连接",
-  "setupStorageConfigTitle": "Storage 配置",
-  "setupStorageConfigSaveFailed": "Supabase Storage 配置保存失败",
-  "setupStorageConfigSaved": "Supabase Storage 配置已保存",
+  "setupSidecarStarted": "本地服务已启动",
+  "setupSidecarStartedSchemaNotReady": "本地服务已启动，资料库初始化未完成",
+  "setupSidecarConnected": "本地服务已连接",
+  "setupSidecarStartFailed": "本地服务未能启动",
+  "setupSidecarStartFailedNodeOrBundled": "本地服务未能启动，请检查运行环境或重新打开 KidMemory",
+  "setupSidecarDisconnected": "本地服务未连接",
+  "setupStorageConfigTitle": "云端分享设置",
+  "setupStorageConfigSaveFailed": "云端分享设置保存失败",
+  "setupStorageConfigSaved": "云端分享设置已保存",
   "setupPgvectorInitFailed": "pgvector 初始化失败",
   "setupPgvectorInitFailedExtMissing": "pgvector 初始化失败，请确认扩展已安装",
   "setupPgvectorNotReady": "pgvector 尚未就绪",
@@ -257,7 +258,7 @@
   "agentSettingsLocalStepDescription": "运行兼容 OpenAI API 的本地 Agent SDK 服务",
   "agentSettingsCustomEndpointStepTitle": "3. 自定义端点",
   "agentSettingsCustomEndpointStepDescription": "支持任何兼容 OpenAI API 格式的服务",
-  "setupStorageSectionIntro": "先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。",
+  "setupStorageSectionIntro": "推荐使用云端私有存储：接口地址、区域、存储空间名称和访问密钥都可以在云端控制台找到。存储空间建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。",
   "setupStoragePublicPrefixHint": "公开桶可填完整对象前缀",
   "setupStoragePublicAccessPrefixLabel": "公开访问前缀（可选）",
   "setupBuiltinPostgresNoPgvector": "内置 PostgreSQL runtime 未包含 pgvector 扩展",
@@ -317,7 +318,7 @@
   "setupRuntimeFoundInitialize": "检测到内置 PostgreSQL runtime，开始初始化。",
   "setupCheckRequestNoResult": "检测请求已发出，但 sidecar 未返回结果",
   "setupDownloading": "正在下载...",
-  "setupSidecarStarting": "正在启动 Sidecar...",
+  "setupSidecarStarting": "正在启动本地服务...",
   "setupInstallingSoftware": "正在安装...",
   "setupTestingConnection": "正在测试连接...",
   "setupFetchingResources": "正在获取资源...",
@@ -335,14 +336,14 @@
   "setupSignedUrlTTLLabel": "签名链接有效期（秒）",
   "setupPageTitle": "设置",
   "setupHomebrewPermissionRetryHint": "请修复 Homebrew 权限后重试。",
-  "setupConfigureStorageFirst": "请先配置 Supabase REST 或 S3 所需参数",
+  "setupConfigureStorageFirst": "请先填写云端分享所需参数",
   "setupHomebrewPermissionCommandHint": "请在终端执行以下命令修复权限后，再回到 KidMemory 重试：",
-  "setupSidecarConfigUnavailable": "读取 sidecar 配置失败，初始化未完成。",
+  "setupSidecarConfigUnavailable": "读取本地服务配置失败，初始化未完成。",
   "setupInputApiKey": "输入 API Key",
   "setupInputAccessKeyId": "输入或粘贴 Access Key ID",
   "setupInputSecretAccessKey": "输入或粘贴 Secret Access Key",
   "setupInputServiceRoleKey": "输入或粘贴 Service Role Key",
-  "setupStorageDialogTitle": "配置 Supabase Storage",
+  "setupStorageDialogTitle": "配置云端分享",
   "setupOpenAiDialogTitle": "配置大模型接口",
   "actionReconnect": "重新连接",
   "actionHide": "隐藏",
@@ -978,7 +979,7 @@
   "@generateExportS279": {
     "description": "generateExportS279"
   },
-  "generateExportS315": "原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。",
+  "generateExportS315": "原因：免费生图服务暂时不可用。请重试，或查看日志了解详情。",
   "@generateExportS315": {
     "description": "generateExportS315"
   },
@@ -1162,6 +1163,98 @@
   "@generateExportS624": {
     "description": "generateExportS624"
   },
+  "generateExportCreateShareDialogTitle": "创建 Web 分享链接",
+  "@generateExportCreateShareDialogTitle": {
+    "description": "Title for confirming web share link creation."
+  },
+  "generateExportCreateShareDialogBody": "这会将导出作品上传到云端，用于生成 Web 分享链接。",
+  "@generateExportCreateShareDialogBody": {
+    "description": "Confirmation copy before creating a web share link."
+  },
+  "generateExportCreateShareLinkLabel": "创建分享链接",
+  "@generateExportCreateShareLinkLabel": {
+    "description": "Button label for creating a web share link."
+  },
+  "generateExportShareCreatingStatus": "正在创建 Web 分享链接...",
+  "@generateExportShareCreatingStatus": {
+    "description": "Status shown while the web share link is being created."
+  },
+  "generateExportShareCreatedStatus": "Web 分享链接已创建",
+  "@generateExportShareCreatedStatus": {
+    "description": "Status shown after the web share link is created."
+  },
+  "generateExportShareFailedStatus": "分享链接创建失败",
+  "@generateExportShareFailedStatus": {
+    "description": "Status shown when web share link creation fails."
+  },
+  "generateExportShareReadyHint": "作品已导出，可以创建 Web 分享链接。",
+  "@generateExportShareReadyHint": {
+    "description": "Hint shown after export before a share link exists."
+  },
+  "generateExportCopyLinkLabel": "复制链接",
+  "@generateExportCopyLinkLabel": {
+    "description": "Button label for copying a web share link."
+  },
+  "generateExportOpenLinkLabel": "打开链接",
+  "@generateExportOpenLinkLabel": {
+    "description": "Button label for opening a web share link."
+  },
+  "generateExportRetryShareLabel": "重试创建",
+  "@generateExportRetryShareLabel": {
+    "description": "Button label for retrying web share link creation after failure."
+  },
+  "generateExportShareNotReady": "导出作品尚未准备好，暂不能创建分享链接。",
+  "@generateExportShareNotReady": {
+    "description": "Snackbar when share link creation cannot start."
+  },
+  "generateExportShareText": "KidMemory 作品：{shareUrl}",
+  "@generateExportShareText": {
+    "description": "Share text generated from a web share URL.",
+    "placeholders": {
+      "shareUrl": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportShareExceptionMessage": "分享链接创建失败：{error}",
+  "@generateExportShareExceptionMessage": {
+    "description": "Share link creation exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generateExportPreviewFailedTitle": "PDF preview failed",
+  "@generateExportPreviewFailedTitle": {
+    "description": "Title shown when the generated PDF preview cannot be opened."
+  },
+  "generateExportPreviewFailedBody": "The preview window did not open. Check the reason, open the export folder to inspect the local file, or view logs to continue debugging.",
+  "@generateExportPreviewFailedBody": {
+    "description": "Body shown when the generated PDF preview cannot be opened."
+  },
+  "generateExportPreviewFailureReason": "Reason: {reason}",
+  "@generateExportPreviewFailureReason": {
+    "description": "Reason line for a PDF preview failure.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportPreviewFailedStatus": "PDF preview failed: {error}",
+  "@generateExportPreviewFailedStatus": {
+    "description": "Status shown after PDF preview opening fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generateExportEditRequestLabel": "修改需求",
+  "@generateExportEditRequestLabel": {
+    "description": "Button label for editing the creation request after a planning or generation failure."
+  },
   "generateExportS627": "查看素材",
   "@generateExportS627": {
     "description": "generateExportS627"
@@ -1337,14 +1430,6 @@
   "generateExportS875": "超时",
   "@generateExportS875": {
     "description": "generateExportS875"
-  },
-  "generateExportS876": "跳过封面",
-  "@generateExportS876": {
-    "description": "generateExportS876"
-  },
-  "generateExportS877": "跳过封面继续导出",
-  "@generateExportS877": {
-    "description": "generateExportS877"
   },
   "generateExportS883": "输入目标或选择快捷类型，Agent 会按素材、故事、预览和导出组织创作流程。",
   "@generateExportS883": {
@@ -1714,7 +1799,7 @@
   "@assetLibraryPageS437": {
     "description": "assetLibraryPageS437"
   },
-  "assetLibraryPageS338": "同步入队失败，请检查 Supabase Storage 配置",
+  "assetLibraryPageS338": "同步入队失败，请检查云端分享设置",
   "@assetLibraryPageS338": {
     "description": "assetLibraryPageS338"
   },
@@ -1730,7 +1815,7 @@
   "@childProfileS887": {
     "description": "childProfileS887"
   },
-  "childProfileS693": "添加档案",
+  "childProfileS693": "Add child profile",
   "@childProfileS693": {
     "description": "childProfileS693"
   },
@@ -1810,7 +1895,7 @@
   "@childProfileS401": {
     "description": "childProfileS401"
   },
-  "childProfileS486": "当前素材库已连接到本地 sidecar，可用于生成成长作品集。",
+  "childProfileS486": "当前素材库已连接到本地服务，可用于生成成长作品集。",
   "@childProfileS486": {
     "description": "childProfileS486"
   },
@@ -2097,45 +2182,147 @@
   "@feedbackPageS448": {
     "description": "feedbackPageS448"
   },
-  "sidecarLauncherS679": "测试环境，跳过 sidecar 自动启动。",
+  "sidecarLauncherS679": "Test environment detected; skipped sidecar auto-start.",
   "@sidecarLauncherS679": {
     "description": "sidecarLauncherS679"
   },
-  "sidecarLauncherS98": "4317 端口已被占用，但未响应 KidMemory sidecar health。",
+  "sidecarLauncherS98": "Port 4317 is already in use, but KidMemory sidecar health did not respond.",
   "@sidecarLauncherS98": {
     "description": "sidecarLauncherS98"
   },
-  "sidecarLauncherS584": "未找到 sidecar 运行目录。请确认 app bundle 中包含 Resources/sidecar，或设置 KIDMEMORY_SIDECAR_DIR。",
+  "sidecarLauncherS584": "Sidecar runtime directory was not found. Confirm the app bundle contains Resources/sidecar, or set KIDMEMORY_SIDECAR_DIR.",
   "@sidecarLauncherS584": {
     "description": "sidecarLauncherS584"
   },
-  "sidecarLauncherS146": "Sidecar 未就绪，开始尝试自动启动。",
+  "sidecarLauncherS146": "Sidecar is not ready; attempting automatic start.",
   "@sidecarLauncherS146": {
     "description": "sidecarLauncherS146"
   },
-  "sidecarLauncherS141": "Sidecar 启动中",
+  "sidecarLauncherS141": "Starting Sidecar",
   "@sidecarLauncherS141": {
     "description": "sidecarLauncherS141"
   },
-  "sidecarLauncherS592": "未检测到可用于启动 sidecar 的 Node.js。",
+  "sidecarLauncherS592": "No Node.js runtime was found for starting sidecar.",
   "@sidecarLauncherS592": {
     "description": "sidecarLauncherS592"
   },
-  "sidecarLauncherS591": "未检测到可启动的 sidecar 入口，已跳过自动启动。",
+  "sidecarLauncherS591": "No runnable sidecar entry point was found; skipped automatic start.",
   "@sidecarLauncherS591": {
     "description": "sidecarLauncherS591"
   },
-  "sidecarLauncherS140": "Sidecar 初始化成功。",
+  "sidecarLauncherS140": "Sidecar initialized successfully.",
   "@sidecarLauncherS140": {
     "description": "sidecarLauncherS140"
   },
-  "sidecarLauncherS193": "sidecar 启动失败：服务未在预期时间内通过 health 检查。",
+  "sidecarLauncherS193": "Sidecar start failed: service did not pass the health check in time.",
   "@sidecarLauncherS193": {
     "description": "sidecarLauncherS193"
   },
-  "sidecarLauncherS194": "sidecar 启动失败：运行目录缺少 dist/main.js。",
+  "sidecarLauncherS194": "Sidecar start failed: runtime directory is missing dist/main.js.",
   "@sidecarLauncherS194": {
     "description": "sidecarLauncherS194"
+  },
+  "sidecarLauncherLaunchCommandLog": "Starting sidecar command: {command}",
+  "@sidecarLauncherLaunchCommandLog": {
+    "description": "Log entry for the sidecar launch command.",
+    "placeholders": {
+      "command": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherStartedPidLog": "Sidecar process started successfully: PID {pid}",
+  "@sidecarLauncherStartedPidLog": {
+    "description": "Log entry after the sidecar process starts.",
+    "placeholders": {
+      "pid": {
+        "type": "int"
+      }
+    }
+  },
+  "sidecarLauncherStartFailedLog": "Sidecar start failed: {error}",
+  "@sidecarLauncherStartFailedLog": {
+    "description": "Log entry when sidecar start throws.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "sidecarLauncherTerminatedOldPidLog": "Terminated old sidecar process PID={pid} on port 4317",
+  "@sidecarLauncherTerminatedOldPidLog": {
+    "description": "Log entry when an old sidecar process is terminated.",
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherForceTerminatedOldPidLog": "Old sidecar process did not exit in time; force terminated PID={pid} on port 4317",
+  "@sidecarLauncherForceTerminatedOldPidLog": {
+    "description": "Log entry when an old sidecar process is force terminated.",
+    "placeholders": {
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherTerminateOldFailedLog": "Failed to terminate old sidecar process: {error}",
+  "@sidecarLauncherTerminateOldFailedLog": {
+    "description": "Log entry when terminating old sidecar processes fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeCwdLog": "Sidecar directory probe: cwd={path}",
+  "@sidecarLauncherDirectoryProbeCwdLog": {
+    "description": "Sidecar directory probe current working directory log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeExecutableLog": "Sidecar directory probe: executable={path}",
+  "@sidecarLauncherDirectoryProbeExecutableLog": {
+    "description": "Sidecar directory probe executable path log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherInvalidExplicitDirLog": "KIDMEMORY_SIDECAR_DIR does not contain a runnable sidecar (missing dist/main.js): {path}",
+  "@sidecarLauncherInvalidExplicitDirLog": {
+    "description": "Sidecar explicit directory invalid log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeCandidateLog": "Sidecar directory probe: {path} => {status}",
+  "@sidecarLauncherDirectoryProbeCandidateLog": {
+    "description": "Sidecar directory probe candidate status log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "sidecarLauncherDirectoryProbeFoundLog": "Sidecar directory probe: found {path}",
+  "@sidecarLauncherDirectoryProbeFoundLog": {
+    "description": "Sidecar directory probe found a valid path.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "desktopShellS696": "温暖童趣",
   "@desktopShellS696": {
@@ -2153,7 +2340,7 @@
   "@desktopShellS129": {
     "description": "desktopShellS129"
   },
-  "desktopShellS89": "11:05:12 准备素材并构建 workspace",
+  "desktopShellS89": "11:05:12 准备素材并构建创作空间",
   "@desktopShellS89": {
     "description": "desktopShellS89"
   },
@@ -2281,7 +2468,7 @@
   "@exportActionsS414": {
     "description": "exportActionsS414"
   },
-  "exportActionsS416": "导出物尚未同步到 Supabase Storage，暂不能复制分享文案",
+  "exportActionsS416": "The export has not finished cloud share sync yet, so the share text cannot be copied.",
   "@exportActionsS416": {
     "description": "exportActionsS416"
   },
@@ -2325,7 +2512,7 @@
   "@exportSyncS337": {
     "description": "exportSyncS337"
   },
-  "exportSyncS157": "Supabase Storage 同步失败",
+  "exportSyncS157": "Cloud share sync failed",
   "@exportSyncS157": {
     "description": "exportSyncS157"
   },
@@ -2365,7 +2552,7 @@
   "@directUploadS855": {
     "description": "directUploadS855"
   },
-  "directUploadS650": "正在创建 Direct Upload 扫码会话...",
+  "directUploadS650": "正在创建扫码上传会话...",
   "@directUploadS650": {
     "description": "directUploadS650"
   },
@@ -2376,7 +2563,7 @@
   "@textUtilsS557": {
     "description": "textUtilsS557"
   },
-  "exportAssetSyncS862": "请先配置 Supabase Storage",
+  "exportAssetSyncS862": "Configure cloud sharing first",
   "@exportAssetSyncS862": {
     "description": "exportAssetSyncS862"
   },
@@ -2395,5 +2582,1712 @@
   "exportPageS702": "点击导出，准备读取当前导出目录",
   "@exportPageS702": {
     "description": "exportPageS702"
+  },
+  "setupLocalDataDirUpdatedLog": "Local data directory updated: {path}",
+  "@setupLocalDataDirUpdatedLog": {
+    "description": "Log entry when the local data directory is updated.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupSchemaInitIncompleteLog": "Schema initialization is incomplete: {message}",
+  "@setupSchemaInitIncompleteLog": {
+    "description": "Log entry when schema initialization is incomplete.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "setupReadinessCompleteMessage": "Initialization complete, finished {done} / {total} readiness checks",
+  "@setupReadinessCompleteMessage": {
+    "description": "Readiness summary after initialization succeeds.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "setupInitializationFailed": "Initialization failed: {error}",
+  "@setupInitializationFailed": {
+    "description": "Initialization failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupStorageTestPassed": "Test passed{cleanupMessage}",
+  "@setupStorageTestPassed": {
+    "description": "Supabase storage test success message.",
+    "placeholders": {
+      "cleanupMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "setupManualCheckTriggeredLog": "Manually triggered setup check: {title}",
+  "@setupManualCheckTriggeredLog": {
+    "description": "Log entry for a manually triggered setup check.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupTestConnectionFailedWithMessage": "Connection test failed: {message}",
+  "@setupTestConnectionFailedWithMessage": {
+    "description": "Connection test failure with a detailed message.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "setupOpenDirectoryPickerFailed": "Failed to open directory picker: {error}",
+  "@setupOpenDirectoryPickerFailed": {
+    "description": "Directory picker open failure.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupLocalDataDirPickFailedLog": "Local data directory selection failed: {error}",
+  "@setupLocalDataDirPickFailedLog": {
+    "description": "Log entry when local data directory picking fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupHomebrewNotWritableForPackage": "Homebrew directory is not writable, cannot install {packageName}.",
+  "@setupHomebrewNotWritableForPackage": {
+    "description": "Homebrew prefix is not writable for a package installation.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupHomebrewBlockedPaths": "Blocked paths: {paths}",
+  "@setupHomebrewBlockedPaths": {
+    "description": "Homebrew blocked paths summary.",
+    "placeholders": {
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
+  "setupPermissionDeniedInstallWithOutput": "The current user does not have permission to install {packageName} automatically.",
+  "@setupPermissionDeniedInstallWithOutput": {
+    "description": "Permission denied install failure with command output.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupPermissionDeniedInstallRetry": "The current user does not have permission to install {packageName} automatically. Fix Homebrew permissions and retry.",
+  "@setupPermissionDeniedInstallRetry": {
+    "description": "Permission denied install failure retry instruction.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInstallCommandFailed": "Install command failed: {output}",
+  "@setupInstallCommandFailed": {
+    "description": "Install command failed with short output.",
+    "placeholders": {
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInstallConfigureFailed": "Install and configuration failed: {error}",
+  "@setupInstallConfigureFailed": {
+    "description": "Install and configure failure message.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCommandTimeoutMessage": "The command ran for more than {minutes} minutes and was stopped automatically. Check the network, Homebrew, or database service status and retry.",
+  "@setupCommandTimeoutMessage": {
+    "description": "Setup command timeout message.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "setupOpenSupabaseDocsFailed": "Failed to open the official Supabase docs: {error}",
+  "@setupOpenSupabaseDocsFailed": {
+    "description": "Supabase docs open failure.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "setupAutoStartUnsupported": "Automatic start is not supported yet: {title}",
+  "@setupAutoStartUnsupported": {
+    "description": "Unsupported automatic start action.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupConfigItemRecorded": "Configuration item \"{title}\" was recorded and will be checked later",
+  "@setupConfigItemRecorded": {
+    "description": "Setup config item recorded message.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "setupInvalidPostgresRuntimeDir": "KIDMEMORY_POSTGRES_RUNTIME_DIR is invalid (must contain bin/lib/share): {path}",
+  "@setupInvalidPostgresRuntimeDir": {
+    "description": "Invalid bundled PostgreSQL runtime directory log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "setupBundledPostgresPortLog": "Bundled PostgreSQL will use port {port}",
+  "@setupBundledPostgresPortLog": {
+    "description": "Bundled PostgreSQL selected port log.",
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "setupPgvectorWorkflowStartedLog": "Started pgvector installation and configuration (local pgvector: {localPgv})",
+  "@setupPgvectorWorkflowStartedLog": {
+    "description": "pgvector setup workflow start log.",
+    "placeholders": {
+      "localPgv": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetSearchCompletedStatus": "Search completed, {count} results",
+  "@datasetSearchCompletedStatus": {
+    "description": "Asset search completed status.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSearchIndexingBaseStatus": "{searchable} searchable · {indexing} indexing",
+  "@datasetSearchIndexingBaseStatus": {
+    "description": "Search indexing status without failures.",
+    "placeholders": {
+      "searchable": {
+        "type": "int"
+      },
+      "indexing": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSearchIndexingFailedStatus": "{base} · {failed} failed",
+  "@datasetSearchIndexingFailedStatus": {
+    "description": "Search indexing status with failures.",
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSampleImportCompletedLog": "Sample dataset import completed: {count} assets",
+  "@datasetSampleImportCompletedLog": {
+    "description": "Sample dataset import completed log.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetSampleImportIncompleteLog": "Sample dataset import incomplete: {raw}",
+  "@datasetSampleImportIncompleteLog": {
+    "description": "Sample dataset import incomplete log.",
+    "placeholders": {
+      "raw": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetSampleImportExceptionLog": "Sample dataset import exception: {error}",
+  "@datasetSampleImportExceptionLog": {
+    "description": "Sample dataset import exception log.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetSampleImportFailedWithError": "Sample dataset import failed: {error}",
+  "@datasetSampleImportFailedWithError": {
+    "description": "Sample dataset import failed snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetChildAddFailedLog": "Add child profile failed: {raw}",
+  "@datasetChildAddFailedLog": {
+    "description": "Child profile add failed log.",
+    "placeholders": {
+      "raw": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildAddedLog": "Added child profile: {childId} {name}",
+  "@datasetChildAddedLog": {
+    "description": "Child profile added log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildAddedMessage": "Added child profile: {name}",
+  "@datasetChildAddedMessage": {
+    "description": "Child profile added snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildEditedLog": "Edited profile: {childId} updated to {name}",
+  "@datasetChildEditedLog": {
+    "description": "Child profile edited log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildEditedMessage": "Profile updated to: {name}",
+  "@datasetChildEditedMessage": {
+    "description": "Child profile edited snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeleteConfirmMessage": "Delete \"{name}\"? Clear this child's linked assets before deleting.",
+  "@datasetChildDeleteConfirmMessage": {
+    "description": "Child profile delete confirmation message.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeletedLog": "Deleted child profile: {childId} {name}",
+  "@datasetChildDeletedLog": {
+    "description": "Child profile deleted log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeletedMessage": "Deleted child profile: {name}",
+  "@datasetChildDeletedMessage": {
+    "description": "Child profile deleted snackbar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetChildDeleteFailedLog": "Delete child profile failed: {childId} {error}",
+  "@datasetChildDeleteFailedLog": {
+    "description": "Child profile delete failed log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetChildNameLabel": "Child name",
+  "@datasetChildNameLabel": {
+    "description": "Child profile name field label."
+  },
+  "datasetExternalOpenSucceededLog": "{label} opened successfully: {target}",
+  "@datasetExternalOpenSucceededLog": {
+    "description": "External target opened successfully log.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetExternalOpenFailedMessage": "{label} open failed: {error}",
+  "@datasetExternalOpenFailedMessage": {
+    "description": "External target open failed message.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "datasetSampleResetLog": "Sample data reset: {childId}, removed {count} assets",
+  "@datasetSampleResetLog": {
+    "description": "Sample dataset reset log.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "datasetPreviewOpenSampleAssetLog": "Opened sample asset preview: {assetId}",
+  "@datasetPreviewOpenSampleAssetLog": {
+    "description": "Open sample asset preview log.",
+    "placeholders": {
+      "assetId": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewOpenHistoryLog": "Opened historical work preview: {jobId}",
+  "@datasetPreviewOpenHistoryLog": {
+    "description": "Open historical generated work preview log.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewLogStatusLine": "Status: {status}",
+  "@datasetPreviewLogStatusLine": {
+    "description": "Status line in generation log details.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "datasetPreviewOpenPageLog": "Opened preview page: {jobId}",
+  "@datasetPreviewOpenPageLog": {
+    "description": "Open generated page preview log.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerAttemptLog": "Trying: {action}",
+  "@installRunnerAttemptLog": {
+    "description": "Install runner attempt log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerCommandSucceededLog": "Install command succeeded: {action}",
+  "@installRunnerCommandSucceededLog": {
+    "description": "Install runner command succeeded log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerTimeoutLog": "Install timed out ({action}); process terminated.",
+  "@installRunnerTimeoutLog": {
+    "description": "Install runner timeout log.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerFailedWithOutputLog": "Install failed ({action}): {output}",
+  "@installRunnerFailedWithOutputLog": {
+    "description": "Install runner failure log with process output.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "installRunnerFailedWithErrorLog": "Install failed ({action}): {error}",
+  "@installRunnerFailedWithErrorLog": {
+    "description": "Install runner failure log with caught error.",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportCreateDirectoryFailedMessage": "Failed to create export directory: {error}",
+  "@exportCreateDirectoryFailedMessage": {
+    "description": "Export directory creation failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportInProgressStatus": "Exporting to {destinationPath}",
+  "@exportInProgressStatus": {
+    "description": "Export in-progress status with destination path.",
+    "placeholders": {
+      "destinationPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportPreparingDestinationLog": "Preparing export to {destinationPath}",
+  "@exportPreparingDestinationLog": {
+    "description": "Export destination preparation log.",
+    "placeholders": {
+      "destinationPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportSucceededLog": "{exportLabel} export succeeded: {actualPath}",
+  "@exportSucceededLog": {
+    "description": "Export succeeded log.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "actualPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFailedLog": "{exportLabel} export failed",
+  "@exportFailedLog": {
+    "description": "Export failed log.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "exportExceptionMessage": "{exportLabel} export exception: {error}",
+  "@exportExceptionMessage": {
+    "description": "Export exception message.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportGenerationStartedLog": "Started generation with {count} selected assets",
+  "@exportGenerationStartedLog": {
+    "description": "Generation started log with selected asset count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportGenerationCompletedLog": "Generation completed with jobId: {jobId}",
+  "@exportGenerationCompletedLog": {
+    "description": "Generation completed log with job id.",
+    "placeholders": {
+      "jobId": {
+        "type": "String"
+      }
+    }
+  },
+  "exportGenerationExceptionMessage": "Generation exception: {error}",
+  "@exportGenerationExceptionMessage": {
+    "description": "Generation exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "exportResultSucceededStatus": "{exportLabel} exported: {actualPath}",
+  "@exportResultSucceededStatus": {
+    "description": "Export result success status.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      },
+      "actualPath": {
+        "type": "String"
+      }
+    }
+  },
+  "exportResultFailedStatus": "{exportLabel} export failed; retry available",
+  "@exportResultFailedStatus": {
+    "description": "Export result failed status.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "directUploadPullbackFailedMessage": "扫码上传回拉失败：{error}",
+  "@directUploadPullbackFailedMessage": {
+    "description": "Direct Upload pullback failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "directUploadCreateSessionFailedMessage": "创建扫码上传会话失败：{message}",
+  "@directUploadCreateSessionFailedMessage": {
+    "description": "Direct Upload session creation failure message.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "importSummaryFallbackImportedMessage": "Asset library refreshed; added {count} items. Sidecar did not return full import counters.",
+  "@importSummaryFallbackImportedMessage": {
+    "description": "Import fallback summary when sidecar counters are missing.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSummaryCountersWithFailures": "Imported {importedCount} · duplicates {duplicatesCount} · skipped {skippedCount} · failed {failedCount}: {failedReasons}",
+  "@importSummaryCountersWithFailures": {
+    "description": "Import counters summary with failure reasons.",
+    "placeholders": {
+      "importedCount": {
+        "type": "int"
+      },
+      "duplicatesCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      },
+      "failedCount": {
+        "type": "int"
+      },
+      "failedReasons": {
+        "type": "String"
+      }
+    }
+  },
+  "importSummaryFailedReasonSeparator": ", ",
+  "@importSummaryFailedReasonSeparator": {
+    "description": "Separator for import failure reasons."
+  },
+  "importStagingFailedLog": "Import staging failed: {path} ({error})",
+  "@importStagingFailedLog": {
+    "description": "Import staging copy failure log.",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "generationTemplateWarmChildhood": "Warm childhood",
+  "@generationTemplateWarmChildhood": {
+    "description": "Default generation template option."
+  },
+  "generationTemplateFairyTaleMemory": "Fairy-tale growth memory",
+  "@generationTemplateFairyTaleMemory": {
+    "description": "Default generation template option."
+  },
+  "generationTemplateSimpleDocumentary": "Simple documentary",
+  "@generationTemplateSimpleDocumentary": {
+    "description": "Default generation template option."
+  },
+  "contentMetricItemCount": "{count} items",
+  "@contentMetricItemCount": {
+    "description": "Count text for generic item metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentMetricImageCount": "{count} images",
+  "@contentMetricImageCount": {
+    "description": "Count text for image metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentMetricCraftCount": "{count} crafts",
+  "@contentMetricCraftCount": {
+    "description": "Count text for craft metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentSettingsConnectionTestFailedWithError": "Connection test failed: {error}",
+  "@agentSettingsConnectionTestFailedWithError": {
+    "description": "Agent settings connection test failure with error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "agentSettingsSaveFailedWithError": "Failed to save configuration: {error}",
+  "@agentSettingsSaveFailedWithError": {
+    "description": "Agent settings save failure with error.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibrarySubtitle": "Manage {childName}'s photos, drawings, and crafts. Select assets to create picture books, memory videos, or keepsake albums.",
+  "@assetLibrarySubtitle": {
+    "description": "Asset library page subtitle for the selected child.",
+    "placeholders": {
+      "childName": {
+        "type": "String"
+      }
+    }
+  },
+  "assetLibrarySearchResultsStatus": "{status} · {count} results",
+  "@assetLibrarySearchResultsStatus": {
+    "description": "Semantic search status with result count.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySearchFailedStatus": "Search failed: {error}",
+  "@assetLibrarySearchFailedStatus": {
+    "description": "Semantic search failed status.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibrarySmartPickedCount": "The assistant picked {count} assets for you",
+  "@assetLibrarySmartPickedCount": {
+    "description": "Smart pick dialog selected asset count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySmartPickAppliedMessage": "Selected {count} assets. You can fine-tune them manually.",
+  "@assetLibrarySmartPickAppliedMessage": {
+    "description": "Smart pick applied toast message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryImportFailedMessage": "Import failed: {error}",
+  "@assetLibraryImportFailedMessage": {
+    "description": "Asset import failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibraryImportSummaryMessage": "Imported {imported} · duplicates {duplicates} · skipped {skipped} · failed {failed}",
+  "@assetLibraryImportSummaryMessage": {
+    "description": "Asset import summary counters.",
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "duplicates": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDeleteSelectedConfirm": "Delete {count} selected assets?",
+  "@assetLibraryDeleteSelectedConfirm": {
+    "description": "Batch delete confirmation message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDeletedSelectedMessage": "Deleted {count} assets",
+  "@assetLibraryDeletedSelectedMessage": {
+    "description": "Batch delete success message.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryDateYmd": "{year}-{month}-{day}",
+  "@assetLibraryDateYmd": {
+    "description": "Asset captured date formatted as year/month/day.",
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryOpenOriginalFailedMessage": "Failed to open original file: {error}",
+  "@assetLibraryOpenOriginalFailedMessage": {
+    "description": "Open original asset file failure message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "assetLibraryCurrentChildChip": "Current child: {childName}",
+  "@assetLibraryCurrentChildChip": {
+    "description": "Current child status chip text.",
+    "placeholders": {
+      "childName": {
+        "type": "String"
+      }
+    }
+  },
+  "assetLibraryAssetCountChip": "{count} assets",
+  "@assetLibraryAssetCountChip": {
+    "description": "Asset count status chip text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryCollectionSelectedCount": "{count} assets in this collection",
+  "@assetLibraryCollectionSelectedCount": {
+    "description": "Selected assets count in collection preview.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibrarySelectedAssetsCount": "{count} assets selected",
+  "@assetLibrarySelectedAssetsCount": {
+    "description": "Batch action selected assets count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assetLibraryResyncLabel": "Resync",
+  "@assetLibraryResyncLabel": {
+    "description": "Retry storage sync action label."
+  },
+  "assetLibrarySyncToStorageLabel": "Sync to storage",
+  "@assetLibrarySyncToStorageLabel": {
+    "description": "Sync asset to storage action label."
+  },
+  "assetLibrarySyncedToStorageText": "Synced to storage.",
+  "@assetLibrarySyncedToStorageText": {
+    "description": "Storage sync completed helper text."
+  },
+  "assetLibrarySyncRunningOrRetryText": "Sync is running or waiting to retry.",
+  "@assetLibrarySyncRunningOrRetryText": {
+    "description": "Storage sync pending/running helper text."
+  },
+  "assetLibraryLocalSyncFallbackText": "Stored locally; sync to storage when ready.",
+  "@assetLibraryLocalSyncFallbackText": {
+    "description": "Local-only storage sync helper text."
+  },
+  "assetLibraryStatusSynced": "Synced",
+  "@assetLibraryStatusSynced": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusSyncing": "Syncing",
+  "@assetLibraryStatusSyncing": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusRetryWaiting": "Retry pending",
+  "@assetLibraryStatusRetryWaiting": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusFailed": "Sync failed",
+  "@assetLibraryStatusFailed": {
+    "description": "Storage status label."
+  },
+  "assetLibraryStatusLocalOnly": "Local only",
+  "@assetLibraryStatusLocalOnly": {
+    "description": "Storage status label."
+  },
+  "generateExportDefaultPageSize": "A4 portrait  210 x 297 mm",
+  "@generateExportDefaultPageSize": {
+    "description": "Default generation page size option."
+  },
+  "generateExportDefaultStyle": "Warm childhood  Friendly and suitable for children",
+  "@generateExportDefaultStyle": {
+    "description": "Default generation style option."
+  },
+  "generateExportDefaultPdfTarget": "PDF file  High-quality PDF for print",
+  "@generateExportDefaultPdfTarget": {
+    "description": "Default export target option."
+  },
+  "generateExportExportedState": "{exportLabel} exported",
+  "@generateExportExportedState": {
+    "description": "Export target has already been exported.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportCoverConfirmBody": "A free image-generation service will create the cover.\nKid photos will not be uploaded; only a text description is sent.",
+  "@generateExportCoverConfirmBody": {
+    "description": "Cover generation confirmation dialog body."
+  },
+  "generateExportSelectedAssetsLabel": "{count} assets selected",
+  "@generateExportSelectedAssetsLabel": {
+    "description": "Selected assets label in generate export.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportTaskGoalLabel": "Goal",
+  "@generateExportTaskGoalLabel": {
+    "description": "Task goal fact label."
+  },
+  "generateExportTaskGoalPictureBook": "Children's picture book",
+  "@generateExportTaskGoalPictureBook": {
+    "description": "Picture book goal value."
+  },
+  "generateExportSuggestedAssetsLabel": "Suggested assets",
+  "@generateExportSuggestedAssetsLabel": {
+    "description": "Suggested assets fact label."
+  },
+  "generateExportSuggestedAssetsValue": "At least 6",
+  "@generateExportSuggestedAssetsValue": {
+    "description": "Suggested minimum asset count."
+  },
+  "generateExportLongImageOption": "{sizeText} / long image",
+  "@generateExportLongImageOption": {
+    "description": "Page size option paired with long image export.",
+    "placeholders": {
+      "sizeText": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportSummaryText": "Assets             {selectedCount}\nGeneration state   {generationState}\nWriting style      {styleText}\nPage size          {sizeText}\nExport target      {exportLabel}",
+  "@generateExportSummaryText": {
+    "description": "Generated work summary text.",
+    "placeholders": {
+      "selectedCount": {
+        "type": "int"
+      },
+      "generationState": {
+        "type": "String"
+      },
+      "styleText": {
+        "type": "String"
+      },
+      "sizeText": {
+        "type": "String"
+      },
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportSelectedAssetsShort": "{count} selected",
+  "@generateExportSelectedAssetsShort": {
+    "description": "Short selected assets count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportAssetInputSelectedTitle": "Assets · {count} selected",
+  "@generateExportAssetInputSelectedTitle": {
+    "description": "Asset input title with selected count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportPagePreviewCount": "Page preview (about {pageCount} pages)",
+  "@generateExportPagePreviewCount": {
+    "description": "Page preview title with approximate page count.",
+    "placeholders": {
+      "pageCount": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportActivityEmptyMessage": "After you click Start generation, Agent analysis, manuscript building, preview rendering, and export status will appear here.\nCurrent status: {statusMessage}",
+  "@generateExportActivityEmptyMessage": {
+    "description": "Activity timeline empty state body.",
+    "placeholders": {
+      "statusMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportCurrentStatusLine": "Current status: {statusMessage}",
+  "@generateExportCurrentStatusLine": {
+    "description": "Current generation status line.",
+    "placeholders": {
+      "statusMessage": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReasonLine": "Reason: {reason}",
+  "@generateExportReasonLine": {
+    "description": "Failure reason line.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReadyToExportSubtitle": "Generation is complete. Preview or export {exportLabel}.",
+  "@generateExportReadyToExportSubtitle": {
+    "description": "Generate settings subtitle after generation.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportDirectoryHint": "Exports are written to the current export directory. After completion, use Open export folder to view the {exportLabel} file.",
+  "@generateExportDirectoryHint": {
+    "description": "Export directory hint for generated work.",
+    "placeholders": {
+      "exportLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "generateExportReadinessAssetRatio": "{selectedCount} / suggested 6+",
+  "@generateExportReadinessAssetRatio": {
+    "description": "Readiness selected assets count against suggestion.",
+    "placeholders": {
+      "selectedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportCloudShareLabel": "Cloud sharing",
+  "@generateExportCloudShareLabel": {
+    "description": "Cloud sharing fact label."
+  },
+  "generateExportCloudShareValue": "Upload after generation",
+  "@generateExportCloudShareValue": {
+    "description": "Cloud sharing fact value."
+  },
+  "generateExportPreviewReadinessMessage": "Ready: export can start",
+  "@generateExportPreviewReadinessMessage": {
+    "description": "Generate/export preview readiness message."
+  },
+  "generateExportPreviewSetupUrlTitle": "1. Configure Supabase URL",
+  "@generateExportPreviewSetupUrlTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupUrlBody": "Confirm that the project URL and key are filled in.",
+  "@generateExportPreviewSetupUrlBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateDetected": "Detected",
+  "@generateExportPreviewStateDetected": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupBucketTitle": "2. Configure bucket",
+  "@generateExportPreviewSetupBucketTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupBucketBody": "Confirm that the export data bucket exists.",
+  "@generateExportPreviewSetupBucketBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewActionOpen": "Open",
+  "@generateExportPreviewActionOpen": {
+    "description": "Preview setup action label."
+  },
+  "generateExportPreviewStateConfigured": "Configured",
+  "@generateExportPreviewStateConfigured": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupPermissionTitle": "3. Storage permissions",
+  "@generateExportPreviewSetupPermissionTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupPermissionBody": "Confirm that service-role key permissions allow storage reads and writes.",
+  "@generateExportPreviewSetupPermissionBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStatePassed": "Passed",
+  "@generateExportPreviewStatePassed": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupSignatureTitle": "4. Directory and signing",
+  "@generateExportPreviewSetupSignatureTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupSignatureBody": "Confirm that the signed URL TTL configuration matches expectations.",
+  "@generateExportPreviewSetupSignatureBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateNormal": "Normal",
+  "@generateExportPreviewStateNormal": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSetupConnectionTitle": "5. Connection test",
+  "@generateExportPreviewSetupConnectionTitle": {
+    "description": "Preview setup check title."
+  },
+  "generateExportPreviewSetupConnectionBody": "Successfully connected to the export service.",
+  "@generateExportPreviewSetupConnectionBody": {
+    "description": "Preview setup check body."
+  },
+  "generateExportPreviewStateConnected": "Connected",
+  "@generateExportPreviewStateConnected": {
+    "description": "Preview setup state label."
+  },
+  "generateExportPreviewSignedUrlPassed": "Signed URL validation passed",
+  "@generateExportPreviewSignedUrlPassed": {
+    "description": "Preview Supabase signed URL test message."
+  },
+  "generateExportPreviewExportCompleted": "Export job completed",
+  "@generateExportPreviewExportCompleted": {
+    "description": "Preview export status message."
+  },
+  "generateExportPreviewLogReadingSamples": "Reading samples",
+  "@generateExportPreviewLogReadingSamples": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewLogCoverGenerated": "Cover generated",
+  "@generateExportPreviewLogCoverGenerated": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewLogExportSubmitted": "Export job submitted",
+  "@generateExportPreviewLogExportSubmitted": {
+    "description": "Preview activity log line."
+  },
+  "generateExportPreviewExportImage": "Export as image",
+  "@generateExportPreviewExportImage": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewExportPdf": "Export as PDF",
+  "@generateExportPreviewExportPdf": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewExportLongImage": "Export as long image",
+  "@generateExportPreviewExportLongImage": {
+    "description": "Preview export target option."
+  },
+  "generateExportPreviewSelectedPageSize": "A4 portrait",
+  "@generateExportPreviewSelectedPageSize": {
+    "description": "Preview selected page size."
+  },
+  "generateExportPreviewSelectedStyle": "Natural and gentle",
+  "@generateExportPreviewSelectedStyle": {
+    "description": "Preview selected style."
+  },
+  "generateExportPreviewShareText": "KidMemory portfolio: {url}\nLink valid for {seconds} seconds",
+  "@generateExportPreviewShareText": {
+    "description": "Preview share text.",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "directUploadChildIdLine": "Child: {childId}",
+  "@directUploadChildIdLine": {
+    "description": "Direct Upload child id line.",
+    "placeholders": {
+      "childId": {
+        "type": "String"
+      }
+    }
+  },
+  "directUploadClientLimitHint": "Recommended ≤{count} items per batch. This is a UX limit, not a security limit.",
+  "@directUploadClientLimitHint": {
+    "description": "Direct Upload recommended client limit hint.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadCreateSessionFailed": "Failed to create upload session: {error}",
+  "@trustedUploadCreateSessionFailed": {
+    "description": "Trusted Upload create session failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadCloseSessionFailed": "Failed to close session: {error}",
+  "@trustedUploadCloseSessionFailed": {
+    "description": "Trusted Upload close session failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadRetryFailed": "Retry failed: {error}",
+  "@trustedUploadRetryFailed": {
+    "description": "Trusted Upload retry failure snackbar.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "trustedUploadRemainingMinutes": "Time remaining: {minutes} minutes",
+  "@trustedUploadRemainingMinutes": {
+    "description": "Trusted Upload remaining session minutes.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadMaxItems": "Limit: {count} images",
+  "@trustedUploadMaxItems": {
+    "description": "Trusted Upload maximum upload item count.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedUploadCopiedMessage": "Copied to clipboard",
+  "@trustedUploadCopiedMessage": {
+    "description": "Trusted Upload copied link snackbar."
+  },
+  "trustedUploadLoadFailed": "Load failed: {error}",
+  "@trustedUploadLoadFailed": {
+    "description": "Trusted Upload load failure message.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedUploadNoItemsMessage": "No upload items yet\nChoose images on your phone to upload",
+  "@trustedUploadNoItemsMessage": {
+    "description": "Trusted Upload empty item list message."
+  },
+  "trustedUploadItemFailed": "Failed: {message}",
+  "@trustedUploadItemFailed": {
+    "description": "Trusted Upload item failure status.",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "contentMetricTagCount": "{count} tags",
+  "@contentMetricTagCount": {
+    "description": "Count text for tag metrics.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentNoRecentWorksMessage": "No recent works",
+  "@contentNoRecentWorksMessage": {
+    "description": "Empty recent works message."
+  },
+  "contentTimelineBirth": "😊\nBirth",
+  "@contentTimelineBirth": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineFirstSmile": "🖍️\nFirst smile",
+  "@contentTimelineFirstSmile": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineFirstDrawing": "🎨\nFirst drawing",
+  "@contentTimelineFirstDrawing": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineDaycare": "🏫\nDaycare started",
+  "@contentTimelineDaycare": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineBicycle": "🚲\nLearned to ride",
+  "@contentTimelineBicycle": {
+    "description": "Sample timeline milestone."
+  },
+  "contentTimelineNewYearArtwork": "🏮\nNew Year artwork",
+  "@contentTimelineNewYearArtwork": {
+    "description": "Sample timeline milestone."
+  },
+  "contentProfileSampleDetails": "Profile information\n\nGender               Boy\nBirthplace           Shanghai\nZodiac               Gemini\nBlood type           A\nCreated              2024-06-18\nLast updated         2025-05-30\n\nGrowth milestones\nFirst drawing   2022-03-15\nStarted daycare 2023-09-01\nFirst exhibition 2024-05-20\nLearned to ride a bicycle 2024-10-12",
+  "@contentProfileSampleDetails": {
+    "description": "Sample child profile detail block."
+  },
+  "contentPaginationStatus": "Page {currentPage} / {totalPages} · {pageSize} per page",
+  "@contentPaginationStatus": {
+    "description": "Pagination status.",
+    "placeholders": {
+      "currentPage": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      },
+      "pageSize": {
+        "type": "int"
+      }
+    }
+  },
+  "contentGenerationCompletePages": "Generated     {currentPage}/{totalPages} pages",
+  "@contentGenerationCompletePages": {
+    "description": "Generation complete status with page count.",
+    "placeholders": {
+      "currentPage": {
+        "type": "int"
+      },
+      "totalPages": {
+        "type": "int"
+      }
+    }
+  },
+  "contentFlowPrepareAssets": "🗂️  Prepare assets\n{count} assets selected",
+  "@contentFlowPrepareAssets": {
+    "description": "Asset preparation flow step.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentFlowAgentGenerated": "✅  Agent structure\nPortfolio content generated",
+  "@contentFlowAgentGenerated": {
+    "description": "Agent generated flow step."
+  },
+  "contentFlowAgentWaiting": "⏳  Agent structure\nWaiting for generation",
+  "@contentFlowAgentWaiting": {
+    "description": "Agent waiting flow step."
+  },
+  "contentFlowExportCompleted": "📄  Export file\nHigh-quality file generated",
+  "@contentFlowExportCompleted": {
+    "description": "Export completed flow step."
+  },
+  "contentFlowExportWaiting": "📄  Export file\nWaiting to export",
+  "@contentFlowExportWaiting": {
+    "description": "Export waiting flow step."
+  },
+  "contentSelectedAssetsTitle": "Selected assets ({count})",
+  "@contentSelectedAssetsTitle": {
+    "description": "Selected assets strip title.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "contentPagePreviewCount": "Page preview ({pageCount} pages)",
+  "@contentPagePreviewCount": {
+    "description": "Generated page preview count title.",
+    "placeholders": {
+      "pageCount": {
+        "type": "int"
+      }
+    }
+  },
+  "contentTimelineSourceText": "Stage: live log\nSource: local task center",
+  "@contentTimelineSourceText": {
+    "description": "Activity timeline source text."
+  },
+  "datasetChildrenClearBirthday": "Clear birthday",
+  "@datasetChildrenClearBirthday": {
+    "description": "Button label for clearing a child profile birthday."
+  },
+  "childProfileEmptyDescription": "Add a child first, then start recording assets, growth timeline\nand portfolios to preserve every moment worth remembering.",
+  "@childProfileEmptyDescription": {
+    "description": "Empty child profile page description."
+  },
+  "childProfileLinkedAssets": "Linked assets: {count}",
+  "@childProfileLinkedAssets": {
+    "description": "Linked asset count on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileAssetChip": "Assets {count}",
+  "@childProfileAssetChip": {
+    "description": "Asset count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileArtworkChip": "Drawings {count}",
+  "@childProfileArtworkChip": {
+    "description": "Artwork count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfilePhotoChip": "Photos {count}",
+  "@childProfilePhotoChip": {
+    "description": "Photo count chip on the child profile header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfilePortraitSmileKeyword": "smile",
+  "@childProfilePortraitSmileKeyword": {
+    "description": "Keyword used to identify child portrait assets."
+  },
+  "childProfileGrowthStatsTitle": "Growth Stats",
+  "@childProfileGrowthStatsTitle": {
+    "description": "Child profile growth statistics section title."
+  },
+  "childProfileAssetDistributionTitle": "Asset Distribution",
+  "@childProfileAssetDistributionTitle": {
+    "description": "Child profile asset distribution section title."
+  },
+  "childProfileRecentWorksTitle": "Recent Works",
+  "@childProfileRecentWorksTitle": {
+    "description": "Child profile recent works section title."
+  },
+  "childProfileGrowthTimelineTitle": "Growth Timeline",
+  "@childProfileGrowthTimelineTitle": {
+    "description": "Child profile growth timeline section title."
+  },
+  "childProfileAssetCountValue": "{count} items",
+  "@childProfileAssetCountValue": {
+    "description": "Asset count value in the child profile side panel.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childProfileTimelineAutoUpdate": "Timeline updates automatically by asset date",
+  "@childProfileTimelineAutoUpdate": {
+    "description": "Child profile timeline milestone helper text."
+  },
+  "childProfilePortfolioSavedLocally": "Portfolio records are saved locally",
+  "@childProfilePortfolioSavedLocally": {
+    "description": "Child profile portfolio milestone helper text."
+  },
+  "creationPhasePreparing": "Prepare",
+  "@creationPhasePreparing": {
+    "description": "Creation workflow phase label before generation starts."
+  },
+  "creationPhasePlanning": "Planning",
+  "@creationPhasePlanning": {
+    "description": "Creation workflow phase label while planning."
+  },
+  "creationPhasePlanReady": "Plan ready",
+  "@creationPhasePlanReady": {
+    "description": "Creation workflow phase label after a plan is ready for user confirmation."
+  },
+  "creationPhaseCreatingJob": "Creating job",
+  "@creationPhaseCreatingJob": {
+    "description": "Creation workflow phase label while creating the generation job."
+  },
+  "creationPhaseEnvironmentPreparing": "Preparing video environment",
+  "@creationPhaseEnvironmentPreparing": {
+    "description": "Creation workflow phase label while memoir video environment is being prepared."
+  },
+  "creationPhaseGenerating": "Generating",
+  "@creationPhaseGenerating": {
+    "description": "Creation workflow phase label while running generation."
+  },
+  "creationPhaseReviewing": "Ready to review",
+  "@creationPhaseReviewing": {
+    "description": "Creation workflow phase label after generation completes and before export."
+  },
+  "creationPhaseExporting": "Exporting locally",
+  "@creationPhaseExporting": {
+    "description": "Creation workflow phase label while exporting locally."
+  },
+  "creationPhasePublished": "Ready to share",
+  "@creationPhasePublished": {
+    "description": "Creation workflow phase label after export is ready to share."
+  },
+  "creationPhaseFailed": "Creation failed",
+  "@creationPhaseFailed": {
+    "description": "Creation workflow phase label after generation or export fails."
+  },
+  "creationPlanningStatus": "Analyzing assets, selecting a skill, and generating a plan",
+  "@creationPlanningStatus": {
+    "description": "Status text while creation planning is in progress."
+  },
+  "creationPlanningAnalyzeAssetsTitle": "Analyze assets",
+  "@creationPlanningAnalyzeAssetsTitle": {
+    "description": "Planning sub-step title for analyzing selected assets."
+  },
+  "creationPlanningAnalyzeAssetsBody": "Reading {count} selected photos, artwork, and tags",
+  "@creationPlanningAnalyzeAssetsBody": {
+    "description": "Planning sub-step body for analyzing selected assets.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creationPlanningSelectSkillTitle": "Select Skill",
+  "@creationPlanningSelectSkillTitle": {
+    "description": "Planning sub-step title for selecting a generation skill."
+  },
+  "creationPlanningSelectSkillBody": "Matching storybook, memory book, or memoir video capability",
+  "@creationPlanningSelectSkillBody": {
+    "description": "Planning sub-step body for selecting a generation skill."
+  },
+  "creationPlanningGeneratePlanTitle": "Generate plan",
+  "@creationPlanningGeneratePlanTitle": {
+    "description": "Planning sub-step title for generating a plan."
+  },
+  "creationPlanningGeneratePlanBody": "Organizing story structure, steps, and prerequisites",
+  "@creationPlanningGeneratePlanBody": {
+    "description": "Planning sub-step body for generating a plan."
+  },
+  "creationPlanReadyStatus": "The creation plan is ready. Confirm it before generation starts.",
+  "@creationPlanReadyStatus": {
+    "description": "Status text after the creation plan has been returned and is waiting for user confirmation."
+  },
+  "creationPlanMissingStatus": "The creation plan is missing. Please plan again.",
+  "@creationPlanMissingStatus": {
+    "description": "Status text when confirmation is attempted without an available plan id."
+  },
+  "creationPlanReadySubtitle": "Review the agent plan, skill, and prerequisites before creating the generation job.",
+  "@creationPlanReadySubtitle": {
+    "description": "Sidebar subtitle when a creation plan is ready for confirmation."
+  },
+  "creationPlanConfirmationTitle": "Confirm creation plan",
+  "@creationPlanConfirmationTitle": {
+    "description": "Title for the creation plan confirmation panel."
+  },
+  "creationPlanSkillLabel": "Skill",
+  "@creationPlanSkillLabel": {
+    "description": "Label for the skill used by the creation plan."
+  },
+  "creationPlanUnknownSkill": "Waiting for backend",
+  "@creationPlanUnknownSkill": {
+    "description": "Fallback value when a creation plan does not include a skill name."
+  },
+  "creationPlanStepsLabel": "Plan steps",
+  "@creationPlanStepsLabel": {
+    "description": "Label above the creation plan step list."
+  },
+  "creationPlanRequirementsLabel": "Prerequisites",
+  "@creationPlanRequirementsLabel": {
+    "description": "Label above the creation plan requirements list."
+  },
+  "creationConfirmPlanAction": "Confirm plan and generate",
+  "@creationConfirmPlanAction": {
+    "description": "Primary action label for confirming a creation plan and creating a job."
+  },
+  "creationGenerationFailedWithStep": "Generation failed: {step} could not finish. {reason}",
+  "@creationGenerationFailedWithStep": {
+    "description": "Status text when a creation job fails at a backend step.",
+    "placeholders": {
+      "step": {},
+      "reason": {}
+    }
+  },
+  "creationFailureStepLine": "Failed step: {step}",
+  "@creationFailureStepLine": {
+    "description": "Line showing the failed creation job step.",
+    "placeholders": {
+      "step": {}
+    }
+  },
+  "creationFailureCodeLine": "Error code: {code}",
+  "@creationFailureCodeLine": {
+    "description": "Line showing a low-level creation job error code.",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "creationReplanAction": "Plan again",
+  "@creationReplanAction": {
+    "description": "Action label for planning again after a generation failure."
+  },
+  "creationCreatingJobStatus": "Creating the generation job",
+  "@creationCreatingJobStatus": {
+    "description": "Status text while the creation job is being created."
+  },
+  "creationEnvironmentPreparingStatus": "Preparing video generation environment",
+  "@creationEnvironmentPreparingStatus": {
+    "description": "Status shown while the memoir video job prepares FFmpeg and Hyperframes environment."
+  },
+  "creationPlanInvalidatedStatus": "创作设置已更新，请重新规划。",
+  "@creationPlanInvalidatedStatus": {
+    "description": "Status shown after changing assets or generation settings invalidates the current creation plan."
+  },
+  "creationGeneratingStatus": "Running the generation job",
+  "@creationGeneratingStatus": {
+    "description": "Status text while the creation job is running."
+  },
+  "generateExportCloudStorageLabel": "Cloud storage",
+  "@generateExportCloudStorageLabel": {
+    "description": "User-facing replacement label for cloud storage provider names in ordinary activity timelines."
+  },
+  "generateExportLocalServiceLabel": "Local service",
+  "@generateExportLocalServiceLabel": {
+    "description": "User-facing replacement label for internal sidecar service names in ordinary activity timelines."
+  },
+  "generateExportMp4Target": "MP4 video  memoir video",
+  "@generateExportMp4Target": {
+    "description": "Export target label for memoir video MP4 output."
+  },
+  "creationPhasePlanConfirm": "Confirm plan",
+  "@creationPhasePlanConfirm": {
+    "description": "Five-step creation flow label for plan confirmation."
+  },
+  "creationPhasePreviewResult": "Review result",
+  "@creationPhasePreviewResult": {
+    "description": "Five-step creation flow label for result preview."
+  },
+  "creationPhaseExportShare": "Export and share",
+  "@creationPhaseExportShare": {
+    "description": "Five-step creation flow label for export and sharing."
+  },
+  "creationFlowTitle": "Creation flow",
+  "@creationFlowTitle": {
+    "description": "Title above the five-step creation flow."
+  },
+  "generationBackendStepsTitle": "Generation steps",
+  "@generationBackendStepsTitle": {
+    "description": "Title for backend-provided generation steps."
+  },
+  "generationLocalProgressTitle": "Creation progress",
+  "@generationLocalProgressTitle": {
+    "description": "Title for local creation progress fallback steps."
+  },
+  "generateExportStartPlanningAction": "Start planning",
+  "@generateExportStartPlanningAction": {
+    "description": "Primary action label to start creation planning."
+  },
+  "generateExportMp4Action": "Export MP4",
+  "@generateExportMp4Action": {
+    "description": "Primary action label for MP4 export."
+  },
+  "generateExportOpenVideoPreviewAction": "Open video preview",
+  "@generateExportOpenVideoPreviewAction": {
+    "description": "Action label for opening a generated memoir video MP4 preview."
+  },
+  "generateExportVideoPreviewUnavailable": "The video file is not ready yet. Regenerate or view logs.",
+  "@generateExportVideoPreviewUnavailable": {
+    "description": "Status shown when the memoir video preview cannot be opened because no MP4 artifact path is available."
+  },
+  "generateExportVideoKeyword": "video",
+  "@generateExportVideoKeyword": {
+    "description": "Keyword used to classify localized video export target labels."
+  },
+  "directUploadServiceUnavailableMessage": "QR upload is temporarily unavailable. Please try again later.",
+  "@directUploadServiceUnavailableMessage": {
+    "description": "Fallback error when direct upload service is unavailable."
+  },
+  "directUploadSessionIncompleteMessage": "QR upload session could not be created. Check upload settings and try again.",
+  "@directUploadSessionIncompleteMessage": {
+    "description": "Error when direct upload session payload is incomplete."
+  },
+  "directUploadConfigIncompleteMessage": "QR upload settings are incomplete. Check upload settings and try again.",
+  "@directUploadConfigIncompleteMessage": {
+    "description": "User-facing replacement for technical direct upload configuration errors."
+  },
+  "feedbackRequestKeyword": "please",
+  "@feedbackRequestKeyword": {
+    "description": "Keyword used to classify request prompts as warning toasts."
   }
 }

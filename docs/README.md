@@ -26,13 +26,14 @@
 
 - `product/architecture.md`：长期架构说明。
 - `product/roadmap.md`：功能路线图。
-- `agent-workflow/`：Hermes + 本地 Harness + Codex 的 Issue 驱动开发流程。
-- `acceptance/manual-e2e-checklist.md`：功能验收清单（按钮级 + 接口级，可逐条打勾执行）。
+- `agent-workflow/workflow.md`：KidMemory 当前唯一保留的 Agent 工作流主文档。
+- `agent-workflow/souls/`：当前四个 Hermes 角色的 `SOUL` 快照，用于版本化查看当前前台协作角色定义。
 - `design/`：设计稿和视觉参考。
-- `assets/`：文档使用的静态资源。
+- `images/`：文档使用的静态资源。
 
 ## 文档规则
 
 - 每个里程碑只保留产品说明和验收记录。
 - 只有确实需要运行配置的里程碑保留 `setup.md`。
 - 临时 proposal、tasks、review、acceptance 文档不作为最终文档保留。
+- 已废弃的实验性流程文档不要继续挂在主入口；需要保留历史时，优先合并进主文档或转成简短背景说明。

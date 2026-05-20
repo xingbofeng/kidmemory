@@ -3,22 +3,27 @@ part of '../../desktop_shell.dart';
 extension _DesktopShellSetupActions on _DesktopShellState {
   void _runSetupAction(SetupCheckVm check) {
     final action = check.action.trim();
-    final isOpenAiConfig = check.title == AppLocalizations.of(context)!.setupOpenAiTitle;
+    final isOpenAiConfig =
+        check.title == AppLocalizations.of(context)!.setupOpenAiTitle;
     final allowOpenAiConfigWhenBlocked =
-        isOpenAiConfig && action.contains(AppLocalizations.of(context)!.actionConfigure);
+        isOpenAiConfig &&
+        action.contains(AppLocalizations.of(context)!.actionConfigure);
     if (!check.actionEnabled) {
       if (allowOpenAiConfigWhenBlocked) {
         unawaited(_configureOpenAI());
         return;
       }
-      _showSnackBar(AppLocalizations.of(context)!.setupCompletePreviousStepFirst);
+      _showSnackBar(
+        AppLocalizations.of(context)!.setupCompletePreviousStepFirst,
+      );
       return;
     }
     if (action == AppLocalizations.of(context)!.actionRefreshChecks) {
       unawaited(refreshReadiness());
       return;
     }
-    if (action.contains(AppLocalizations.of(context)!.actionTest) || action.contains(AppLocalizations.of(context)!.actionCheck)) {
+    if (action.contains(AppLocalizations.of(context)!.actionTest) ||
+        action.contains(AppLocalizations.of(context)!.actionCheck)) {
       unawaited(_runTargetedSetupCheck(check.title));
       return;
     }
@@ -31,11 +36,13 @@ extension _DesktopShellSetupActions on _DesktopShellState {
         unawaited(_runPostgresSetupWorkflow());
         return;
       }
-      if (check.title == _sidecarSetupTitle) {
+      if (check.title == _sidecarSetupTitle(context)) {
         unawaited(_runSidecarSetupWorkflow());
         return;
       }
-      _showSnackBar('暂不支持自动启动：${check.title}');
+      _showSnackBar(
+        AppLocalizations.of(context)!.setupAutoStartUnsupported(check.title),
+      );
       return;
     }
     if (action.contains(AppLocalizations.of(context)!.actionDirectory)) {
@@ -62,7 +69,9 @@ extension _DesktopShellSetupActions on _DesktopShellState {
       _showSnackBar(AppLocalizations.of(context)!.setupNoConfigDialog);
       return;
     }
-    _showSnackBar('配置项“${check.title}”已记录，稍后继续检测');
+    _showSnackBar(
+      AppLocalizations.of(context)!.setupConfigItemRecorded(check.title),
+    );
   }
 
   Future<void> _runInstallAndConfigure(String checkTitle) async {
@@ -70,7 +79,7 @@ extension _DesktopShellSetupActions on _DesktopShellState {
       await _runPostgresSetupWorkflow();
       return;
     }
-    if (checkTitle == _sidecarSetupTitle) {
+    if (checkTitle == _sidecarSetupTitle(context)) {
       await _runSidecarSetupWorkflow();
       return;
     }

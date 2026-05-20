@@ -1,14 +1,25 @@
 import '../../../core/sidecar/sidecar_api.dart';
 import 'direct_upload_models.dart';
 
-/// Thin typed wrapper around [SidecarApi] for the Direct Upload flow.
+/// Thin typed wrapper around [SidecarApi] for the QR upload flow.
 ///
 /// Keeps widgets decoupled from the raw HTTP plumbing so widget tests can
 /// inject fakes without touching the real network layer.
 class DirectUploadController {
-  DirectUploadController({required this.api});
+  DirectUploadController({
+    required this.api,
+    this.serviceUnavailableMessage =
+        'QR upload is temporarily unavailable. Please try again later.',
+    this.sessionIncompleteMessage =
+        'QR upload session could not be created. Check upload settings and try again.',
+    this.configIncompleteMessage =
+        'QR upload settings are incomplete. Check upload settings and try again.',
+  });
 
   final SidecarApi api;
+  final String serviceUnavailableMessage;
+  final String sessionIncompleteMessage;
+  final String configIncompleteMessage;
 
   static const _basePath = '/api/web-companion/direct-upload/sessions';
 
@@ -37,9 +48,7 @@ class DirectUploadController {
     required String token,
     List<String>? objectKeys,
   }) async {
-    final body = <String, dynamic>{
-      'token': token,
-    };
+    final body = <String, dynamic>{'token': token};
     if (objectKeys != null) {
       body['objectKeys'] = objectKeys;
     }
@@ -53,12 +62,12 @@ class DirectUploadController {
       final message = response['message'];
       final code = response['code'];
       if (message is String && message.trim().isNotEmpty) {
-        throw StateError(message);
+        throw StateError(_ordinaryErrorMessage(message));
       }
       if (code is String && code.trim().isNotEmpty) {
-        throw StateError('Sidecar 返回错误：$code');
+        throw StateError(_ordinaryErrorMessage(code));
       }
-      throw StateError('Sidecar 返回错误');
+      throw StateError(serviceUnavailableMessage);
     }
   }
 
@@ -70,7 +79,20 @@ class DirectUploadController {
         })
         .toList(growable: false);
     if (missing.isNotEmpty) {
-      throw StateError('Direct Upload 会话响应缺少字段：${missing.join(', ')}');
+      throw StateError(sessionIncompleteMessage);
     }
+  }
+
+  String _ordinaryErrorMessage(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('supabase') ||
+        lower.contains('sidecar') ||
+        lower.contains('requestid') ||
+        lower.contains('jobid') ||
+        lower.contains('anon_key') ||
+        lower.contains('service_role')) {
+      return configIncompleteMessage;
+    }
+    return message;
   }
 }

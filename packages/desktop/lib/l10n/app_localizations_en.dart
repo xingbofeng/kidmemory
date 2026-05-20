@@ -55,10 +55,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateExportTitle => 'Generate & Export';
 
   @override
-  String get directUploadEntryButtonLabel => '扫码上传 · Direct';
+  String get directUploadEntryButtonLabel => '扫码上传';
 
   @override
-  String get directUploadDialogTitle => '扫码上传 · Direct';
+  String get directUploadDialogTitle => '手机扫码上传';
 
   @override
   String get directUploadPullBackActionLabel => '拉回本地';
@@ -70,7 +70,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionCloseLabel => '关闭';
 
   @override
-  String get directUploadRiskNotice => 'Supabase 直传验证版 — 对象需电脑端回拉后才算入库';
+  String get directUploadRiskNotice => '上传完成后需在电脑端拉回，素材才会正式入库';
 
   @override
   String get uploadSessionPathLabel => '会话路径';
@@ -79,7 +79,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadAccessLinkLabel => '扫码或复制链接';
 
   @override
-  String get directUploadQrCodeLabel => 'Direct Upload 扫码链接二维码';
+  String get directUploadQrCodeLabel => '扫码上传链接二维码';
 
   @override
   String get directUploadNoItemsHint => '暂无远端对象，请先在手机端扫码上传';
@@ -136,7 +136,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadStatusPullingLabel => '回拉中';
 
   @override
-  String get setupPostgresTitle => 'PostgreSQL 配置';
+  String get setupPostgresTitle => '本地资料库';
 
   @override
   String get setupPgvectorTitle => 'pgvector 检测';
@@ -148,7 +148,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupLocalDataDirTitle => '本地数据目录';
 
   @override
-  String get setupSidecarServiceTitle => 'Sidecar 本地服务';
+  String get setupSidecarServiceTitle => 'KidMemory 本地服务';
+
+  @override
+  String get setupAgentServiceTitle => 'Agent service configuration';
 
   @override
   String get setupItemTitle => '配置项';
@@ -280,32 +283,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupStorageS3ModeLabel => 'S3 方式（推荐）';
 
   @override
-  String get setupSidecarStarted => 'Sidecar 已启动';
+  String get setupSidecarStarted => '本地服务已启动';
 
   @override
-  String get setupSidecarStartedSchemaNotReady => 'Sidecar 已启动，schema 初始化未完成';
+  String get setupSidecarStartedSchemaNotReady => '本地服务已启动，资料库初始化未完成';
 
   @override
-  String get setupSidecarConnected => 'Sidecar 已连接';
+  String get setupSidecarConnected => '本地服务已连接';
 
   @override
-  String get setupSidecarStartFailed => 'Sidecar 未能启动';
+  String get setupSidecarStartFailed => '本地服务未能启动';
 
   @override
   String get setupSidecarStartFailedNodeOrBundled =>
-      'Sidecar 未能启动，请检查 Node.js 或 bundled sidecar';
+      '本地服务未能启动，请检查运行环境或重新打开 KidMemory';
 
   @override
-  String get setupSidecarDisconnected => 'Sidecar 未连接';
+  String get setupSidecarDisconnected => '本地服务未连接';
 
   @override
-  String get setupStorageConfigTitle => 'Storage 配置';
+  String get setupStorageConfigTitle => '云端分享设置';
 
   @override
-  String get setupStorageConfigSaveFailed => 'Supabase Storage 配置保存失败';
+  String get setupStorageConfigSaveFailed => '云端分享设置保存失败';
 
   @override
-  String get setupStorageConfigSaved => 'Supabase Storage 配置已保存';
+  String get setupStorageConfigSaved => '云端分享设置已保存';
 
   @override
   String get setupPgvectorInitFailed => 'pgvector 初始化失败';
@@ -416,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupStorageSectionIntro =>
-      '先用 S3 方式最省事：接口地址、区域、桶名、Access Key 和 Secret Key 都在 Supabase 控制台里能找到。bucket 建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。';
+      '推荐使用云端私有存储：接口地址、区域、存储空间名称和访问密钥都可以在云端控制台找到。存储空间建议保持私有，KidMemory 会在分享时自动生成带有效期的链接。';
 
   @override
   String get setupStoragePublicPrefixHint => '公开桶可填完整对象前缀';
@@ -610,7 +613,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupDownloading => '正在下载...';
 
   @override
-  String get setupSidecarStarting => '正在启动 Sidecar...';
+  String get setupSidecarStarting => '正在启动本地服务...';
 
   @override
   String get setupInstallingSoftware => '正在安装...';
@@ -664,14 +667,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupHomebrewPermissionRetryHint => '请修复 Homebrew 权限后重试。';
 
   @override
-  String get setupConfigureStorageFirst => '请先配置 Supabase REST 或 S3 所需参数';
+  String get setupConfigureStorageFirst => '请先填写云端分享所需参数';
 
   @override
   String get setupHomebrewPermissionCommandHint =>
       '请在终端执行以下命令修复权限后，再回到 KidMemory 重试：';
 
   @override
-  String get setupSidecarConfigUnavailable => '读取 sidecar 配置失败，初始化未完成。';
+  String get setupSidecarConfigUnavailable => '读取本地服务配置失败，初始化未完成。';
 
   @override
   String get setupInputApiKey => '输入 API Key';
@@ -686,7 +689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupInputServiceRoleKey => '输入或粘贴 Service Role Key';
 
   @override
-  String get setupStorageDialogTitle => '配置 Supabase Storage';
+  String get setupStorageDialogTitle => '配置云端分享';
 
   @override
   String get setupOpenAiDialogTitle => '配置大模型接口';
@@ -1194,7 +1197,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateExportS279 => '创作类型';
 
   @override
-  String get generateExportS315 => '原因：免费生图服务暂时不可用。你可以重试，或跳过封面继续导出。';
+  String get generateExportS315 => '原因：免费生图服务暂时不可用。请重试，或查看日志了解详情。';
 
   @override
   String get generateExportS324 => '去素材库选择';
@@ -1332,6 +1335,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateExportS624 => '查看日志';
 
   @override
+  String get generateExportCreateShareDialogTitle => '创建 Web 分享链接';
+
+  @override
+  String get generateExportCreateShareDialogBody =>
+      '这会将导出作品上传到云端，用于生成 Web 分享链接。';
+
+  @override
+  String get generateExportCreateShareLinkLabel => '创建分享链接';
+
+  @override
+  String get generateExportShareCreatingStatus => '正在创建 Web 分享链接...';
+
+  @override
+  String get generateExportShareCreatedStatus => 'Web 分享链接已创建';
+
+  @override
+  String get generateExportShareFailedStatus => '分享链接创建失败';
+
+  @override
+  String get generateExportShareReadyHint => '作品已导出，可以创建 Web 分享链接。';
+
+  @override
+  String get generateExportCopyLinkLabel => '复制链接';
+
+  @override
+  String get generateExportOpenLinkLabel => '打开链接';
+
+  @override
+  String get generateExportRetryShareLabel => '重试创建';
+
+  @override
+  String get generateExportShareNotReady => '导出作品尚未准备好，暂不能创建分享链接。';
+
+  @override
+  String generateExportShareText(String shareUrl) {
+    return 'KidMemory 作品：$shareUrl';
+  }
+
+  @override
+  String generateExportShareExceptionMessage(Object error) {
+    return '分享链接创建失败：$error';
+  }
+
+  @override
+  String get generateExportPreviewFailedTitle => 'PDF preview failed';
+
+  @override
+  String get generateExportPreviewFailedBody =>
+      'The preview window did not open. Check the reason, open the export folder to inspect the local file, or view logs to continue debugging.';
+
+  @override
+  String generateExportPreviewFailureReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String generateExportPreviewFailedStatus(Object error) {
+    return 'PDF preview failed: $error';
+  }
+
+  @override
+  String get generateExportEditRequestLabel => '修改需求';
+
+  @override
   String get generateExportS627 => '查看素材';
 
   @override
@@ -1463,12 +1530,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generateExportS875 => '超时';
-
-  @override
-  String get generateExportS876 => '跳过封面';
-
-  @override
-  String get generateExportS877 => '跳过封面继续导出';
 
   @override
   String get generateExportS883 => '输入目标或选择快捷类型，Agent 会按素材、故事、预览和导出组织创作流程。';
@@ -1747,7 +1808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assetLibraryPageS437 => '已加入同步队列';
 
   @override
-  String get assetLibraryPageS338 => '同步入队失败，请检查 Supabase Storage 配置';
+  String get assetLibraryPageS338 => '同步入队失败，请检查云端分享设置';
 
   @override
   String get childProfileS715 => '珍藏成长点滴，记录美好时光';
@@ -1759,7 +1820,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childProfileS887 => '还没有孩子档案';
 
   @override
-  String get childProfileS693 => '添加档案';
+  String get childProfileS693 => 'Add child profile';
 
   @override
   String get childProfileS625 => '查看示例';
@@ -1819,7 +1880,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childProfileS401 => '导入素材后，这里会按真实素材更新成长统计和最近作品。';
 
   @override
-  String get childProfileS486 => '当前素材库已连接到本地 sidecar，可用于生成成长作品集。';
+  String get childProfileS486 => '当前素材库已连接到本地服务，可用于生成成长作品集。';
 
   @override
   String get childProfileS480 => '当前档案';
@@ -2032,35 +2093,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackPageS448 => '已更新';
 
   @override
-  String get sidecarLauncherS679 => '测试环境，跳过 sidecar 自动启动。';
+  String get sidecarLauncherS679 =>
+      'Test environment detected; skipped sidecar auto-start.';
 
   @override
-  String get sidecarLauncherS98 => '4317 端口已被占用，但未响应 KidMemory sidecar health。';
+  String get sidecarLauncherS98 =>
+      'Port 4317 is already in use, but KidMemory sidecar health did not respond.';
 
   @override
   String get sidecarLauncherS584 =>
-      '未找到 sidecar 运行目录。请确认 app bundle 中包含 Resources/sidecar，或设置 KIDMEMORY_SIDECAR_DIR。';
+      'Sidecar runtime directory was not found. Confirm the app bundle contains Resources/sidecar, or set KIDMEMORY_SIDECAR_DIR.';
 
   @override
-  String get sidecarLauncherS146 => 'Sidecar 未就绪，开始尝试自动启动。';
+  String get sidecarLauncherS146 =>
+      'Sidecar is not ready; attempting automatic start.';
 
   @override
-  String get sidecarLauncherS141 => 'Sidecar 启动中';
+  String get sidecarLauncherS141 => 'Starting Sidecar';
 
   @override
-  String get sidecarLauncherS592 => '未检测到可用于启动 sidecar 的 Node.js。';
+  String get sidecarLauncherS592 =>
+      'No Node.js runtime was found for starting sidecar.';
 
   @override
-  String get sidecarLauncherS591 => '未检测到可启动的 sidecar 入口，已跳过自动启动。';
+  String get sidecarLauncherS591 =>
+      'No runnable sidecar entry point was found; skipped automatic start.';
 
   @override
-  String get sidecarLauncherS140 => 'Sidecar 初始化成功。';
+  String get sidecarLauncherS140 => 'Sidecar initialized successfully.';
 
   @override
-  String get sidecarLauncherS193 => 'sidecar 启动失败：服务未在预期时间内通过 health 检查。';
+  String get sidecarLauncherS193 =>
+      'Sidecar start failed: service did not pass the health check in time.';
 
   @override
-  String get sidecarLauncherS194 => 'sidecar 启动失败：运行目录缺少 dist/main.js。';
+  String get sidecarLauncherS194 =>
+      'Sidecar start failed: runtime directory is missing dist/main.js.';
+
+  @override
+  String sidecarLauncherLaunchCommandLog(String command) {
+    return 'Starting sidecar command: $command';
+  }
+
+  @override
+  String sidecarLauncherStartedPidLog(int pid) {
+    return 'Sidecar process started successfully: PID $pid';
+  }
+
+  @override
+  String sidecarLauncherStartFailedLog(Object error) {
+    return 'Sidecar start failed: $error';
+  }
+
+  @override
+  String sidecarLauncherTerminatedOldPidLog(String pid) {
+    return 'Terminated old sidecar process PID=$pid on port 4317';
+  }
+
+  @override
+  String sidecarLauncherForceTerminatedOldPidLog(String pid) {
+    return 'Old sidecar process did not exit in time; force terminated PID=$pid on port 4317';
+  }
+
+  @override
+  String sidecarLauncherTerminateOldFailedLog(Object error) {
+    return 'Failed to terminate old sidecar process: $error';
+  }
+
+  @override
+  String sidecarLauncherDirectoryProbeCwdLog(String path) {
+    return 'Sidecar directory probe: cwd=$path';
+  }
+
+  @override
+  String sidecarLauncherDirectoryProbeExecutableLog(String path) {
+    return 'Sidecar directory probe: executable=$path';
+  }
+
+  @override
+  String sidecarLauncherInvalidExplicitDirLog(String path) {
+    return 'KIDMEMORY_SIDECAR_DIR does not contain a runnable sidecar (missing dist/main.js): $path';
+  }
+
+  @override
+  String sidecarLauncherDirectoryProbeCandidateLog(String path, String status) {
+    return 'Sidecar directory probe: $path => $status';
+  }
+
+  @override
+  String sidecarLauncherDirectoryProbeFoundLog(String path) {
+    return 'Sidecar directory probe: found $path';
+  }
 
   @override
   String get desktopShellS696 => '温暖童趣';
@@ -2075,7 +2198,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get desktopShellS129 => 'PDF 文件 高质量 PDF（打印级别）';
 
   @override
-  String get desktopShellS89 => '11:05:12 准备素材并构建 workspace';
+  String get desktopShellS89 => '11:05:12 准备素材并构建创作空间';
 
   @override
   String get desktopShellS90 => '11:05:18 调用 sidecar 生成任务';
@@ -2171,7 +2294,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportActionsS414 => '导出文件夹';
 
   @override
-  String get exportActionsS416 => '导出物尚未同步到 Supabase Storage，暂不能复制分享文案';
+  String get exportActionsS416 =>
+      'The export has not finished cloud share sync yet, so the share text cannot be copied.';
 
   @override
   String get exportActionsS273 => '分享文案已复制';
@@ -2204,7 +2328,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportSyncS337 => '同步入队失败';
 
   @override
-  String get exportSyncS157 => 'Supabase Storage 同步失败';
+  String get exportSyncS157 => 'Cloud share sync failed';
 
   @override
   String get exportGenerationStateS736 => '生成完成，可预览并导出 PDF';
@@ -2234,13 +2358,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get directUploadS855 => '请先选择一个孩子再创建扫码上传会话';
 
   @override
-  String get directUploadS650 => '正在创建 Direct Upload 扫码会话...';
+  String get directUploadS650 => '正在创建扫码上传会话...';
 
   @override
   String get textUtilsS557 => '无错误输出';
 
   @override
-  String get exportAssetSyncS862 => '请先配置 Supabase Storage';
+  String get exportAssetSyncS862 => 'Configure cloud sharing first';
 
   @override
   String get exportPageS851 => '请先完成生成，再导出';
@@ -2253,4 +2377,1050 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportPageS702 => '点击导出，准备读取当前导出目录';
+
+  @override
+  String setupLocalDataDirUpdatedLog(String path) {
+    return 'Local data directory updated: $path';
+  }
+
+  @override
+  String setupSchemaInitIncompleteLog(String message) {
+    return 'Schema initialization is incomplete: $message';
+  }
+
+  @override
+  String setupReadinessCompleteMessage(int done, int total) {
+    return 'Initialization complete, finished $done / $total readiness checks';
+  }
+
+  @override
+  String setupInitializationFailed(Object error) {
+    return 'Initialization failed: $error';
+  }
+
+  @override
+  String setupStorageTestPassed(String cleanupMessage) {
+    return 'Test passed$cleanupMessage';
+  }
+
+  @override
+  String setupManualCheckTriggeredLog(String title) {
+    return 'Manually triggered setup check: $title';
+  }
+
+  @override
+  String setupTestConnectionFailedWithMessage(String message) {
+    return 'Connection test failed: $message';
+  }
+
+  @override
+  String setupOpenDirectoryPickerFailed(Object error) {
+    return 'Failed to open directory picker: $error';
+  }
+
+  @override
+  String setupLocalDataDirPickFailedLog(Object error) {
+    return 'Local data directory selection failed: $error';
+  }
+
+  @override
+  String setupHomebrewNotWritableForPackage(String packageName) {
+    return 'Homebrew directory is not writable, cannot install $packageName.';
+  }
+
+  @override
+  String setupHomebrewBlockedPaths(String paths) {
+    return 'Blocked paths: $paths';
+  }
+
+  @override
+  String setupPermissionDeniedInstallWithOutput(String packageName) {
+    return 'The current user does not have permission to install $packageName automatically.';
+  }
+
+  @override
+  String setupPermissionDeniedInstallRetry(String packageName) {
+    return 'The current user does not have permission to install $packageName automatically. Fix Homebrew permissions and retry.';
+  }
+
+  @override
+  String setupInstallCommandFailed(String output) {
+    return 'Install command failed: $output';
+  }
+
+  @override
+  String setupInstallConfigureFailed(String error) {
+    return 'Install and configuration failed: $error';
+  }
+
+  @override
+  String setupCommandTimeoutMessage(int minutes) {
+    return 'The command ran for more than $minutes minutes and was stopped automatically. Check the network, Homebrew, or database service status and retry.';
+  }
+
+  @override
+  String setupOpenSupabaseDocsFailed(Object error) {
+    return 'Failed to open the official Supabase docs: $error';
+  }
+
+  @override
+  String setupAutoStartUnsupported(String title) {
+    return 'Automatic start is not supported yet: $title';
+  }
+
+  @override
+  String setupConfigItemRecorded(String title) {
+    return 'Configuration item \"$title\" was recorded and will be checked later';
+  }
+
+  @override
+  String setupInvalidPostgresRuntimeDir(String path) {
+    return 'KIDMEMORY_POSTGRES_RUNTIME_DIR is invalid (must contain bin/lib/share): $path';
+  }
+
+  @override
+  String setupBundledPostgresPortLog(int port) {
+    return 'Bundled PostgreSQL will use port $port';
+  }
+
+  @override
+  String setupPgvectorWorkflowStartedLog(String localPgv) {
+    return 'Started pgvector installation and configuration (local pgvector: $localPgv)';
+  }
+
+  @override
+  String datasetSearchCompletedStatus(int count) {
+    return 'Search completed, $count results';
+  }
+
+  @override
+  String datasetSearchIndexingBaseStatus(int searchable, int indexing) {
+    return '$searchable searchable · $indexing indexing';
+  }
+
+  @override
+  String datasetSearchIndexingFailedStatus(String base, int failed) {
+    return '$base · $failed failed';
+  }
+
+  @override
+  String datasetSampleImportCompletedLog(int count) {
+    return 'Sample dataset import completed: $count assets';
+  }
+
+  @override
+  String datasetSampleImportIncompleteLog(String raw) {
+    return 'Sample dataset import incomplete: $raw';
+  }
+
+  @override
+  String datasetSampleImportExceptionLog(Object error) {
+    return 'Sample dataset import exception: $error';
+  }
+
+  @override
+  String datasetSampleImportFailedWithError(Object error) {
+    return 'Sample dataset import failed: $error';
+  }
+
+  @override
+  String datasetChildAddFailedLog(String raw) {
+    return 'Add child profile failed: $raw';
+  }
+
+  @override
+  String datasetChildAddedLog(String childId, String name) {
+    return 'Added child profile: $childId $name';
+  }
+
+  @override
+  String datasetChildAddedMessage(String name) {
+    return 'Added child profile: $name';
+  }
+
+  @override
+  String datasetChildEditedLog(String childId, String name) {
+    return 'Edited profile: $childId updated to $name';
+  }
+
+  @override
+  String datasetChildEditedMessage(String name) {
+    return 'Profile updated to: $name';
+  }
+
+  @override
+  String datasetChildDeleteConfirmMessage(String name) {
+    return 'Delete \"$name\"? Clear this child\'s linked assets before deleting.';
+  }
+
+  @override
+  String datasetChildDeletedLog(String childId, String name) {
+    return 'Deleted child profile: $childId $name';
+  }
+
+  @override
+  String datasetChildDeletedMessage(String name) {
+    return 'Deleted child profile: $name';
+  }
+
+  @override
+  String datasetChildDeleteFailedLog(String childId, Object error) {
+    return 'Delete child profile failed: $childId $error';
+  }
+
+  @override
+  String get datasetChildNameLabel => 'Child name';
+
+  @override
+  String datasetExternalOpenSucceededLog(String label, String target) {
+    return '$label opened successfully: $target';
+  }
+
+  @override
+  String datasetExternalOpenFailedMessage(String label, Object error) {
+    return '$label open failed: $error';
+  }
+
+  @override
+  String datasetSampleResetLog(String childId, int count) {
+    return 'Sample data reset: $childId, removed $count assets';
+  }
+
+  @override
+  String datasetPreviewOpenSampleAssetLog(String assetId) {
+    return 'Opened sample asset preview: $assetId';
+  }
+
+  @override
+  String datasetPreviewOpenHistoryLog(String jobId) {
+    return 'Opened historical work preview: $jobId';
+  }
+
+  @override
+  String datasetPreviewLogStatusLine(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String datasetPreviewOpenPageLog(String jobId) {
+    return 'Opened preview page: $jobId';
+  }
+
+  @override
+  String installRunnerAttemptLog(String action) {
+    return 'Trying: $action';
+  }
+
+  @override
+  String installRunnerCommandSucceededLog(String action) {
+    return 'Install command succeeded: $action';
+  }
+
+  @override
+  String installRunnerTimeoutLog(String action) {
+    return 'Install timed out ($action); process terminated.';
+  }
+
+  @override
+  String installRunnerFailedWithOutputLog(String action, String output) {
+    return 'Install failed ($action): $output';
+  }
+
+  @override
+  String installRunnerFailedWithErrorLog(String action, Object error) {
+    return 'Install failed ($action): $error';
+  }
+
+  @override
+  String exportCreateDirectoryFailedMessage(Object error) {
+    return 'Failed to create export directory: $error';
+  }
+
+  @override
+  String exportInProgressStatus(String destinationPath) {
+    return 'Exporting to $destinationPath';
+  }
+
+  @override
+  String exportPreparingDestinationLog(String destinationPath) {
+    return 'Preparing export to $destinationPath';
+  }
+
+  @override
+  String exportSucceededLog(String exportLabel, String actualPath) {
+    return '$exportLabel export succeeded: $actualPath';
+  }
+
+  @override
+  String exportFailedLog(String exportLabel) {
+    return '$exportLabel export failed';
+  }
+
+  @override
+  String exportExceptionMessage(String exportLabel, Object error) {
+    return '$exportLabel export exception: $error';
+  }
+
+  @override
+  String exportGenerationStartedLog(int count) {
+    return 'Started generation with $count selected assets';
+  }
+
+  @override
+  String exportGenerationCompletedLog(String jobId) {
+    return 'Generation completed with jobId: $jobId';
+  }
+
+  @override
+  String exportGenerationExceptionMessage(Object error) {
+    return 'Generation exception: $error';
+  }
+
+  @override
+  String exportResultSucceededStatus(String exportLabel, String actualPath) {
+    return '$exportLabel exported: $actualPath';
+  }
+
+  @override
+  String exportResultFailedStatus(String exportLabel) {
+    return '$exportLabel export failed; retry available';
+  }
+
+  @override
+  String directUploadPullbackFailedMessage(Object error) {
+    return '扫码上传回拉失败：$error';
+  }
+
+  @override
+  String directUploadCreateSessionFailedMessage(String message) {
+    return '创建扫码上传会话失败：$message';
+  }
+
+  @override
+  String importSummaryFallbackImportedMessage(int count) {
+    return 'Asset library refreshed; added $count items. Sidecar did not return full import counters.';
+  }
+
+  @override
+  String importSummaryCountersWithFailures(
+    int importedCount,
+    int duplicatesCount,
+    int skippedCount,
+    int failedCount,
+    String failedReasons,
+  ) {
+    return 'Imported $importedCount · duplicates $duplicatesCount · skipped $skippedCount · failed $failedCount: $failedReasons';
+  }
+
+  @override
+  String get importSummaryFailedReasonSeparator => ', ';
+
+  @override
+  String importStagingFailedLog(String path, Object error) {
+    return 'Import staging failed: $path ($error)';
+  }
+
+  @override
+  String get generationTemplateWarmChildhood => 'Warm childhood';
+
+  @override
+  String get generationTemplateFairyTaleMemory => 'Fairy-tale growth memory';
+
+  @override
+  String get generationTemplateSimpleDocumentary => 'Simple documentary';
+
+  @override
+  String contentMetricItemCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String contentMetricImageCount(int count) {
+    return '$count images';
+  }
+
+  @override
+  String contentMetricCraftCount(int count) {
+    return '$count crafts';
+  }
+
+  @override
+  String agentSettingsConnectionTestFailedWithError(Object error) {
+    return 'Connection test failed: $error';
+  }
+
+  @override
+  String agentSettingsSaveFailedWithError(Object error) {
+    return 'Failed to save configuration: $error';
+  }
+
+  @override
+  String assetLibrarySubtitle(String childName) {
+    return 'Manage $childName\'s photos, drawings, and crafts. Select assets to create picture books, memory videos, or keepsake albums.';
+  }
+
+  @override
+  String assetLibrarySearchResultsStatus(String status, int count) {
+    return '$status · $count results';
+  }
+
+  @override
+  String assetLibrarySearchFailedStatus(Object error) {
+    return 'Search failed: $error';
+  }
+
+  @override
+  String assetLibrarySmartPickedCount(int count) {
+    return 'The assistant picked $count assets for you';
+  }
+
+  @override
+  String assetLibrarySmartPickAppliedMessage(int count) {
+    return 'Selected $count assets. You can fine-tune them manually.';
+  }
+
+  @override
+  String assetLibraryImportFailedMessage(Object error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String assetLibraryImportSummaryMessage(
+    int imported,
+    int duplicates,
+    int skipped,
+    int failed,
+  ) {
+    return 'Imported $imported · duplicates $duplicates · skipped $skipped · failed $failed';
+  }
+
+  @override
+  String assetLibraryDeleteSelectedConfirm(int count) {
+    return 'Delete $count selected assets?';
+  }
+
+  @override
+  String assetLibraryDeletedSelectedMessage(int count) {
+    return 'Deleted $count assets';
+  }
+
+  @override
+  String assetLibraryDateYmd(int year, int month, int day) {
+    return '$year-$month-$day';
+  }
+
+  @override
+  String assetLibraryOpenOriginalFailedMessage(Object error) {
+    return 'Failed to open original file: $error';
+  }
+
+  @override
+  String assetLibraryCurrentChildChip(String childName) {
+    return 'Current child: $childName';
+  }
+
+  @override
+  String assetLibraryAssetCountChip(int count) {
+    return '$count assets';
+  }
+
+  @override
+  String assetLibraryCollectionSelectedCount(int count) {
+    return '$count assets in this collection';
+  }
+
+  @override
+  String assetLibrarySelectedAssetsCount(int count) {
+    return '$count assets selected';
+  }
+
+  @override
+  String get assetLibraryResyncLabel => 'Resync';
+
+  @override
+  String get assetLibrarySyncToStorageLabel => 'Sync to storage';
+
+  @override
+  String get assetLibrarySyncedToStorageText => 'Synced to storage.';
+
+  @override
+  String get assetLibrarySyncRunningOrRetryText =>
+      'Sync is running or waiting to retry.';
+
+  @override
+  String get assetLibraryLocalSyncFallbackText =>
+      'Stored locally; sync to storage when ready.';
+
+  @override
+  String get assetLibraryStatusSynced => 'Synced';
+
+  @override
+  String get assetLibraryStatusSyncing => 'Syncing';
+
+  @override
+  String get assetLibraryStatusRetryWaiting => 'Retry pending';
+
+  @override
+  String get assetLibraryStatusFailed => 'Sync failed';
+
+  @override
+  String get assetLibraryStatusLocalOnly => 'Local only';
+
+  @override
+  String get generateExportDefaultPageSize => 'A4 portrait  210 x 297 mm';
+
+  @override
+  String get generateExportDefaultStyle =>
+      'Warm childhood  Friendly and suitable for children';
+
+  @override
+  String get generateExportDefaultPdfTarget =>
+      'PDF file  High-quality PDF for print';
+
+  @override
+  String generateExportExportedState(String exportLabel) {
+    return '$exportLabel exported';
+  }
+
+  @override
+  String get generateExportCoverConfirmBody =>
+      'A free image-generation service will create the cover.\nKid photos will not be uploaded; only a text description is sent.';
+
+  @override
+  String generateExportSelectedAssetsLabel(int count) {
+    return '$count assets selected';
+  }
+
+  @override
+  String get generateExportTaskGoalLabel => 'Goal';
+
+  @override
+  String get generateExportTaskGoalPictureBook => 'Children\'s picture book';
+
+  @override
+  String get generateExportSuggestedAssetsLabel => 'Suggested assets';
+
+  @override
+  String get generateExportSuggestedAssetsValue => 'At least 6';
+
+  @override
+  String generateExportLongImageOption(String sizeText) {
+    return '$sizeText / long image';
+  }
+
+  @override
+  String generateExportSummaryText(
+    int selectedCount,
+    String generationState,
+    String styleText,
+    String sizeText,
+    String exportLabel,
+  ) {
+    return 'Assets             $selectedCount\nGeneration state   $generationState\nWriting style      $styleText\nPage size          $sizeText\nExport target      $exportLabel';
+  }
+
+  @override
+  String generateExportSelectedAssetsShort(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String generateExportAssetInputSelectedTitle(int count) {
+    return 'Assets · $count selected';
+  }
+
+  @override
+  String generateExportPagePreviewCount(int pageCount) {
+    return 'Page preview (about $pageCount pages)';
+  }
+
+  @override
+  String generateExportActivityEmptyMessage(String statusMessage) {
+    return 'After you click Start generation, Agent analysis, manuscript building, preview rendering, and export status will appear here.\nCurrent status: $statusMessage';
+  }
+
+  @override
+  String generateExportCurrentStatusLine(String statusMessage) {
+    return 'Current status: $statusMessage';
+  }
+
+  @override
+  String generateExportReasonLine(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String generateExportReadyToExportSubtitle(String exportLabel) {
+    return 'Generation is complete. Preview or export $exportLabel.';
+  }
+
+  @override
+  String generateExportDirectoryHint(String exportLabel) {
+    return 'Exports are written to the current export directory. After completion, use Open export folder to view the $exportLabel file.';
+  }
+
+  @override
+  String generateExportReadinessAssetRatio(int selectedCount) {
+    return '$selectedCount / suggested 6+';
+  }
+
+  @override
+  String get generateExportCloudShareLabel => 'Cloud sharing';
+
+  @override
+  String get generateExportCloudShareValue => 'Upload after generation';
+
+  @override
+  String get generateExportPreviewReadinessMessage => 'Ready: export can start';
+
+  @override
+  String get generateExportPreviewSetupUrlTitle => '1. Configure Supabase URL';
+
+  @override
+  String get generateExportPreviewSetupUrlBody =>
+      'Confirm that the project URL and key are filled in.';
+
+  @override
+  String get generateExportPreviewStateDetected => 'Detected';
+
+  @override
+  String get generateExportPreviewSetupBucketTitle => '2. Configure bucket';
+
+  @override
+  String get generateExportPreviewSetupBucketBody =>
+      'Confirm that the export data bucket exists.';
+
+  @override
+  String get generateExportPreviewActionOpen => 'Open';
+
+  @override
+  String get generateExportPreviewStateConfigured => 'Configured';
+
+  @override
+  String get generateExportPreviewSetupPermissionTitle =>
+      '3. Storage permissions';
+
+  @override
+  String get generateExportPreviewSetupPermissionBody =>
+      'Confirm that service-role key permissions allow storage reads and writes.';
+
+  @override
+  String get generateExportPreviewStatePassed => 'Passed';
+
+  @override
+  String get generateExportPreviewSetupSignatureTitle =>
+      '4. Directory and signing';
+
+  @override
+  String get generateExportPreviewSetupSignatureBody =>
+      'Confirm that the signed URL TTL configuration matches expectations.';
+
+  @override
+  String get generateExportPreviewStateNormal => 'Normal';
+
+  @override
+  String get generateExportPreviewSetupConnectionTitle => '5. Connection test';
+
+  @override
+  String get generateExportPreviewSetupConnectionBody =>
+      'Successfully connected to the export service.';
+
+  @override
+  String get generateExportPreviewStateConnected => 'Connected';
+
+  @override
+  String get generateExportPreviewSignedUrlPassed =>
+      'Signed URL validation passed';
+
+  @override
+  String get generateExportPreviewExportCompleted => 'Export job completed';
+
+  @override
+  String get generateExportPreviewLogReadingSamples => 'Reading samples';
+
+  @override
+  String get generateExportPreviewLogCoverGenerated => 'Cover generated';
+
+  @override
+  String get generateExportPreviewLogExportSubmitted => 'Export job submitted';
+
+  @override
+  String get generateExportPreviewExportImage => 'Export as image';
+
+  @override
+  String get generateExportPreviewExportPdf => 'Export as PDF';
+
+  @override
+  String get generateExportPreviewExportLongImage => 'Export as long image';
+
+  @override
+  String get generateExportPreviewSelectedPageSize => 'A4 portrait';
+
+  @override
+  String get generateExportPreviewSelectedStyle => 'Natural and gentle';
+
+  @override
+  String generateExportPreviewShareText(String url, int seconds) {
+    return 'KidMemory portfolio: $url\nLink valid for $seconds seconds';
+  }
+
+  @override
+  String directUploadChildIdLine(String childId) {
+    return 'Child: $childId';
+  }
+
+  @override
+  String directUploadClientLimitHint(int count) {
+    return 'Recommended ≤$count items per batch. This is a UX limit, not a security limit.';
+  }
+
+  @override
+  String trustedUploadCreateSessionFailed(Object error) {
+    return 'Failed to create upload session: $error';
+  }
+
+  @override
+  String trustedUploadCloseSessionFailed(Object error) {
+    return 'Failed to close session: $error';
+  }
+
+  @override
+  String trustedUploadRetryFailed(Object error) {
+    return 'Retry failed: $error';
+  }
+
+  @override
+  String trustedUploadRemainingMinutes(int minutes) {
+    return 'Time remaining: $minutes minutes';
+  }
+
+  @override
+  String trustedUploadMaxItems(int count) {
+    return 'Limit: $count images';
+  }
+
+  @override
+  String get trustedUploadCopiedMessage => 'Copied to clipboard';
+
+  @override
+  String trustedUploadLoadFailed(String error) {
+    return 'Load failed: $error';
+  }
+
+  @override
+  String get trustedUploadNoItemsMessage =>
+      'No upload items yet\nChoose images on your phone to upload';
+
+  @override
+  String trustedUploadItemFailed(String message) {
+    return 'Failed: $message';
+  }
+
+  @override
+  String contentMetricTagCount(int count) {
+    return '$count tags';
+  }
+
+  @override
+  String get contentNoRecentWorksMessage => 'No recent works';
+
+  @override
+  String get contentTimelineBirth => '😊\nBirth';
+
+  @override
+  String get contentTimelineFirstSmile => '🖍️\nFirst smile';
+
+  @override
+  String get contentTimelineFirstDrawing => '🎨\nFirst drawing';
+
+  @override
+  String get contentTimelineDaycare => '🏫\nDaycare started';
+
+  @override
+  String get contentTimelineBicycle => '🚲\nLearned to ride';
+
+  @override
+  String get contentTimelineNewYearArtwork => '🏮\nNew Year artwork';
+
+  @override
+  String get contentProfileSampleDetails =>
+      'Profile information\n\nGender               Boy\nBirthplace           Shanghai\nZodiac               Gemini\nBlood type           A\nCreated              2024-06-18\nLast updated         2025-05-30\n\nGrowth milestones\nFirst drawing   2022-03-15\nStarted daycare 2023-09-01\nFirst exhibition 2024-05-20\nLearned to ride a bicycle 2024-10-12';
+
+  @override
+  String contentPaginationStatus(
+    int currentPage,
+    int totalPages,
+    int pageSize,
+  ) {
+    return 'Page $currentPage / $totalPages · $pageSize per page';
+  }
+
+  @override
+  String contentGenerationCompletePages(int currentPage, int totalPages) {
+    return 'Generated     $currentPage/$totalPages pages';
+  }
+
+  @override
+  String contentFlowPrepareAssets(int count) {
+    return '🗂️  Prepare assets\n$count assets selected';
+  }
+
+  @override
+  String get contentFlowAgentGenerated =>
+      '✅  Agent structure\nPortfolio content generated';
+
+  @override
+  String get contentFlowAgentWaiting =>
+      '⏳  Agent structure\nWaiting for generation';
+
+  @override
+  String get contentFlowExportCompleted =>
+      '📄  Export file\nHigh-quality file generated';
+
+  @override
+  String get contentFlowExportWaiting => '📄  Export file\nWaiting to export';
+
+  @override
+  String contentSelectedAssetsTitle(int count) {
+    return 'Selected assets ($count)';
+  }
+
+  @override
+  String contentPagePreviewCount(int pageCount) {
+    return 'Page preview ($pageCount pages)';
+  }
+
+  @override
+  String get contentTimelineSourceText =>
+      'Stage: live log\nSource: local task center';
+
+  @override
+  String get datasetChildrenClearBirthday => 'Clear birthday';
+
+  @override
+  String get childProfileEmptyDescription =>
+      'Add a child first, then start recording assets, growth timeline\nand portfolios to preserve every moment worth remembering.';
+
+  @override
+  String childProfileLinkedAssets(int count) {
+    return 'Linked assets: $count';
+  }
+
+  @override
+  String childProfileAssetChip(int count) {
+    return 'Assets $count';
+  }
+
+  @override
+  String childProfileArtworkChip(int count) {
+    return 'Drawings $count';
+  }
+
+  @override
+  String childProfilePhotoChip(int count) {
+    return 'Photos $count';
+  }
+
+  @override
+  String get childProfilePortraitSmileKeyword => 'smile';
+
+  @override
+  String get childProfileGrowthStatsTitle => 'Growth Stats';
+
+  @override
+  String get childProfileAssetDistributionTitle => 'Asset Distribution';
+
+  @override
+  String get childProfileRecentWorksTitle => 'Recent Works';
+
+  @override
+  String get childProfileGrowthTimelineTitle => 'Growth Timeline';
+
+  @override
+  String childProfileAssetCountValue(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get childProfileTimelineAutoUpdate =>
+      'Timeline updates automatically by asset date';
+
+  @override
+  String get childProfilePortfolioSavedLocally =>
+      'Portfolio records are saved locally';
+
+  @override
+  String get creationPhasePreparing => 'Prepare';
+
+  @override
+  String get creationPhasePlanning => 'Planning';
+
+  @override
+  String get creationPhasePlanReady => 'Plan ready';
+
+  @override
+  String get creationPhaseCreatingJob => 'Creating job';
+
+  @override
+  String get creationPhaseEnvironmentPreparing => 'Preparing video environment';
+
+  @override
+  String get creationPhaseGenerating => 'Generating';
+
+  @override
+  String get creationPhaseReviewing => 'Ready to review';
+
+  @override
+  String get creationPhaseExporting => 'Exporting locally';
+
+  @override
+  String get creationPhasePublished => 'Ready to share';
+
+  @override
+  String get creationPhaseFailed => 'Creation failed';
+
+  @override
+  String get creationPlanningStatus =>
+      'Analyzing assets, selecting a skill, and generating a plan';
+
+  @override
+  String get creationPlanningAnalyzeAssetsTitle => 'Analyze assets';
+
+  @override
+  String creationPlanningAnalyzeAssetsBody(Object count) {
+    return 'Reading $count selected photos, artwork, and tags';
+  }
+
+  @override
+  String get creationPlanningSelectSkillTitle => 'Select Skill';
+
+  @override
+  String get creationPlanningSelectSkillBody =>
+      'Matching storybook, memory book, or memoir video capability';
+
+  @override
+  String get creationPlanningGeneratePlanTitle => 'Generate plan';
+
+  @override
+  String get creationPlanningGeneratePlanBody =>
+      'Organizing story structure, steps, and prerequisites';
+
+  @override
+  String get creationPlanReadyStatus =>
+      'The creation plan is ready. Confirm it before generation starts.';
+
+  @override
+  String get creationPlanMissingStatus =>
+      'The creation plan is missing. Please plan again.';
+
+  @override
+  String get creationPlanReadySubtitle =>
+      'Review the agent plan, skill, and prerequisites before creating the generation job.';
+
+  @override
+  String get creationPlanConfirmationTitle => 'Confirm creation plan';
+
+  @override
+  String get creationPlanSkillLabel => 'Skill';
+
+  @override
+  String get creationPlanUnknownSkill => 'Waiting for backend';
+
+  @override
+  String get creationPlanStepsLabel => 'Plan steps';
+
+  @override
+  String get creationPlanRequirementsLabel => 'Prerequisites';
+
+  @override
+  String get creationConfirmPlanAction => 'Confirm plan and generate';
+
+  @override
+  String creationGenerationFailedWithStep(Object step, Object reason) {
+    return 'Generation failed: $step could not finish. $reason';
+  }
+
+  @override
+  String creationFailureStepLine(Object step) {
+    return 'Failed step: $step';
+  }
+
+  @override
+  String creationFailureCodeLine(Object code) {
+    return 'Error code: $code';
+  }
+
+  @override
+  String get creationReplanAction => 'Plan again';
+
+  @override
+  String get creationCreatingJobStatus => 'Creating the generation job';
+
+  @override
+  String get creationEnvironmentPreparingStatus =>
+      'Preparing video generation environment';
+
+  @override
+  String get creationPlanInvalidatedStatus => '创作设置已更新，请重新规划。';
+
+  @override
+  String get creationGeneratingStatus => 'Running the generation job';
+
+  @override
+  String get generateExportCloudStorageLabel => 'Cloud storage';
+
+  @override
+  String get generateExportLocalServiceLabel => 'Local service';
+
+  @override
+  String get generateExportMp4Target => 'MP4 video  memoir video';
+
+  @override
+  String get creationPhasePlanConfirm => 'Confirm plan';
+
+  @override
+  String get creationPhasePreviewResult => 'Review result';
+
+  @override
+  String get creationPhaseExportShare => 'Export and share';
+
+  @override
+  String get creationFlowTitle => 'Creation flow';
+
+  @override
+  String get generationBackendStepsTitle => 'Generation steps';
+
+  @override
+  String get generationLocalProgressTitle => 'Creation progress';
+
+  @override
+  String get generateExportStartPlanningAction => 'Start planning';
+
+  @override
+  String get generateExportMp4Action => 'Export MP4';
+
+  @override
+  String get generateExportOpenVideoPreviewAction => 'Open video preview';
+
+  @override
+  String get generateExportVideoPreviewUnavailable =>
+      'The video file is not ready yet. Regenerate or view logs.';
+
+  @override
+  String get generateExportVideoKeyword => 'video';
+
+  @override
+  String get directUploadServiceUnavailableMessage =>
+      'QR upload is temporarily unavailable. Please try again later.';
+
+  @override
+  String get directUploadSessionIncompleteMessage =>
+      'QR upload session could not be created. Check upload settings and try again.';
+
+  @override
+  String get directUploadConfigIncompleteMessage =>
+      'QR upload settings are incomplete. Check upload settings and try again.';
+
+  @override
+  String get feedbackRequestKeyword => 'please';
 }

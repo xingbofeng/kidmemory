@@ -47,7 +47,9 @@ extension _DesktopShellSetupDialogStorageSubmit on _DesktopShellState {
       );
     });
     _showSnackBar(
-      result.okValue ? AppLocalizations.of(context)!.setupStorageConfigSaved : AppLocalizations.of(context)!.setupStorageConfigSaveFailed,
+      result.okValue
+          ? AppLocalizations.of(context)!.setupStorageConfigSaved
+          : AppLocalizations.of(context)!.setupStorageConfigSaveFailed,
     );
     await refreshReadiness();
   }

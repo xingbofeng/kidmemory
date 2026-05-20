@@ -2,8 +2,9 @@ part of '../desktop_shell.dart';
 
 extension _DesktopShellSidecarLifecycle on _DesktopShellState {
   Future<void> _bootstrapSidecarAndRefresh() async {
+    final l10n = AppLocalizations.of(context)!;
     if (mounted) {
-      _setShellState(() => readinessMessage = AppLocalizations.of(context)!.sidecarS151);
+      _setShellState(() => readinessMessage = l10n.sidecarS151);
     }
     if (Platform.environment['FLUTTER_TEST'] == 'true') {
       await _ensureSidecarRunning();
@@ -11,14 +12,24 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
       return;
     }
     if (_bundledPostgresRuntimeAvailable()) {
-      final pgReady = await _ensureBundledPostgresReady(AppLocalizations.of(context)!.setupPostgresTitle);
+      final bool pgReady;
+      try {
+        pgReady = await _ensureBundledPostgresReady(
+          l10n.setupPostgresTitle,
+        );
+      } catch (error) {
+        _appendLog(l10n.setupSidecarStartFailedNodeOrBundled);
+        _appendLog('$error');
+        _markSidecarUnavailable(l10n.sidecarS266);
+        return;
+      }
       if (!pgReady) {
-        _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS266);
+        _markSidecarUnavailable(l10n.sidecarS266);
         return;
       }
       final relaunched = await _ensureSidecarRunning(forceRestart: true);
       if (!relaunched) {
-        _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS155);
+        _markSidecarUnavailable(l10n.sidecarS155);
         return;
       }
       await refreshReadiness();
@@ -30,13 +41,13 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
     }
     if (mounted) {
       _setShellState(() {
-        readinessMessage = AppLocalizations.of(context)!.sidecarS652;
+        readinessMessage = l10n.sidecarS652;
         readinessChecks = _pgFirstSetupChecks();
       });
     }
     final sidecarReady = await _ensureSidecarRunning();
     if (!sidecarReady) {
-      _markSidecarUnavailable(AppLocalizations.of(context)!.sidecarS145);
+      _markSidecarUnavailable(l10n.sidecarS145);
       return;
     }
     await refreshReadiness();
@@ -58,7 +69,7 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
     if (logMessage != null) _appendLog(logMessage);
     if (!mounted) return;
     _setShellState(() {
-      readinessMessage = _sidecarDisconnectedMessage;
+      readinessMessage = _sidecarDisconnectedMessage(context);
       readinessChecks = _pgFirstSetupChecks();
     });
   }
@@ -76,7 +87,9 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
           ? check
           : _copySetupCheck(
               check,
-              state: check.ok == true ? check.state : AppLocalizations.of(context)!.sidecarS792,
+              state: check.ok == true
+                  ? check.state
+                  : AppLocalizations.of(context)!.sidecarS792,
               actionEnabled: false,
             );
       if (check.ok != true) blocked = true;

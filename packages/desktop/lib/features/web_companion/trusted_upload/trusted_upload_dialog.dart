@@ -6,14 +6,11 @@ import 'dart:async';
 import 'trusted_upload_controller.dart';
 import 'trusted_upload_models.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/chrome.dart';
 
-/// Trusted Upload 对话框
+/// Trusted Upload dialog.
 ///
-/// 显示：
-/// - 二维码（或可复制的 URL）
-/// - 会话信息（过期时间、上传数量）
-/// - 上传项状态列表
-/// - 关闭会话按钮
+/// Shows QR/link access, session information, item status, and close controls.
 class TrustedUploadDialog extends StatefulWidget {
   const TrustedUploadDialog({
     required this.controller,
@@ -47,11 +44,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
   }
 
   void _startPolling() {
-    // 每 3 秒轮询一次状态
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       _fetchStatus();
     });
-    // 立即获取一次
     _fetchStatus();
   }
 
@@ -89,7 +84,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('关闭会话失败: $e'),
+            content: Text(
+              AppLocalizations.of(context)!.trustedUploadCloseSessionFailed(e),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -105,7 +102,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('重试失败: $e'),
+            content: Text(
+              AppLocalizations.of(context)!.trustedUploadRetryFailed(e),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -119,7 +118,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
     if (session == null) {
       return AlertDialog(
         title: Text(AppLocalizations.of(context)!.errorTitle),
-        content: Text(AppLocalizations.of(context)!.trustedUploadSessionNotReadyMessage),
+        content: Text(
+          AppLocalizations.of(context)!.trustedUploadSessionNotReadyMessage,
+        ),
       );
     }
 
@@ -131,10 +132,9 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题栏
             Row(
               children: [
-                const Icon(Icons.qr_code_2, size: 32),
+                const AppAssetIcon(uploadIconAsset, size: 32),
                 const SizedBox(width: 12),
                 Text(
                   AppLocalizations.of(context)!.trustedUploadDialogTitle,
@@ -142,14 +142,13 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const AppAssetIcon(stopIconAsset, size: 18),
                   onPressed: _handleClose,
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // 说明横幅
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -159,7 +158,7 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue),
+                  AppAssetIcon(infoIconAsset, size: 22),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -172,22 +171,16 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
             ),
             const SizedBox(height: 16),
 
-            // 会话信息
             _buildSessionInfo(session),
             const SizedBox(height: 16),
 
-            // 二维码或 URL
             _buildQRCodeSection(session),
             const SizedBox(height: 16),
 
-            // 状态统计
             if (_status != null) _buildStatusSummary(_status!),
             const SizedBox(height: 16),
 
-            // 上传项列表
-            Expanded(
-              child: _buildItemsList(),
-            ),
+            Expanded(child: _buildItemsList()),
           ],
         ),
       ),
@@ -201,13 +194,19 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
 
     return Row(
       children: [
-        const Icon(Icons.timer_outlined, size: 20),
+        const AppAssetIcon(timeIconAsset, size: 20),
         const SizedBox(width: 8),
-        Text('剩余时间: $remainingMinutes 分钟'),
+        Text(
+          AppLocalizations.of(
+            context,
+          )!.trustedUploadRemainingMinutes(remainingMinutes),
+        ),
         const SizedBox(width: 24),
-        const Icon(Icons.upload_outlined, size: 20),
+        const AppAssetIcon(uploadIconAsset, size: 20),
         const SizedBox(width: 8),
-        Text('上限: ${session.maxItems} 张'),
+        Text(
+          AppLocalizations.of(context)!.trustedUploadMaxItems(session.maxItems),
+        ),
       ],
     );
   }
@@ -260,11 +259,17 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: const AppAssetIcon(linkIconAsset, size: 20),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: session.webUrl));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('已复制到剪贴板')),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.trustedUploadCopiedMessage,
+                      ),
+                    ),
                   );
                 },
               ),
@@ -336,9 +341,13 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const AppAssetIcon(stopIconAsset, size: 48),
             const SizedBox(height: 16),
-            Text('加载失败: $_error'),
+            Text(
+              AppLocalizations.of(
+                context,
+              )!.trustedUploadLoadFailed(_error ?? ''),
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetchStatus,
@@ -354,8 +363,8 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
     }
 
     if (_status!.items.isEmpty) {
-      return const Center(
-        child: Text('暂无上传项\n请在手机端选择图片上传'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.trustedUploadNoItemsMessage),
       );
     }
 
@@ -369,37 +378,33 @@ class _TrustedUploadDialogState extends State<TrustedUploadDialog> {
   }
 
   Widget _buildItemTile(TrustedUploadItem item) {
-    IconData icon;
-    Color color;
+    String iconAsset;
 
     if (item.isReady) {
-      icon = Icons.check_circle;
-      color = Colors.green;
+      iconAsset = completeIconAsset;
     } else if (item.isFailed) {
-      icon = Icons.error;
-      color = Colors.red;
+      iconAsset = stopIconAsset;
     } else if (item.isPulling) {
-      icon = Icons.download;
-      color = Colors.purple;
+      iconAsset = downloadIconAsset;
     } else if (item.isUploading) {
-      icon = Icons.cloud_upload;
-      color = Colors.blue;
+      iconAsset = cloudUploadIconAsset;
     } else {
-      icon = Icons.pending;
-      color = Colors.orange;
+      iconAsset = timeIconAsset;
     }
 
     return ListTile(
-      leading: Icon(icon, color: color),
+      leading: AppAssetIcon(iconAsset, size: 24),
       title: Text(item.filename),
       subtitle: Text(
         item.isFailed && item.errorMessage != null
-            ? '失败: ${item.errorMessage}'
+            ? AppLocalizations.of(
+                context,
+              )!.trustedUploadItemFailed(item.errorMessage!)
             : item.status,
       ),
       trailing: item.isFailed
           ? IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const AppAssetIcon(refreshIconAsset, size: 20),
               onPressed: () => _handleRetry(item.uploadItemId),
             )
           : null,

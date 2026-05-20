@@ -1,108 +1,250 @@
-# Hermes + Harness + Codex 工作流
+# KidMemory Agent 工作流
 
-## 目标
+本文档是 KidMemory 当前唯一保留的 agent workflow 主文档。
 
-建立一套轻量、可复盘、低污染的本地 agent 开发流程：
+仓库内不再并行维护旧的实验性流程说明；角色相关的补充材料统一收口到 `souls/` 目录中的快照文件。
 
-1. 用户和 Hermes 聊清楚需求。
-2. Hermes 按模板创建完整 GitHub Issue，并直接标记 `status:ready`。
-3. 本地 Harness 轮询 GitHub Issue。
-4. Harness 为可执行 Issue 创建 worktree 和分支，并用 goal 模式启动 Codex。
-5. Codex 尽力实现，产出一个 commit 和一个 PR。
-6. 用户人工 review PR，并在 Issue 评论里写修改意见。
-7. Harness 根据状态继续派发修复或新任务。
+目标是建立一套以 Slack 为前台、以 GitHub Issue / PR 为事实源、以 Harness 为后台调度器、以 Codex 为代码执行器的本地多 agent 开发流程。
 
-## 角色边界
+## 总览
+
+当前统一流程：
+
+```text
+Slack thread
+  -> overseer 澄清并派发
+  -> pm 产出完整任务说明
+  -> GitHub Issue 创建或更新并进入 status:ready
+  -> Harness 轮询 Issue
+  -> 创建或复用 worktree + 分支
+  -> tmux + codex exec(goal 模式)
+  -> 产出一个 commit + 一个 PR
+  -> tester 辅助验收
+  -> 人工 review / merge
+  -> Harness 清理本地 worktree
+```
+
+核心原则：
+
+- Slack thread 是前台协作入口。
+- GitHub Issue 和 PR 是长期事实源。
+- Harness 是本地常驻 daemon，负责轮询和调度。
+- Codex 只在独立 worktree 中执行。
+- 一个 Issue 对应一个分支、一个 PR、最终一个 commit。
+- 开发者前期人工 review，tester 负责辅助验收。
+
+## 角色与职责
 
 ### 用户
 
-- 和 Hermes 对齐需求。
+- 和 `overseer` 对齐需求。
 - 人工 review PR。
-- 如果需要打回，在 Issue 评论里写修改意见。
+- 需要打回时，在 Issue 评论中写修改意见。
 - 手动把 Issue 标成 `status:changes-requested`。
 - 决定 merge。
 
-### Hermes
+### `overseer`
 
-- 负责需求澄清。
-- 负责把需求整理成完整 Issue。
-- 可以持续修改 Issue body。
-- 可以直接给 Issue 打 `status:ready`。
-- 不写代码。
+- 接收需求。
+- 在 Slack thread 里追问关键问题。
+- 需求足够清楚后，派给 `pm` 输出任务说明。
+- 检查任务说明是否完整。
+- 创建或更新 GitHub Issue，并标记 `status:ready`。
+- PR 创建后派给 `tester` 验收。
+- 不直接写代码，不直接运行 Codex。
+
+### `pm`
+
+- 把自然语言需求整理成完整任务说明。
+- 必须补齐背景、用户故事、目标、不做什么、产品方案、设计图 / 视觉参考、技术方案、改动目录结构、验收标准、分支建议。
+- 复杂任务可以协助创建或更新 GitHub Issue。
+- 不直接写代码，不直接运行 Codex。
 
 ### Harness
 
-Harness 是本地调度器，放在仓库外维护和运行。
-
-运行形态：
-
-- 常驻 daemon。
-- 由用户在本机配置 cron / launchd 保活或定时启动。
-- Harness 本体不提交到 KidMemory 仓库。
-
-职责：
-
+- 常驻本地 daemon。
 - 轮询 GitHub Issue。
-- 按 FIFO 和依赖关系选择任务。
-- 创建或复用 worktree。
-- 创建或复用分支。
+- 依据状态、依赖关系和 FIFO 调度。
+- 创建或复用 worktree、分支、tmux 会话。
 - 用 goal 模式启动 Codex。
-- 更新 Issue 状态 label。
-- 自动创建缺失的 GitHub labels。
-- 使用 `gh` CLI 创建和更新 PR。
-- PR merge / Issue done 后清理本地 worktree 和本地分支。
+- 更新 Issue labels。
+- 使用 `gh` 创建和更新 PR。
+- Issue 完成后清理 worktree 和本地分支。
 
-Harness 不做：
+### `developer`
 
-- 不判断产品方案是否正确。
-- 不判断技术方案是否合理。
-- 不修改需求内容。
-- 不删除远端分支。
+- 作为 Slack 前台开发代理。
+- 接收 `overseer` 派发。
+- 校验任务说明是否完整。
+- 调用 [`scripts/agent-codex-tmux-run.sh`](../../scripts/agent-codex-tmux-run.sh) 启动 `tmux + codex exec`。
+- 汇报 session、worktree、日志路径、PR 链接和阻塞项。
+- 不在主工作区直接长时间写代码。
 
-### Codex
+### Codex Worker
 
-- 只执行 Harness 派发的 Issue。
-- 每次必须通过 goal 模式启动。
-- 在独立 worktree 中工作。
-- 一个 Issue 最终只保留一个 commit。
-- 一个 Issue 对应一个 PR。
-- 测试失败或实现不完整时，也照常创建或更新 PR。
-- 需要人工注意时，打 `needs-human-attention`。
+- 只执行当前 Issue。
+- 只认 Issue、Issue comments、PR、仓库代码。
+- 在独立 worktree 中实现任务。
+- 尽力跑默认验证命令。
+- 产出一个 commit 和一个 PR。
+- 即使测试失败或实现不完整，也照常创建 PR，并在 PR 中写清楚风险。
+
+### `tester`
+
+- 对照任务说明、Issue、PR body、PR diff 和测试结果做辅助验收。
+- 逐条检查用户故事和验收标准。
+- 输出通过、需要修改或需要开发者判断。
+- 不写代码，不 merge。
 
 ## 事实源
 
-只认这些信息：
+只认这些：
 
-- GitHub Issue 最新 body。
-- GitHub Issue comments。
-- PR body。
-- PR diff。
-- PR 状态。
+- GitHub Issue 最新 body
+- GitHub Issue comments
+- PR body
+- PR diff
+- PR 状态
 
-不认这些信息：
+不认这些：
 
-- Hermes 聊天历史。
-- 本地临时聊天。
-- Codex 自己的推测。
+- Slack 历史聊天本身
+- 本地临时对话
+- Codex 自己的额外猜测
 
-## Issue 规则
+## Slack 配置
 
-默认：
+### 推荐拓扑
 
-- 一个 Issue 写全。
-- 一个 Issue 可以直接对应一个 PR。
+最稳配置是：
+
+```text
+一个 Hermes profile 对应一个 Slack app / bot
+```
+
+当前角色：
+
+```text
+overseer   总监
+pm         产品经理
+developer  开发者
+tester     测试员
+```
+
+### 本地 profile 目录
+
+```text
+~/.hermes/profiles/overseer/
+~/.hermes/profiles/pm/
+~/.hermes/profiles/developer/
+~/.hermes/profiles/tester/
+```
+
+每个 profile 至少包含：
+
+```text
+config.yaml
+.env
+SOUL.md
+```
+
+仓库中保存的角色提示词快照位于：
+
+- [overseer.md](./souls/overseer.md)
+- [pm.md](./souls/pm.md)
+- [developer.md](./souls/developer.md)
+- [tester.md](./souls/tester.md)
+
+### Slack App 权限
+
+每个 bot 的 `OAuth & Permissions -> Bot Token Scopes` 至少需要：
+
+```text
+app_mentions:read
+channels:history
+channels:read
+chat:write
+groups:history
+groups:read
+im:history
+im:read
+im:write
+users:read
+```
+
+`Event Subscriptions -> Subscribe to bot events` 至少需要：
+
+```text
+app_mention
+message.channels
+message.groups
+message.im
+```
+
+加完后需要对每个 App 执行一次 `Reinstall to Workspace`。
+
+### 每个 profile 的 `.env`
+
+每个 profile 的 `.env` 至少需要：
+
+```env
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_APP_TOKEN=xapp-...
+SLACK_ALLOW_ALL_USERS=true
+SLACK_ALLOWED_CHANNELS=<channel-id>
+SLACK_HOME_CHANNEL=<channel-id>
+GH_CONFIG_DIR=/Users/counter/.config/gh
+CODEX_HOME=/Users/counter/.codex
+```
+
+说明：
+
+- `SLACK_BOT_TOKEN`：Bot User OAuth Token。
+- `SLACK_APP_TOKEN`：Socket Mode App-Level Token。
+- `SLACK_ALLOW_ALL_USERS=true`：当前阶段默认放开触发用户。
+- `SLACK_ALLOWED_CHANNELS`：限制仅在指定频道工作。
+- `SLACK_HOME_CHANNEL`：接收系统回执和跨平台消息的 home channel。
+- `GH_CONFIG_DIR`、`CODEX_HOME`：显式复用主账号登录态。
+
+### Gateway 运行约定
+
+统一使用 [`scripts/restart-hermes-gateways.sh`](../../scripts/restart-hermes-gateways.sh) 启动和重启四个 gateway。
+
+脚本当前统一注入：
+
+- `HOME=/Users/counter`
+- `GH_CONFIG_DIR=/Users/counter/.config/gh`
+- `CODEX_HOME=/Users/counter/.codex`
+- `HERMES_YOLO_MODE=1`
+- `HERMES_ACCEPT_HOOKS=1`
+- `HERMES_KANBAN_DISPATCH_IN_GATEWAY=0`
+
+当前运行约定：
+
+- `kanban.dispatch_in_gateway=false`
+- `approvals.mode=off`
+- `hooks_auto_accept=true`
+- 不再使用 profile 私有 `home/`
+
+### Slack 协作规则
+
+- 新开需求时建议明确 mention 对应 agent。
+- 同一个 Slack thread 内可以持续补充需求。
+- 每次只 mention 一个下游 agent。
+- bot-to-bot 连续往返最多 2 轮。
+- 超过 2 轮仍未收敛时，由开发者介入。
+- 重要结论必须回写到 GitHub Issue 或 PR。
+
+## GitHub Issue 规则
+
+### 基本原则
+
+- 默认一个 Issue 写全。
+- 默认一个 Issue 对应一个 PR。
 - 不强制拆产品 Issue、技术 Issue、验收 Issue。
+- 只有在明显过大、存在前后置依赖、需要多 PR 或并行开发时才拆单。
 
-只有出现以下情况才拆：
-
-- 一个 PR 做不完。
-- 存在明确前后置依赖。
-- 需要多个 agent 或多人并行。
-- 单个 Issue 的验收标准过长，已经影响 review。
-
-## 状态 label
-
-必需状态：
+### 必需状态 label
 
 - `status:ready`
 - `status:doing`
@@ -110,7 +252,7 @@ Harness 不做：
 - `status:changes-requested`
 - `status:done`
 
-辅助 label：
+### 辅助 label
 
 - `needs-human-attention`
 - `type:feature`
@@ -118,7 +260,78 @@ Harness 不做：
 - `type:refactor`
 - `type:chore`
 
-## 状态流转
+### Issue 模板
+
+```md
+# <任务标题>
+
+## 1. 背景
+
+## 2. 用户故事
+
+US1. ...
+US2. ...
+
+## 3. 目标
+
+## 4. 不做什么
+
+## 5. 产品方案
+
+### 功能入口
+### 用户路径
+### 正常状态
+### 空状态
+### 错误状态
+### 权限 / 可见性
+
+## 6. 设计图 / 视觉参考
+
+### 设计来源
+### 设计范围
+### 关键视觉要求
+### 设计验收方式
+
+## 7. 技术方案
+
+### 现状
+### 目标设计
+### 数据流 / 调用链
+### 关键类型 / API
+### 错误处理
+### 复用与约束
+
+## 8. 改动目录结构
+
+## 9. 依赖关系
+
+前置依赖：
+
+- 无
+
+后续依赖：
+
+- 无
+
+## 10. 验收标准
+
+AC1. ...
+AC2. ...
+AC3. ...
+
+## 11. 分支建议
+
+feature/<issue-number>-<slug>
+```
+
+要求：
+
+- 不适用的小节必须写 `不适用`，不能留空。
+- 涉及 UI、布局、交互、视觉样式时，`设计图 / 视觉参考` 必填。
+- 必须写清楚 `改动目录结构`。
+- 必须写清楚 `不做什么`。
+
+## 状态机
 
 ### 首次开发
 
@@ -129,18 +342,6 @@ status:ready
   -> status:done
 ```
 
-步骤：
-
-1. Hermes 创建完整 Issue，并标记 `status:ready`。
-2. Harness 轮询到 Issue。
-3. Harness 创建 worktree 和分支。
-4. Harness 把 Issue 改为 `status:doing`。
-5. Harness 用 goal 模式启动 Codex。
-6. Codex 实现、验证、提交、创建 PR。
-7. PR 创建或更新成功后，Harness 把 Issue 改为 `status:human-review`。
-8. 用户 review 并 merge。
-9. Issue closed 或 `status:done` 后，Harness 清理本地 worktree 和本地分支。
-
 ### 打回修复
 
 ```text
@@ -150,86 +351,121 @@ status:human-review
   -> status:human-review
 ```
 
-步骤：
+### 流转规则
 
-1. 用户在 Issue 评论里写修改意见。
-2. 用户手动把 Issue 标成 `status:changes-requested`。
-3. Harness 优先处理 `status:changes-requested`。
-4. Harness 复用同一个 worktree、分支和 PR。
-5. Harness 用新的 goal 启动 Codex。
-6. Codex 根据最新 Issue body、Issue comments、当前 PR diff 继续修改。
-7. Codex 仍然把分支整理为一个 commit。
-8. PR 更新成功后回到 `status:human-review`。
+1. `overseer` / `pm` 把需求整理成完整 Issue。
+2. Issue 满足模板要求后，打 `status:ready`。
+3. Harness 轮询到可执行 Issue，创建或复用 worktree 和分支，改为 `status:doing`。
+4. Codex 完成当前轮实现并创建或更新 PR 后，Issue 进入 `status:human-review`。
+5. 人工 review 通过后 merge，Issue 关闭或打 `status:done`。
+6. 如果需要继续修改，用户在 Issue 评论中写要求，并手动打 `status:changes-requested`。
+7. Harness 优先复用原 worktree、原分支、原 PR 继续执行。
 
 ## 调度规则
 
 ### 并发
 
 - 同一时间最多一个 `status:doing`。
-- `status:human-review` 可以积压最多 10 个。
-- `status:changes-requested` 修复不受 human-review 积压上限限制。
+- `status:human-review` 最多允许积压 10 个。
+- `status:changes-requested` 不受 `human-review` 积压上限限制。
 
 ### 优先级
-
-调度顺序：
 
 1. `status:changes-requested`
 2. `status:ready`
 
-同一状态内按 Issue 编号从小到大 FIFO。
+同一状态内按 Issue 编号 FIFO。
 
-### 依赖判断
+### 依赖关系
 
-Issue 模板中包含：
+- 只认 Issue `依赖关系` 小节。
+- 所有前置 Issue 必须 closed 或带 `status:done` 才能开工。
+- 只有 PR 创建但未 merge，不算依赖完成。
+- 依赖未满足时，Harness 跳过该 Issue，只记本地日志，不自动评论。
 
-```md
-## 依赖关系
+## Harness 执行约定
 
-前置依赖：
+Harness 是仓库外的本地 daemon，本仓库只保留与其协作的文档和脚本约定。
 
-- 无
+Harness 职责：
 
-后续依赖：
+- 轮询 Issue
+- 自动补全缺失 labels
+- 按状态、依赖关系和 FIFO 选任务
+- 创建或复用 worktree
+- 创建或复用分支
+- 启动 tmux + `codex exec`
+- 用 `gh` 创建或更新 PR
+- merge / done 后清理本地 worktree 和本地分支
 
-- 无
+Harness 不负责：
+
+- 改写需求
+- 判断产品方案是否合理
+- 判断技术方案是否合理
+- 删除远端分支
+
+## Codex Worker 执行规则
+
+- 必须通过 goal 模式启动。
+- 只执行当前 Issue。
+- 默认遵守 Issue 中的 `技术方案` 和 `改动目录结构`。
+- 如果必须超出指定范围改动，PR body 必须写 `偏离说明`，并打 `needs-human-attention`。
+- 如果实现不完整、测试失败或需要人工判断，仍然创建或更新 PR。
+- 最终分支相对 base branch 只保留一个 commit。
+- PR body 使用中文。
+
+默认按改动目录运行验证：
+
+```text
+packages/web:
+  npm --prefix packages/web run test
+  npm --prefix packages/web run build
+
+packages/sidecar:
+  npm --prefix packages/sidecar run build
+
+packages/cloud-api:
+  npm --prefix packages/cloud-api run build
+
+packages/protocol:
+  npm --prefix packages/protocol run build
+
+packages/desktop:
+  cd packages/desktop && flutter test
 ```
 
-如果前置依赖列出 Issue：
+## Git 与 PR 约定
 
-- 所有前置 Issue 必须 closed，或带 `status:done`。
-- PR 已创建但未 merge，不算完成。
-- 前置依赖未完成时，Harness 跳过该 Issue，继续扫描下一个。
-- 跳过时不评论，只写本地日志。
+分支命名：
 
-### 新任务派发条件
+```text
+feature/<issue-number>-<slug>
+fix/<issue-number>-<slug>
+refactor/<issue-number>-<slug>
+chore/<issue-number>-<slug>
+```
 
-Harness 派发 `status:ready` 前检查：
+Commit 格式：
 
-- 当前没有 `status:doing`。
-- `status:human-review` 数量小于 10。
-- 前置依赖已完成。
+```text
+<type>(<scope>): <中文祈使句摘要>
 
-Harness 派发 `status:changes-requested` 前检查：
+Refs #<issue-number>
 
-- 当前没有 `status:doing`。
-- 前置依赖已完成。
-- 不受 `status:human-review` 数量限制。
+Co-authored-by: OpenAI Codex <codex@openai.com>
+```
 
-## GitHub 操作
+PR body 至少包含：
 
-Harness 使用 `gh` CLI 操作 GitHub。
+- 摘要
+- 验收标准完成情况
+- 测试结果
+- 偏离说明
+- 需要人工注意
+- 关联 Issue
 
-职责：
-
-- 查询 Issue。
-- 查询 Issue labels。
-- 查询 Issue comments。
-- 自动创建缺失 label。
-- 更新 Issue labels。
-- 创建 PR。
-- 更新 PR metadata。
-
-PR 创建使用：
+创建 PR 默认使用：
 
 ```bash
 gh pr create \
@@ -239,15 +475,18 @@ gh pr create \
   --body-file "<pr-body-file>"
 ```
 
-MVP 默认创建普通 PR，不强制 Draft PR。
+## 人工 Review 关注点
 
-如果后续希望所有 Codex PR 先以 Draft 状态出现，可以在 Harness 配置中增加：
-
-```bash
---draft
-```
-
-## Codex CLI 调用
+- PR 是否对应正确 Issue
+- 是否只有一个 commit
+- commit message 是否包含 `Refs #<issue-number>`
+- commit message 是否包含 `Co-authored-by: OpenAI Codex <codex@openai.com>`
+- PR body 是否包含 `Closes #<issue-number>` 或等价关联
+- 是否逐条回应 AC
+- 是否符合设计图 / 视觉参考
+- 是否说明测试结果
+- 是否存在无关改动
+- 如果存在 `needs-human-attention`，是否写清楚原因
 
 Harness 通过 `codex exec` 启动 Codex goal。
 

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kidmemory_desktop/core/sidecar/agent_config_api.dart';
+import 'package:kidmemory_desktop/core/sidecar/desktop_sidecar_gateway.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -103,6 +105,221 @@ void main() {
       final response = await api.get('/health');
       expect(response['ok'], isTrue);
       expect(receivedTraceHeader, 'trc_desktop_trace_header');
+    },
+  );
+
+  test('AgentConfigApi saves and tests persisted agent configs', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final seen = <String>[];
+    addTearDown(() async => server.close(force: true));
+
+    server.listen((request) async {
+      final path = request.uri.path;
+      seen.add('${request.method} $path');
+      final bodyText = await utf8.decoder.bind(request).join();
+      final body = bodyText.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(bodyText) as Map<String, dynamic>;
+
+      Object data;
+      if (request.method == 'POST' && path == '/api/config/agent-configs') {
+        data = {
+          'id': 'config_desktop_1',
+          'name': body['name'],
+          'description': body['description'],
+          'provider': body['provider'],
+          'model': body['model'],
+          'baseUrl': body['baseUrl'],
+          'apiKeyConfigured': true,
+          'temperature': body['temperature'],
+          'maxTokens': body['maxTokens'],
+          'toolsEnabled': const <String>[],
+          'workspaceConfig': const <String, dynamic>{},
+          'isDefault': body['isDefault'],
+          'isActive': true,
+          'createdAt': '2026-05-20T00:00:00.000Z',
+          'updatedAt': '2026-05-20T00:00:00.000Z',
+        };
+      } else if (request.method == 'POST' &&
+          path == '/api/config/agent-configs/config_desktop_1/set-default') {
+        data = {'success': true};
+      } else if (request.method == 'POST' &&
+          path == '/api/config/agent-configs/config_desktop_1/test') {
+        data = {
+          'success': true,
+          'responseTime': 120,
+          'modelUsed': 'mimo-v2-pro',
+          'tokensUsed': 12,
+        };
+      } else {
+        request.response.statusCode = 404;
+        data = {'path': path};
+      }
+
+      request.response
+        ..headers.contentType = ContentType.json
+        ..write(jsonEncode({'code': 0, 'msg': 'ok', 'data': data}));
+      await request.response.close();
+    });
+
+    final api = AgentConfigApi(
+      SidecarApi(
+        baseUrl: 'http://${server.address.host}:${server.port}',
+        retries: 0,
+      ),
+    );
+
+    final config = await api.createAgentConfig(
+      CreateAgentConfigInput(
+        name: 'Xiaomi MiMo',
+        provider: 'custom',
+        model: 'mimo-v2-pro',
+        baseUrl: 'https://api.xiaomimimo.com/v1',
+        apiKey: 'sk-test',
+        temperature: 0,
+        maxTokens: 4000,
+        isDefault: true,
+      ),
+    );
+    final defaultSet = await api.setDefaultAgentConfig(config.id);
+    final testResult = await api.testAgentConfigById(config.id);
+
+    expect(defaultSet, isTrue);
+    expect(testResult.success, isTrue);
+    expect(testResult.modelUsed, 'mimo-v2-pro');
+    expect(seen, [
+      'POST /api/config/agent-configs',
+      'POST /api/config/agent-configs/config_desktop_1/set-default',
+      'POST /api/config/agent-configs/config_desktop_1/test',
+    ]);
+  });
+
+  test(
+    'DesktopSidecarGateway calls creation job orchestration routes',
+    () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final seen = <String>[];
+      var planBody = <String, dynamic>{};
+      addTearDown(() async => server.close(force: true));
+
+      server.listen((request) async {
+        final path = request.uri.path;
+        seen.add('${request.method} $path');
+        final bodyText = await utf8.decoder.bind(request).join();
+        final body = bodyText.isEmpty
+            ? <String, dynamic>{}
+            : jsonDecode(bodyText) as Map<String, dynamic>;
+        Object data;
+        if (path == '/creation/jobs/plan') {
+          planBody = body;
+          data = {
+            'planId': 'plan_desktop_1',
+            'creationType': body['creationType'],
+            'summary': 'Backend plan summary',
+            'skillName': 'KidMemory storybook',
+            'steps': const <Map<String, dynamic>>[],
+            'requirements': const {
+              'minAssets': 1,
+              'recommendedAssets': 6,
+              'needsCloudImage': true,
+              'needsHyperframes': false,
+              'needsFfmpeg': false,
+            },
+            'requirementItems': const <String>[],
+          };
+        } else if (path == '/creation/jobs') {
+          data = {
+            'jobId': 'job_desktop_1',
+            'planId': body['planId'],
+            'creationType': 'storybook',
+            'status': 'running',
+            'currentStepId': 'plan',
+            'steps': const <Map<String, dynamic>>[],
+            'artifacts': const <Map<String, dynamic>>[],
+            'error': null,
+          };
+        } else if (path == '/creation/jobs/job_desktop_1/events') {
+          data = {'events': const <Map<String, dynamic>>[]};
+        } else if (path == '/creation/jobs/job_desktop_1/export') {
+          data = {
+            'artifactId': 'artifact_desktop_pdf',
+            'kind': body['target'],
+            'jobId': 'job_desktop_1',
+          };
+        } else if (path == '/creation/jobs/job_desktop_1/share') {
+          data = {
+            'shareId': 'share_desktop_1',
+            'shareUrl': 'http://localhost:3001/share/share_desktop_1',
+            'artifactId': body['artifactId'],
+          };
+        } else if (path == '/creation/jobs/job_desktop_1') {
+          data = {
+            'jobId': 'job_desktop_1',
+            'planId': 'plan_desktop_1',
+            'creationType': 'storybook',
+            'status': 'running',
+            'currentStepId': 'plan',
+            'steps': const <Map<String, dynamic>>[],
+            'artifacts': const <Map<String, dynamic>>[],
+            'error': null,
+          };
+        } else {
+          request.response.statusCode = 404;
+          data = {'path': path};
+        }
+        request.response
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({'code': 0, 'msg': 'ok', 'data': data}));
+        await request.response.close();
+      });
+
+      final gateway = DesktopSidecarGateway(
+        SidecarApi(
+          baseUrl: 'http://${server.address.host}:${server.port}',
+          retries: 0,
+        ),
+      );
+
+      final plan = await gateway.createCreationPlanRaw(
+        goal: 'Make a bedtime story',
+        creationType: 'storybook',
+        assetIds: const ['asset_a', 'asset_b'],
+        settings: const {'tone': 'warm'},
+      );
+      final job = await gateway.createCreationJobRaw(
+        planId: plan['planId'] as String,
+      );
+      final detail = await gateway.getCreationJobRaw(
+        jobId: job['jobId'] as String,
+      );
+      final events = await gateway.getCreationJobEventsRaw(
+        jobId: job['jobId'] as String,
+      );
+      final exported = await gateway.exportCreationJobRaw(
+        jobId: job['jobId'] as String,
+        target: 'pdf',
+        targetPath: '/tmp/kidmemory.pdf',
+      );
+      final shared = await gateway.shareCreationJobRaw(
+        jobId: job['jobId'] as String,
+        artifactId: exported['artifactId'] as String,
+      );
+
+      expect(plan['planId'], 'plan_desktop_1');
+      expect(planBody['assetIds'], ['asset_a', 'asset_b']);
+      expect(planBody['settings'], {'tone': 'warm'});
+      expect(detail['jobId'], 'job_desktop_1');
+      expect(events['events'], isA<List<dynamic>>());
+      expect(exported['kind'], 'pdf');
+      expect(shared['shareUrl'], contains('/share/share_desktop_1'));
+      expect(seen, [
+        'POST /creation/jobs/plan',
+        'POST /creation/jobs',
+        'GET /creation/jobs/job_desktop_1',
+        'GET /creation/jobs/job_desktop_1/events',
+        'POST /creation/jobs/job_desktop_1/export',
+        'POST /creation/jobs/job_desktop_1/share',
+      ]);
     },
   );
 }

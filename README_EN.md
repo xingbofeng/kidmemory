@@ -72,10 +72,19 @@ The desktop app covers setup, child profiles, asset import, asset library manage
 
 - **Built-in Skills**: sidecar provides generation skills and rule context for asset interpretation, story composition, page planning, style constraints, and export validation.
 - **Built-in MCP tools**: sidecar exposes controlled MCP tools to the Agent, including asset access, context retrieval, media processing, image generation/rendering, export utilities, and diagnostics.
+- **Agent SDK orchestration**: the OpenAI Agent SDK handles reasoning and orchestration. The model first sees MCP tools and local skills, then decides whether the task should call a formal business tool or use local skill context through shell capabilities.
 - **Controlled workspace**: Each generation job gets an isolated workspace with `input/`, rules, asset references, and template context. The Agent reads and writes only inside that workspace.
 - **Structured artifacts**: The Agent must produce agreed files such as `book.json` and `book.html`; sidecar owns schema validation, preview conversion, and PDF export.
 - **Permission isolation**: The Agent cannot directly access the database, `.env`, Supabase service role keys, or arbitrary local files. It reads controlled data through sidecar APIs and MCP tools.
 - **Desktop observability**: Flutter shows Agent configuration status, generation progress, preview output, export results, and failure details so parents can review before publishing.
+
+![Agent SDK, MCP, and Skills diagram](docs/images/agent-sdk-mcp-skill-en.png)
+
+- **MCP is the business tool layer**: the Agent discovers and calls controlled capabilities through the sidecar MCP server, such as reading assets, fetching context, exporting, diagnostics, and media processing.
+- **Skills are the local capability context layer**: `shellTool({ environment: { type: "local", skills } })` mounts each skill's `name`, `description`, and `path` so the model understands which local skills are available.
+- **Results flow back to the Agent**: whether execution happens through MCP or a local skill, the result returns to the Agent, which continues reasoning and produces the final output.
+
+In one sentence: **MCP provides business tools, Skills provide local capability context, and the Agent SDK orchestrates both.**
 
 ## Local Development Quick Start
 

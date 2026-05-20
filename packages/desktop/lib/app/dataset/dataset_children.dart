@@ -19,14 +19,24 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
     if (!mounted) return;
     if (!result.hasChild) {
       _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS689);
-      _appendLog('添加孩子档案失败：${jsonEncode(result.raw)}');
+      _appendLog(
+        AppLocalizations.of(
+          context,
+        )!.datasetChildAddFailedLog(jsonEncode(result.raw)),
+      );
       return;
     }
     _setShellState(() => selectedChildId = result.childId);
     await refreshDataset();
     if (!mounted) return;
-    _appendLog('添加孩子档案：${result.childId} ${saved.name}');
-    _showSnackBar('已添加孩子档案：${saved.name}');
+    _appendLog(
+      AppLocalizations.of(
+        context,
+      )!.datasetChildAddedLog(result.childId, saved.name),
+    );
+    _showSnackBar(
+      AppLocalizations.of(context)!.datasetChildAddedMessage(saved.name),
+    );
   }
 
   Future<void> _editSelectedChildProfile(ChildVm current) async {
@@ -48,8 +58,14 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
     );
     if (!mounted) return;
     await refreshDataset();
-    _appendLog('编辑资料：${current.id} 更新为 ${saved.name}');
-    _showSnackBar('资料已更新为：${saved.name}');
+    _appendLog(
+      AppLocalizations.of(
+        context,
+      )!.datasetChildEditedLog(current.id, saved.name),
+    );
+    _showSnackBar(
+      AppLocalizations.of(context)!.datasetChildEditedMessage(saved.name),
+    );
   }
 
   Future<void> _deleteSelectedChildProfile(ChildVm current) async {
@@ -60,12 +76,16 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.datasetChildrenS301)),
-        content: Text('确定删除「${current.name}」吗？删除前需要先清空这个孩子关联的素材。'),
+        title: Text(AppLocalizations.of(context)!.datasetChildrenS301),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.datasetChildDeleteConfirmMessage(current.name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(AppLocalizations.of(context)!.actionCancel)),
+            child: Text(AppLocalizations.of(context)!.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -73,7 +93,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
               backgroundColor: const Color(0xffb84938),
               foregroundColor: Colors.white,
             ),
-            child: Text(AppLocalizations.of(context)!.assetLibraryPageS296)),
+            child: Text(AppLocalizations.of(context)!.assetLibraryPageS296),
           ),
         ],
       ),
@@ -84,7 +104,9 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
       if (!mounted) return;
       if (!result.okValue) {
         _showSnackBar(
-          result.messageValue.isNotEmpty ? result.messageValue : AppLocalizations.of(context)!.assetLibraryPageS299,
+          result.messageValue.isNotEmpty
+              ? result.messageValue
+              : AppLocalizations.of(context)!.assetLibraryPageS299,
         );
         return;
       }
@@ -93,12 +115,22 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
       }
       await refreshDataset();
       if (!mounted) return;
-      _appendLog('删除孩子档案：${current.id} ${current.name}');
-      _showSnackBar('已删除孩子档案：${current.name}');
+      _appendLog(
+        AppLocalizations.of(
+          context,
+        )!.datasetChildDeletedLog(current.id, current.name),
+      );
+      _showSnackBar(
+        AppLocalizations.of(context)!.datasetChildDeletedMessage(current.name),
+      );
     } catch (error) {
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context)!.datasetChildrenS300);
-      _appendLog('删除孩子档案失败：${current.id} $error');
+      _appendLog(
+        AppLocalizations.of(
+          context,
+        )!.datasetChildDeleteFailedLog(current.id, error),
+      );
     }
   }
 
@@ -252,7 +284,11 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
                 focusNode: _nameFocusNode,
                 autofocus: true,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(labelText: '孩子名字'),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(
+                    context,
+                  )!.datasetChildNameLabel,
+                ),
                 onSubmitted: (_) => _pickBirthday(),
               ),
               const SizedBox(height: 14),
@@ -288,8 +324,14 @@ class _ChildProfileDialogState extends State<_ChildProfileDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () => setState(_birthdayController.clear),
+          child: Text(
+            AppLocalizations.of(context)!.datasetChildrenClearBirthday,
+          ),
+        ),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.actionCancel)),
+          child: Text(AppLocalizations.of(context)!.actionCancel),
         ),
         widget.actionIcon == null
             ? ElevatedButton(

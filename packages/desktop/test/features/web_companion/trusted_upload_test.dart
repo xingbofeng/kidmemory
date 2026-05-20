@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 import 'package:kidmemory_desktop/features/web_companion/trusted_upload/trusted_upload_entry.dart';
 import 'package:kidmemory_desktop/features/web_companion/trusted_upload/trusted_upload_controller.dart';
+import 'package:kidmemory_desktop/shared/widgets/chrome.dart';
+
+import '../../localized_test_app.dart';
 
 void main() {
   group('TrustedUploadEntryButton', () {
@@ -10,7 +13,7 @@ void main() {
       final mockApi = MockSidecarApi();
 
       await tester.pumpWidget(
-        MaterialApp(
+        localizedTestApp(
           home: Scaffold(
             body: TrustedUploadEntryButton(
               sidecarApi: mockApi,
@@ -21,14 +24,14 @@ void main() {
       );
 
       expect(find.text('扫码上传'), findsOneWidget);
-      expect(find.byIcon(Icons.qr_code_2), findsOneWidget);
+      expect(find.byType(AppAssetIcon), findsOneWidget);
     });
 
     testWidgets('should be tappable', (tester) async {
       final mockApi = MockSidecarApi();
 
       await tester.pumpWidget(
-        MaterialApp(
+        localizedTestApp(
           home: Scaffold(
             body: TrustedUploadEntryButton(
               sidecarApi: mockApi,

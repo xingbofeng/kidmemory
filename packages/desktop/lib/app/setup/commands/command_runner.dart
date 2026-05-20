@@ -10,7 +10,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     try {
       final result = await Process.run(executable, arguments);
       if (result.exitCode != 0) return '';
-      return '${result.tdout}'.trim();
+      return '${result.stdout}'.trim();
     } catch (_) {
       return '';
     }
@@ -39,8 +39,12 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
   }) {
     final user = Platform.environment['USER'] ?? r'$(whoami)';
     return [
-      'Homebrew 目录不可写，无法安装 $packageName。',
-      '不可写路径：${blockedPaths.join('，')}',
+      AppLocalizations.of(
+        context,
+      )!.setupHomebrewNotWritableForPackage(packageName),
+      AppLocalizations.of(
+        context,
+      )!.setupHomebrewBlockedPaths(blockedPaths.join(', ')),
       AppLocalizations.of(context)!.setupHomebrewPermissionCommandHint,
       'sudo chown -R $user:admin "$prefix"',
       'chmod -R u+rwX "$prefix"',
@@ -54,7 +58,7 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     bool allowFailure = false,
     Duration timeout = _setupCommandTimeout,
   }) {
-    // Guardrails retained in delegated implementation: process.exitCode.timeout(...) and ProcessSignal.igterm.
+    // Guardrails retained in delegated implementation: process.exitCode.timeout(...) and ProcessSignal.sigterm.
     return _runSetupCommandStreamingImpl(
       executable,
       arguments,
@@ -68,7 +72,9 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
     final raw = error.toString();
     final lower = raw.toLowerCase();
     if (error is _SetupCommandException &&
-        error.output.contains(AppLocalizations.of(context)!.setupHomebrewDirectoryNotWritable)) {
+        error.output.contains(
+          AppLocalizations.of(context)!.setupHomebrewDirectoryNotWritable,
+        )) {
       return error.output;
     }
     if (lower.contains('permission denied') ||
@@ -77,16 +83,24 @@ extension _DesktopShellSetupCommandRunner on _DesktopShellState {
         lower.contains('cannot write')) {
       if (error is _SetupCommandException && error.output.trim().isNotEmpty) {
         return [
-          '当前用户没有安装权限，无法自动安装 $packageName。',
+          AppLocalizations.of(
+            context,
+          )!.setupPermissionDeniedInstallWithOutput(packageName),
           _shortProcessOutput(error.output),
           AppLocalizations.of(context)!.setupHomebrewPermissionRetryHint,
         ].join('\n');
       }
-      return '当前用户没有安装权限，无法自动安装 $packageName。请修复 Homebrew 权限后重试。';
+      return AppLocalizations.of(
+        context,
+      )!.setupPermissionDeniedInstallRetry(packageName);
     }
     if (error is _SetupCommandException && error.output.trim().isNotEmpty) {
-      return '安装命令失败：${_shortProcessOutput(error.output)}';
+      return AppLocalizations.of(
+        context,
+      )!.setupInstallCommandFailed(_shortProcessOutput(error.output));
     }
-    return '安装与配置失败：${_shortProcessOutput(raw)}';
+    return AppLocalizations.of(
+      context,
+    )!.setupInstallConfigureFailed(_shortProcessOutput(raw));
   }
 }

@@ -1,7 +1,7 @@
-/// Trusted Upload 数据模型
+/// Trusted Upload data models.
 library;
 
-/// 上传会话
+/// Upload session.
 class TrustedUploadSession {
   const TrustedUploadSession({
     required this.sessionId,
@@ -28,12 +28,9 @@ class TrustedUploadSession {
   }
 }
 
-/// 上传状态
+/// Upload status.
 class TrustedUploadStatus {
-  const TrustedUploadStatus({
-    required this.sessionId,
-    required this.items,
-  });
+  const TrustedUploadStatus({required this.sessionId, required this.items});
 
   final String sessionId;
   final List<TrustedUploadItem> items;
@@ -53,12 +50,13 @@ class TrustedUploadStatus {
   int get totalCount => items.length;
   int get pendingCount => items.where((i) => i.status == 'pending').length;
   int get uploadingCount => items.where((i) => i.status == 'uploading').length;
-  int get pullingCount => items.where((i) => i.status == 'pulling_local').length;
+  int get pullingCount =>
+      items.where((i) => i.status == 'pulling_local').length;
   int get readyCount => items.where((i) => i.status == 'ready').length;
   int get failedCount => items.where((i) => i.status == 'failed').length;
 }
 
-/// 上传项
+/// Upload item.
 class TrustedUploadItem {
   const TrustedUploadItem({
     required this.uploadItemId,

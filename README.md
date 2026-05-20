@@ -72,21 +72,30 @@ KidMemory 是一个本地优先的 AI 家庭记忆出版系统。它面向真实
 
 - **内置 Skills**：sidecar 为书稿生成准备固定技能包和规则上下文，用于素材解读、故事编排、页面结构规划、风格约束和导出校验。
 - **内置 MCP 工具**：sidecar 暴露受控 MCP 工具给 Agent 使用，包括素材读取、上下文检索、媒体处理、图片生成 / 渲染、导出相关工具和诊断工具。
+- **Agent SDK 编排**：OpenAI Agent SDK 负责推理和编排。模型会先看到 MCP tools 和本地 skills，再判断当前任务该调用正式业务工具，还是参考本地 skill 上下文后走 shell 能力。
 - **受控 Workspace**：每次生成任务会创建独立 workspace，将 `input/`、规则、素材引用和模板上下文写入其中；Agent 只在 workspace 内读写产物。
 - **结构化产物**：Agent 需要输出 `book.json`、`book.html` 等约定文件，sidecar 统一负责 schema 校验、预览转换和 PDF 导出。
 - **工具权限隔离**：Agent 不能直接访问数据库、`.env`、Supabase service role key 或本机任意文件；需要通过 sidecar 提供的 API 和 MCP 工具间接读取受控数据。
 - **桌面端可观测**：Flutter 侧负责展示 Agent 配置状态、生成进度、预览结果、导出结果和失败信息，便于家长在发布前检查。
 
+![Agent SDK + MCP + Skill 协作图](docs/images/agent-sdk-mcp-skill-zh.png)
+
+- **MCP 是正式业务工具层**：Agent 通过 sidecar 的 MCP server 发现和调用受控能力，比如读取素材、查上下文、导出、诊断和媒体处理。
+- **Skill 是本地技能上下文层**：通过 `shellTool({ environment: { type: "local", skills } })` 把 `SKILL.md` 的 `name`、`description`、`path` 挂给模型，让模型知道有哪些本地技能可参考。
+- **结果统一回流给 Agent**：无论调用的是 MCP 还是本地 skill，执行结果都会回到 Agent，再继续推理并生成最终输出。
+
+一句话说：**MCP 提供业务工具，Skill 提供本地能力上下文，Agent SDK 负责把两者编排起来。**
+
 ## 协作开发工作流
 
-本仓库使用 GitHub Issue 驱动的 Hermes + 本地 Harness + Codex 协作流程：
+当前保留的协作开发流程是 Slack + Hermes + Harness + Codex：
 
-- Hermes 负责和用户澄清需求，并按模板创建 `status:ready` Issue。
-- 本地 Harness 负责轮询 Issue、创建 worktree、启动 Codex goal 和更新状态。
-- Codex 只执行 ready Issue，并产出一个 commit 和一个 PR。
-- 前期由用户人工 review PR，稳定后再考虑 Reviewer Agent。
+- Slack 线程中由 `overseer`、`pm`、`developer`、`tester` 四个 Hermes profile 做前台协作。
+- GitHub Issue 是需求事实源，GitHub PR 是代码交付事实源。
+- Harness 负责轮询 Issue、创建 worktree / 分支、启动 `tmux + codex exec`、创建或更新 PR。
+- 当前 review 以前期人工 review 为主，`tester` 负责验收辅助。
 
-详细流程、Issue 模板和 agent 提示词见 [`docs/agent-workflow/`](docs/agent-workflow/)。
+统一说明见 [`docs/agent-workflow/workflow.md`](docs/agent-workflow/workflow.md)。仓库内只保留主流程文档和角色 `SOUL` 快照，不再并行维护旧的实验性工作流说明。
 
 ## 本地开发快速开始
 

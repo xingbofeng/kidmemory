@@ -8,11 +8,6 @@ class AgentConfigApi {
 
   final SidecarApi _api;
 
-  Future<TestAgentConfigResultOutput> testAgentConfig(AgentConfig config) async {
-    final response = await _api.post('/books/agent/test', config.toJson());
-    return TestAgentConfigResultOutput.fromJson(_asMap(response));
-  }
-
   Future<List<AgentConfigResponseDto>> listAgentConfigs() async {
     final configs = await _api.getList('/api/config/agent-configs');
     return configs
@@ -93,28 +88,10 @@ class AgentConfigApi {
   }
 }
 
-class AgentConfig {
-  AgentConfig({
-    required this.baseUrl,
-    required this.apiKey,
-    required this.model,
-  });
-
-  final String baseUrl;
-  final String apiKey;
-  final String model;
-
-  Map<String, dynamic> toJson() {
-    return {'baseUrl': baseUrl, 'apiKey': apiKey, 'model': model};
-  }
-}
-
 JsonMap _asMap(Object? value) {
   if (value is JsonMap) return value;
   if (value is Map) {
-    return value.map(
-      (key, entry) => MapEntry(key.toString(), entry),
-    );
+    return value.map((key, entry) => MapEntry(key.toString(), entry));
   }
   return const {};
 }

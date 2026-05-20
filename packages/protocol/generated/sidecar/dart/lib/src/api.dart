@@ -10,6 +10,7 @@ import 'package:kidmemory_protocol/src/auth/oauth.dart';
 import 'package:kidmemory_protocol/src/api/agent_config_api.dart';
 import 'package:kidmemory_protocol/src/api/books_api.dart';
 import 'package:kidmemory_protocol/src/api/config_api.dart';
+import 'package:kidmemory_protocol/src/api/creation_api.dart';
 import 'package:kidmemory_protocol/src/api/dataset_api.dart';
 import 'package:kidmemory_protocol/src/api/direct_upload_api.dart';
 import 'package:kidmemory_protocol/src/api/lan_receiver_api.dart';
@@ -25,7 +26,7 @@ class KidmemoryProtocol {
     Dio? dio,
     String? basePathOverride,
     List<Interceptor>? interceptors,
-  })  : 
+  })  :
         this.dio = dio ??
             Dio(BaseOptions(
               baseUrl: basePathOverride ?? basePath,
@@ -124,6 +125,12 @@ class KidmemoryProtocol {
   /// by doing that all interceptors will not be executed
   ConfigApi getConfigApi() {
     return ConfigApi(dio);
+  }
+
+  /// Get CreationApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CreationApi getCreationApi() {
+    return CreationApi(dio);
   }
 
   /// Get DatasetApi instance, base route and serializer can be overridden by a given but be careful,

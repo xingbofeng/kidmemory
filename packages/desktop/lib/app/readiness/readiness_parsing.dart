@@ -31,10 +31,10 @@ class _UiConfigParsed {
     }
 
     List<String> stringListAt(String key) {
-      return _jsonListAt(generate, key)
-          .map((item) => '$item'.trim())
-          .where((item) => item.isNotEmpty)
-          .toList();
+      return _jsonListAt(
+        generate,
+        key,
+      ).map((item) => '$item'.trim()).where((item) => item.isNotEmpty).toList();
     }
 
     return _UiConfigParsed(

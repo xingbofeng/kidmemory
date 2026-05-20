@@ -24,7 +24,7 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
     final searchTypeOptions = _parseLabeledOptions(uiConfig.searchTypeOptions);
     final generationTemplates = _nonEmptyOr(
       uiConfig.templates,
-      _defaultGenerationTemplates,
+      _defaultGenerationTemplates(context),
     );
     final generationPageSizes = _nonEmptyOr(
       uiConfig.pageSizes,
@@ -75,10 +75,15 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
     final checks = <SetupCheckVm>[];
     for (final item in rawChecks) {
       final title = _normalizeSetupTitle(
-        item.title.isNotEmpty ? item.title : AppLocalizations.of(context)!.setupItemTitle,
+        item.title.isNotEmpty
+            ? item.title
+            : AppLocalizations.of(context)!.setupItemTitle,
       );
-      final sourceBody = item.body.isEmpty ? AppLocalizations.of(context)!.setupWaitingConfigLoad : item.body;
-      final normalizedBody = title == AppLocalizations.of(context)!.setupOpenAiTitle
+      final sourceBody = item.body.isEmpty
+          ? AppLocalizations.of(context)!.setupWaitingConfigLoad
+          : item.body;
+      final normalizedBody =
+          title == AppLocalizations.of(context)!.setupOpenAiTitle
           ? AppLocalizations.of(context)!.setupOpenAiDescription
           : (item.purpose.isNotEmpty
                 ? item.purpose
@@ -89,10 +94,18 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
           title: title,
           body: normalizedBody,
           action: _setupActionForTitle(item.action, title),
-          state: item.state.isNotEmpty ? item.state : AppLocalizations.of(context)!.setupPending,
+          state: item.state.isNotEmpty
+              ? item.state
+              : AppLocalizations.of(context)!.setupPending,
           ok: item.ok,
-          secondaryActionLabel: title == AppLocalizations.of(context)!.setupOpenAiTitle ? AppLocalizations.of(context)!.actionEditConfig : null,
-          secondaryActionPath: title == AppLocalizations.of(context)!.setupOpenAiTitle ? AppLocalizations.of(context)!.actionConfigurePathToken : null,
+          secondaryActionLabel:
+              title == AppLocalizations.of(context)!.setupOpenAiTitle
+              ? AppLocalizations.of(context)!.actionEditConfig
+              : null,
+          secondaryActionPath:
+              title == AppLocalizations.of(context)!.setupOpenAiTitle
+              ? AppLocalizations.of(context)!.actionConfigurePathToken
+              : null,
         ),
       );
     }
@@ -121,7 +134,9 @@ extension _DesktopShellReadinessMappers on _DesktopShellState {
   }
 
   String _normalizeSetupTitle(String title) {
-    if (title == AppLocalizations.of(context)!.setupSidecarServiceTitle) return _sidecarSetupTitle;
+    if (title == AppLocalizations.of(context)!.setupSidecarServiceTitle) {
+      return _sidecarSetupTitle(context);
+    }
     return title;
   }
 }

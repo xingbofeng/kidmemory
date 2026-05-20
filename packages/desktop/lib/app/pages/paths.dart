@@ -88,7 +88,9 @@ List<SetupCheckVm> _disconnectedSetupChecks(BuildContext context) {
       body: AppLocalizations.of(context)!.setupOpenAiDescription,
       action: AppLocalizations.of(context)!.actionTestConnection,
       secondaryActionLabel: AppLocalizations.of(context)!.actionEditConfig,
-      secondaryActionPath: AppLocalizations.of(context)!.actionConfigurePathToken,
+      secondaryActionPath: AppLocalizations.of(
+        context,
+      )!.actionConfigurePathToken,
       state: AppLocalizations.of(context)!.setupNeedsConfiguration,
       ok: false,
       actionEnabled: false,
@@ -107,6 +109,9 @@ List<SetupCheckVm> _disconnectedSetupChecks(BuildContext context) {
   ];
 }
 
-String _localDataDirectoryDescription(BuildContext context, _KidMemoryPathSet paths) {
+String _localDataDirectoryDescription(
+  BuildContext context,
+  _KidMemoryPathSet paths,
+) {
   return AppLocalizations.of(context)!.setupLocalDataDirectoryDescription;
 }

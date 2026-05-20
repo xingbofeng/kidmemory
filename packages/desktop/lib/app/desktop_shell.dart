@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../core/sidecar/sidecar_api.dart';
 import '../core/sidecar/desktop_sidecar_gateway.dart';
 import '../core/sidecar/sidecar_launcher.dart';
+import '../core/sidecar/agent_config_api.dart';
 import '../core/logging/desktop_log_cleanup_worker.dart';
 import '../core/logging/desktop_logger.dart';
 import '../core/logging/desktop_trace_context.dart';
@@ -22,7 +23,6 @@ import '../features/web_companion/direct_upload/direct_upload_controller.dart';
 import '../features/web_companion/direct_upload/direct_upload_dialog.dart';
 import '../features/web_companion/direct_upload/direct_upload_models.dart';
 import '../shared/models/library_models.dart';
-import 'setup/dialogs/openai_dialog_utils.dart';
 import 'app_step.dart';
 import '../shared/widgets/chrome.dart';
 import '../shared/widgets/content.dart';
@@ -142,17 +142,27 @@ class _DesktopShellState extends State<DesktopShell> {
   bool generated = false;
   bool generating = false;
   bool exported = false;
+  bool shareCreating = false;
+  CreationWorkflowPhase creationWorkflowPhase = CreationWorkflowPhase.preparing;
+  String? planId;
+  CreationPlanPreviewVm? creationPlan;
+  CreationFailureVm? creationFailure;
+  List<CreationPlanStepVm> creationJobSteps = const [];
+  String generatedArtifactKind = '';
+  String generatedArtifactPath = '';
+  String previewFailureReason = '';
   String? jobId;
   String traceId = '';
   String requestId = '';
   String statusMessage = '';
-  String readinessMessage = _sidecarDisconnectedMessage;
+  String readinessMessage = '';
   List<SetupCheckVm> readinessChecks = const [];
   List<Map<String, String>> searchTypeOptions = const [];
-  List<String> generationTemplates = _defaultGenerationTemplates;
+  List<String> generationTemplates = const [];
   List<String> generationPageSizes = const [];
   List<String> generationStyles = const [];
   List<String> generationExportTargets = const [];
+  String generationCreationType = 'storybook';
   String generationTemplate = '';
   String generationPageSize = '';
   String generationStyle = '';
@@ -181,6 +191,7 @@ class _DesktopShellState extends State<DesktopShell> {
   late final DesktopTraceContext desktopTraceContext;
   late final DesktopLogger desktopLogger;
   late final DesktopLogCleanupWorker desktopLogCleanupWorker;
+  Timer? _creationJobPollingTimer;
   int _bundledPostgresPort = _pgDefaultPort;
   bool _localizedDefaultsInitialized = false;
 
@@ -209,6 +220,7 @@ class _DesktopShellState extends State<DesktopShell> {
       findExecutable: _findExecutable,
       ensureNodeAvailable: _ensureNodeAvailable,
       onLog: _appendLog,
+      localizationsProvider: () => AppLocalizations.of(context),
       extraEnvironment: () => <String, String>{
         'POSTGRES_HOST': _pgDefaultLoopback,
         'POSTGRES_PORT': '$_bundledPostgresPort',
@@ -227,7 +239,9 @@ class _DesktopShellState extends State<DesktopShell> {
         data: const {'source': 'desktop_shell.initState'},
       ),
     );
-    unawaited(_bootstrapSidecarAndRefresh());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_bootstrapSidecarAndRefresh());
+    });
   }
 
   @override
@@ -236,8 +250,11 @@ class _DesktopShellState extends State<DesktopShell> {
     if (_localizedDefaultsInitialized) return;
     _localizedDefaultsInitialized = true;
     readinessChecks = _disconnectedSetupChecks(context);
-    statusMessage = AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel;
+    statusMessage = AppLocalizations.of(
+      context,
+    )!.contentPreviewWaitingForGenerationLabel;
     searchTypeOptions = _defaultSearchTypeOptions(context);
+    generationTemplates = _defaultGenerationTemplates(context);
     generationPageSizes = _defaultGenerationPageSizes(context);
     generationStyles = _defaultGenerationStyles(context);
     generationExportTargets = _defaultGenerationExportTargets(context);
@@ -253,7 +270,12 @@ class _DesktopShellState extends State<DesktopShell> {
     ]);
   }
 
-  void _setShellState(VoidCallback fn) => setState(fn);
+  void _setShellState(VoidCallback fn) {
+    setState(fn);
+    if (step != AppStep.generate) {
+      _stopCreationJobPolling();
+    }
+  }
 
   // Keep a local lifecycle fallback, but respect PG owner lock to avoid
   // stale DesktopShell instances stopping the new session database.
@@ -281,6 +303,7 @@ class _DesktopShellState extends State<DesktopShell> {
 
   @override
   void dispose() {
+    _stopCreationJobPolling();
     _stopBundledPostgresIfRunning();
     super.dispose();
   }
@@ -327,7 +350,7 @@ class _DesktopShellState extends State<DesktopShell> {
   void _handleStepSelection(AppStep next) {
     if (next == AppStep.assets && children.isEmpty) return;
     if (step == next) return;
-    setState(() => step = next);
+    _setShellState(() => step = next);
   }
 
   Widget _page(AppStep effectiveStep) {

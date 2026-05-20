@@ -168,39 +168,11 @@ test("OpenAI 配置在未设置时默认为空", () => {
   assert.equal(config.openai.apiKey, "");
 });
 
-test("updates OpenAI config with plaintext key in config status payload", async () => {
-  const appConfig = new AppConfigService(loadConfigFromEnv({}));
-  const service = new ConfigService(appConfig, {} as any);
-
-  const updateResult = await service.updateOpenAI({
-    baseUrl: "https://api.openai.com/v1",
-    model: "gpt-4.1-mini",
-    apiKey: "sk-plain-123",
-  });
-  assert.equal(updateResult.ok, true);
-
-  const status = await service.status();
-  assert.equal(status.openai.baseUrl, "https://api.openai.com/v1");
-  assert.equal(status.openai.model, "gpt-4.1-mini");
-  assert.equal(status.openai.apiKeyConfigured, true);
-  assert.equal(status.openai.apiKey, "sk-plain-123");
-  assert.equal("apiKeyDisplay" in status.openai, false);
-  assert.equal("apiKeyStorageMode" in status.openai, false);
-});
-
-test("loads OpenAI and Storage setup config from database runtime config", async () => {
+test("loads Storage setup config from database runtime config", async () => {
   const appConfig = new AppConfigService(loadConfigFromEnv({}));
   const prisma = {
     runtimeConfig: {
       findMany: async () => [
-        {
-          key: "openai",
-          value: {
-            baseUrl: "https://api.openai.com/v1",
-            model: "gpt-4.1-mini",
-            apiKey: "sk-db-123",
-          },
-        },
         {
           key: "supabaseStorage",
           value: {
@@ -224,9 +196,9 @@ test("loads OpenAI and Storage setup config from database runtime config", async
 
   const status = await service.status();
 
-  assert.equal(status.openai.baseUrl, "https://api.openai.com/v1");
-  assert.equal(status.openai.model, "gpt-4.1-mini");
-  assert.equal(status.openai.apiKey, "sk-db-123");
+  assert.equal(status.openai.baseUrl, "");
+  assert.equal(status.openai.model, "");
+  assert.equal(status.openai.apiKeyConfigured, false);
   assert.equal(status.supabaseStorage.configured, true);
   assert.equal(status.supabaseStorage.s3.configured, true);
 });
@@ -245,11 +217,6 @@ test("persists setup config updates to database runtime config", async () => {
   };
   const service = new ConfigService(appConfig, prisma as any);
 
-  await service.updateOpenAI({
-    baseUrl: "https://api.openai.com/v1",
-    model: "gpt-4.1-mini",
-    apiKey: "sk-plain-123",
-  });
   await service.updateSupabaseStorage({
     url: "https://kidmemory.supabase.co",
     bucket: "kidmemory-assets",
@@ -258,7 +225,7 @@ test("persists setup config updates to database runtime config", async () => {
 
   assert.deepEqual(
     upserts.map((entry) => entry.key),
-    ["openai", "supabaseStorage"],
+    ["supabaseStorage"],
   );
 });
 

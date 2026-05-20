@@ -96,6 +96,28 @@ const ROUTES: RouteCheck[] = [
     },
   },
   {
+    name: "GET /books/jobs remains available until creation jobs fully cover it",
+    method: "GET",
+    path: "/books/jobs",
+    expectStatuses: [200],
+    assertJson: (payload) => {
+      const data = unwrapApiData(payload);
+      const body = data as Record<string, unknown>;
+      assert.ok(Array.isArray(body.jobs), "books/jobs should still expose the legacy job list");
+    },
+  },
+  {
+    name: "POST /books/jobs remains wired and validates payloads",
+    method: "POST",
+    path: "/books/jobs",
+    body: { assetIds: [] },
+    expectStatuses: [422],
+    assertJson: (payload) => {
+      const data = unwrapApiData(payload);
+      assert.equal(typeof data, "object", "books/jobs validation error should include structured data");
+    },
+  },
+  {
     name: "POST /sample/import accepts a JSON body",
     method: "POST",
     path: "/sample/import",
@@ -174,6 +196,26 @@ test("sidecar returns 404 for unknown routes without crashing the app", async (t
 
   const response = await fetch(`${baseUrl}/this-route-does-not-exist`, { method: "GET" });
   assert.equal(response.status, 404);
+});
+
+test("legacy OpenAI config routes stay removed", async (t) => {
+  const { app, baseUrl } = await startApp();
+  t.after(async () => {
+    await app.close();
+  });
+
+  const removedPaths = ["/config" + "/openai", "/config/check" + "/openai"];
+  for (const path of removedPaths) {
+    await t.test(`POST ${path} returns 404`, async () => {
+      const response = await fetch(`${baseUrl}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      assert.equal(response.status, 404);
+    });
+  }
 });
 
 test("web companion trusted upload sessions route exists", async () => {

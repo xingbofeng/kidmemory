@@ -77,7 +77,7 @@ export type StorageSyncJob = {
 export type ExportArtifact = {
   id: string;
   jobId: string;
-  kind: "pdf" | "long_image_png" | "long_image_jpg";
+  kind: "pdf" | "long_image_png" | "long_image_jpg" | "mp4";
   localPath: string;
   storageProvider?: string;
   storageStatus?: string;

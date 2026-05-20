@@ -9,7 +9,7 @@ class SourceRow extends StatelessWidget {
     super.key,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final String? iconAsset;
   final String label;
   final String value;
@@ -83,7 +83,10 @@ class AssetCard extends StatelessWidget {
                     child: AssetArtworkPreview(
                       path: previewPath,
                       fallbackIcon: asset.icon,
-                      fallbackAssetPath: _assetPreviewIconAsset(l10n, asset.type),
+                      fallbackAssetPath: _assetPreviewIconAsset(
+                        l10n,
+                        asset.type,
+                      ),
                       label: '',
                       height: double.infinity,
                       width: double.infinity,
@@ -252,9 +255,11 @@ class AssetCard extends StatelessWidget {
 
   String _formatAssetDate(AppLocalizations l10n, String value) {
     final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value.isEmpty ? l10n.contentDateMissingLabel : value;
+    if (parsed == null) {
+      return value.isEmpty ? l10n.contentDateMissingLabel : value;
+    }
     final local = parsed.toLocal();
-    return '${local.year}年${local.month}月${local.day}日';
+    return l10n.assetLibraryDateYmd(local.year, local.month, local.day);
   }
 
   String _displayAssetTitle(AppLocalizations l10n, String value, String type) {
@@ -317,17 +322,29 @@ class StatusStack extends StatelessWidget {
       child: Column(
         children: [
           StatusPill(
-            text: generated ? '生成完成     $pageCount/$pageCount 页' : AppLocalizations.of(context)!.contentPreviewWaitingForGenerationLabel,
+            text: generated
+                ? AppLocalizations.of(
+                    context,
+                  )!.contentGenerationCompletePages(pageCount, pageCount)
+                : AppLocalizations.of(
+                    context,
+                  )!.contentPreviewWaitingForGenerationLabel,
             color: const Color(0xffeaf7ee),
           ),
           const SizedBox(height: 10),
           StatusPill(
-            text: generated ? AppLocalizations.of(context)!.contentPreviewCompletedLabel : AppLocalizations.of(context)!.contentPreviewWaitingLabel,
+            text: generated
+                ? AppLocalizations.of(context)!.contentPreviewCompletedLabel
+                : AppLocalizations.of(context)!.contentPreviewWaitingLabel,
             color: const Color(0xffeef6ff),
           ),
           const SizedBox(height: 10),
           StatusPill(
-            text: exported ? AppLocalizations.of(context)!.contentExportCompletedFileLabel : AppLocalizations.of(context)!.contentExportFormatSelectionHint,
+            text: exported
+                ? AppLocalizations.of(context)!.contentExportCompletedFileLabel
+                : AppLocalizations.of(
+                    context,
+                  )!.contentExportFormatSelectionHint,
             color: const Color(0xfffff4df),
           ),
         ],
@@ -371,9 +388,19 @@ class StepProgress extends StatelessWidget {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Text('🗂️  准备素材\n已选择 $selectedCount 张素材'),
-        Text(generated ? '✅  Agent 生成结构\n已生成作品集内容' : '⏳  Agent 生成结构\n等待生成'),
-        Text(exported ? '📄  导出文件\n已生成高质量文件' : '📄  导出文件\n等待导出'),
+        Text(
+          AppLocalizations.of(context)!.contentFlowPrepareAssets(selectedCount),
+        ),
+        Text(
+          generated
+              ? AppLocalizations.of(context)!.contentFlowAgentGenerated
+              : AppLocalizations.of(context)!.contentFlowAgentWaiting,
+        ),
+        Text(
+          exported
+              ? AppLocalizations.of(context)!.contentFlowExportCompleted
+              : AppLocalizations.of(context)!.contentFlowExportWaiting,
+        ),
       ],
     ),
   );
@@ -390,7 +417,7 @@ class SelectedAssetsStrip extends StatelessWidget {
     child: Row(
       children: [
         Text(
-          '已选择素材（$count）',
+          AppLocalizations.of(context)!.contentSelectedAssetsTitle(count),
           style: const TextStyle(fontWeight: FontWeight.w900),
         ),
         const SizedBox(width: 12),
@@ -401,7 +428,9 @@ class SelectedAssetsStrip extends StatelessWidget {
               children: count == 0
                   ? [
                       Text(
-                        AppLocalizations.of(context)!.contentNoSelectedAssetsHint,
+                        AppLocalizations.of(
+                          context,
+                        )!.contentNoSelectedAssetsHint,
                         style: TextStyle(color: Color(0xff77685e)),
                       ),
                     ]
@@ -420,7 +449,9 @@ class SelectedAssetsStrip extends StatelessWidget {
                           ),
                         ),
                       SecondaryButton(
-                        label: AppLocalizations.of(context)!.contentViewAllLabel,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.contentViewAllLabel,
                         onPressed: onViewAll ?? () {},
                       ),
                     ],
@@ -445,11 +476,25 @@ class PagePreviewPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageCount = _estimatedPageCount(selectedCount);
-    final title = generated ? '页面预览（共 $pageCount 页）' : AppLocalizations.of(context)!.contentPreviewWaitingTitle;
+    final title = generated
+        ? AppLocalizations.of(context)!.contentPagePreviewCount(pageCount)
+        : AppLocalizations.of(context)!.contentPreviewWaitingTitle;
     final generatedPreviews = [
-      (bookIconAsset, Icons.auto_stories_outlined, AppLocalizations.of(context)!.contentSectionCoverLabel),
-      (paletteIconAsset, Icons.palette_outlined, AppLocalizations.of(context)!.contentSectionStoriesLabel),
-      (bearDocumentIconAsset, Icons.description_outlined, AppLocalizations.of(context)!.contentSectionGrowthRecordsLabel),
+      (
+        bookIconAsset,
+        Icons.auto_stories_outlined,
+        AppLocalizations.of(context)!.contentSectionCoverLabel,
+      ),
+      (
+        paletteIconAsset,
+        Icons.palette_outlined,
+        AppLocalizations.of(context)!.contentSectionStoriesLabel,
+      ),
+      (
+        bearDocumentIconAsset,
+        Icons.description_outlined,
+        AppLocalizations.of(context)!.contentSectionGrowthRecordsLabel,
+      ),
     ];
     return SurfaceCard(
       child: SizedBox(
@@ -466,7 +511,9 @@ class PagePreviewPanel extends StatelessWidget {
                 if (!generated) ...[
                   const SizedBox(width: 12),
                   Text(
-                    AppLocalizations.of(context)!.contentPreviewAvailableAfterGenerationHint,
+                    AppLocalizations.of(
+                      context,
+                    )!.contentPreviewAvailableAfterGenerationHint,
                     style: TextStyle(fontSize: 12, color: Color(0xff8c7663)),
                   ),
                 ],
@@ -497,7 +544,9 @@ class PagePreviewPanel extends StatelessWidget {
                       child: PreviewPlaceholder(
                         icon: Icons.article_outlined,
                         iconAsset: bearDocumentIconAsset,
-                        label: AppLocalizations.of(context)!.contentCoverAppearsAfterGenerationLabel,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.contentCoverAppearsAfterGenerationLabel,
                       ),
                     ),
                     SizedBox(width: 16),
@@ -505,7 +554,9 @@ class PagePreviewPanel extends StatelessWidget {
                       child: PreviewPlaceholder(
                         icon: Icons.image_outlined,
                         iconAsset: imageIconAsset,
-                        label: AppLocalizations.of(context)!.contentStoryPagesWaitingLabel,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.contentStoryPagesWaitingLabel,
                       ),
                     ),
                     SizedBox(width: 16),
@@ -513,7 +564,9 @@ class PagePreviewPanel extends StatelessWidget {
                       child: PreviewPlaceholder(
                         icon: Icons.subject_rounded,
                         iconAsset: pdfIconAsset,
-                        label: AppLocalizations.of(context)!.contentExportBeforePreviewHint,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.contentExportBeforePreviewHint,
                       ),
                     ),
                   ],
@@ -535,7 +588,7 @@ class PreviewPlaceholder extends StatelessWidget {
     super.key,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final String? iconAsset;
   final String label;
 
@@ -634,25 +687,18 @@ class AgentLogPanel extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text('●  $statusMessage\n${logLines.join('\n')}'),
-              if (requestId.trim().isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Request ID: $requestId',
-                  style: const TextStyle(
-                    color: Color(0xff8c7663),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text('阶段：实时记录\n来源：本地任务中心'),
+            Text(AppLocalizations.of(context)!.contentTimelineSourceText),
             const SizedBox(height: 12),
-            SecondaryButton(label: AppLocalizations.of(context)!.contentViewDetailsLabel, onPressed: onViewDetails ?? () {}),
+            SecondaryButton(
+              label: AppLocalizations.of(context)!.contentViewDetailsLabel,
+              onPressed: onViewDetails ?? () {},
+            ),
           ],
         ),
       ],
@@ -664,14 +710,14 @@ class ExportOption extends StatelessWidget {
   const ExportOption({
     required this.title,
     required this.value,
-    required this.icon,
+    this.icon,
     this.iconAsset,
     super.key,
   });
 
   final String title;
   final String value;
-  final IconData icon;
+  final IconData? icon;
   final String? iconAsset;
 
   @override
@@ -689,10 +735,9 @@ class ExportOption extends StatelessWidget {
               AppAssetIcon(iconAsset, fallbackIcon: icon, size: 24),
               const SizedBox(width: 12),
               Expanded(child: Text(value)),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
+              const AppAssetIcon(
+                downArrowIconAsset,
                 size: compactInlineIconSize,
-                color: Color(0xff7a6a5b),
               ),
             ],
           ),

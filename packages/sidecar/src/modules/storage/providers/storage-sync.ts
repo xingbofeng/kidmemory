@@ -241,6 +241,7 @@ function exportArtifactObjectPath(artifact: ExportArtifact, childId: string) {
 
 function extensionForArtifact(artifact: ExportArtifact) {
   if (artifact.kind === "pdf") return ".pdf";
+  if (artifact.kind === "mp4") return ".mp4";
   if (artifact.kind === "long_image_jpg") return ".jpg";
   return ".png";
 }

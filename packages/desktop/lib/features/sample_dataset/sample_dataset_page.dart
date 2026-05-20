@@ -41,8 +41,11 @@ class SampleDatasetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final assets = previewAssets;
-    final displayAssets = assets.isEmpty ? _samplePreviewPlaceholders(context) : assets;
+    final displayAssets = assets.isEmpty
+        ? _samplePreviewPlaceholders(context)
+        : assets;
     final samplePreviewOnly = assets.isEmpty;
     final counts = {
       "artwork": samplePreviewOnly ? _sampleArtworkCount : artworkCount,
@@ -57,7 +60,10 @@ class SampleDatasetPage extends StatelessWidget {
       subtitle: AppLocalizations.of(context)!.sampleDatasetPageSubtitle,
       leading: onBack == null
           ? null
-          : PageBackButton(tooltip: AppLocalizations.of(context)!.sampleDatasetBackTooltip, onPressed: onBack!),
+          : PageBackButton(
+              tooltip: AppLocalizations.of(context)!.sampleDatasetBackTooltip,
+              onPressed: onBack!,
+            ),
       child: SingleChildScrollView(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,11 +73,23 @@ class SampleDatasetPage extends StatelessWidget {
                 children: [
                   MetricStrip(
                     metrics: [
-                      (AppLocalizations.of(context)!.contentMetricTotalLabel, '$totalCount 项'),
-                      (AppLocalizations.of(context)!.contentCategoryArtworkLabel, '${counts['artwork']} 张'),
-                      (AppLocalizations.of(context)!.contentCategoryCraftLabel, '${counts['craft']} 件'),
-                      (AppLocalizations.of(context)!.contentLicenseLabel, 'CC0'),
-                      (AppLocalizations.of(context)!.contentAssetTypePhotoLabel, '${counts['photo']} 张'),
+                      (
+                        l10n.contentMetricTotalLabel,
+                        l10n.contentMetricItemCount(totalCount),
+                      ),
+                      (
+                        l10n.contentCategoryArtworkLabel,
+                        l10n.contentMetricImageCount(counts['artwork'] ?? 0),
+                      ),
+                      (
+                        l10n.contentCategoryCraftLabel,
+                        l10n.contentMetricCraftCount(counts['craft'] ?? 0),
+                      ),
+                      (l10n.contentLicenseLabel, 'CC0'),
+                      (
+                        l10n.contentAssetTypePhotoLabel,
+                        l10n.contentMetricImageCount(counts['photo'] ?? 0),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -82,24 +100,36 @@ class SampleDatasetPage extends StatelessWidget {
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: infoIconAsset,
-                          title: AppLocalizations.of(context)!.sampleDatasetInfoCardTitle,
-                          text: AppLocalizations.of(context)!.sampleDatasetInfoCardDescription,
+                          title: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetInfoCardTitle,
+                          text: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetInfoCardDescription,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: uploadIconAsset,
-                          title: AppLocalizations.of(context)!.sampleDatasetImportStepsTitle,
-                          text: AppLocalizations.of(context)!.sampleDatasetImportStepsDescription,
+                          title: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetImportStepsTitle,
+                          text: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetImportStepsDescription,
                         ),
                       ),
                       SizedBox(width: 16),
                       Expanded(
                         child: SmallInfoCard(
                           iconAsset: pdfIconAsset,
-                          title: AppLocalizations.of(context)!.sampleDatasetExpectedOutputTitle,
-                          text: AppLocalizations.of(context)!.sampleDatasetExpectedOutputDescription,
+                          title: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetExpectedOutputTitle,
+                          text: AppLocalizations.of(
+                            context,
+                          )!.sampleDatasetExpectedOutputDescription,
                         ),
                       ),
                     ],
@@ -113,7 +143,9 @@ class SampleDatasetPage extends StatelessWidget {
               child: Column(
                 children: [
                   SidePanel(
-                    title: AppLocalizations.of(context)!.sampleDatasetAfterImportDescriptionTitle,
+                    title: AppLocalizations.of(
+                      context,
+                    )!.sampleDatasetAfterImportDescriptionTitle,
                     artworkCount: counts['artwork'] ?? 0,
                     craftCount: counts['craft'] ?? 0,
                     photoCount: counts['photo'] ?? 0,
@@ -144,62 +176,62 @@ List<AssetPreviewItem> _samplePreviewPlaceholders(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
   return [
     AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderSunlightGardenLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderSunlightGardenPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderGrassFieldLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderGrassFieldPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderBirthdayCakeLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderBirthdayCakePath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderBirthdayBoyLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderBirthdayBoyPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderOceanWorldLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderOceanWorldPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderDinosaurWorldLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderDinosaurWorldPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderHappinessFamilyLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderHappinessFamilyPath,
-  ),
-  AssetPreviewItem(
-    label: l10n.sampleDatasetPlaceholderDrawingLabel,
-    icon: Icons.photo_camera_rounded,
-    typeLabel: l10n.contentAssetTypePhotoLabel,
-    iconAsset: cameraIconAsset,
-    path: l10n.sampleDatasetPlaceholderDrawingPath,
-  ),
-];
+      label: l10n.sampleDatasetPlaceholderSunlightGardenLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderSunlightGardenPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderGrassFieldLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderGrassFieldPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderBirthdayCakeLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderBirthdayCakePath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderBirthdayBoyLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderBirthdayBoyPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderOceanWorldLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderOceanWorldPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderDinosaurWorldLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderDinosaurWorldPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderHappinessFamilyLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderHappinessFamilyPath,
+    ),
+    AssetPreviewItem(
+      label: l10n.sampleDatasetPlaceholderDrawingLabel,
+      icon: Icons.photo_camera_rounded,
+      typeLabel: l10n.contentAssetTypePhotoLabel,
+      iconAsset: cameraIconAsset,
+      path: l10n.sampleDatasetPlaceholderDrawingPath,
+    ),
+  ];
 }
 
 const _sampleAssetCount = 17;
@@ -236,12 +268,18 @@ class _SampleActionPanel extends StatelessWidget {
         children: [
           _SampleStatusCard(
             iconAsset: uploadIconAsset,
-            title: AppLocalizations.of(context)!.sampleDatasetImportingStatusTitle,
-            text: AppLocalizations.of(context)!.sampleDatasetImportingStatusDescription,
+            title: AppLocalizations.of(
+              context,
+            )!.sampleDatasetImportingStatusTitle,
+            text: AppLocalizations.of(
+              context,
+            )!.sampleDatasetImportingStatusDescription,
           ),
           const SizedBox(height: 10),
           PrimaryButton(
-            label: AppLocalizations.of(context)!.sampleDatasetImportingActionLabel,
+            label: AppLocalizations.of(
+              context,
+            )!.sampleDatasetImportingActionLabel,
             icon: Icons.hourglass_top_rounded,
             iconAsset: uploadIconAsset,
             onPressed: null,
@@ -278,7 +316,9 @@ class _SampleActionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SecondaryButton(
-            label: AppLocalizations.of(context)!.sampleDatasetGenerateSampleBookLabel,
+            label: AppLocalizations.of(
+              context,
+            )!.sampleDatasetGenerateSampleBookLabel,
             icon: Icons.auto_awesome_rounded,
             iconAsset: wandIconAsset,
             fullWidth: true,
@@ -317,7 +357,9 @@ class _SampleActionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           PrimaryButton(
-            label: AppLocalizations.of(context)!.sampleDatasetRetryImportButtonLabel,
+            label: AppLocalizations.of(
+              context,
+            )!.sampleDatasetRetryImportButtonLabel,
             icon: Icons.refresh_rounded,
             iconAsset: refreshIconAsset,
             onPressed: onImport,
@@ -340,7 +382,9 @@ class _SampleActionPanel extends StatelessWidget {
         _SampleStatusCard(
           iconAsset: infoIconAsset,
           title: AppLocalizations.of(context)!.sampleDatasetNotImportedTitle,
-          text: AppLocalizations.of(context)!.sampleDatasetImportInstructionText,
+          text: AppLocalizations.of(
+            context,
+          )!.sampleDatasetImportInstructionText,
         ),
         const SizedBox(height: 10),
         PrimaryButton(

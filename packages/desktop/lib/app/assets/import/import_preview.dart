@@ -29,7 +29,9 @@ extension _DesktopShellImportPreview on _DesktopShellState {
     required String typeLabel,
     required Map<String, int> seenLabels,
   }) {
-    final label = rawLabel.trim().isEmpty ? AppLocalizations.of(context)!.importPreviewS578 : rawLabel.trim();
+    final label = rawLabel.trim().isEmpty
+        ? AppLocalizations.of(context)!.importPreviewS578
+        : rawLabel.trim();
     final seen = seenLabels[label] ?? 0;
     seenLabels[label] = seen + 1;
     if (seen == 0) return label;

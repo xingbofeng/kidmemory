@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import type {
+import {
   CommitUploadItemRequestDto,
   CommitUploadItemResponseDto,
   CreateUploadItemsRequestDto,
@@ -21,14 +21,14 @@ export class WebCompanionController {
 
   @Get('/direct-upload/sessions/:sessionId/config')
   @ApiOperation({ summary: 'Get direct upload config for trusted upload session' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: DirectUploadConfigResponseDto })
   async getDirectUploadConfig(@Param('sessionId') sessionId: string): Promise<DirectUploadConfigResponseDto> {
     return this.service.getDirectUploadConfig(sessionId);
   }
 
   @Get('/sessions/:sessionId')
   @ApiOperation({ summary: 'Get trusted upload session summary' })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: SessionSummaryResponseDto })
   async getSessionSummary(
     @Param('sessionId') sessionId: string,
     @Query('token') token?: string,
@@ -38,31 +38,8 @@ export class WebCompanionController {
 
   @Post('/sessions/:sessionId/items')
   @ApiOperation({ summary: 'Create upload items for trusted upload session' })
-  @ApiBody({
-    schema: {
-      type: "object",
-      required: ["token", "files"],
-      properties: {
-        token: { type: "string" },
-        provider: { type: "string", enum: ["lan", "supabase"] },
-        files: {
-          type: "array",
-          minItems: 1,
-          items: {
-            type: "object",
-            required: ["clientFileId", "filename", "contentType", "sizeBytes"],
-            properties: {
-              clientFileId: { type: "string" },
-              filename: { type: "string" },
-              contentType: { type: "string" },
-              sizeBytes: { type: "number" },
-            },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 200 })
+  @ApiBody({ type: CreateUploadItemsRequestDto })
+  @ApiResponse({ status: 200, type: CreateUploadItemsResponseDto })
   async createUploadItems(
     @Param('sessionId') sessionId: string,
     @Body() body: CreateUploadItemsRequestDto,
@@ -72,20 +49,8 @@ export class WebCompanionController {
 
   @Put('/sessions/:sessionId/items/:uploadItemId/commit')
   @ApiOperation({ summary: 'Commit upload item' })
-  @ApiBody({
-    schema: {
-      type: "object",
-      required: ["token", "uploadToken", "sizeBytes"],
-      properties: {
-        token: { type: "string" },
-        uploadToken: { type: "string" },
-        checksumSha256: { type: "string" },
-        sizeBytes: { type: "number" },
-        metadata: { type: "object", additionalProperties: true },
-      },
-    },
-  })
-  @ApiResponse({ status: 200 })
+  @ApiBody({ type: CommitUploadItemRequestDto })
+  @ApiResponse({ status: 200, type: CommitUploadItemResponseDto })
   async commitUploadItem(
     @Param('sessionId') sessionId: string,
     @Param('uploadItemId') uploadItemId: string,
@@ -98,7 +63,7 @@ export class WebCompanionController {
   @ApiOperation({ summary: 'Validate public share token' })
   @ApiQuery({ name: 'clientIp', required: false })
   @ApiQuery({ name: 'userAgent', required: false })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: ShareTokenValidationResponseDto })
   async validateShareToken(
     @Param('shareToken') shareToken: string,
     @Query('clientIp') clientIp?: string,
@@ -110,7 +75,7 @@ export class WebCompanionController {
   @Get('/share/:shareToken/assets')
   @ApiOperation({ summary: 'Get public shared assets' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: SharedAssetDto, isArray: true })
   async getSharedAssets(
     @Param('shareToken') shareToken: string,
     @Query('limit') limit?: string,
@@ -122,7 +87,7 @@ export class WebCompanionController {
   @Get('/share/:shareToken/book')
   @ApiOperation({ summary: 'Get public shared book metadata' })
   @ApiQuery({ name: 'bookId', required: false, type: String })
-  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 200, type: SharedBookDto })
   async getSharedBook(
     @Param('shareToken') shareToken: string,
     @Query('bookId') bookId?: string,

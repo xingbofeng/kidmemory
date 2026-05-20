@@ -27,6 +27,7 @@ void main() {
           'message': '缺少 SUPABASE_ANON_KEY',
         },
       ),
+      configIncompleteMessage: '扫码上传配置未完成，请检查上传设置后重试',
     );
 
     expect(
@@ -35,7 +36,7 @@ void main() {
         isA<StateError>().having(
           (error) => error.message,
           'message',
-          contains('SUPABASE_ANON_KEY'),
+          contains('扫码上传配置未完成'),
         ),
       ),
     );
@@ -46,6 +47,7 @@ void main() {
       api: _FakeSidecarApi(
         postResponse: const {'sessionId': 'session-1', 'childId': 'child-1'},
       ),
+      sessionIncompleteMessage: '扫码上传会话创建失败，请检查上传配置后重试',
     );
 
     expect(
@@ -54,7 +56,7 @@ void main() {
         isA<StateError>().having(
           (error) => error.message,
           'message',
-          contains('publicUrl'),
+          contains('扫码上传会话创建失败'),
         ),
       ),
     );

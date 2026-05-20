@@ -4,11 +4,18 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
   Future<void> _safeOpenExternalTarget(String target, String label) async {
     try {
       await openExternalTarget(target);
-      _appendLog('$label 打开成功：$target');
+      _appendLog(
+        AppLocalizations.of(
+          context,
+        )!.datasetExternalOpenSucceededLog(label, target),
+      );
     } catch (error) {
       if (!mounted) return;
-      _showSnackBar('$label 打开失败：$error');
-      _appendLog('$label 打开失败：$error');
+      final message = AppLocalizations.of(
+        context,
+      )!.datasetExternalOpenFailedMessage(label, error);
+      _showSnackBar(message);
+      _appendLog(message);
     }
   }
 
@@ -27,7 +34,10 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
     } catch (_) {
       // Keep user-facing failure messages coming from the open attempt if needed.
     }
-    await _safeOpenExternalTarget(normalized, AppLocalizations.of(context)!.contentDirectoryLabel);
+    await _safeOpenExternalTarget(
+      normalized,
+      AppLocalizations.of(context)!.contentDirectoryLabel,
+    );
   }
 
   String _normalizeDirectoryPath(String input) {

@@ -48,8 +48,21 @@ export class SkillLoaderService {
       throw new Error(`Invalid skill registry format at ${registryPath}: missing skills array`);
     }
 
+    const configuredSkills = parsed.skills.map((item) => this.validateRegistryEntry(item, registryPath));
+    const scannedSkills = await this.scanSkillsFromFilesystem();
+    const mergedSkills = new Map<string, SkillRegistryEntry>();
+
+    for (const item of configuredSkills) {
+      mergedSkills.set(item.id, item);
+    }
+    for (const item of scannedSkills) {
+      if (!mergedSkills.has(item.id)) {
+        mergedSkills.set(item.id, item);
+      }
+    }
+
     return {
-      skills: parsed.skills.map((item) => this.validateRegistryEntry(item, registryPath)),
+      skills: Array.from(mergedSkills.values()),
     };
   }
 
@@ -106,5 +119,48 @@ export class SkillLoaderService {
         }
         : undefined,
     };
+  }
+
+  private async scanSkillsFromFilesystem(): Promise<SkillRegistryEntry[]> {
+    const skillsDir = path.resolve(this.getSkillsRootDir(), "skills");
+    let entries: Array<{ isDirectory: () => boolean; name: string | Buffer }>;
+    try {
+      entries = (await fs.readdir(skillsDir, { withFileTypes: true })) as Array<{
+        isDirectory: () => boolean;
+        name: string | Buffer;
+      }>;
+    } catch {
+      return [];
+    }
+
+    const scanned: SkillRegistryEntry[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const skillId = String(entry.name).trim();
+      if (!skillId) {
+        continue;
+      }
+
+      const skillEntryFile = path.resolve(skillsDir, skillId, "SKILL.md");
+      try {
+        await fs.access(skillEntryFile);
+      } catch {
+        continue;
+      }
+
+      scanned.push({
+        id: skillId,
+        source: `local://skills/${skillId}`,
+        version: "local",
+        path: `skills/${skillId}`,
+        entry: "SKILL.md",
+      });
+    }
+
+    scanned.sort((a, b) => a.id.localeCompare(b.id));
+    return scanned;
   }
 }

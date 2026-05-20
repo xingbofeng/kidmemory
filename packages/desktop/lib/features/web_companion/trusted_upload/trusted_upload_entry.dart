@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../core/sidecar/sidecar_api.dart';
+import '../../../shared/widgets/chrome.dart';
 import 'trusted_upload_controller.dart';
 import 'trusted_upload_dialog.dart';
 
-/// Trusted Upload 入口按钮
+/// Trusted Upload entry button.
 ///
-/// 与 Direct Upload 的区别：
-/// - 使用后端可信会话（token hash、过期时间、数量限制）
-/// - 支持 signed upload target
-/// - 支持 pullback worker 自动入库
+/// Uses trusted backend sessions, signed upload targets, and pullback workers.
 class TrustedUploadEntryButton extends StatelessWidget {
   const TrustedUploadEntryButton({
     required this.sidecarApi,
@@ -26,7 +24,7 @@ class TrustedUploadEntryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () => _showTrustedUploadDialog(context),
-      icon: const Icon(Icons.qr_code_2),
+      icon: const AppAssetIcon(uploadIconAsset, size: 20),
       label: Text(AppLocalizations.of(context)!.trustedUploadEntryButtonLabel),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -41,12 +39,10 @@ class TrustedUploadEntryButton extends StatelessWidget {
     );
 
     try {
-      // 创建上传会话
       await controller.createSession();
 
       if (!context.mounted) return;
 
-      // 显示对话框
       await showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -61,7 +57,9 @@ class TrustedUploadEntryButton extends StatelessWidget {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('创建上传会话失败: $e'),
+          content: Text(
+            AppLocalizations.of(context)!.trustedUploadCreateSessionFailed(e),
+          ),
           backgroundColor: Colors.red,
         ),
       );

@@ -11,7 +11,10 @@ export class JobsService {
    * Ordered by priority (higher first) then createdAt (older first)
    */
   async getPendingJobs(query: PendingJobsQueryDto): Promise<JobResponseDto[]> {
-    const limit = query.limit || 5;
+    const limit =
+      typeof query.limit === 'string'
+        ? Number.parseInt(query.limit, 10) || 5
+        : query.limit || 5;
 
     const where: {
       status: string;

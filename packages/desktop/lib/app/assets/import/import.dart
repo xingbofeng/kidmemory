@@ -13,11 +13,18 @@ extension _DesktopShellImportFlow on _DesktopShellState {
       label: 'images',
       extensions: const ['jpg', 'jpeg', 'png', 'webp', 'zip'],
     );
-    return openFiles(acceptedTypeGroups: [group], confirmButtonText: AppLocalizations.of(context)!.assetLibraryImportPhotoLabel);
+    return openFiles(
+      acceptedTypeGroups: [group],
+      confirmButtonText: AppLocalizations.of(
+        context,
+      )!.assetLibraryImportPhotoLabel,
+    );
   }
 
   Future<String?> _pickImportFolderPath() {
-    return getDirectoryPath(confirmButtonText: AppLocalizations.of(context)!.importPageS904);
+    return getDirectoryPath(
+      confirmButtonText: AppLocalizations.of(context)!.importPageS904,
+    );
   }
 
   Future<AssetImportReport> importFiles() => _importFilesReport();
@@ -32,7 +39,12 @@ extension _DesktopShellImportFlow on _DesktopShellState {
     if (childId == null) return _importBlockedReport();
     final files = await pickImportFiles();
     if (files.isEmpty) {
-      return const AssetImportReport(imported: 0, duplicates: 0, failed: 0, skipped: 0);
+      return const AssetImportReport(
+        imported: 0,
+        duplicates: 0,
+        failed: 0,
+        skipped: 0,
+      );
     }
     final stagedPaths = await _stageImportPaths(files.map((f) => f.path));
     if (stagedPaths.isEmpty) return _importStagingFailedReport();
@@ -44,16 +56,28 @@ extension _DesktopShellImportFlow on _DesktopShellState {
     if (childId == null) return _importBlockedReport();
     final folderPath = await pickImportFolderPath();
     if (folderPath == null || folderPath.isEmpty) {
-      return const AssetImportReport(imported: 0, duplicates: 0, failed: 0, skipped: 0);
+      return const AssetImportReport(
+        imported: 0,
+        duplicates: 0,
+        failed: 0,
+        skipped: 0,
+      );
     }
     final stagedPaths = await _stageImportPaths([folderPath]);
     if (stagedPaths.isEmpty) return _importStagingFailedReport();
     return _importStagedPaths(childId: childId, stagedPaths: stagedPaths);
   }
 
-  Future<AssetImportReport> _importDroppedPathsReport(List<String> paths) async {
+  Future<AssetImportReport> _importDroppedPathsReport(
+    List<String> paths,
+  ) async {
     if (paths.isEmpty) {
-      return const AssetImportReport(imported: 0, duplicates: 0, failed: 0, skipped: 0);
+      return const AssetImportReport(
+        imported: 0,
+        duplicates: 0,
+        failed: 0,
+        skipped: 0,
+      );
     }
     final childId = await _ensureImportChild();
     if (childId == null) return _importBlockedReport();
@@ -80,7 +104,10 @@ extension _DesktopShellImportFlow on _DesktopShellState {
   Future<String?> _ensureImportChild() async {
     if (selectedChildId != null) return selectedChildId;
     const fallbackChildId = 'child-default';
-    final result = await gateway.ensureChildDto(id: fallbackChildId, name: AppLocalizations.of(context)!.assetLibraryChildLabel);
+    final result = await gateway.ensureChildDto(
+      id: fallbackChildId,
+      name: AppLocalizations.of(context)!.assetLibraryChildLabel,
+    );
     final childId = result.hasChild ? result.childId : fallbackChildId;
     await refreshDataset();
     if (!mounted) return null;
@@ -103,5 +130,4 @@ extension _DesktopShellImportFlow on _DesktopShellState {
     failed: 1,
     message: AppLocalizations.of(context)!.importPageS674,
   );
-
 }

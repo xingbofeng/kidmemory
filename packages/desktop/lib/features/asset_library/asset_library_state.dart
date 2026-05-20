@@ -131,11 +131,11 @@ class _AssetLibraryController {
         )
         .toList();
     if (normalized.isNotEmpty) return normalized;
-    return const [
-      {'value': 'all', 'label': AppLocalizations.of(context)!.contentTypeFilterAllLabel},
-      {'value': 'artwork', 'label': AppLocalizations.of(context)!.contentCategoryDrawingLabel},
-      {'value': 'photo', 'label': AppLocalizations.of(context)!.contentAssetTypePhotoLabel},
-      {'value': 'craft', 'label': AppLocalizations.of(context)!.contentAssetTypeCraftLabel},
+    return [
+      {'value': 'all', 'label': 'all'},
+      {'value': 'artwork', 'label': 'artwork'},
+      {'value': 'photo', 'label': 'photo'},
+      {'value': 'craft', 'label': 'craft'},
     ];
   }
 

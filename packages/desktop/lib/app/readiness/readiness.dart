@@ -8,7 +8,9 @@ extension _DesktopShellReadiness on _DesktopShellState {
       _applyReadinessUiConfig(loadedUiConfig);
 
       if (!snapshot.available) {
-        _markSidecarUnavailable(AppLocalizations.of(context)!.setupSidecarConfigUnavailable);
+        _markSidecarUnavailable(
+          AppLocalizations.of(context)!.setupSidecarConfigUnavailable,
+        );
         return;
       }
       _applyReadinessStorageAndPaths(snapshot.config);
@@ -22,11 +24,15 @@ extension _DesktopShellReadiness on _DesktopShellState {
         final message = schemaMessage.isNotEmpty
             ? schemaMessage
             : AppLocalizations.of(context)!.setupSchemaInitFailed;
-        _appendLog('schema 初始化未完成：$message');
+        _appendLog(
+          AppLocalizations.of(context)!.setupSchemaInitIncompleteLog(message),
+        );
       }
       _setShellState(() {
         readinessMessage = schemaReady
-            ? '初始化成功，已完成 ${readyCount + 1} / 2 项 readiness 检测'
+            ? AppLocalizations.of(
+                context,
+              )!.setupReadinessCompleteMessage(readyCount + 1, 2)
             : AppLocalizations.of(context)!.setupSidecarStartedSchemaNotReady;
         readinessChecks = _buildReadinessChecks(openai: snapshot.openai);
       });
@@ -35,7 +41,9 @@ extension _DesktopShellReadiness on _DesktopShellState {
       }
     } catch (error) {
       debugPrint('KidMemory readiness refresh failed: $error');
-      _markSidecarUnavailable('初始化失败：$error');
+      _markSidecarUnavailable(
+        AppLocalizations.of(context)!.setupInitializationFailed(error),
+      );
       return;
     }
   }

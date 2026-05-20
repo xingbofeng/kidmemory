@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// 从其他文件导入的类型
+// Types imported from other files.
 export '../../features/setup/setup_page.dart'
     show SetupCheckVm, SupabaseStorageVm;
 export '../../features/generate_export/generate_export_page.dart'
@@ -66,7 +66,7 @@ class AssetVm {
       description: json['description'] as String? ?? '',
       tags: (json['tags'] as List?)?.cast<String>() ?? const [],
       capturedAt: json['capturedAt'] as String? ?? '',
-      icon: Icons.image, // 默认图标，实际应根据 type 决定
+      icon: Icons.image,
       imagePath: json['imagePath'] as String? ?? '',
       thumbnailPath: json['thumbnailPath'] as String? ?? '',
       previewUrl: json['previewUrl'] as String? ?? '',

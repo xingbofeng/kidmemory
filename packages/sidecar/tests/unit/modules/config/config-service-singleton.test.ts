@@ -21,7 +21,6 @@ test("ConfigService composes the readiness delegate exactly once per instance", 
   await service.status();
   await service.uiConfig();
   service.postgresReadiness();
-  await service.openAIReadiness();
   service.claudeReadiness();
   service.pgVectorReadiness();
   service.initializeSchema();

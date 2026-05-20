@@ -6,5 +6,4 @@ extension _DesktopShellSetupState on _DesktopShellState {
     if (selectedRoot == null || selectedRoot.trim().isEmpty) return;
     await _applySelectedLocalDataRoot(selectedRoot);
   }
-
 }

@@ -1,7 +1,7 @@
 import '../../shared/models/library_models.dart';
-import 'package:kidmemory_protocol/kidmemory_protocol.dart';
+import 'package:kidmemory_protocol/kidmemory_protocol.dart' hide AgentConfigApi;
+import 'agent_config_api.dart';
 import 'sidecar_api.dart';
-import '../../../l10n/app_localizations.dart';
 
 class DesktopSidecarGateway {
   const DesktopSidecarGateway(this._api);
@@ -14,14 +14,14 @@ class DesktopSidecarGateway {
     final schema = await _api.postStrict('/schema/init');
     final postgres = await _api.postStrict('/config/check/postgres');
     final pgvector = await _api.postStrict('/config/check/pgvector');
-    final openai = await _api.postStrict('/config/check/openai');
+    final openai = await checkOpenAiDto();
     return ReadinessSnapshot(
       uiConfig: uiConfig,
       config: ReadinessConfig.fromJson(config),
       schema: ReadinessCheckDto.fromJson(schema),
       postgres: ReadinessCheckDto.fromJson(postgres),
       pgvector: ReadinessCheckDto.fromJson(pgvector),
-      openai: ReadinessCheckDto.fromJson(openai),
+      openai: openai,
     );
   }
 
@@ -74,6 +74,63 @@ class DesktopSidecarGateway {
     return BookExportResponseDto.fromJson(raw);
   }
 
+  Future<Map<String, dynamic>> createCreationPlanRaw({
+    required String goal,
+    required String creationType,
+    required List<String> assetIds,
+    Map<String, dynamic> settings = const {},
+  }) async {
+    return _api.postStrict('/creation/jobs/plan', {
+      'goal': goal,
+      'creationType': creationType,
+      'assetIds': assetIds,
+      if (settings.isNotEmpty) 'settings': settings,
+    });
+  }
+
+  Future<Map<String, dynamic>> createCreationJobRaw({
+    required String planId,
+  }) async {
+    return _api.postStrict('/creation/jobs', {'planId': planId});
+  }
+
+  Future<Map<String, dynamic>> getCreationJobRaw({
+    required String jobId,
+  }) async {
+    return _api.getStrict('/creation/jobs/${Uri.encodeComponent(jobId)}');
+  }
+
+  Future<Map<String, dynamic>> getCreationJobEventsRaw({
+    required String jobId,
+  }) async {
+    return _api.getStrict(
+      '/creation/jobs/${Uri.encodeComponent(jobId)}/events',
+    );
+  }
+
+  Future<Map<String, dynamic>> exportCreationJobRaw({
+    required String jobId,
+    required String target,
+    String? targetPath,
+  }) async {
+    return _api
+        .postStrict('/creation/jobs/${Uri.encodeComponent(jobId)}/export', {
+          'target': target,
+          if (targetPath != null && targetPath.trim().isNotEmpty)
+            'targetPath': targetPath.trim(),
+        });
+  }
+
+  Future<Map<String, dynamic>> shareCreationJobRaw({
+    required String jobId,
+    required String artifactId,
+  }) async {
+    return _api.postStrict(
+      '/creation/jobs/${Uri.encodeComponent(jobId)}/share',
+      {'artifactId': artifactId},
+    );
+  }
+
   Future<AssetSearchResultDto> searchAssetsDto({
     required AssetSearchRequestDto payload,
   }) async {
@@ -124,7 +181,7 @@ class DesktopSidecarGateway {
   }) async {
     final payload = <String, dynamic>{
       'name': name,
-      if (birthday.trim().isNotEmpty) 'birthday': birthday.trim(),
+      'birthday': birthday.trim(),
       'notes': notes,
     };
     await _api.patch('/children/$id', payload);
@@ -197,8 +254,40 @@ class DesktopSidecarGateway {
   }
 
   Future<ReadinessCheckDto> checkOpenAiDto() async {
-    final raw = await _api.post('/config/check/openai');
-    return ReadinessCheckDto.fromJson(raw);
+    final agentConfigApi = AgentConfigApi(_api);
+    AgentConfigResponseDto? config;
+    try {
+      config = await agentConfigApi.getDefaultAgentConfig();
+    } on SidecarApiException {
+      config = null;
+    }
+    if (config == null) {
+      return ReadinessCheckDto(
+        ok: false,
+        service: 'openai',
+        blocksGeneration: false,
+        message: '大模型接口未配置。',
+      );
+    }
+
+    try {
+      final result = await agentConfigApi.testAgentConfigById(config.id);
+      return ReadinessCheckDto(
+        ok: result.success,
+        service: config.provider,
+        blocksGeneration: false,
+        message: result.success
+            ? 'Agent config readiness check passed'
+            : result.errorMessage ?? 'Agent config readiness check failed',
+      );
+    } on SidecarApiException catch (error) {
+      return ReadinessCheckDto(
+        ok: false,
+        service: config.provider,
+        blocksGeneration: false,
+        message: error.message,
+      );
+    }
   }
 
   Future<ReadinessCheckDto> initSchemaDto() async {
@@ -219,20 +308,6 @@ class DesktopSidecarGateway {
     required PostgresConfigRequestDto payload,
   }) async {
     final raw = await _api.post('/config/postgres', payload.toJson());
-    return OperationResultResponseDto.fromJson(raw);
-  }
-
-  Future<OperationResultDto> configureOpenAiDto({
-    required OpenAiConfigRequestDto payload,
-  }) async {
-    final raw = await _api.post('/config/openai', payload.toJson());
-    return OperationResultResponseDto.fromJson(raw);
-  }
-
-  Future<OperationResultDto> configureOpenAiRaw({
-    required Map<String, dynamic> payload,
-  }) async {
-    final raw = await _api.post('/config/openai', payload);
     return OperationResultResponseDto.fromJson(raw);
   }
 
@@ -257,7 +332,6 @@ class DesktopSidecarGateway {
 }
 
 typedef PostgresConfigInput = PostgresConfigRequestDto;
-typedef OpenAiConfigInput = OpenAiConfigRequestDto;
 typedef PathsConfigInput = PathsConfigRequestDto;
 typedef SupabaseStorageConfigInput = SupabaseStorageConfigRequestDto;
 typedef UpdateAssetInput = UpdateAssetRequestDto;
@@ -645,7 +719,9 @@ ChildVm _childVmFromJson(Map<String, dynamic> raw) => ChildVm(
 
 String _childDisplayName(Map<String, dynamic> raw) {
   final id = _stringAt(raw, 'id');
-  if (id.startsWith('sample-child')) return AppLocalizations.of(context)!.childProfileS425;
+  final name = _stringAt(raw, 'name').trim();
+  if (name.isNotEmpty) return name;
+  if (id.startsWith('sample-child')) return 'Sample child';
   return _stringAny(raw, const ['name', 'id']);
 }
 

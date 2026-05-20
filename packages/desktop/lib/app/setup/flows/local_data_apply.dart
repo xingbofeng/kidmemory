@@ -13,13 +13,19 @@ extension _DesktopShellSetupLocalDataApply on _DesktopShellState {
     if (!mounted) return;
     final appliedPaths = _pathsFromConfig(result.pathConfig, paths);
     _setShellState(() {
-        readinessChecks = _replacePathChecks(
-          readinessChecks,
-          appliedPaths,
-          state: result.okValue ? AppLocalizations.of(context)!.setupChosen : AppLocalizations.of(context)!.setupLocalPathSelected,
-        );
-      });
-    _appendLog('本地数据目录已更新：${appliedPaths.dataDir}');
+      readinessChecks = _replacePathChecks(
+        readinessChecks,
+        appliedPaths,
+        state: result.okValue
+            ? AppLocalizations.of(context)!.setupChosen
+            : AppLocalizations.of(context)!.setupLocalPathSelected,
+      );
+    });
+    _appendLog(
+      AppLocalizations.of(
+        context,
+      )!.setupLocalDataDirUpdatedLog(appliedPaths.dataDir),
+    );
     _showSnackBar(
       result.okValue
           ? AppLocalizations.of(context)!.setupLocalPathUpdated

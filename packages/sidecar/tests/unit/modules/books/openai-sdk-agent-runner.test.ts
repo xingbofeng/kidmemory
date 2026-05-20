@@ -119,7 +119,7 @@ describe('OpenAISDKAgentRunner', () => {
         temperature: 0.7,
         maxTokens: 4000,
         systemPrompt: 'Test prompt',
-        toolsEnabled: ['image_analysis'],
+        toolsEnabled: [],
         workspaceConfig: {},
         isActive: true,
         isDefault: false,
@@ -132,6 +132,69 @@ describe('OpenAISDKAgentRunner', () => {
 
       assert.equal(testRunner.getStatus(), 'idle');
     });
+
+    it('mounts skills on the SDK shell tool environment', async () => {
+      const capturedTools: any[] = [];
+      class CaptureAgent extends MockAgent {
+        constructor(config: any) {
+          super(config);
+          capturedTools.push(...(config.tools || []));
+        }
+      }
+
+      const deps = {
+        ...mockDependencies,
+        Agent: CaptureAgent as any,
+      } as any;
+
+      const agentConfig = {
+        id: 'config_2',
+        name: 'Skill Config',
+        provider: 'openai' as const,
+        model: 'gpt-4o-mini',
+        baseUrl: 'https://api.openai.com/v1',
+        temperature: 0.5,
+        maxTokens: 1000,
+        systemPrompt: 'Skill test',
+        toolsEnabled: [],
+        workspaceConfig: {},
+        isActive: true,
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        metadata: {},
+      };
+
+      const testRunner = new OpenAISDKAgentRunner({
+        apiKey: 'test-api-key',
+        model: agentConfig.model,
+        localSkills: [
+          {
+            name: 'hyperframes',
+            description: 'Create video compositions with Hyperframes.',
+            path: '/Users/counter/.kidmemory/skills/hyperframes',
+          },
+        ],
+      }, deps);
+
+      await testRunner.run({
+        childId: 'child_1',
+        assets: [],
+        outputFormat: 'json',
+      });
+
+      const shell = capturedTools.find((item) => item.type === 'shell');
+      assert.ok(shell);
+      assert.equal(shell.environment.type, 'local');
+      assert.deepEqual(shell.environment.skills, [
+        {
+          name: 'hyperframes',
+          description: 'Create video compositions with Hyperframes.',
+          path: '/Users/counter/.kidmemory/skills/hyperframes',
+        },
+      ]);
+    });
+
   });
 
   describe('run', () => {
@@ -170,7 +233,7 @@ describe('OpenAISDKAgentRunner', () => {
       assert.ok(result.executionLog);
       assert.ok(result.executionLog.length > 0);
       assert.equal(result.tokensUsed, 150);
-      assert.ok(result.duration);
+      assert.ok(result.duration !== undefined);
     });
 
     it('should handle empty assets', async () => {

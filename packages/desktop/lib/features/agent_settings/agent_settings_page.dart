@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kidmemory_protocol/kidmemory_protocol.dart' show AgentConfigResponseDto;
+import 'package:kidmemory_protocol/kidmemory_protocol.dart'
+    show AgentConfigResponseDto;
 import '../../../core/sidecar/agent_config_api.dart';
 import '../../../core/sidecar/sidecar_api.dart';
 import '../../../l10n/app_localizations.dart';
@@ -90,18 +91,12 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
         successMessage = null;
       });
 
-      final config = AgentConfig(
-        baseUrl: baseUrlController.text.trim(),
-        apiKey: apiKeyController.text.trim(),
-        model: modelController.text.trim().isEmpty
-            ? 'gpt-4'
-            : modelController.text.trim(),
-      );
-
-      final result = await agentConfigApi.testAgentConfig(config);
+      final config = await _saveCurrentForm(setAsDefault: true);
+      final result = await agentConfigApi.testAgentConfigById(config.id);
 
       setState(() {
         isLoading = false;
+        currentConfig = config;
       });
 
       if (result.success) {
@@ -109,13 +104,15 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
           successMessage = l10n.agentSettingsConnectionTestSuccess;
         });
       } else {
-        _showError(result.errorMessage ?? l10n.agentSettingsConnectionTestFailed);
+        _showError(
+          result.errorMessage ?? l10n.agentSettingsConnectionTestFailed,
+        );
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      _showError('连接测试失败: $e');
+      _showError(l10n.agentSettingsConnectionTestFailedWithError(e));
     }
   }
 
@@ -135,49 +132,8 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
 
       final temperature =
           double.tryParse(temperatureController.text.trim()) ?? 0.7;
-      final maxTokens = int.tryParse(maxTokensController.text.trim()) ?? 4000;
-      final configName = nameController.text.trim().isEmpty
-          ? 'OpenAI'
-          : nameController.text.trim();
-      final description = descriptionController.text.trim().isEmpty
-          ? null
-          : descriptionController.text.trim();
-
-      final savedConfig = currentConfig == null
-          ? await agentConfigApi.createAgentConfig(
-              CreateAgentConfigInput(
-                name: configName,
-                description: description,
-                provider: selectedProvider,
-                model: modelController.text.trim().isEmpty
-                    ? 'gpt-4'
-                    : modelController.text.trim(),
-                apiKey: apiKeyController.text.trim(),
-                baseUrl: baseUrlController.text.trim(),
-                temperature: temperature,
-                maxTokens: maxTokens,
-                isDefault: true,
-              ),
-            )
-          : await agentConfigApi.updateAgentConfig(
-              currentConfig!.id,
-              UpdateAgentConfigInput(
-                name: configName,
-                description: description,
-                provider: selectedProvider,
-                model: modelController.text.trim().isEmpty
-                    ? 'gpt-4'
-                    : modelController.text.trim(),
-                apiKey: apiKeyController.text.trim().isEmpty
-                    ? null
-                    : apiKeyController.text.trim(),
-                baseUrl: baseUrlController.text.trim(),
-                temperature: temperature,
-                maxTokens: maxTokens,
-              ),
-            );
-
-      await agentConfigApi.setDefaultAgentConfig(savedConfig.id);
+      temperatureController.text = temperature.toString();
+      final savedConfig = await _saveCurrentForm(setAsDefault: true);
 
       setState(() {
         currentConfig = savedConfig;
@@ -188,8 +144,59 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
       setState(() {
         isLoading = false;
       });
-      _showError('保存配置失败: $e');
+      _showError(l10n.agentSettingsSaveFailedWithError(e));
     }
+  }
+
+  Future<AgentConfigResponseDto> _saveCurrentForm({
+    required bool setAsDefault,
+  }) async {
+    final temperature =
+        double.tryParse(temperatureController.text.trim()) ?? 0.7;
+    final maxTokens = int.tryParse(maxTokensController.text.trim()) ?? 4000;
+    final configName = nameController.text.trim().isEmpty
+        ? 'OpenAI'
+        : nameController.text.trim();
+    final description = descriptionController.text.trim().isEmpty
+        ? null
+        : descriptionController.text.trim();
+    final model = modelController.text.trim().isEmpty
+        ? 'gpt-4'
+        : modelController.text.trim();
+    final apiKey = apiKeyController.text.trim();
+
+    final savedConfig = currentConfig == null
+        ? await agentConfigApi.createAgentConfig(
+            CreateAgentConfigInput(
+              name: configName,
+              description: description,
+              provider: selectedProvider,
+              model: model,
+              apiKey: apiKey,
+              baseUrl: baseUrlController.text.trim(),
+              temperature: temperature,
+              maxTokens: maxTokens,
+              isDefault: setAsDefault,
+            ),
+          )
+        : await agentConfigApi.updateAgentConfig(
+            currentConfig!.id,
+            UpdateAgentConfigInput(
+              name: configName,
+              description: description,
+              provider: selectedProvider,
+              model: model,
+              apiKey: apiKey.isEmpty ? null : apiKey,
+              baseUrl: baseUrlController.text.trim(),
+              temperature: temperature,
+              maxTokens: maxTokens,
+            ),
+          );
+
+    if (setAsDefault) {
+      await agentConfigApi.setDefaultAgentConfig(savedConfig.id);
+    }
+    return savedConfig;
   }
 
   void _showError(String message) {
@@ -227,7 +234,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.agentSettingsOpenAiDescription,
+                      AppLocalizations.of(
+                        context,
+                      )!.agentSettingsOpenAiDescription,
                       style: TextStyle(color: Colors.blue.shade700),
                     ),
                   ),
@@ -306,7 +315,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
               label: 'Base URL',
               hint: AppLocalizations.of(context)!.agentSettingsBaseUrlHint,
               required: true,
-              helperText: AppLocalizations.of(context)!.agentSettingsBaseUrlHelper,
+              helperText: AppLocalizations.of(
+                context,
+              )!.agentSettingsBaseUrlHelper,
             ),
             const SizedBox(height: 16),
 
@@ -316,7 +327,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
               hint: AppLocalizations.of(context)!.agentSettingsApiKeyHint,
               obscureText: true,
               required: true,
-              helperText: AppLocalizations.of(context)!.agentSettingsApiKeyHelper,
+              helperText: AppLocalizations.of(
+                context,
+              )!.agentSettingsApiKeyHelper,
             ),
             const SizedBox(height: 16),
 
@@ -324,7 +337,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
               controller: modelController,
               label: AppLocalizations.of(context)!.agentSettingsModelLabel,
               hint: AppLocalizations.of(context)!.agentSettingsModelHint,
-              helperText: AppLocalizations.of(context)!.agentSettingsModelDefaultHint,
+              helperText: AppLocalizations.of(
+                context,
+              )!.agentSettingsModelDefaultHint,
             ),
             const SizedBox(height: 32),
 
@@ -338,7 +353,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                     child: OutlinedButton.icon(
                       onPressed: _testConnection,
                       icon: const Icon(Icons.wifi_protected_setup),
-                      label: Text(AppLocalizations.of(context)!.actionTestConnection),
+                      label: Text(
+                        AppLocalizations.of(context)!.actionTestConnection,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -346,7 +363,9 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                     child: ElevatedButton.icon(
                       onPressed: _saveConfiguration,
                       icon: const Icon(Icons.save),
-                      label: Text(AppLocalizations.of(context)!.actionSaveSettings),
+                      label: Text(
+                        AppLocalizations.of(context)!.actionSaveSettings,
+                      ),
                     ),
                   ),
                 ],
@@ -373,15 +392,23 @@ class _AgentSettingsPageState extends State<AgentSettingsPage> {
                 children: [
                   _buildHelpItem(
                     AppLocalizations.of(context)!.agentSettingsOpenAiStepTitle,
-                    AppLocalizations.of(context)!.agentSettingsOpenAiStepDescription,
+                    AppLocalizations.of(
+                      context,
+                    )!.agentSettingsOpenAiStepDescription,
                   ),
                   _buildHelpItem(
                     AppLocalizations.of(context)!.agentSettingsLocalStepTitle,
-                    AppLocalizations.of(context)!.agentSettingsLocalStepDescription,
+                    AppLocalizations.of(
+                      context,
+                    )!.agentSettingsLocalStepDescription,
                   ),
                   _buildHelpItem(
-                    AppLocalizations.of(context)!.agentSettingsCustomEndpointStepTitle,
-                    AppLocalizations.of(context)!.agentSettingsCustomEndpointStepDescription,
+                    AppLocalizations.of(
+                      context,
+                    )!.agentSettingsCustomEndpointStepTitle,
+                    AppLocalizations.of(
+                      context,
+                    )!.agentSettingsCustomEndpointStepDescription,
                   ),
                 ],
               ),

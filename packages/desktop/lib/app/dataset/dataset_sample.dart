@@ -14,6 +14,7 @@ extension _DesktopShellDatasetSample on _DesktopShellState {
       generationStyle = AppLocalizations.of(context)!.datasetSampleS697;
       step = AppStep.generate;
     });
+    _invalidateCreationPlanForInputChange();
   }
 
   Future<void> _confirmResetSampleDataset() async {
@@ -29,7 +30,9 @@ extension _DesktopShellDatasetSample on _DesktopShellState {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(AppLocalizations.of(context)!.sampleDatasetResetDataLabel),
+            child: Text(
+              AppLocalizations.of(context)!.sampleDatasetResetDataLabel,
+            ),
           ),
         ],
       ),
@@ -49,7 +52,11 @@ extension _DesktopShellDatasetSample on _DesktopShellState {
       sampleImported = false;
       sampleImportFailed = false;
     });
-    _appendLog('示例数据已重置：$targetChild，移除 ${result.deletedAssets} 个素材');
+    _appendLog(
+      AppLocalizations.of(
+        context,
+      )!.datasetSampleResetLog(targetChild, result.deletedAssets ?? 0),
+    );
     await refreshDataset();
   }
 

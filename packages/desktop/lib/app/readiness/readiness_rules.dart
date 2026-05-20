@@ -3,7 +3,7 @@ part of '../desktop_shell.dart';
 extension _DesktopShellReadinessRules on _DesktopShellState {
   String _setupActionForTitle(Object? rawAction, String title) {
     if (title == AppLocalizations.of(context)!.setupPostgresTitle ||
-        title == _sidecarSetupTitle ||
+        title == _sidecarSetupTitle(context) ||
         title == AppLocalizations.of(context)!.setupPgvectorTitle ||
         title == AppLocalizations.of(context)!.setupOpenAiTitle ||
         title == AppLocalizations.of(context)!.setupLocalDataDirTitle) {
@@ -23,7 +23,8 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
     if (title == AppLocalizations.of(context)!.setupPostgresTitle) {
       return AppLocalizations.of(context)!.actionInstallAndConfigure;
     }
-    if (title == _sidecarSetupTitle) return AppLocalizations.of(context)!.actionStartSidecar;
+    if (title == _sidecarSetupTitle(context))
+      return AppLocalizations.of(context)!.actionStartSidecar;
     if (title == AppLocalizations.of(context)!.setupPgvectorTitle) {
       return AppLocalizations.of(context)!.actionInstallAndConfigure;
     }
@@ -41,12 +42,25 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
     for (final rawLine in lines) {
       final line = rawLine.trim();
       if (line.isEmpty) continue;
-      if (line == AppLocalizations.of(context)!.setupPurposeLabel) return AppLocalizations.of(context)!.setupSystemConfigItemSummary;
+      if (line == AppLocalizations.of(context)!.setupPurposeLabel)
+        return AppLocalizations.of(context)!.setupSystemConfigItemSummary;
       if (line.startsWith(AppLocalizations.of(context)!.setupPurposePrefixCn)) {
-        return line.replaceFirst(AppLocalizations.of(context)!.setupPurposePrefixCn, '').trim();
+        return line
+            .replaceFirst(
+              AppLocalizations.of(context)!.setupPurposePrefixCn,
+              '',
+            )
+            .trim();
       }
-      if (line.startsWith(AppLocalizations.of(context)!.setupPurposePrefixAscii)) {
-        return line.replaceFirst(AppLocalizations.of(context)!.setupPurposePrefixAscii, '').trim();
+      if (line.startsWith(
+        AppLocalizations.of(context)!.setupPurposePrefixAscii,
+      )) {
+        return line
+            .replaceFirst(
+              AppLocalizations.of(context)!.setupPurposePrefixAscii,
+              '',
+            )
+            .trim();
       }
       if (line.startsWith(AppLocalizations.of(context)!.setupPurposeLabel)) {
         final marker = line.indexOf('：');

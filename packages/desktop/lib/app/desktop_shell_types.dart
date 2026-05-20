@@ -10,8 +10,12 @@ enum _PgvectorLocalStatus { notInstalled, installed, unknown }
 
 enum _StreamKind { stdout, stderr }
 
-const _sidecarDisconnectedMessage = 'Sidecar 未连接';
-const _sidecarSetupTitle = 'Agent 服务配置';
+String _sidecarDisconnectedMessage(BuildContext context) =>
+    AppLocalizations.of(context)!.setupSidecarDisconnected;
+
+String _sidecarSetupTitle(BuildContext context) =>
+    AppLocalizations.of(context)!.setupAgentServiceTitle;
+
 const _setupCommandTimeout = Duration(minutes: 8);
 
 class _SetupCommandException implements Exception {

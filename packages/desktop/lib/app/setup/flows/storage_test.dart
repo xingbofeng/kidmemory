@@ -14,18 +14,28 @@ extension _DesktopShellSetupStorageTest on _DesktopShellState {
     });
     final result = await gateway.testSupabaseStorageDto();
     if (!mounted) return;
-    final cleanupMessage = result.cleanupOk ? '' : AppLocalizations.of(context)!.setupTestCleanupFailedSuffix;
+    final cleanupMessage = result.cleanupOk
+        ? ''
+        : AppLocalizations.of(context)!.setupTestCleanupFailedSuffix;
     final message = result.okValue
-        ? '测试通过$cleanupMessage'
+        ? AppLocalizations.of(context)!.setupStorageTestPassed(cleanupMessage)
         : (result.messageValue.isNotEmpty
               ? result.messageValue
-              : (result.codeValue.isNotEmpty ? result.codeValue : AppLocalizations.of(context)!.setupTestFailed));
+              : (result.codeValue.isNotEmpty
+                    ? result.codeValue
+                    : AppLocalizations.of(context)!.setupTestFailed));
     _setShellState(() {
       supabaseStorage = supabaseStorage.copyWith(
         testing: false,
         testMessage: message,
       );
     });
-    _showSnackBar(result.okValue ? message : 'Supabase Storage $message');
+    _showSnackBar(
+      result.okValue
+          ? message
+          : AppLocalizations.of(
+              context,
+            )!.setupTestConnectionFailedWithMessage(message),
+    );
   }
 }
