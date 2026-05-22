@@ -40,6 +40,7 @@ test("AgentRuntime injects safe workspace file tools only for the OpenAI Agent e
   assert.equal(seenAgentTools.includes("write_file"), true);
   assert.equal(seenAgentTools.includes("edit_file"), true);
   assert.equal(seenAgentTools.includes("search_files"), true);
+  assert.equal(seenAgentTools.includes("generate_storybook_image_with_pollinations"), true);
   assert.equal(seenAgentTools.includes("run_command"), false);
   assert.equal(seenSandboxTools.includes("read_file"), false);
   assert.equal(seenSandboxTools.includes("write_file"), false);

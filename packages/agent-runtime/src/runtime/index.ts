@@ -235,7 +235,7 @@ export class AgentRuntime {
     }));
     await this.runBeforeRun(runContext);
 
-    const tools = this.prepareTools({ runContext, eventBus, skills, workspaceDir: request.workspaceDir });
+    const tools = await this.prepareTools({ runContext, eventBus, skills, workspaceDir: request.workspaceDir });
     const policyError = this.validateToolPolicy(tools);
     if (policyError) return this.failBeforeExecutor({ request, runId, sessionId, goal, runContext, eventBus, emitted, error: policyError });
 
@@ -446,24 +446,30 @@ export class AgentRuntime {
     };
   }
 
-  private prepareTools(input: {
+  private async prepareTools(input: {
     runContext: AgentRunMiddlewareContext;
     eventBus: AgentEventBus;
     skills: SkillDeckLoadResult;
     workspaceDir: string;
   }): AgentTool[] {
+    const [workspaceTools, skillTools, builtinTools, customTools] = await Promise.all([
+      this.executorKind === "agent"
+        ? Promise.resolve(createWorkspaceAgentTools({
+            workspaceDir: input.workspaceDir,
+            command: { enabled: this.policy.tools?.enableWorkspaceCommandTool ?? false },
+          }))
+        : Promise.resolve([]),
+      Promise.resolve(createSkillDeckAgentTools(input.skills)),
+      Promise.resolve(this.builtinTools.pollinations ? [createPollinationsStorybookImageTool()] : []),
+      Promise.resolve(this.customTools),
+    ]);
+
     const approvalRequired = new Set(this.policy.tools?.requireApprovalToolIds ?? []);
-    const workspaceTools = this.executorKind === "agent"
-	      ? createWorkspaceAgentTools({
-	          workspaceDir: input.workspaceDir,
-	          command: { enabled: this.policy.tools?.enableWorkspaceCommandTool ?? false },
-	        })
-	      : [];
     return [
       ...workspaceTools,
-      ...this.customTools,
-      ...createSkillDeckAgentTools(input.skills),
-      ...(this.builtinTools.pollinations ? [createPollinationsStorybookImageTool()] : []),
+      ...customTools,
+      ...skillTools,
+      ...builtinTools,
     ].map((tool) => ({
       ...tool,
       requiresApproval: tool.requiresApproval || approvalRequired.has(tool.id) || undefined,
