@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.tmp/
+
+examples/**/work/*
+!examples/**/work/.gitkeep
+
+examples/**/output/*
+!examples/**/output/.gitkeep
+
+examples/**/.kidmemory/logs/*
+!examples/**/.kidmemory/logs/.gitkeep
+
+examples/**/.kidmemory/sessions/*
+!examples/**/.kidmemory/sessions/.gitkeep
+
+examples/**/.kidmemory/skills/**/readme-assets/

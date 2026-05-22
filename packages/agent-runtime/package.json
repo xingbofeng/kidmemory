@@ -1,0 +1,47 @@
+{
+  "name": "@kidmemory/agent-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "find tests -name '*.test.ts' -print0 | xargs -0 tsx --test",
+    "type-check": "tsc -p tsconfig.build.json --noEmit",
+    "lint": "eslint --max-warnings=0 \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/**/*.ts\"",
+    "compile": "tsc -p tsconfig.build.json",
+    "build": "node --run lint && node --run type-check && node --run compile && node --run verify:package && node --run test",
+    "verify:package": "node scripts/verify-package-export.mjs",
+    "check-env": "tsx scripts/check-env.ts",
+    "check-model": "tsx scripts/check-model.ts",
+    "check-provider": "tsx scripts/check-provider.ts",
+    "demo:prepare": "tsx scripts/prepare-demo-workspace.ts",
+    "demo:run": "tsx scripts/run-demo.ts",
+    "demo:inspect": "tsx scripts/inspect-result.ts",
+    "verify:demo": "tsx scripts/verify-demo.ts"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.11.4",
+    "openai": "^6.37.0",
+    "skill-deck": "^0.1.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "^22.19.19",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.34.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
