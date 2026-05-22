@@ -228,6 +228,7 @@ kidmemory/
 │   ├── desktop/      Flutter macOS desktop app
 │   ├── sidecar/      Local NestJS API, database, Agent orchestration, export
 │   ├── cloud-api/    Cloud upload, sharing, and device sync API
+│   ├── agent-runtime/Agent Runtime SDK built on OpenAI Agents SDK
 │   ├── web/          Mobile Web Companion
 │   └── protocol/     OpenAPI, TypeScript/Dart types, and contract entry points
 ├── docs/             Product, design, and architecture docs
@@ -245,6 +246,7 @@ kidmemory/
 - `packages/desktop`: Flutter macOS app. Entry point is `lib/main.dart`; the main shell is `lib/app/desktop_shell.dart`; sidecar access lives in `lib/core/sidecar/`.
 - `packages/sidecar`: Local NestJS service. Owns readiness checks, child and asset datasets, Web Companion sessions, sync, storage, media generation, Agent config, book jobs, and PDF export.
 - `packages/cloud-api`: Cloud NestJS service for remote upload, sharing, and device sync.
+- `packages/agent-runtime`: Agent Runtime SDK used by generation workflows. It is built on OpenAI Agents SDK and provides sandbox/agent executors, dynamic skill discovery, and workspace artifact/session logging.
 - `packages/web`: React/Vite mobile UI for QR upload, lightweight browsing, sharing, and trusted upload sessions.
 - `packages/protocol`: Unified contract layer. OpenAPI generates TypeScript and Dart types; downstream packages should not import internal `generated/*/ts` paths directly.
 

@@ -1,6 +1,36 @@
-import js from "@eslint/js";
-import tseslint from "@typescript-eslint/eslint-plugin";
-import tsparser from "@typescript-eslint/parser";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+const packageJsonCandidates = [
+  path.join(process.cwd(), "package.json"),
+  path.join(configDir, "packages", "web", "package.json"),
+  path.join(configDir, "packages", "sidecar", "package.json"),
+  path.join(configDir, "packages", "cloud-api", "package.json"),
+  path.join(configDir, "packages", "protocol", "package.json"),
+  path.join(configDir, "packages", "agent-runtime", "package.json"),
+];
+const requireFromInstalledPackage = packageJsonCandidates
+  .map((packageJsonPath) => createRequire(packageJsonPath))
+  .find((candidateRequire) => {
+    try {
+      candidateRequire.resolve("@eslint/js");
+      candidateRequire.resolve("@typescript-eslint/eslint-plugin");
+      candidateRequire.resolve("@typescript-eslint/parser");
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+if (!requireFromInstalledPackage) {
+  throw new Error("Unable to resolve ESLint dependencies from installed package node_modules.");
+}
+
+const js = requireFromInstalledPackage("@eslint/js");
+const tseslint = requireFromInstalledPackage("@typescript-eslint/eslint-plugin");
+const tsparser = requireFromInstalledPackage("@typescript-eslint/parser");
 
 export default [
   js.configs.recommended,

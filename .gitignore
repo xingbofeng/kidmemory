@@ -43,6 +43,10 @@ exports/
 local-data/
 !openspec/**/local-data/
 !openspec/**/local-data/**
+!packages/agent-runtime/src/workspace/
+!packages/agent-runtime/src/workspace/**
+!packages/agent-runtime/examples/
+!packages/agent-runtime/examples/**
 
 # Bundled third-party binaries generated/downloaded locally
 third_party/
@@ -76,3 +80,4 @@ packages/protocol/openapi/*.preview.zh.html
 tmp/
 implementation-notes.md
 HANDOFF.md
+examples/

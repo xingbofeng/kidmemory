@@ -239,6 +239,7 @@ kidmemory/
 │   ├── desktop/      Flutter macOS 桌面端
 │   ├── sidecar/      本地 NestJS API、数据库、Agent 编排、导出
 │   ├── cloud-api/    云端上传、分享、设备同步 API
+│   ├── agent-runtime/基于 OpenAI Agents SDK 的 Agent 运行时 SDK
 │   ├── web/          手机 Web Companion
 │   └── protocol/     OpenAPI、TS/Dart 类型和协议入口
 ├── docs/             产品、设计和架构文档
@@ -256,6 +257,7 @@ kidmemory/
 - `packages/desktop`：Flutter macOS app。入口是 `lib/main.dart`，核心 shell 在 `lib/app/desktop_shell.dart`，sidecar 访问封装在 `lib/core/sidecar/`。
 - `packages/sidecar`：本地 NestJS 服务。包含配置检测、孩子和素材数据集、Web Companion 会话、同步、存储、媒体生成、Agent 配置、书稿任务和 PDF 导出。
 - `packages/cloud-api`：云端 NestJS 服务。负责远程上传、分享、设备同步等非本地能力。
+- `packages/agent-runtime`：Agent Runtime SDK。基于 OpenAI Agents SDK，提供 `sandbox` 与 `agent` 执行器、动态 Skill 发现和 workspace 结构化产物/会话日志能力，供生成阶段调用。
 - `packages/web`：React/Vite 手机端。用于扫码上传、轻量浏览、分享和可信上传会话。
 - `packages/protocol`：统一协议层。通过 OpenAPI 生成 TypeScript 和 Dart 类型，下游禁止直接依赖 `generated/*/ts` 内部路径。
 
