@@ -46,9 +46,15 @@ void main() {
   });
 
   test('desktop OpenAI setup uses persisted agent config APIs only', () {
-    final legacyOpenAiConfigPath = '/config' '/openai';
-    final legacyOpenAiCheckPath = '/config/check' '/openai';
-    final legacyAgentTestPath = '/books/agent' '/test';
+    final legacyOpenAiConfigPath =
+        '/config'
+        '/openai';
+    final legacyOpenAiCheckPath =
+        '/config/check'
+        '/openai';
+    final legacyAgentTestPath =
+        '/books/agent'
+        '/test';
     final targets = <String>[
       '$root/lib/core/sidecar/agent_config_api.dart',
       '$root/lib/core/sidecar/desktop_sidecar_gateway.dart',
@@ -115,9 +121,7 @@ void main() {
 
       expect(
         gatewaySource,
-        contains(
-          "import 'package:kidmemory_protocol/kidmemory_protocol.dart'",
-        ),
+        contains("import 'package:kidmemory_protocol/kidmemory_protocol.dart'"),
       );
       for (final alias in const [
         'typedef PostgresConfigInput = PostgresConfigRequestDto;',
@@ -229,6 +233,52 @@ void main() {
         RegExp(r'(^|[^A-Za-z])Icon\(').hasMatch(source),
         isFalse,
         reason: file.path,
+      );
+    }
+  });
+
+  test('generate export feature is split into focused modules', () {
+    final featureRoot = Directory('$root/lib/features/generate_export');
+    final pageFile = File('${featureRoot.path}/generate_export_page.dart');
+    final pageSource = pageFile.readAsStringSync();
+
+    final expectedFiles = [
+      'generate_export_assets.dart',
+      'generate_export_models.dart',
+      'generate_export_utils.dart',
+      'widgets/activity_and_failures.dart',
+      'widgets/compose_stage.dart',
+      'widgets/creation_stage_stepper.dart',
+      'widgets/export_result_panel.dart',
+      'widgets/generation_progress.dart',
+      'widgets/plan_confirmation.dart',
+      'widgets/preview_panels.dart',
+      'widgets/settings_panel.dart',
+      'widgets/shared_ui.dart',
+    ];
+
+    for (final relativePath in expectedFiles) {
+      expect(
+        File('${featureRoot.path}/$relativePath').existsSync(),
+        isTrue,
+        reason: '$relativePath should exist',
+      );
+    }
+
+    expect(pageSource.split('\n'), hasLength(lessThanOrEqualTo(500)));
+    expect(pageSource, contains('class GenerateExportPage'));
+    for (final movedDeclaration in const [
+      'class ExportResultVm',
+      'enum CreationWorkflowPhase',
+      'class SmartGenerateActions',
+      'class GenerationFlowProgress',
+      'class ExportResultPanel',
+      'class GenerateSettingsPanel',
+    ]) {
+      expect(
+        pageSource,
+        isNot(contains(movedDeclaration)),
+        reason: '$movedDeclaration should not live in the page shell',
       );
     }
   });
