@@ -2,35 +2,33 @@ import { z } from "zod";
 
 export const CreationTypeSchema = z.enum(["storybook", "memory_book", "memoir_video"]);
 
-export const CreateCreationPlanDtoSchema = z
+export const CreateCreationTaskDtoSchema = z
   .object({
-    goal: z.string().trim().min(1),
     creationType: CreationTypeSchema,
+    goal: z.string().trim().min(1),
     assetIds: z.array(z.string().trim().min(1)).min(1),
-    settings: z.record(z.string(), z.unknown()).optional(),
   })
   .strict();
 
-export const CreateCreationJobDtoSchema = z
-  .object({
-    planId: z.string().trim().min(1),
-  })
-  .strict();
+export const GenerateCreationTaskDtoSchema = z
+  .object({})
+  .strict()
+  .optional();
 
-export const ExportCreationJobDtoSchema = z
+export const ExportCreationTaskDtoSchema = z
   .object({
-    target: z.enum(["pdf", "mp4"]),
+    target: z.enum(["pdf", "mp4", "long_image_png", "long_image_jpg"]),
     targetPath: z.string().trim().min(1).optional(),
   })
   .strict();
 
-export const ShareCreationJobDtoSchema = z
+export const ShareCreationTaskDtoSchema = z
   .object({
     artifactId: z.string().trim().min(1),
   })
   .strict();
 
-export type CreateCreationPlanDto = z.infer<typeof CreateCreationPlanDtoSchema>;
-export type CreateCreationJobDto = z.infer<typeof CreateCreationJobDtoSchema>;
-export type ExportCreationJobDto = z.infer<typeof ExportCreationJobDtoSchema>;
-export type ShareCreationJobDto = z.infer<typeof ShareCreationJobDtoSchema>;
+export type CreateCreationTaskDto = z.infer<typeof CreateCreationTaskDtoSchema>;
+export type GenerateCreationTaskDto = z.infer<typeof GenerateCreationTaskDtoSchema>;
+export type ExportCreationTaskDto = z.infer<typeof ExportCreationTaskDtoSchema>;
+export type ShareCreationTaskDto = z.infer<typeof ShareCreationTaskDtoSchema>;

@@ -19,7 +19,7 @@ Method | HTTP request | Description
 
 
 # **webCompanionControllerCommitUploadItem**
-> webCompanionControllerCommitUploadItem(sessionId, uploadItemId)
+> CommitUploadItemResponseDto webCompanionControllerCommitUploadItem(sessionId, uploadItemId, commitUploadItemRequestDto)
 
 Commit upload item
 
@@ -28,11 +28,13 @@ Commit upload item
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String uploadItemId = uploadItemId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String uploadItemId = uploadItemId_example; // String |
+final CommitUploadItemRequestDto commitUploadItemRequestDto = ; // CommitUploadItemRequestDto |
 
 try {
-    api.webCompanionControllerCommitUploadItem(sessionId, uploadItemId);
+    final response = api.webCompanionControllerCommitUploadItem(sessionId, uploadItemId, commitUploadItemRequestDto);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerCommitUploadItem: $e\n');
 }
@@ -42,12 +44,13 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **uploadItemId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **uploadItemId** | **String**|  |
+ **commitUploadItemRequestDto** | [**CommitUploadItemRequestDto**](CommitUploadItemRequestDto.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**CommitUploadItemResponseDto**](CommitUploadItemResponseDto.md)
 
 ### Authorization
 
@@ -55,13 +58,13 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerCreateUploadItems**
-> webCompanionControllerCreateUploadItems(sessionId)
+> CreateUploadItemsResponseDto webCompanionControllerCreateUploadItems(sessionId, createUploadItemsRequestDto)
 
 Create upload items for trusted upload session
 
@@ -70,10 +73,12 @@ Create upload items for trusted upload session
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final CreateUploadItemsRequestDto createUploadItemsRequestDto = ; // CreateUploadItemsRequestDto |
 
 try {
-    api.webCompanionControllerCreateUploadItems(sessionId);
+    final response = api.webCompanionControllerCreateUploadItems(sessionId, createUploadItemsRequestDto);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerCreateUploadItems: $e\n');
 }
@@ -83,11 +88,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **createUploadItemsRequestDto** | [**CreateUploadItemsRequestDto**](CreateUploadItemsRequestDto.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**CreateUploadItemsResponseDto**](CreateUploadItemsResponseDto.md)
 
 ### Authorization
 
@@ -95,13 +101,13 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetDirectUploadConfig**
-> webCompanionControllerGetDirectUploadConfig(sessionId)
+> DirectUploadConfigResponseDto webCompanionControllerGetDirectUploadConfig(sessionId)
 
 Get direct upload config for trusted upload session
 
@@ -110,10 +116,11 @@ Get direct upload config for trusted upload session
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
-    api.webCompanionControllerGetDirectUploadConfig(sessionId);
+    final response = api.webCompanionControllerGetDirectUploadConfig(sessionId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetDirectUploadConfig: $e\n');
 }
@@ -123,11 +130,11 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
-void (empty response body)
+[**DirectUploadConfigResponseDto**](DirectUploadConfigResponseDto.md)
 
 ### Authorization
 
@@ -136,12 +143,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSessionSummary**
-> webCompanionControllerGetSessionSummary(sessionId)
+> SessionSummaryResponseDto webCompanionControllerGetSessionSummary(sessionId)
 
 Get trusted upload session summary
 
@@ -150,10 +157,11 @@ Get trusted upload session summary
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
-    api.webCompanionControllerGetSessionSummary(sessionId);
+    final response = api.webCompanionControllerGetSessionSummary(sessionId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSessionSummary: $e\n');
 }
@@ -163,11 +171,11 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
-void (empty response body)
+[**SessionSummaryResponseDto**](SessionSummaryResponseDto.md)
 
 ### Authorization
 
@@ -176,12 +184,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSharedAssets**
-> webCompanionControllerGetSharedAssets(shareToken, limit)
+> List<SharedAssetDto> webCompanionControllerGetSharedAssets(shareToken, limit)
 
 Get public shared assets
 
@@ -190,11 +198,12 @@ Get public shared assets
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
-final num limit = 8.14; // num | 
+final String shareToken = shareToken_example; // String |
+final num limit = 8.14; // num |
 
 try {
-    api.webCompanionControllerGetSharedAssets(shareToken, limit);
+    final response = api.webCompanionControllerGetSharedAssets(shareToken, limit);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSharedAssets: $e\n');
 }
@@ -204,12 +213,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
- **limit** | **num**|  | [optional] 
+ **shareToken** | **String**|  |
+ **limit** | **num**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**List&lt;SharedAssetDto&gt;**](SharedAssetDto.md)
 
 ### Authorization
 
@@ -218,12 +227,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSharedBook**
-> webCompanionControllerGetSharedBook(shareToken, bookId)
+> SharedBookDto webCompanionControllerGetSharedBook(shareToken, bookId)
 
 Get public shared book metadata
 
@@ -232,11 +241,12 @@ Get public shared book metadata
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
-final String bookId = bookId_example; // String | 
+final String shareToken = shareToken_example; // String |
+final String bookId = bookId_example; // String |
 
 try {
-    api.webCompanionControllerGetSharedBook(shareToken, bookId);
+    final response = api.webCompanionControllerGetSharedBook(shareToken, bookId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSharedBook: $e\n');
 }
@@ -246,12 +256,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
- **bookId** | **String**|  | [optional] 
+ **shareToken** | **String**|  |
+ **bookId** | **String**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**SharedBookDto**](SharedBookDto.md)
 
 ### Authorization
 
@@ -260,12 +270,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerValidateShareToken**
-> webCompanionControllerValidateShareToken(shareToken, userAgent, clientIp)
+> ShareTokenValidationResponseDto webCompanionControllerValidateShareToken(shareToken, userAgent, clientIp)
 
 Validate public share token
 
@@ -274,12 +284,13 @@ Validate public share token
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
-final Object userAgent = ; // Object | 
-final Object clientIp = ; // Object | 
+final String shareToken = shareToken_example; // String |
+final Object userAgent = ; // Object |
+final Object clientIp = ; // Object |
 
 try {
-    api.webCompanionControllerValidateShareToken(shareToken, userAgent, clientIp);
+    final response = api.webCompanionControllerValidateShareToken(shareToken, userAgent, clientIp);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerValidateShareToken: $e\n');
 }
@@ -289,13 +300,13 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
- **userAgent** | [**Object**](.md)|  | [optional] 
- **clientIp** | [**Object**](.md)|  | [optional] 
+ **shareToken** | **String**|  |
+ **userAgent** | [**Object**](.md)|  | [optional]
+ **clientIp** | [**Object**](.md)|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**ShareTokenValidationResponseDto**](ShareTokenValidationResponseDto.md)
 
 ### Authorization
 
@@ -304,7 +315,6 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

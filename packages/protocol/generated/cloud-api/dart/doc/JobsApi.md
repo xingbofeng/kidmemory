@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 
 # **jobsControllerGetPendingJobs**
-> jobsControllerGetPendingJobs(limit, deviceId)
+> List<JobResponseDto> jobsControllerGetPendingJobs(limit, deviceId)
 
 Get pending jobs for device
 
@@ -27,7 +27,8 @@ final num limit = 8.14; // num | Maximum jobs to return
 final Object deviceId = ; // Object | Filter by device ID (null = unassigned)
 
 try {
-    api.jobsControllerGetPendingJobs(limit, deviceId);
+    final response = api.jobsControllerGetPendingJobs(limit, deviceId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling JobsApi->jobsControllerGetPendingJobs: $e\n');
 }
@@ -37,12 +38,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **limit** | **num**| Maximum jobs to return | [optional] 
- **deviceId** | [**Object**](.md)| Filter by device ID (null = unassigned) | [optional] 
+ **limit** | **num**| Maximum jobs to return | [optional]
+ **deviceId** | [**Object**](.md)| Filter by device ID (null = unassigned) | [optional]
 
 ### Return type
 
-void (empty response body)
+[**List&lt;JobResponseDto&gt;**](JobResponseDto.md)
 
 ### Authorization
 
@@ -51,12 +52,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jobsControllerUpdateStatus**
-> jobsControllerUpdateStatus(id)
+> JobResponseDto jobsControllerUpdateStatus(id, updateJobStatusRequestDto)
 
 Update job status
 
@@ -65,10 +66,12 @@ Update job status
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getJobsApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
+final UpdateJobStatusRequestDto updateJobStatusRequestDto = ; // UpdateJobStatusRequestDto |
 
 try {
-    api.jobsControllerUpdateStatus(id);
+    final response = api.jobsControllerUpdateStatus(id, updateJobStatusRequestDto);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling JobsApi->jobsControllerUpdateStatus: $e\n');
 }
@@ -78,11 +81,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
+ **updateJobStatusRequestDto** | [**UpdateJobStatusRequestDto**](UpdateJobStatusRequestDto.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**JobResponseDto**](JobResponseDto.md)
 
 ### Authorization
 
@@ -90,8 +94,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

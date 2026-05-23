@@ -23,6 +23,7 @@ export type ExecutorRunRequest = {
   skills: SkillDeckLoadResult;
   tools: AgentTool[];
   mcpServers: McpServerDefinition[];
+  requiredOutputFiles?: string[];
 };
 
 export type ExecutorRunResult =

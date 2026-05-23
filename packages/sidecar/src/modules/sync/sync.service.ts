@@ -6,7 +6,6 @@ import { Inject, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nest
 import { AppConfigService } from '../../infrastructure/config/app-config.service.ts';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import { DatasetService } from '../dataset/dataset.service.ts';
-import { BooksService } from '../books/books.service.ts';
 import { CloudApiClient } from './cloud-api.client.ts';
 import { MachineIdService } from './machine-id.service.ts';
 import type { UploadItemResponseDto, JobResponseDto } from './dto/cloud-api.dto.ts';
@@ -41,8 +40,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     @Inject(MachineIdService) private readonly machineIdService: MachineIdService,
     @Inject(AppConfigService) private readonly configService: AppConfigService,
     @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(DatasetService) private readonly datasetService: DatasetService,
-    @Inject(BooksService) private readonly booksService: BooksService
+    @Inject(DatasetService) private readonly datasetService: DatasetService
   ) {
     // 从环境变量读取同步间隔，默认 30 秒
     this.heartbeatIntervalMs = Number(process.env.SYNC_INTERVAL_MS) || 30000;
@@ -553,48 +551,16 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     // 根据任务类型执行不同的逻辑
     switch (job.type) {
       case 'book_generation':
-        return await this.executeBookGenerationJob(job);
+        throw new Error('Cloud book_generation jobs are no longer executed through the legacy book job API. Use creation tasks through agent-runtime.');
       case 'asset_processing':
         return await this.executeAssetProcessingJob(job);
       case 'export_pdf':
-        return await this.executeExportPdfJob(job);
+        throw new Error('Cloud export_pdf jobs are no longer executed through the legacy book job API. Use creation task export.');
       case 'export_long_image':
-        return await this.executeExportLongImageJob(job);
+        throw new Error('Cloud export_long_image jobs are no longer executed through the legacy book job API. Use creation task export.');
       default:
         throw new Error(`Unknown job type: ${job.type}`);
     }
-  }
-
-  /**
-   * 执行书稿生成任务
-   */
-  private async executeBookGenerationJob(job: JobResponseDto): Promise<Record<string, unknown>> {
-    // 调用 BooksService.createJob 创建书稿
-    const payload = job.payload;
-    if (!payload) {
-      throw new Error('Invalid book generation job payload');
-    }
-
-    // 确保 payload 包含必要字段
-    if (!payload.childId || !Array.isArray(payload.assetIds)) {
-      throw new Error('Invalid book generation job payload');
-    }
-
-    const result = await this.booksService.createJob({
-      childId: payload.childId,
-      assetIds: payload.assetIds,
-    });
-
-    if (result.status !== 200 || !result.data) {
-      throw new Error(`Book generation failed: ${JSON.stringify(result)}`);
-    }
-
-    // 类型安全地访问 data 属性
-    const data = result.data as Record<string, unknown>;
-    return {
-      localJobId: data.id || null,
-      bookId: data.bookId || null,
-    };
   }
 
   /**
@@ -620,65 +586,4 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  /**
-   * 执行 PDF 导出任务
-   */
-  private async executeExportPdfJob(job: JobResponseDto): Promise<Record<string, unknown>> {
-    // PDF 导出任务
-    const payload = job.payload;
-    if (!payload) {
-      throw new Error('Invalid export PDF job payload');
-    }
-
-    if (!payload.jobId) {
-      throw new Error('Invalid export PDF job payload');
-    }
-
-    const result = await this.booksService.exportPdf(payload.jobId as string, {
-      targetPath: payload.targetPath,
-    });
-
-    if (result.status !== 200 || !result.data) {
-      throw new Error(`PDF export failed: ${JSON.stringify(result)}`);
-    }
-
-    // 类型安全地访问 artifact 属性
-    const data = result.data as Record<string, unknown>;
-    const artifact = data.artifact as Record<string, unknown> | undefined;
-    return {
-      artifactId: artifact?.id,
-      pdfPath: artifact?.localPath,
-    };
-  }
-
-  /**
-   * 执行长图导出任务
-   */
-  private async executeExportLongImageJob(job: JobResponseDto): Promise<Record<string, unknown>> {
-    // 长图导出任务
-    const payload = job.payload;
-    if (!payload) {
-      throw new Error('Invalid export long image job payload');
-    }
-
-    if (!payload.jobId) {
-      throw new Error('Invalid export long image job payload');
-    }
-
-    const result = await this.booksService.exportLongImage(payload.jobId as string, {
-      targetPath: payload.targetPath,
-    });
-
-    if (result.status !== 200 || !result.data) {
-      throw new Error(`Long image export failed: ${JSON.stringify(result)}`);
-    }
-
-    // 类型安全地访问 artifact 属性
-    const data = result.data as Record<string, unknown>;
-    const artifact = data.artifact as Record<string, unknown> | undefined;
-    return {
-      artifactId: artifact?.id,
-      imagePath: artifact?.localPath,
-    };
-  }
 }

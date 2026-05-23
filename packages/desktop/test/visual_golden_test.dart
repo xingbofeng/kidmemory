@@ -129,10 +129,10 @@ void main() {
           generating: false,
           exported: true,
           creationPhase: CreationWorkflowPhase.published,
-          statusMessage: '长图 JPG 已导出：/tmp/kidmemory/job_123456.jpg',
+          statusMessage: '长图 JPG 已导出：/tmp/kidmemory/task_123456.jpg',
           requestId: 'req_123456',
           logLines: const [
-            '10:21:03  生成完成，已获得 jobId: job_123456',
+            '10:21:03  生成完成，已获得 taskId: task_123456',
             '10:21:16  长图 JPG 导出成功',
             '10:21:18  Supabase Storage 同步完成',
           ],
@@ -150,11 +150,11 @@ void main() {
           selectedExportTarget: '长图 JPG  体积更小',
           exportResult: const ExportResultVm(
             kind: 'long_image_jpg',
-            localPath: '/tmp/kidmemory/job_123456.jpg',
+            localPath: '/tmp/kidmemory/task_123456.jpg',
             storageStatus: 'synced',
-            remoteUrl: 'https://project.supabase.co/signed/job_123456.jpg',
+            remoteUrl: 'https://project.supabase.co/signed/task_123456.jpg',
             shareText:
-                'KidMemory 作品集：https://project.supabase.co/signed/job_123456.jpg\n链接有效期：3600 秒',
+                'KidMemory 作品集：https://project.supabase.co/signed/task_123456.jpg\n链接有效期：3600 秒',
           ),
           onGenerate: () {},
           onConfirmPlan: () {},

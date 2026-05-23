@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kidmemory_protocol/kidmemory_protocol.dart'
-    show AgentConfigResponseDto;
+import '../../../core/sidecar/sidecar_dtos.dart' show AgentConfigResponseDto;
 import '../../../core/sidecar/agent_config_api.dart';
 import '../../../core/sidecar/sidecar_api.dart';
 import '../../../l10n/app_localizations.dart';

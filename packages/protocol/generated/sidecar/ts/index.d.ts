@@ -593,7 +593,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/creation/jobs/plan": {
+    "/creation/tasks": {
         parameters: {
             query?: never;
             header?: never;
@@ -602,35 +602,55 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["CreationController_createPlan"];
+        post: operations["CreationController_createTask"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/creation/jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["CreationController_createJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/creation/jobs/{jobId}/events": {
+    "/creation/tasks/{taskId}/generate": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["CreationController_generateTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/creation/tasks/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        get: operations["CreationController_getTask"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/creation/tasks/{taskId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: string;
             };
             cookie?: never;
         };
@@ -643,12 +663,12 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/creation/jobs/{jobId}/preview": {
+    "/creation/tasks/{taskId}/preview": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
@@ -661,178 +681,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/creation/jobs/{jobId}": {
+    "/creation/tasks/{taskId}/export": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        get: operations["CreationController_getJob"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/creation/jobs/{jobId}/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
         get?: never;
         put?: never;
-        post: operations["CreationController_exportJob"];
+        post: operations["CreationController_exportTask"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/creation/jobs/{jobId}/share": {
+    "/creation/tasks/{taskId}/share": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
         get?: never;
         put?: never;
-        post: operations["CreationController_shareJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["BooksController_listJobs"];
-        put?: never;
-        post: operations["BooksController_createJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["BooksController_getJob"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["BooksController_cancelJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["BooksController_retryJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}/preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["BooksController_preview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}/export/pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["BooksController_exportPdf"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/books/jobs/{id}/export/long-image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["BooksController_exportLongImage"];
+        post: operations["CreationController_shareTask"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2143,7 +2021,7 @@ export interface operations {
             };
         };
     };
-    CreationController_createPlan: {
+    CreationController_createTask: {
         parameters: {
             query?: never;
             header?: never;
@@ -2160,16 +2038,37 @@ export interface operations {
             };
         };
     };
-    CreationController_createJob: {
+    CreationController_generateTask: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                taskId: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CreationController_getTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2182,7 +2081,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
@@ -2201,7 +2100,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
@@ -2215,31 +2114,12 @@ export interface operations {
             };
         };
     };
-    CreationController_getJob: {
+    CreationController_exportTask: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CreationController_exportJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                jobId: string;
+                taskId: string;
             };
             cookie?: never;
         };
@@ -2253,160 +2133,12 @@ export interface operations {
             };
         };
     };
-    CreationController_shareJob: {
+    CreationController_shareTask: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_listJobs: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_createJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_getJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_cancelJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_retryJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_preview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_exportPdf: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    BooksController_exportLongImage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+                taskId: string;
             };
             cookie?: never;
         };

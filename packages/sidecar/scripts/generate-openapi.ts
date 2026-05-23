@@ -43,6 +43,7 @@ function normalizePathParameters(document: Record<string, unknown>): void {
 }
 
 async function generateOpenApi(): Promise<void> {
+  process.env.KIDMEMORY_OPENAPI_GENERATION = "1";
   const app = await NestFactory.create(AppModule, { logger: false });
   try {
     const swaggerConfig = new DocumentBuilder()

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
@@ -110,10 +110,75 @@ if (!useLocal && !useDocker) {
 }
 
 for (const target of targets) {
+  rmSync(target.output, { recursive: true, force: true })
   mkdirSync(dirname(target.output), { recursive: true })
   const result = useLocal ? runLocalGenerator(target.input, target.output) : runDockerGenerator(target.input, target.output)
   if (result.status !== 0) {
     process.exit(result.status ?? 1)
   }
+  rmSync(join(target.output, 'test'), { recursive: true, force: true })
+  removeDeprecatedSidecarBookArtifacts(target)
+  exportGeneratedModels(target.output)
   console.log(`Generated Dart client: ${target.output}`)
+}
+
+function removeDeprecatedSidecarBookArtifacts(target) {
+  if (!target.input.endsWith('sidecar.openapi.json')) return
+
+  for (const relativePath of [
+    'doc/BooksApi.md',
+    'doc/BookExportResponseDto.md',
+    'doc/CreateBookJobRequestDto.md',
+    'doc/CreateBookJobResponseDto.md',
+    'doc/ExportBookRequestDto.md',
+    'doc/ExportLongImageRequestDto.md',
+    'doc/ExportedPayloadResponseDto.md',
+    'lib/src/api/books_api.dart',
+    'lib/src/model/book_export_response_dto.dart',
+    'lib/src/model/book_export_response_dto.g.dart',
+    'lib/src/model/create_book_job_request_dto.dart',
+    'lib/src/model/create_book_job_request_dto.g.dart',
+    'lib/src/model/create_book_job_response_dto.dart',
+    'lib/src/model/create_book_job_response_dto.g.dart',
+    'lib/src/model/export_book_request_dto.dart',
+    'lib/src/model/export_book_request_dto.g.dart',
+    'lib/src/model/export_long_image_request_dto.dart',
+    'lib/src/model/export_long_image_request_dto.g.dart',
+    'lib/src/model/exported_payload_response_dto.dart',
+    'lib/src/model/exported_payload_response_dto.g.dart',
+    'test/books_api_test.dart',
+    'test/book_export_response_dto_test.dart',
+    'test/create_book_job_request_dto_test.dart',
+    'test/create_book_job_response_dto_test.dart',
+    'test/export_book_request_dto_test.dart',
+    'test/export_long_image_request_dto_test.dart',
+    'test/exported_payload_response_dto_test.dart',
+  ]) {
+    rmSync(join(target.output, relativePath), { force: true })
+  }
+}
+
+function exportGeneratedModels(outputDir) {
+  const libraryPath = join(outputDir, 'lib', 'kidmemory_protocol.dart')
+  const modelDir = join(outputDir, 'lib', 'src', 'model')
+  const source = readFileSync(libraryPath, 'utf8')
+  const withoutExistingModelExports = source
+    .split('\n')
+    .filter((line) => !line.includes("src/model/"))
+    .join('\n')
+
+  if (!existsSync(modelDir)) {
+    writeFileSync(libraryPath, `${withoutExistingModelExports.trimEnd()}\n`)
+    return
+  }
+
+  const modelExports = readdirSync(modelDir)
+    .filter((file) => file.endsWith('.dart') && !file.endsWith('.g.dart'))
+    .sort()
+    .map((file) => `export 'package:kidmemory_protocol/src/model/${file}';`)
+    .join('\n')
+
+  if (!modelExports) return
+
+  writeFileSync(libraryPath, `${withoutExistingModelExports.trimEnd()}\n\n${modelExports}\n`)
 }

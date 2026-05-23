@@ -96,26 +96,17 @@ const ROUTES: RouteCheck[] = [
     },
   },
   {
-    name: "GET /books/jobs remains available until creation jobs fully cover it",
+    name: "GET /books/jobs stays removed after creation task migration",
     method: "GET",
     path: "/books/jobs",
-    expectStatuses: [200],
-    assertJson: (payload) => {
-      const data = unwrapApiData(payload);
-      const body = data as Record<string, unknown>;
-      assert.ok(Array.isArray(body.jobs), "books/jobs should still expose the legacy job list");
-    },
+    expectStatuses: [404],
   },
   {
-    name: "POST /books/jobs remains wired and validates payloads",
+    name: "POST /books/jobs stays removed after creation task migration",
     method: "POST",
     path: "/books/jobs",
     body: { assetIds: [] },
-    expectStatuses: [422],
-    assertJson: (payload) => {
-      const data = unwrapApiData(payload);
-      assert.equal(typeof data, "object", "books/jobs validation error should include structured data");
-    },
+    expectStatuses: [404],
   },
   {
     name: "POST /sample/import accepts a JSON body",

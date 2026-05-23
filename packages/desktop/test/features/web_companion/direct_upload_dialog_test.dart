@@ -61,7 +61,7 @@ void main() {
     expect(find.textContaining('Supabase'), findsNothing);
     expect(find.textContaining('sidecar'), findsNothing);
     expect(find.textContaining('requestId'), findsNothing);
-    expect(find.textContaining('jobId'), findsNothing);
+    expect(find.textContaining('taskId'), findsNothing);
   });
 
   testWidgets('dialog has a close affordance', (tester) async {

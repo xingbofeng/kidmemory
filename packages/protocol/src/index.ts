@@ -12,13 +12,13 @@ export type {
   CreationArtifact,
   CreationError,
   CreationEvent,
+  CreationExportArtifact,
   CreationFailureCategory,
-  CreationJob,
-  CreationJobStatus,
-  CreationPlan,
-  CreationPlanStatus,
+  CreationPlanRequirements,
   CreationStep,
   CreationStepStatus,
+  CreationTask,
+  CreationTaskStatus,
   CreationType,
 } from './common/creation.js';
 export type { Locale } from './common/locale.js';

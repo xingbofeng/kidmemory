@@ -16,8 +16,8 @@ class CreationApi {
 
   const CreationApi(this._dio);
 
-  /// creationControllerCreateJob
-  /// 
+  /// creationControllerCreateTask
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerCreateJob({ 
+  Future<Response<void>> creationControllerCreateTask({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs';
+    final _path = r'/creation/tasks';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -61,10 +61,11 @@ class CreationApi {
     return _response;
   }
 
-  /// creationControllerCreatePlan
-  /// 
+  /// creationControllerExportTask
+  ///
   ///
   /// Parameters:
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -74,7 +75,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerCreatePlan({ 
+  Future<Response<void>> creationControllerExportTask({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +84,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/plan';
+    final _path = r'/creation/tasks/{taskId}/export'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -106,11 +108,11 @@ class CreationApi {
     return _response;
   }
 
-  /// creationControllerExportJob
-  /// 
+  /// creationControllerGenerateTask
+  ///
   ///
   /// Parameters:
-  /// * [jobId] 
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -120,8 +122,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerExportJob({ 
-    required String jobId,
+  Future<Response<void>> creationControllerGenerateTask({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -129,7 +131,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/{jobId}/export'.replaceAll('{' r'jobId' '}', jobId.toString());
+    final _path = r'/creation/tasks/{taskId}/generate'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -154,10 +156,10 @@ class CreationApi {
   }
 
   /// creationControllerGetEvents
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [jobId] 
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -167,8 +169,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerGetEvents({ 
-    required String jobId,
+  Future<Response<void>> creationControllerGetEvents({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -176,7 +178,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/{jobId}/events'.replaceAll('{' r'jobId' '}', jobId.toString());
+    final _path = r'/creation/tasks/{taskId}/events'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -200,11 +202,11 @@ class CreationApi {
     return _response;
   }
 
-  /// creationControllerGetJob
-  /// 
+  /// creationControllerGetTask
+  ///
   ///
   /// Parameters:
-  /// * [jobId] 
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -214,8 +216,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerGetJob({ 
-    required String jobId,
+  Future<Response<void>> creationControllerGetTask({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -223,7 +225,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/{jobId}'.replaceAll('{' r'jobId' '}', jobId.toString());
+    final _path = r'/creation/tasks/{taskId}'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -248,10 +250,10 @@ class CreationApi {
   }
 
   /// creationControllerPreview
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [jobId] 
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -261,8 +263,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerPreview({ 
-    required String jobId,
+  Future<Response<void>> creationControllerPreview({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -270,7 +272,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/{jobId}/preview'.replaceAll('{' r'jobId' '}', jobId.toString());
+    final _path = r'/creation/tasks/{taskId}/preview'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -294,11 +296,11 @@ class CreationApi {
     return _response;
   }
 
-  /// creationControllerShareJob
-  /// 
+  /// creationControllerShareTask
+  ///
   ///
   /// Parameters:
-  /// * [jobId] 
+  /// * [taskId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -308,8 +310,8 @@ class CreationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> creationControllerShareJob({ 
-    required String jobId,
+  Future<Response<void>> creationControllerShareTask({
+    required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -317,7 +319,7 @@ class CreationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/creation/jobs/{jobId}/share'.replaceAll('{' r'jobId' '}', jobId.toString());
+    final _path = r'/creation/tasks/{taskId}/share'.replaceAll('{' r'taskId' '}', taskId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

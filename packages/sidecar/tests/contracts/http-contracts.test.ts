@@ -14,9 +14,13 @@ import { ApiResponseInterceptor } from "../../src/infrastructure/http/api-respon
 type TestServer = {
   app: INestApplication;
   baseUrl: string;
+  restoreEnv: () => void;
 };
 
 async function startContractServer(): Promise<TestServer> {
+  const oldDisableCloudSync = process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
+  process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = "true";
+
   const app = await NestFactory.create(AppModule, { logger: false });
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new ApiResponseInterceptor());
@@ -28,13 +32,29 @@ async function startContractServer(): Promise<TestServer> {
   return {
     app,
     baseUrl: `http://127.0.0.1:${address.port}`,
+    restoreEnv: () => {
+      if (oldDisableCloudSync === undefined) {
+        delete process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
+      } else {
+        process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = oldDisableCloudSync;
+      }
+    },
   };
 }
 
+async function stopContractServer(server: TestServer) {
+  try {
+    await server.app.close();
+  } finally {
+    server.restoreEnv();
+  }
+}
+
 test("sidecar contract: health endpoint returns stable service metadata", async (t) => {
-  const { app, baseUrl } = await startContractServer();
+  const server = await startContractServer();
+  const { baseUrl } = server;
   t.after(async () => {
-    await app.close();
+    await stopContractServer(server);
   });
 
   const response = await requestJson(baseUrl, "/health", { method: "GET" });
@@ -49,9 +69,10 @@ test("sidecar contract: health endpoint returns stable service metadata", async 
 });
 
 test("sidecar contract: invalid public share assets token returns an auth-style error", async (t) => {
-  const { app, baseUrl } = await startContractServer();
+  const server = await startContractServer();
+  const { baseUrl } = server;
   t.after(async () => {
-    await app.close();
+    await stopContractServer(server);
   });
 
   const response = await requestJson(baseUrl, "/api/web-companion/share/invalid-token/assets", { method: "GET" });
@@ -62,9 +83,10 @@ test("sidecar contract: invalid public share assets token returns an auth-style 
 });
 
 test("sidecar contract: invalid public share book token returns an auth-style error", async (t) => {
-  const { app, baseUrl } = await startContractServer();
+  const server = await startContractServer();
+  const { baseUrl } = server;
   t.after(async () => {
-    await app.close();
+    await stopContractServer(server);
   });
 
   const response = await requestJson(baseUrl, "/api/web-companion/share/invalid-token/book", { method: "GET" });
@@ -74,10 +96,11 @@ test("sidecar contract: invalid public share book token returns an auth-style er
   assert.ok("error" in response.body || "code" in response.body || "message" in response.body);
 });
 
-test("sidecar contract: create book job rejects empty asset selection", async (t) => {
-  const { app, baseUrl } = await startContractServer();
+test("sidecar contract: legacy book job endpoint is not exposed", async (t) => {
+  const server = await startContractServer();
+  const { baseUrl } = server;
   t.after(async () => {
-    await app.close();
+    await stopContractServer(server);
   });
 
   const response = await requestJson(baseUrl, "/books/jobs", {
@@ -85,7 +108,7 @@ test("sidecar contract: create book job rejects empty asset selection", async (t
     body: JSON.stringify({ assetIds: [] }),
   });
 
-  assert.equal(response.status, 422);
+  assert.equal(response.status, 404);
   assertObject(response.body);
   assert.notEqual(response.body.code, 0);
   assertString(response.body.msg);

@@ -456,7 +456,6 @@ Rewrite:
 - [ ] `packages/desktop/test/generate_export_ui_enhancement_test.dart`
 - [ ] `packages/desktop/test/app_test.dart`
 - [ ] `packages/desktop/test/visual_golden_test.dart`
-- [ ] `packages/desktop/test/design_capture_test.dart`
 
 Delete or rewrite if installer-only skill support remains:
 

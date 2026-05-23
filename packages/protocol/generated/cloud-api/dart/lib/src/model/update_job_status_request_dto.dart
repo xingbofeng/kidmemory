@@ -106,6 +106,8 @@ class UpdateJobStatusRequestDto {
 
 
 enum UpdateJobStatusRequestDtoStatusEnum {
+@JsonValue(r'pending')
+pending(r'pending'),
 @JsonValue(r'claimed')
 claimed(r'claimed'),
 @JsonValue(r'processing')
@@ -113,9 +115,7 @@ processing(r'processing'),
 @JsonValue(r'completed')
 completed(r'completed'),
 @JsonValue(r'failed')
-failed(r'failed'),
-@JsonValue(r'pending')
-pending(r'pending');
+failed(r'failed');
 
 const UpdateJobStatusRequestDtoStatusEnum(this.value);
 

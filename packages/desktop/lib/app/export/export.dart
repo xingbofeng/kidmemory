@@ -31,7 +31,7 @@ extension _DesktopShellExportFlow on _DesktopShellState {
     );
     _markGenerationStarted();
     try {
-      final plan = await gateway.createCreationPlanRaw(
+      final task = await gateway.createCreationTaskRaw(
         goal: generationTemplate.trim().isEmpty
             ? 'KidMemory storybook'
             : generationTemplate.trim(),
@@ -44,7 +44,7 @@ extension _DesktopShellExportFlow on _DesktopShellState {
         },
       );
       if (!mounted) return;
-      _applyCreationPlanResult(plan);
+      _applyCreationTaskPlanResult(task);
     } catch (error) {
       if (!mounted) return;
       _applyGenerationError(error);
@@ -54,8 +54,8 @@ extension _DesktopShellExportFlow on _DesktopShellState {
   }
 
   Future<void> confirmCreationPlan() async {
-    final currentPlanId = planId?.trim() ?? '';
-    if (currentPlanId.isEmpty) {
+    final currentTaskId = taskId?.trim() ?? '';
+    if (currentTaskId.isEmpty) {
       _setShellState(() {
         creationWorkflowPhase = CreationWorkflowPhase.failed;
         statusMessage = AppLocalizations.of(context)!.creationPlanMissingStatus;
@@ -77,18 +77,18 @@ extension _DesktopShellExportFlow on _DesktopShellState {
         event: 'desktop.action.confirm_creation_plan',
         traceId: nextTraceId,
         requestId: nextRequestId,
-        data: {'planId': currentPlanId},
+        data: {'taskId': currentTaskId},
       ),
     );
-    _markCreationJobStarted();
+    _markCreationTaskGenerationStarted();
     try {
-      final job = await gateway.createCreationJobRaw(planId: currentPlanId);
+      final task = await gateway.generateCreationTaskRaw(taskId: currentTaskId);
       if (!mounted) return;
-      _applyCreationJobResult(job);
-      final nextJobId = jobId;
-      final status = '${job['status'] ?? ''}'.trim();
-      if (nextJobId != null && !_isCreationJobTerminalStatus(status)) {
-        _startCreationJobPolling(nextJobId);
+      _applyCreationTaskResult(task);
+      final nextTaskId = taskId;
+      final status = '${task['status'] ?? ''}'.trim();
+      if (nextTaskId != null && !_isCreationTaskTerminalStatus(status)) {
+        _startCreationTaskPolling(nextTaskId);
       }
     } catch (error) {
       if (!mounted) return;
@@ -114,10 +114,10 @@ extension _DesktopShellExportFlow on _DesktopShellState {
         event: 'desktop.action.export_pdf',
         traceId: nextTraceId,
         requestId: nextRequestId,
-        data: {'jobId': jobId, 'target': generationExportTarget},
+        data: {'taskId': taskId, 'target': generationExportTarget},
       ),
     );
-    if (jobId == null) {
+    if (taskId == null) {
       _setShellState(
         () => statusMessage = AppLocalizations.of(context)!.exportPageS851,
       );
@@ -152,7 +152,7 @@ extension _DesktopShellExportFlow on _DesktopShellState {
     }
     final destinationPath = _buildExportTargetPath(
       targetDirectoryPath,
-      _exportFileNameForJob(jobId!, target),
+      _exportFileNameForJob(taskId!, target),
     );
     _setShellState(() {
       creationWorkflowPhase = CreationWorkflowPhase.exporting;
@@ -164,34 +164,18 @@ extension _DesktopShellExportFlow on _DesktopShellState {
       final String actualPath;
       final String artifactId;
       final String exportedMessage;
-      if (target == _ExportTarget.pdf || target == _ExportTarget.mp4) {
-        final result = await gateway.exportCreationJobRaw(
-          jobId: jobId!,
-          target: _artifactKindForTarget(target),
-          targetPath: destinationPath,
-        );
-        exportedOk =
-            result['artifactId']?.toString().trim().isNotEmpty ?? false;
-        actualPath = result['localPath']?.toString().trim().isNotEmpty == true
-            ? result['localPath'].toString()
-            : destinationPath;
-        artifactId = result['artifactId']?.toString() ?? '';
-        exportedMessage = '';
-      } else {
-        final result = await gateway.exportBookDto(
-          payload: ExportBookInput(
-            jobId: jobId!,
-            targetPath: destinationPath,
-            format: target == _ExportTarget.longImageJpg ? 'jpg' : 'png',
-          ),
-        );
-        exportedOk = result.exportedPayload.okValue;
-        actualPath = result.exportedPayload.pathValue.trim().isNotEmpty
-            ? result.exportedPayload.pathValue
-            : destinationPath;
-        artifactId = result.artifactId;
-        exportedMessage = result.exportedPayload.messageValue;
-      }
+      final result = await gateway.exportCreationTaskRaw(
+        taskId: taskId!,
+        target: _artifactKindForTarget(target),
+        targetPath: destinationPath,
+      );
+      exportedOk =
+          result['artifactId']?.toString().trim().isNotEmpty ?? false;
+      actualPath = result['localPath']?.toString().trim().isNotEmpty == true
+          ? result['localPath'].toString()
+          : destinationPath;
+      artifactId = result['artifactId']?.toString() ?? '';
+      exportedMessage = '';
       if (!mounted) return;
       final syncedResult = exportedOk
           ? await _maybeSyncExportArtifact(artifactId)

@@ -1,8 +1,10 @@
 # @kidmemory/agent-runtime
 
+![agent-runtime 架构图](../../docs/images/agent-runtime-architecture.png)
+
 `@kidmemory/agent-runtime` 是 KidMemory Generate 阶段的 SDK，负责把 workspace、Skill、工具和模型执行器组合成一条可闭环运行的 Agent 调用链。
 
-它不提供业务路由，也不替代 Sidecar；它只负责“给定 workspace + prompt 的通用执行能力”。
+它不提供业务路由，也不替代 Sidecar；它只负责”给定 workspace + prompt 的通用执行能力”。
 
 ## 它做什么
 

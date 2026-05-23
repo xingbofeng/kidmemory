@@ -1,5 +1,5 @@
 import 'sidecar_api.dart';
-import 'package:kidmemory_protocol/kidmemory_protocol.dart';
+import 'sidecar_dtos.dart';
 
 typedef JsonMap = Map<String, dynamic>;
 

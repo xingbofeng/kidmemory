@@ -9,17 +9,17 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**creationControllerCreateJob**](CreationApi.md#creationcontrollercreatejob) | **POST** /creation/jobs | 
-[**creationControllerCreatePlan**](CreationApi.md#creationcontrollercreateplan) | **POST** /creation/jobs/plan | 
-[**creationControllerExportJob**](CreationApi.md#creationcontrollerexportjob) | **POST** /creation/jobs/{jobId}/export | 
-[**creationControllerGetEvents**](CreationApi.md#creationcontrollergetevents) | **GET** /creation/jobs/{jobId}/events | 
-[**creationControllerGetJob**](CreationApi.md#creationcontrollergetjob) | **GET** /creation/jobs/{jobId} | 
-[**creationControllerPreview**](CreationApi.md#creationcontrollerpreview) | **GET** /creation/jobs/{jobId}/preview | 
-[**creationControllerShareJob**](CreationApi.md#creationcontrollersharejob) | **POST** /creation/jobs/{jobId}/share | 
+[**creationControllerCreateTask**](CreationApi.md#creationcontrollercreatetask) | **POST** /creation/tasks |
+[**creationControllerExportTask**](CreationApi.md#creationcontrollerexporttask) | **POST** /creation/tasks/{taskId}/export |
+[**creationControllerGenerateTask**](CreationApi.md#creationcontrollergeneratetask) | **POST** /creation/tasks/{taskId}/generate |
+[**creationControllerGetEvents**](CreationApi.md#creationcontrollergetevents) | **GET** /creation/tasks/{taskId}/events |
+[**creationControllerGetTask**](CreationApi.md#creationcontrollergettask) | **GET** /creation/tasks/{taskId} |
+[**creationControllerPreview**](CreationApi.md#creationcontrollerpreview) | **GET** /creation/tasks/{taskId}/preview |
+[**creationControllerShareTask**](CreationApi.md#creationcontrollersharetask) | **POST** /creation/tasks/{taskId}/share |
 
 
-# **creationControllerCreateJob**
-> creationControllerCreateJob()
+# **creationControllerCreateTask**
+> creationControllerCreateTask()
 
 
 
@@ -30,9 +30,9 @@ import 'package:kidmemory_protocol/api.dart';
 final api = KidmemoryProtocol().getCreationApi();
 
 try {
-    api.creationControllerCreateJob();
+    api.creationControllerCreateTask();
 } on DioException catch (e) {
-    print('Exception when calling CreationApi->creationControllerCreateJob: $e\n');
+    print('Exception when calling CreationApi->creationControllerCreateTask: $e\n');
 }
 ```
 
@@ -54,8 +54,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **creationControllerCreatePlan**
-> creationControllerCreatePlan()
+# **creationControllerExportTask**
+> creationControllerExportTask(taskId)
 
 
 
@@ -64,48 +64,12 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getCreationApi();
+final String taskId = taskId_example; // String |
 
 try {
-    api.creationControllerCreatePlan();
+    api.creationControllerExportTask(taskId);
 } on DioException catch (e) {
-    print('Exception when calling CreationApi->creationControllerCreatePlan: $e\n');
-}
-```
-
-### Parameters
-This endpoint does not need any parameter.
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: Not defined
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **creationControllerExportJob**
-> creationControllerExportJob(jobId)
-
-
-
-### Example
-```dart
-import 'package:kidmemory_protocol/api.dart';
-
-final api = KidmemoryProtocol().getCreationApi();
-final String jobId = jobId_example; // String | 
-
-try {
-    api.creationControllerExportJob(jobId);
-} on DioException catch (e) {
-    print('Exception when calling CreationApi->creationControllerExportJob: $e\n');
+    print('Exception when calling CreationApi->creationControllerExportTask: $e\n');
 }
 ```
 
@@ -113,7 +77,47 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **jobId** | **String**|  | 
+ **taskId** | **String**|  |
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **creationControllerGenerateTask**
+> creationControllerGenerateTask(taskId)
+
+
+
+### Example
+```dart
+import 'package:kidmemory_protocol/api.dart';
+
+final api = KidmemoryProtocol().getCreationApi();
+final String taskId = taskId_example; // String |
+
+try {
+    api.creationControllerGenerateTask(taskId);
+} on DioException catch (e) {
+    print('Exception when calling CreationApi->creationControllerGenerateTask: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **taskId** | **String**|  |
 
 ### Return type
 
@@ -131,7 +135,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **creationControllerGetEvents**
-> creationControllerGetEvents(jobId)
+> creationControllerGetEvents(taskId)
 
 
 
@@ -140,10 +144,10 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getCreationApi();
-final String jobId = jobId_example; // String | 
+final String taskId = taskId_example; // String |
 
 try {
-    api.creationControllerGetEvents(jobId);
+    api.creationControllerGetEvents(taskId);
 } on DioException catch (e) {
     print('Exception when calling CreationApi->creationControllerGetEvents: $e\n');
 }
@@ -153,7 +157,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **jobId** | **String**|  | 
+ **taskId** | **String**|  |
 
 ### Return type
 
@@ -170,8 +174,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **creationControllerGetJob**
-> creationControllerGetJob(jobId)
+# **creationControllerGetTask**
+> creationControllerGetTask(taskId)
 
 
 
@@ -180,12 +184,12 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getCreationApi();
-final String jobId = jobId_example; // String | 
+final String taskId = taskId_example; // String |
 
 try {
-    api.creationControllerGetJob(jobId);
+    api.creationControllerGetTask(taskId);
 } on DioException catch (e) {
-    print('Exception when calling CreationApi->creationControllerGetJob: $e\n');
+    print('Exception when calling CreationApi->creationControllerGetTask: $e\n');
 }
 ```
 
@@ -193,7 +197,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **jobId** | **String**|  | 
+ **taskId** | **String**|  |
 
 ### Return type
 
@@ -211,7 +215,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **creationControllerPreview**
-> creationControllerPreview(jobId)
+> creationControllerPreview(taskId)
 
 
 
@@ -220,10 +224,10 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getCreationApi();
-final String jobId = jobId_example; // String | 
+final String taskId = taskId_example; // String |
 
 try {
-    api.creationControllerPreview(jobId);
+    api.creationControllerPreview(taskId);
 } on DioException catch (e) {
     print('Exception when calling CreationApi->creationControllerPreview: $e\n');
 }
@@ -233,7 +237,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **jobId** | **String**|  | 
+ **taskId** | **String**|  |
 
 ### Return type
 
@@ -250,8 +254,8 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **creationControllerShareJob**
-> creationControllerShareJob(jobId)
+# **creationControllerShareTask**
+> creationControllerShareTask(taskId)
 
 
 
@@ -260,12 +264,12 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getCreationApi();
-final String jobId = jobId_example; // String | 
+final String taskId = taskId_example; // String |
 
 try {
-    api.creationControllerShareJob(jobId);
+    api.creationControllerShareTask(taskId);
 } on DioException catch (e) {
-    print('Exception when calling CreationApi->creationControllerShareJob: $e\n');
+    print('Exception when calling CreationApi->creationControllerShareTask: $e\n');
 }
 ```
 
@@ -273,7 +277,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **jobId** | **String**|  | 
+ **taskId** | **String**|  |
 
 ### Return type
 
@@ -289,4 +293,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -1,7 +1,7 @@
 part of '../desktop_shell.dart';
 
 extension _DesktopShellExportGenerationState on _DesktopShellState {
-  bool _isCreationJobTerminalStatus(String status) {
+  bool _isCreationTaskTerminalStatus(String status) {
     return {
       'succeeded',
       'generated',
@@ -12,54 +12,53 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
     }.contains(status);
   }
 
-  bool _isCreationJobSuccessfulStatus(String status) {
+  bool _isCreationTaskSuccessfulStatus(String status) {
     return {'succeeded', 'generated', 'exported', 'shared'}.contains(status);
   }
 
-  void _stopCreationJobPolling() {
-    _creationJobPollingTimer?.cancel();
-    _creationJobPollingTimer = null;
+  void _stopCreationTaskPolling() {
+    _creationTaskPollingTimer?.cancel();
+    _creationTaskPollingTimer = null;
   }
 
-  void _startCreationJobPolling(String nextJobId) {
-    _stopCreationJobPolling();
-    if (nextJobId.trim().isEmpty) return;
-    _creationJobPollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      unawaited(_pollCreationJobStatus(nextJobId));
+  void _startCreationTaskPolling(String nextTaskId) {
+    _stopCreationTaskPolling();
+    if (nextTaskId.trim().isEmpty) return;
+    _creationTaskPollingTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      unawaited(_pollCreationTaskStatus(nextTaskId));
     });
   }
 
-  Future<void> _pollCreationJobStatus(String targetJobId) async {
-    if (!mounted || step != AppStep.generate || jobId != targetJobId) {
-      _stopCreationJobPolling();
+  Future<void> _pollCreationTaskStatus(String targetTaskId) async {
+    if (!mounted || step != AppStep.generate || taskId != targetTaskId) {
+      _stopCreationTaskPolling();
       return;
     }
     try {
-      final job = await gateway.getCreationJobRaw(jobId: targetJobId);
-      if (!mounted || jobId != targetJobId) return;
-      _applyCreationJobResult(job, appendProgressLog: false);
+      final task = await gateway.getCreationTaskRaw(taskId: targetTaskId);
+      if (!mounted || taskId != targetTaskId) return;
+      _applyCreationTaskResult(task, appendProgressLog: false);
     } catch (error) {
-      if (!mounted || jobId != targetJobId) return;
-      _stopCreationJobPolling();
+      if (!mounted || taskId != targetTaskId) return;
+      _stopCreationTaskPolling();
       _applyGenerationError(error);
     }
   }
 
   void _markGenerationStarted() {
-    _stopCreationJobPolling();
+    _stopCreationTaskPolling();
     _setShellState(() {
       generating = true;
       generated = false;
       exported = false;
       exportResult = null;
       previewFailureReason = '';
-      planId = null;
-      creationPlan = null;
+      creationTask = null;
       creationFailure = null;
-      creationJobSteps = const [];
+      creationTaskSteps = const [];
       generatedArtifactKind = '';
       generatedArtifactPath = '';
-      jobId = null;
+      taskId = null;
       creationWorkflowPhase = CreationWorkflowPhase.planning;
       statusMessage = AppLocalizations.of(context)!.creationPlanningStatus;
     });
@@ -70,15 +69,15 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
     );
   }
 
-  void _applyCreationPlanResult(Map<String, dynamic> plan) {
-    final summary = '${plan['summary'] ?? ''}'.trim();
-    final nextPlanId = '${plan['planId'] ?? ''}'.trim();
-    final preview = CreationPlanPreviewVm.fromJson(plan);
+  void _applyCreationTaskPlanResult(Map<String, dynamic> task) {
+    final summary = '${task['summary'] ?? ''}'.trim();
+    final nextTaskId = '${task['taskId'] ?? ''}'.trim();
+    final preview = CreationTaskPreviewVm.fromJson(task);
     _setShellState(() {
-      planId = nextPlanId.isNotEmpty ? nextPlanId : null;
-      creationPlan = preview.hasContent ? preview : null;
+      taskId = nextTaskId.isNotEmpty ? nextTaskId : null;
+      creationTask = preview.hasContent ? preview : null;
       creationFailure = null;
-      creationJobSteps = const [];
+      creationTaskSteps = const [];
       generatedArtifactKind = '';
       generatedArtifactPath = '';
       previewFailureReason = '';
@@ -92,12 +91,12 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
     _appendLog(statusMessage);
   }
 
-  void _markCreationJobStarted() {
+  void _markCreationTaskGenerationStarted() {
     final isVideo = generationCreationType == 'memoir_video';
     _setShellState(() {
       generating = true;
       creationFailure = null;
-      creationJobSteps = const [];
+      creationTaskSteps = const [];
       generatedArtifactKind = '';
       generatedArtifactPath = '';
       previewFailureReason = '';
@@ -111,37 +110,37 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
     _appendLog(statusMessage);
   }
 
-  void _applyCreationJobResult(
-    Map<String, dynamic> job, {
+  void _applyCreationTaskResult(
+    Map<String, dynamic> task, {
     bool appendProgressLog = true,
   }) {
-    final nextJobId = '${job['jobId'] ?? ''}'.trim();
-    final status = '${job['status'] ?? ''}'.trim();
-    final steps = readCreationPlanSteps(job['steps']);
+    final nextTaskId = '${task['taskId'] ?? ''}'.trim();
+    final status = '${task['status'] ?? ''}'.trim();
+    final steps = readCreationTaskSteps(task['steps']);
     if (status == 'failed' || status == 'cancelled') {
-      _applyCreationJobFailure(job, nextJobId);
+      _applyCreationTaskFailure(task, nextTaskId);
       return;
     }
-    final isComplete = _isCreationJobSuccessfulStatus(status);
+    final isComplete = _isCreationTaskSuccessfulStatus(status);
     if (isComplete) {
-      _stopCreationJobPolling();
+      _stopCreationTaskPolling();
     }
     _setShellState(() {
       generating = !isComplete;
       generated = isComplete;
       creationFailure = null;
-      creationJobSteps = steps;
+      creationTaskSteps = steps;
       generatedArtifactKind = isComplete
-          ? _creationArtifactKind(job['artifacts'])
+          ? _creationArtifactKind(task['artifacts'])
           : '';
       generatedArtifactPath = isComplete
-          ? _creationArtifactPath(job['artifacts'])
+          ? _creationArtifactPath(task['artifacts'])
           : '';
       previewFailureReason = '';
       creationWorkflowPhase = isComplete
           ? CreationWorkflowPhase.reviewing
           : CreationWorkflowPhase.generating;
-      jobId = nextJobId.isNotEmpty ? nextJobId : null;
+      taskId = nextTaskId.isNotEmpty ? nextTaskId : taskId;
       statusMessage = isComplete
           ? AppLocalizations.of(context)!.exportGenerationStateS736
           : AppLocalizations.of(context)!.creationGeneratingStatus;
@@ -151,16 +150,16 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
         isComplete
             ? AppLocalizations.of(
                 context,
-              )!.exportGenerationCompletedLog(jobId ?? '')
+              )!.exportGenerationCompletedLog(taskId ?? '')
             : AppLocalizations.of(context)!.generateExportS719,
       );
     }
   }
 
-  void _applyCreationJobFailure(Map<String, dynamic> job, String nextJobId) {
-    _stopCreationJobPolling();
-    final failure = CreationFailureVm.fromJob(job);
-    final steps = readCreationPlanSteps(job['steps']);
+  void _applyCreationTaskFailure(Map<String, dynamic> task, String nextTaskId) {
+    _stopCreationTaskPolling();
+    final failure = CreationFailureVm.fromTask(task);
+    final steps = readCreationTaskSteps(task['steps']);
     final reason = failure.reason.isNotEmpty
         ? failure.reason
         : AppLocalizations.of(context)!.generateExportS226;
@@ -175,9 +174,9 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
       generating = false;
       generated = false;
       creationWorkflowPhase = CreationWorkflowPhase.failed;
-      jobId = nextJobId.isNotEmpty ? nextJobId : null;
+      taskId = nextTaskId.isNotEmpty ? nextTaskId : taskId;
       creationFailure = failure.hasContent ? failure : null;
-      creationJobSteps = steps;
+      creationTaskSteps = steps;
       generatedArtifactKind = '';
       generatedArtifactPath = '';
       previewFailureReason = '';
@@ -192,26 +191,24 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
   }
 
   void _invalidateCreationPlanForInputChange() {
-    _stopCreationJobPolling();
-    if (planId == null &&
-        jobId == null &&
+    _stopCreationTaskPolling();
+    if (taskId == null &&
         !generated &&
         !exported &&
         exportResult == null) {
       return;
     }
     _setShellState(() {
-      planId = null;
-      jobId = null;
+      taskId = null;
       generated = false;
       generating = false;
       exported = false;
       shareCreating = false;
       exportResult = null;
       previewFailureReason = '';
-      creationPlan = null;
+      creationTask = null;
       creationFailure = null;
-      creationJobSteps = const [];
+      creationTaskSteps = const [];
       generatedArtifactKind = '';
       generatedArtifactPath = '';
       creationWorkflowPhase = CreationWorkflowPhase.preparing;
@@ -223,7 +220,7 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
   }
 
   void _applyGenerationError(Object error) {
-    _stopCreationJobPolling();
+    _stopCreationTaskPolling();
     final message = AppLocalizations.of(
       context,
     )!.exportGenerationExceptionMessage(error);
@@ -232,7 +229,7 @@ extension _DesktopShellExportGenerationState on _DesktopShellState {
       generated = false;
       creationWorkflowPhase = CreationWorkflowPhase.failed;
       creationFailure = null;
-      creationJobSteps = const [];
+      creationTaskSteps = const [];
       generatedArtifactKind = '';
       generatedArtifactPath = '';
       previewFailureReason = '';

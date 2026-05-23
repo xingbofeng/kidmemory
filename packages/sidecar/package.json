@@ -20,13 +20,13 @@
     "prisma:dev": "prisma migrate dev"
   },
   "dependencies": {
+    "@kidmemory/agent-runtime": "file:../agent-runtime",
     "@kidmemory/protocol": "file:../protocol",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@nestjs/common": "^11.1.21",
     "@nestjs/core": "^11.1.21",
     "@nestjs/platform-express": "^11.1.21",
     "@nestjs/swagger": "^11.4.3",
-    "@openai/agents": "^0.11.4",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@rekog/mcp-nest": "^1.9.9",

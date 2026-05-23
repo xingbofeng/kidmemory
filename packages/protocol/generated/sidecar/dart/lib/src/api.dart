@@ -8,7 +8,6 @@ import 'package:kidmemory_protocol/src/auth/basic_auth.dart';
 import 'package:kidmemory_protocol/src/auth/bearer_auth.dart';
 import 'package:kidmemory_protocol/src/auth/oauth.dart';
 import 'package:kidmemory_protocol/src/api/agent_config_api.dart';
-import 'package:kidmemory_protocol/src/api/books_api.dart';
 import 'package:kidmemory_protocol/src/api/config_api.dart';
 import 'package:kidmemory_protocol/src/api/creation_api.dart';
 import 'package:kidmemory_protocol/src/api/dataset_api.dart';
@@ -113,12 +112,6 @@ class KidmemoryProtocol {
   /// by doing that all interceptors will not be executed
   AgentConfigApi getAgentConfigApi() {
     return AgentConfigApi(dio);
-  }
-
-  /// Get BooksApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  BooksApi getBooksApi() {
-    return BooksApi(dio);
   }
 
   /// Get ConfigApi instance, base route and serializer can be overridden by a given but be careful,

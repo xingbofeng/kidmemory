@@ -48,11 +48,11 @@ extension _DesktopShellExportActions on _DesktopShellState {
 
   Future<void> _confirmAndCreateShareLink() async {
     final current = exportResult;
-    final currentJobId = jobId?.trim() ?? '';
+    final currentTaskId = taskId?.trim() ?? '';
     final artifactId = current?.artifactId.trim() ?? '';
     if (current == null ||
         current.localPath.trim().isEmpty ||
-        currentJobId.isEmpty ||
+        currentTaskId.isEmpty ||
         artifactId.isEmpty) {
       _showSnackBar(AppLocalizations.of(context)!.generateExportShareNotReady);
       return;
@@ -89,8 +89,8 @@ extension _DesktopShellExportActions on _DesktopShellState {
     });
     _appendLog(AppLocalizations.of(context)!.generateExportShareCreatingStatus);
     try {
-      final share = await gateway.shareCreationJobRaw(
-        jobId: currentJobId,
+      final share = await gateway.shareCreationTaskRaw(
+        taskId: currentTaskId,
         artifactId: artifactId,
       );
       if (!mounted) return;

@@ -23,7 +23,7 @@ class CreateUploadItemsRequestDto {
 
     required  this.token,
 
-    required  this.provider,
+     this.provider,
 
     required  this.files,
   });
@@ -43,12 +43,12 @@ class CreateUploadItemsRequestDto {
   @JsonKey(
     
     name: r'provider',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final CreateUploadItemsRequestDtoProviderEnum provider;
+  final CreateUploadItemsRequestDtoProviderEnum? provider;
 
 
 

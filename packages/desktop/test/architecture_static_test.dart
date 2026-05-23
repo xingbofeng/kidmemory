@@ -124,11 +124,20 @@ void main() {
         'typedef PathsConfigInput = PathsConfigRequestDto;',
         'typedef SupabaseStorageConfigInput = SupabaseStorageConfigRequestDto;',
         'typedef UpdateAssetInput = UpdateAssetRequestDto;',
-        'typedef CreateBookJobInput = CreateBookJobRequestDto;',
         'typedef ImportAssetsInput = ImportAssetsRequestDto;',
       ]) {
         expect(gatewaySource, contains(alias));
       }
+      expect(
+        gatewaySource,
+        contains("'/creation/tasks'"),
+        reason: 'creation should use task-first sidecar routes',
+      );
+      expect(
+        gatewaySource,
+        isNot(contains('/books/jobs')),
+        reason: 'desktop should not call the removed legacy book job API',
+      );
     },
   );
 
@@ -145,7 +154,6 @@ void main() {
       'class EnqueueResultDto',
       'class StorageSyncRunResultDto',
       'class ArtifactShareResultDto',
-      'class BookExportResultDto',
       'class ExportedPayloadDto',
       'class IndexingStatusDto',
       'class ImportSampleResultDto',
@@ -153,7 +161,6 @@ void main() {
       'class AssetSearchResultDto',
       'class AssetSearchItemDto',
       'class ImportAssetsResultDto',
-      'class CreateBookJobResultDto',
       'class ResetSampleResultDto',
       'class UpdateAssetResultDto',
     ]) {

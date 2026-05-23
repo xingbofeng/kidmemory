@@ -9,6 +9,15 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/commit_upload_item_request_dto.dart';
+import 'package:kidmemory_protocol/src/model/commit_upload_item_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/create_upload_items_request_dto.dart';
+import 'package:kidmemory_protocol/src/model/create_upload_items_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/direct_upload_config_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/session_summary_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/share_token_validation_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/shared_asset_dto.dart';
+import 'package:kidmemory_protocol/src/model/shared_book_dto.dart';
 
 class WebCompanionApi {
 
@@ -17,11 +26,12 @@ class WebCompanionApi {
   const WebCompanionApi(this._dio);
 
   /// Commit upload item
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [uploadItemId] 
+  /// * [sessionId]
+  /// * [uploadItemId]
+  /// * [commitUploadItemRequestDto]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -29,11 +39,12 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [CommitUploadItemResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCommitUploadItem({ 
+  Future<Response<CommitUploadItemResponseDto>> webCompanionControllerCommitUploadItem({
     required String sessionId,
     required String uploadItemId,
+    required CommitUploadItemRequestDto commitUploadItemRequestDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -51,25 +62,70 @@ class WebCompanionApi {
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(commitUploadItemRequestDto);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    CommitUploadItemResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<CommitUploadItemResponseDto, CommitUploadItemResponseDto>(rawData, 'CommitUploadItemResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<CommitUploadItemResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Create upload items for trusted upload session
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
+  /// * [createUploadItemsRequestDto]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -77,10 +133,11 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [CreateUploadItemsResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCreateUploadItems({ 
+  Future<Response<CreateUploadItemsResponseDto>> webCompanionControllerCreateUploadItems({
     required String sessionId,
+    required CreateUploadItemsRequestDto createUploadItemsRequestDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -98,25 +155,69 @@ class WebCompanionApi {
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(createUploadItemsRequestDto);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    CreateUploadItemsResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<CreateUploadItemsResponseDto, CreateUploadItemsResponseDto>(rawData, 'CreateUploadItemsResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<CreateUploadItemsResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get direct upload config for trusted upload session
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -124,9 +225,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [DirectUploadConfigResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetDirectUploadConfig({ 
+  Future<Response<DirectUploadConfigResponseDto>> webCompanionControllerGetDirectUploadConfig({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -156,14 +257,39 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    DirectUploadConfigResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DirectUploadConfigResponseDto, DirectUploadConfigResponseDto>(rawData, 'DirectUploadConfigResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DirectUploadConfigResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get trusted upload session summary
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -171,9 +297,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [SessionSummaryResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSessionSummary({ 
+  Future<Response<SessionSummaryResponseDto>> webCompanionControllerGetSessionSummary({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -203,15 +329,40 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    SessionSummaryResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<SessionSummaryResponseDto, SessionSummaryResponseDto>(rawData, 'SessionSummaryResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<SessionSummaryResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get public shared assets
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
-  /// * [limit] 
+  /// * [shareToken]
+  /// * [limit]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -219,9 +370,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<SharedAssetDto>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedAssets({ 
+  Future<Response<List<SharedAssetDto>>> webCompanionControllerGetSharedAssets({
     required String shareToken,
     num? limit,
     CancelToken? cancelToken,
@@ -257,15 +408,40 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<SharedAssetDto>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<SharedAssetDto>, SharedAssetDto>(rawData, 'List<SharedAssetDto>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<SharedAssetDto>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Get public shared book metadata
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
-  /// * [bookId] 
+  /// * [shareToken]
+  /// * [bookId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -273,9 +449,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [SharedBookDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedBook({ 
+  Future<Response<SharedBookDto>> webCompanionControllerGetSharedBook({
     required String shareToken,
     String? bookId,
     CancelToken? cancelToken,
@@ -311,16 +487,41 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    SharedBookDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<SharedBookDto, SharedBookDto>(rawData, 'SharedBookDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<SharedBookDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Validate public share token
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
-  /// * [userAgent] 
-  /// * [clientIp] 
+  /// * [shareToken]
+  /// * [userAgent]
+  /// * [clientIp]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -328,9 +529,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [ShareTokenValidationResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerValidateShareToken({ 
+  Future<Response<ShareTokenValidationResponseDto>> webCompanionControllerValidateShareToken({
     required String shareToken,
     Object? userAgent,
     Object? clientIp,
@@ -368,7 +569,32 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    ShareTokenValidationResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ShareTokenValidationResponseDto, ShareTokenValidationResponseDto>(rawData, 'ShareTokenValidationResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ShareTokenValidationResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

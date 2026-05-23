@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 
 # **uploadItemsControllerGetPendingSync**
-> uploadItemsControllerGetPendingSync(offset, limit, deviceId)
+> List<UploadItemResponseDto> uploadItemsControllerGetPendingSync(offset, limit, deviceId)
 
 Get pending sync upload items
 
@@ -28,7 +28,8 @@ final num limit = 8.14; // num | Maximum items to return
 final Object deviceId = ; // Object | Filter by device ID
 
 try {
-    api.uploadItemsControllerGetPendingSync(offset, limit, deviceId);
+    final response = api.uploadItemsControllerGetPendingSync(offset, limit, deviceId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling UploadItemsApi->uploadItemsControllerGetPendingSync: $e\n');
 }
@@ -38,13 +39,13 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **offset** | **num**| Number of items to skip | [optional] 
- **limit** | **num**| Maximum items to return | [optional] 
- **deviceId** | [**Object**](.md)| Filter by device ID | [optional] 
+ **offset** | **num**| Number of items to skip | [optional]
+ **limit** | **num**| Maximum items to return | [optional]
+ **deviceId** | [**Object**](.md)| Filter by device ID | [optional]
 
 ### Return type
 
-void (empty response body)
+[**List&lt;UploadItemResponseDto&gt;**](UploadItemResponseDto.md)
 
 ### Authorization
 
@@ -53,12 +54,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **uploadItemsControllerUpdateSyncStatus**
-> uploadItemsControllerUpdateSyncStatus(id)
+> UploadItemResponseDto uploadItemsControllerUpdateSyncStatus(id, updateSyncStatusRequestDto)
 
 Update upload item sync status
 
@@ -67,10 +68,12 @@ Update upload item sync status
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getUploadItemsApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
+final UpdateSyncStatusRequestDto updateSyncStatusRequestDto = ; // UpdateSyncStatusRequestDto |
 
 try {
-    api.uploadItemsControllerUpdateSyncStatus(id);
+    final response = api.uploadItemsControllerUpdateSyncStatus(id, updateSyncStatusRequestDto);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling UploadItemsApi->uploadItemsControllerUpdateSyncStatus: $e\n');
 }
@@ -80,11 +83,12 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
+ **updateSyncStatusRequestDto** | [**UpdateSyncStatusRequestDto**](UpdateSyncStatusRequestDto.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**UploadItemResponseDto**](UploadItemResponseDto.md)
 
 ### Authorization
 
@@ -92,8 +96,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

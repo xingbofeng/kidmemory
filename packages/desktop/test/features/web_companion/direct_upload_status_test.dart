@@ -109,7 +109,7 @@ void main() {
           objectKey: 'web-companion-uploads/sess/oops.jpg',
           status: 'failed',
           errorMessage:
-              'Supabase sidecar requestId=req_1 jobId=job_1 SUPABASE_ANON_KEY',
+              'Supabase sidecar requestId=req_1 taskId=task_1 SUPABASE_ANON_KEY',
         ),
       ],
     );
@@ -117,6 +117,6 @@ void main() {
     expect(find.textContaining('Supabase'), findsNothing);
     expect(find.textContaining('sidecar'), findsNothing);
     expect(find.textContaining('requestId'), findsNothing);
-    expect(find.textContaining('jobId'), findsNothing);
+    expect(find.textContaining('taskId'), findsNothing);
   });
 }

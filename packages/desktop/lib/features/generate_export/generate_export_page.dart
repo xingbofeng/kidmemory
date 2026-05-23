@@ -73,8 +73,8 @@ enum CreationWorkflowPhase {
 
 enum CreationMainStage { prepare, plan, generate, preview, share }
 
-class CreationPlanPreviewVm {
-  const CreationPlanPreviewVm({
+class CreationTaskPreviewVm {
+  const CreationTaskPreviewVm({
     required this.summary,
     required this.skillName,
     required this.steps,
@@ -83,11 +83,11 @@ class CreationPlanPreviewVm {
 
   final String summary;
   final String skillName;
-  final List<CreationPlanStepVm> steps;
+  final List<CreationTaskStepVm> steps;
   final List<String> requirements;
 
-  factory CreationPlanPreviewVm.fromJson(Map<String, dynamic> json) {
-    return CreationPlanPreviewVm(
+  factory CreationTaskPreviewVm.fromJson(Map<String, dynamic> json) {
+    return CreationTaskPreviewVm(
       summary: '${json['summary'] ?? ''}'.trim(),
       skillName: '${json['skillName'] ?? ''}'.trim(),
       steps: _readPlanSteps(json['steps']),
@@ -102,8 +102,8 @@ class CreationPlanPreviewVm {
       requirements.isNotEmpty;
 }
 
-class CreationPlanStepVm {
-  const CreationPlanStepVm({
+class CreationTaskStepVm {
+  const CreationTaskStepVm({
     required this.stepId,
     required this.label,
     required this.status,
@@ -131,17 +131,17 @@ class CreationFailureVm {
   final String category;
   final String detail;
 
-  factory CreationFailureVm.fromJob(Map<String, dynamic> job) {
+  factory CreationFailureVm.fromTask(Map<String, dynamic> job) {
     final steps = _readPlanSteps(job['steps']);
     final currentStepId = '${job['currentStepId'] ?? ''}'.trim();
-    CreationPlanStepVm? failedStep;
+    CreationTaskStepVm? failedStep;
     for (final step in steps) {
       if (step.status == 'failed') {
         failedStep = step;
         break;
       }
     }
-    failedStep ??= steps.cast<CreationPlanStepVm?>().firstWhere(
+    failedStep ??= steps.cast<CreationTaskStepVm?>().firstWhere(
       (step) => step?.stepId == currentStepId,
       orElse: () => null,
     );
@@ -164,12 +164,12 @@ class CreationFailureVm {
       detail.isNotEmpty;
 }
 
-List<CreationPlanStepVm> _readPlanSteps(Object? value) {
+List<CreationTaskStepVm> _readPlanSteps(Object? value) {
   if (value is! Iterable) return const [];
   return [
     for (final item in value)
       if (item is Map)
-        CreationPlanStepVm(
+        CreationTaskStepVm(
           stepId: '${item['stepId'] ?? ''}'.trim(),
           label: '${item['label'] ?? item['stepId'] ?? ''}'.trim(),
           status: '${item['status'] ?? ''}'.trim(),
@@ -178,7 +178,7 @@ List<CreationPlanStepVm> _readPlanSteps(Object? value) {
   ].where((step) => step.label.isNotEmpty).toList(growable: false);
 }
 
-List<CreationPlanStepVm> readCreationPlanSteps(Object? value) {
+List<CreationTaskStepVm> readCreationTaskSteps(Object? value) {
   return _readPlanSteps(value);
 }
 
@@ -225,9 +225,9 @@ class GenerateExportPage extends StatelessWidget {
     this.onGeneratePictureBook,
     this.onGenerateMemoryAlbum,
     this.onGenerateMemoryVideo,
-    this.creationPlan,
+    this.creationTask,
     this.creationFailure,
-    this.creationJobSteps = const [],
+    this.creationTaskSteps = const [],
     this.exportResult,
     this.previewFailureReason = '',
     this.shareCreating = false,
@@ -271,9 +271,9 @@ class GenerateExportPage extends StatelessWidget {
   final bool shareCreating;
   final ExportResultVm? exportResult;
   final String previewFailureReason;
-  final CreationPlanPreviewVm? creationPlan;
+  final CreationTaskPreviewVm? creationTask;
   final CreationFailureVm? creationFailure;
-  final List<CreationPlanStepVm> creationJobSteps;
+  final List<CreationTaskStepVm> creationTaskSteps;
   final VoidCallback? onOpenExportFolder;
   final VoidCallback? onOpenPreviewFailureFolder;
   final VoidCallback? onCreateShareLink;
@@ -339,10 +339,10 @@ class GenerateExportPage extends StatelessWidget {
       exported: exported,
     );
     final showPlanConfirmation =
-        creationPlan != null &&
+        creationTask != null &&
         creationPhase == CreationWorkflowPhase.planReady;
     final showGenerationProgress =
-        creationJobSteps.isNotEmpty ||
+        creationTaskSteps.isNotEmpty ||
         creationPhase == CreationWorkflowPhase.planning ||
         creationPhase == CreationWorkflowPhase.creatingJob ||
         creationPhase == CreationWorkflowPhase.generating ||
@@ -439,13 +439,13 @@ class GenerateExportPage extends StatelessWidget {
                     exported: exported,
                     creationPhase: creationPhase,
                     exportLabel: exportLabel,
-                    backendSteps: creationJobSteps,
+                    backendSteps: creationTaskSteps,
                   ),
                 ],
                 if (showPlanConfirmation) ...[
                   const SizedBox(height: 16),
                   CreationPlanConfirmationPanel(
-                    plan: creationPlan!,
+                    plan: creationTask!,
                     onConfirm: onConfirmPlan,
                     onEditRequest: onEditCreationRequest,
                   ),
@@ -1386,7 +1386,7 @@ class GenerationFlowProgress extends StatelessWidget {
   final bool exported;
   final CreationWorkflowPhase creationPhase;
   final String exportLabel;
-  final List<CreationPlanStepVm> backendSteps;
+  final List<CreationTaskStepVm> backendSteps;
 
   @override
   Widget build(BuildContext context) {
@@ -2254,7 +2254,7 @@ class CreationPlanConfirmationPanel extends StatelessWidget {
     super.key,
   });
 
-  final CreationPlanPreviewVm plan;
+  final CreationTaskPreviewVm plan;
   final VoidCallback onConfirm;
   final VoidCallback onEditRequest;
 
@@ -2365,7 +2365,7 @@ class _PlanPreviewStep extends StatelessWidget {
   const _PlanPreviewStep({required this.index, required this.step});
 
   final int index;
-  final CreationPlanStepVm step;
+  final CreationTaskStepVm step;
 
   @override
   Widget build(BuildContext context) {
@@ -2538,7 +2538,7 @@ String _ordinaryTimelineText(BuildContext context, String text) {
   var sanitized = text.trim();
   if (sanitized.isEmpty) return sanitized;
 
-  if (RegExp('jobId\\s*:', caseSensitive: false).hasMatch(sanitized)) {
+  if (RegExp('taskId\\s*:', caseSensitive: false).hasMatch(sanitized)) {
     return l10n.exportGenerationStateS736;
   }
 

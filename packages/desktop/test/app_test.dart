@@ -221,8 +221,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('将使用免费生图服务生成封面图'), findsNothing);
-      expect(api.lastPlanBody?['creationType'], 'storybook');
-      expect(api.lastJobBody, isNull);
+      expect(api.lastTaskBody?['creationType'], 'storybook');
+      expect(api.lastGenerateBody, isNull);
       expect(find.text('确认创作计划'), findsOneWidget);
       expect(find.text('KidMemory storybook'), findsOneWidget);
       expect(find.text('Compose selected assets'), findsOneWidget);
@@ -230,7 +230,7 @@ void main() {
       expect(find.text('OpenAI Agent SDK configuration'), findsOneWidget);
       expect(find.text('确认计划并开始生成'), findsWidgets);
       await confirmReadyCreationPlan(tester);
-      expect(api.lastJobBody?['planId'], 'plan_123456');
+      expect(api.lastGenerateBody?['taskId'], 'task_123456');
     },
   );
 
@@ -252,7 +252,7 @@ void main() {
     await tester.tap(find.text('生成成长纪念册'));
     await tester.pumpAndSettle();
 
-    expect(api.lastPlanBody?['creationType'], 'memory_book');
+    expect(api.lastTaskBody?['creationType'], 'memory_book');
     expect(find.text('确认创作计划'), findsOneWidget);
   });
 
@@ -288,7 +288,7 @@ void main() {
 
     expect(find.text('计划待确认'), findsWidgets);
     expect(find.text('确认创作计划'), findsOneWidget);
-    expect(api.lastJobBody, isNull);
+    expect(api.lastGenerateBody, isNull);
 
     final confirmButton = primaryButton('确认计划并开始生成').last;
     await tester.ensureVisible(confirmButton);
@@ -297,7 +297,7 @@ void main() {
 
     expect(find.text('创建任务中'), findsWidgets);
     expect(find.textContaining('正在创建生成任务'), findsWidgets);
-    expect(api.lastJobBody?['planId'], 'plan_slow');
+    expect(api.lastGenerateBody?['taskId'], 'task_slow');
 
     api.completeJob();
     await tester.pumpAndSettle();
@@ -321,8 +321,8 @@ void main() {
 
     await generateStorybookFromPrimary(tester);
 
-    expect(api.createdPlanIds, ['plan_1']);
-    expect(api.jobPlanIds, ['plan_1']);
+    expect(api.createdTaskIds, ['task_1']);
+    expect(api.generatedTaskIds, ['task_1']);
     expect(find.textContaining('生成完成，可预览并导出 PDF'), findsWidgets);
 
     await gotoStep(tester, '素材库');
@@ -338,9 +338,9 @@ void main() {
 
     await generateStorybookFromPrimary(tester);
 
-    expect(api.createdPlanIds, ['plan_1', 'plan_2']);
-    expect(api.jobPlanIds, ['plan_1', 'plan_2']);
-    expect(api.lastPlanBody?['assetIds'], ['asset-dino-world']);
+    expect(api.createdTaskIds, ['task_1', 'task_2']);
+    expect(api.generatedTaskIds, ['task_1', 'task_2']);
+    expect(api.lastTaskBody?['assetIds'], ['asset-dino-world']);
   });
 
   testWidgets('plan failure exposes retry edit and log actions', (
@@ -360,7 +360,7 @@ void main() {
     await tester.tap(primaryButton('开始规划'));
     await tester.pumpAndSettle();
 
-    expect(api.planAttempts, 1);
+    expect(api.taskAttempts, 1);
     expect(find.text('生成失败'), findsWidgets);
     expect(find.textContaining('规划服务暂时不可用'), findsWidgets);
     expect(secondaryButton('重试'), findsOneWidget);
@@ -380,7 +380,7 @@ void main() {
     await tester.tap(secondaryButton('重试'));
     await tester.pumpAndSettle();
 
-    expect(api.planAttempts, 2);
+    expect(api.taskAttempts, 2);
 
     await tester.ensureVisible(secondaryButton('修改需求'));
     await tester.tap(secondaryButton('修改需求'));
@@ -404,8 +404,8 @@ void main() {
 
     await generateStorybookFromPrimary(tester);
 
-    expect(api.planAttempts, 1);
-    expect(api.jobAttempts, 1);
+    expect(api.taskAttempts, 1);
+    expect(api.generateAttempts, 1);
     expect(find.text('生成失败'), findsWidgets);
     expect(find.textContaining('Skill runtime crashed'), findsWidgets);
     expect(find.text('失败步骤：Generate PDF draft'), findsOneWidget);
@@ -422,7 +422,7 @@ void main() {
     expect(find.textContaining('E_SKILL_RUNTIME'), findsWidgets);
     expect(find.textContaining('Skill runtime crashed'), findsWidgets);
     expect(find.textContaining('requestId: req_'), findsWidgets);
-    expect(find.textContaining('jobId: job_failed_1'), findsWidgets);
+    expect(find.textContaining('taskId: task_failed_1'), findsWidgets);
 
     await tester.tap(find.text('关闭'));
     await tester.pumpAndSettle();
@@ -431,7 +431,7 @@ void main() {
     await tester.tap(secondaryButton('重新规划'));
     await tester.pumpAndSettle();
 
-    expect(api.planAttempts, 2);
+    expect(api.taskAttempts, 2);
     expect(find.text('确认创作计划'), findsOneWidget);
     expect(find.text('生成失败'), findsNothing);
 
@@ -457,9 +457,9 @@ void main() {
 
     await generateMemoryVideoFromCard(tester);
 
-    expect(api.planAttempts, 1);
-    expect(api.jobAttempts, 1);
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.taskAttempts, 1);
+    expect(api.generateAttempts, 1);
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
     expect(find.text('生成失败'), findsWidgets);
     expect(find.textContaining('Hyperframes 未能成功生成 MP4'), findsWidgets);
     expect(find.text('失败步骤：生成 MP4 视频'), findsOneWidget);
@@ -473,7 +473,7 @@ void main() {
 
     expect(find.text('生成日志详情'), findsOneWidget);
     expect(find.textContaining('E_HYPERFRAMES_RENDER'), findsWidgets);
-    expect(find.textContaining('jobId: job_video_failed_1'), findsWidgets);
+    expect(find.textContaining('taskId: task_video_failed_1'), findsWidgets);
 
     await tester.tap(find.text('关闭'));
     await tester.pumpAndSettle();
@@ -482,8 +482,8 @@ void main() {
     await tester.tap(secondaryButton('重新生成'));
     await tester.pumpAndSettle();
 
-    expect(api.planAttempts, 2);
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.taskAttempts, 2);
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
     expect(find.text('确认创作计划'), findsOneWidget);
   });
 
@@ -510,8 +510,8 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
-    expect(api.lastJobBody?['planId'], 'plan_video_slow');
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
+    expect(api.lastGenerateBody?['taskId'], 'task_video_slow');
     expect(find.text('准备视频环境'), findsWidgets);
     expect(find.textContaining('正在准备视频生成环境'), findsWidgets);
 
@@ -522,7 +522,7 @@ void main() {
   });
 
   testWidgets(
-    'creation job polls detail until completion and renders backend steps',
+    'creation task polls detail until completion and renders backend steps',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -559,7 +559,7 @@ void main() {
     },
   );
 
-  testWidgets('creation job polling stops when leaving the generate page', (
+  testWidgets('creation task polling stops when leaving the generate page', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
@@ -630,7 +630,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        (api.lastPlanBody?['settings'] as Map?)?.containsKey('coverPolicy'),
+        (api.lastTaskBody?['settings'] as Map?)?.containsKey('coverPolicy') ??
+            false,
         false,
       );
       expect(find.text('封面图生成失败'), findsWidgets);
@@ -991,15 +992,15 @@ void main() {
 
       expect(
         api.lastExportBody?['targetPath'],
-        '/tmp/kidmemory-exports/job_123456.pdf',
+        '/tmp/kidmemory-exports/task_123456.pdf',
       );
       expect(find.textContaining('点击导出，准备读取当前导出目录'), findsOneWidget);
       expect(
-        find.textContaining('PDF 导出成功：/tmp/kidmemory-exports/job_123456.pdf'),
+        find.textContaining('PDF 导出成功：/tmp/kidmemory-exports/task_123456.pdf'),
         findsOneWidget,
       );
       expect(
-        find.textContaining('PDF 已导出：/tmp/kidmemory-exports/job_123456.pdf'),
+        find.textContaining('PDF 已导出：/tmp/kidmemory-exports/task_123456.pdf'),
         findsOneWidget,
       );
     },
@@ -1026,7 +1027,7 @@ void main() {
 
     expect(find.text('正在导出到本地'), findsWidgets);
     expect(
-      find.textContaining('正在导出到 /tmp/kidmemory-exports/job_123456.pdf'),
+      find.textContaining('正在导出到 /tmp/kidmemory-exports/task_123456.pdf'),
       findsWidgets,
     );
 
@@ -1034,7 +1035,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('PDF 已导出：/tmp/kidmemory-exports/job_123456.pdf'),
+      find.textContaining('PDF 已导出：/tmp/kidmemory-exports/task_123456.pdf'),
       findsOneWidget,
     );
   });
@@ -1068,9 +1069,9 @@ void main() {
           ? '${Platform.environment['APPDATA'] ?? home}/KidMemory/exports'
           : '$home/.local/share/KidMemory/exports';
 
-      expect(api.lastExportBody?['targetPath'], '$expectedRoot/job_123456.pdf');
+      expect(api.lastExportBody?['targetPath'], '$expectedRoot/task_123456.pdf');
       expect(
-        find.textContaining('PDF 导出成功：$expectedRoot/job_123456.pdf'),
+        find.textContaining('PDF 导出成功：$expectedRoot/task_123456.pdf'),
         findsOneWidget,
       );
     },
@@ -1090,7 +1091,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await generateMemoryVideoFromCard(tester);
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
     expect(find.text('导出 MP4'), findsOneWidget);
 
     await tester.tap(find.text('导出 MP4'));
@@ -1100,10 +1101,10 @@ void main() {
     expect(api.lastExportBody?['target'], 'mp4');
     expect(
       api.lastExportBody?['targetPath'],
-      '/tmp/kidmemory-exports/job_123456.mp4',
+      '/tmp/kidmemory-exports/task_123456.mp4',
     );
     expect(
-      find.textContaining('MP4 已导出：/tmp/kidmemory-exports/job_123456.mp4'),
+      find.textContaining('MP4 已导出：/tmp/kidmemory-exports/task_123456.mp4'),
       findsOneWidget,
     );
   });
@@ -1133,7 +1134,7 @@ void main() {
 
     await generateMemoryVideoFromCard(tester);
 
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
     expect(find.text('打开视频预览'), findsOneWidget);
     expect(find.text('预览全部页面'), findsNothing);
 
@@ -1141,7 +1142,7 @@ void main() {
     await tester.tap(secondaryButton('打开视频预览'));
     await tester.pumpAndSettle();
 
-    expect(openedTarget, '/tmp/kidmemory-exports/job_video_success.mp4');
+    expect(openedTarget, '/tmp/kidmemory-exports/task_video_success.mp4');
   });
 
   testWidgets('switching back to storybook restores PDF export target', (
@@ -1160,7 +1161,7 @@ void main() {
     await tester.ensureVisible(find.text('生成回忆录视频'));
     await tester.tap(find.text('生成回忆录视频'));
     await tester.pumpAndSettle();
-    expect(api.lastPlanBody?['creationType'], 'memoir_video');
+    expect(api.lastTaskBody?['creationType'], 'memoir_video');
 
     await tester.ensureVisible(secondaryButton('修改需求'));
     await tester.tap(secondaryButton('修改需求'));
@@ -1173,7 +1174,7 @@ void main() {
     await tester.pumpAndSettle();
     await confirmReadyCreationPlan(tester);
 
-    expect(api.lastPlanBody?['creationType'], 'storybook');
+    expect(api.lastTaskBody?['creationType'], 'storybook');
     expect(find.text('导出 PDF'), findsOneWidget);
 
     await tester.tap(find.text('导出 PDF'));
@@ -1183,7 +1184,7 @@ void main() {
     expect(api.lastExportBody?['target'], 'pdf');
     expect(
       api.lastExportBody?['targetPath'],
-      '/tmp/kidmemory-exports/job_123456.pdf',
+      '/tmp/kidmemory-exports/task_123456.pdf',
     );
   });
 
@@ -1222,10 +1223,10 @@ void main() {
 
       expect(
         api.lastLongImageExportBody?['targetPath'],
-        '/tmp/kidmemory-exports/job_123456.jpg',
+        '/tmp/kidmemory-exports/task_123456.jpg',
       );
-      expect(api.lastLongImageExportBody?['format'], 'jpg');
-      expect(api.storageSyncArtifactIds, contains('artifact-job-jpg'));
+      expect(api.lastLongImageExportBody?['target'], 'long_image_jpg');
+      expect(api.storageSyncArtifactIds, contains('artifact-task-jpg'));
       expect(api.storageWorkerRuns, 1);
       expect(find.textContaining('长图 JPG 已导出'), findsWidgets);
       expect(find.textContaining('链接有效期：3600 秒'), findsWidgets);
@@ -1279,7 +1280,7 @@ void main() {
     await tester.pump();
 
     expect(api.shareRequests, 1);
-    expect(api.lastShareBody?['artifactId'], 'artifact-job-pdf');
+    expect(api.lastShareBody?['artifactId'], 'artifact-task-pdf');
     expect(find.text('正在创建 Web 分享链接...'), findsWidgets);
 
     api.completeShare();
@@ -1288,7 +1289,7 @@ void main() {
 
     expect(find.textContaining('Web 分享链接已创建'), findsWidgets);
     expect(
-      find.textContaining('http://localhost:3001/share/share_job_123456'),
+      find.textContaining('http://localhost:3001/share/share_task_123456'),
       findsWidgets,
     );
 
@@ -1296,7 +1297,7 @@ void main() {
     await tester.tap(secondaryButton('打开链接'));
     await tester.pumpAndSettle();
 
-    expect(openedTargets, ['http://localhost:3001/share/share_job_123456']);
+    expect(openedTargets, ['http://localhost:3001/share/share_task_123456']);
   });
 
   testWidgets('pdf share failure exposes retry and log actions', (
@@ -1324,7 +1325,7 @@ void main() {
     await pumpUntil(tester, () => api.shareRequests == 1);
     await tester.pumpAndSettle();
 
-    expect(api.lastShareBody?['artifactId'], 'artifact-job-pdf');
+    expect(api.lastShareBody?['artifactId'], 'artifact-task-pdf');
     expect(find.textContaining('分享链接创建失败'), findsWidgets);
     expect(find.textContaining('分享服务暂时不可用'), findsWidgets);
     expect(secondaryButton('重试创建'), findsOneWidget);
@@ -1404,7 +1405,7 @@ void main() {
     await tester.pumpAndSettle();
     await generateStorybookFromPrimary(tester);
     expect(find.textContaining('Request ID:'), findsNothing);
-    expect(find.textContaining('jobId:'), findsNothing);
+    expect(find.textContaining('taskId:'), findsNothing);
     await tester.ensureVisible(secondaryButton('查看详细日志'));
     await tester.tap(secondaryButton('查看详细日志'));
     await tester.pumpAndSettle();
@@ -1412,7 +1413,7 @@ void main() {
     expect(find.text('生成日志详情'), findsOneWidget);
     expect(find.textContaining('状态：'), findsWidgets);
     expect(find.textContaining('requestId: req_'), findsWidgets);
-    expect(find.textContaining('jobId: job_123456'), findsWidgets);
+    expect(find.textContaining('taskId: task_123456'), findsWidgets);
   });
 
   testWidgets('preview all pages opens after generated job ready', (
@@ -1446,7 +1447,7 @@ void main() {
     await tester.ensureVisible(secondaryButton('预览全部页面'));
     await tester.tap(secondaryButton('预览全部页面'));
     await tester.pumpAndSettle();
-    expect(openedUrl, '${api.baseUrl}/creation/jobs/job_123456/preview');
+    expect(openedUrl, '${api.baseUrl}/creation/tasks/task_123456/preview');
   });
 
   testWidgets('pdf preview failure exposes reason folder and log actions', (
@@ -1576,7 +1577,7 @@ void main() {
     await tester.pumpAndSettle();
     await generateStorybookFromPrimary(tester);
 
-    expect((api.lastJobBody?['settings'] as Map?)?['childId'], 'child-2');
+    expect((api.lastGenerateBody?['settings'] as Map?)?['childId'], 'child-2');
   });
 
   testWidgets('bulk delete ignores assets hidden by the current child filter', (
@@ -1764,11 +1765,20 @@ void main() {
   });
 }
 
+String _taskIdFromTaskRoute(String path) {
+  final parts = path.split('/');
+  final index = parts.indexOf('tasks');
+  if (index >= 0 && index + 1 < parts.length) {
+    return Uri.decodeComponent(parts[index + 1]);
+  }
+  return '';
+}
+
 class _FakeSidecarApi extends SidecarApi {
   Map<String, dynamic>? lastExportBody;
-  String? lastJobId;
-  Map<String, dynamic>? lastJobBody;
-  Map<String, dynamic>? lastPlanBody;
+  String? lastTaskId;
+  Map<String, dynamic>? lastGenerateBody;
+  Map<String, dynamic>? lastTaskBody;
   Map<String, dynamic>? lastPathBody;
 
   @override
@@ -1836,10 +1846,10 @@ class _FakeSidecarApi extends SidecarApi {
     if (path.startsWith('/config/check/')) {
       return {'ok': true};
     }
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
       return {
-        'planId': 'plan_123456',
+        'taskId': 'task_123456',
         'creationType': body['creationType'] ?? 'storybook',
         'summary': 'Create a PDF from selected assets',
         'skillName': 'KidMemory storybook',
@@ -1848,12 +1858,12 @@ class _FakeSidecarApi extends SidecarApi {
         'requirementItems': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
-      lastJobId = 'job_123456';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId.isEmpty ? 'task_123456' : taskId;
+      lastGenerateBody = {...body, 'taskId': lastTaskId};
       return {
-        'jobId': lastJobId,
-        'planId': body['planId'],
+        'taskId': lastTaskId,
         'creationType': 'storybook',
         'status': 'succeeded',
         'currentStepId': 'publish',
@@ -1862,25 +1872,13 @@ class _FakeSidecarApi extends SidecarApi {
         'error': null,
       };
     }
-    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/export')) {
       lastExportBody = body;
       return {
-        'artifactId': 'artifact-job-pdf',
+        'artifactId': 'artifact-task-pdf',
         'kind': body['target'] ?? 'pdf',
-        'jobId': lastJobId,
+        'taskId': lastTaskId,
         'localPath': body['targetPath'],
-      };
-    }
-    if (path == '/books/jobs') {
-      lastJobBody = body;
-      lastJobId = 'job_123456';
-      return {'id': lastJobId, 'status': 'generated'};
-    }
-    if (path.startsWith('/books/jobs/') && path.endsWith('/export/pdf')) {
-      lastExportBody = body;
-      return {
-        'exported': {'ok': true, 'path': body['targetPath']},
-        'verified': {'ok': true, 'pageCount': 6, 'firstPageRendered': true},
       };
     }
     return {'ok': true};
@@ -1894,7 +1892,7 @@ class _SlowCreationSidecarApi extends _FakeSidecarApi {
   void completePlan() {
     if (!planCompleter.isCompleted) {
       planCompleter.complete({
-        'planId': 'plan_slow',
+        'taskId': 'task_slow',
         'creationType': 'storybook',
         'summary': 'Slow creation plan is ready',
         'skillName': 'KidMemory storybook',
@@ -1906,10 +1904,10 @@ class _SlowCreationSidecarApi extends _FakeSidecarApi {
 
   void completeJob() {
     if (!jobCompleter.isCompleted) {
-      lastJobId = 'job_slow';
+      lastTaskId = 'task_slow';
       jobCompleter.complete({
-        'jobId': lastJobId,
-        'planId': lastJobBody?['planId'],
+        'taskId': lastTaskId,
+        'taskId': lastGenerateBody?['taskId'],
         'creationType': 'storybook',
         'status': 'succeeded',
         'currentStepId': 'publish',
@@ -1925,12 +1923,14 @@ class _SlowCreationSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
       return planCompleter.future;
     }
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId;
+      lastGenerateBody = {...body, 'taskId': taskId};
       return jobCompleter.future;
     }
     return super.post(path, body);
@@ -1938,16 +1938,16 @@ class _SlowCreationSidecarApi extends _FakeSidecarApi {
 }
 
 class _PlanFailureSidecarApi extends _FakeSidecarApi {
-  int planAttempts = 0;
+  int taskAttempts = 0;
 
   @override
   Future<Map<String, dynamic>> post(
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      planAttempts += 1;
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      taskAttempts += 1;
+      lastTaskBody = body;
       throw const SidecarApiException('计划失败：规划服务暂时不可用');
     }
     return super.post(path, body);
@@ -1955,19 +1955,19 @@ class _PlanFailureSidecarApi extends _FakeSidecarApi {
 }
 
 class _FailedCreationJobSidecarApi extends _FakeSidecarApi {
-  int planAttempts = 0;
-  int jobAttempts = 0;
+  int taskAttempts = 0;
+  int generateAttempts = 0;
 
   @override
   Future<Map<String, dynamic>> post(
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      planAttempts += 1;
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      taskAttempts += 1;
+      lastTaskBody = body;
       return {
-        'planId': 'plan_failed_$planAttempts',
+        'taskId': 'task_failed_$taskAttempts',
         'creationType': body['creationType'] ?? 'storybook',
         'summary': 'Create a PDF from selected assets',
         'skillName': 'KidMemory storybook',
@@ -1975,13 +1975,13 @@ class _FailedCreationJobSidecarApi extends _FakeSidecarApi {
         'requirements': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
-      jobAttempts += 1;
-      lastJobBody = body;
-      lastJobId = 'job_failed_$jobAttempts';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      generateAttempts += 1;
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId.isEmpty ? 'task_failed_$generateAttempts' : taskId;
+      lastGenerateBody = {...body, 'taskId': lastTaskId};
       return {
-        'jobId': lastJobId,
-        'planId': body['planId'],
+        'taskId': lastTaskId,
         'creationType': 'storybook',
         'status': 'failed',
         'currentStepId': 'generate',
@@ -2017,19 +2017,19 @@ class _FailedCreationJobSidecarApi extends _FakeSidecarApi {
 }
 
 class _FailedMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
-  int planAttempts = 0;
-  int jobAttempts = 0;
+  int taskAttempts = 0;
+  int generateAttempts = 0;
 
   @override
   Future<Map<String, dynamic>> post(
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      planAttempts += 1;
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      taskAttempts += 1;
+      lastTaskBody = body;
       return {
-        'planId': 'plan_video_failed_$planAttempts',
+        'taskId': 'task_video_failed_$taskAttempts',
         'creationType': body['creationType'] ?? 'memoir_video',
         'summary': 'Create a memory video from selected assets',
         'skillName': 'KidMemory Hyperframes memoir video',
@@ -2043,13 +2043,13 @@ class _FailedMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
         ],
       };
     }
-    if (path == '/creation/jobs') {
-      jobAttempts += 1;
-      lastJobBody = body;
-      lastJobId = 'job_video_failed_$jobAttempts';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      generateAttempts += 1;
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId.isEmpty ? 'task_video_failed_$generateAttempts' : taskId;
+      lastGenerateBody = {...body, 'taskId': lastTaskId};
       return {
-        'jobId': lastJobId,
-        'planId': body['planId'],
+        'taskId': lastTaskId,
         'creationType': 'memoir_video',
         'status': 'failed',
         'currentStepId': 'generate',
@@ -2081,10 +2081,10 @@ class _SuccessfulMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
       return {
-        'planId': 'plan_video_success',
+        'taskId': 'task_video_success',
         'creationType': body['creationType'] ?? 'memoir_video',
         'summary': 'Create a memory video from selected assets',
         'skillName': 'KidMemory Hyperframes memoir video',
@@ -2095,12 +2095,12 @@ class _SuccessfulMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
         'requirements': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
-      lastJobId = 'job_video_success';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId.isEmpty ? 'task_video_success' : taskId;
+      lastGenerateBody = {...body, 'taskId': lastTaskId};
       return {
-        'jobId': lastJobId,
-        'planId': body['planId'],
+        'taskId': lastTaskId,
         'creationType': 'memoir_video',
         'status': 'succeeded',
         'currentStepId': 'review',
@@ -2113,7 +2113,7 @@ class _SuccessfulMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
           {
             'artifactId': 'artifact-video-success',
             'kind': 'mp4',
-            'localPath': '/tmp/kidmemory-exports/job_video_success.mp4',
+            'localPath': '/tmp/kidmemory-exports/task_video_success.mp4',
           },
         ],
         'error': null,
@@ -2129,8 +2129,7 @@ class _SlowMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
   void completeJob() {
     if (jobCompleter.isCompleted) return;
     jobCompleter.complete({
-      'jobId': 'job_video_slow',
-      'planId': lastJobBody?['planId'],
+      'taskId': lastGenerateBody?['taskId'] ?? 'task_video_slow',
       'creationType': 'memoir_video',
       'status': 'succeeded',
       'currentStepId': 'review',
@@ -2143,7 +2142,7 @@ class _SlowMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
         {
           'artifactId': 'artifact-video-slow',
           'kind': 'mp4',
-          'localPath': '/tmp/kidmemory-exports/job_video_slow.mp4',
+          'localPath': '/tmp/kidmemory-exports/task_video_slow.mp4',
         },
       ],
       'error': null,
@@ -2155,10 +2154,10 @@ class _SlowMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
       return {
-        'planId': 'plan_video_slow',
+        'taskId': 'task_video_slow',
         'creationType': body['creationType'] ?? 'memoir_video',
         'summary': 'Create a memory video from selected assets',
         'skillName': 'KidMemory Hyperframes memoir video',
@@ -2169,8 +2168,10 @@ class _SlowMemoirVideoCreationJobSidecarApi extends _FakeSidecarApi {
         'requirements': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId;
+      lastGenerateBody = {...body, 'taskId': taskId};
       return jobCompleter.future;
     }
     return super.post(path, body);
@@ -2182,8 +2183,7 @@ class _RunningCreationSidecarApi extends _FakeSidecarApi {
 
   Map<String, dynamic> runningJob({String detail = 'Running skill workspace'}) {
     return {
-      'jobId': 'job_polling',
-      'planId': lastJobBody?['planId'],
+      'taskId': lastGenerateBody?['taskId'] ?? 'task_polling',
       'creationType': 'storybook',
       'status': 'running',
       'currentStepId': 'generate',
@@ -2215,9 +2215,9 @@ class _RunningCreationSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
-      lastJobId = 'job_polling';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      lastGenerateBody = body;
+      lastTaskId = 'task_polling';
       return runningJob();
     }
     return super.post(path, body);
@@ -2225,7 +2225,7 @@ class _RunningCreationSidecarApi extends _FakeSidecarApi {
 
   @override
   Future<Map<String, dynamic>> get(String path) async {
-    if (path == '/creation/jobs/job_polling') {
+    if (path == '/creation/tasks/task_polling') {
       pollCount += 1;
       return runningJob(detail: 'Still generating');
     }
@@ -2236,11 +2236,10 @@ class _RunningCreationSidecarApi extends _FakeSidecarApi {
 class _PollingCreationSidecarApi extends _RunningCreationSidecarApi {
   @override
   Future<Map<String, dynamic>> get(String path) async {
-    if (path == '/creation/jobs/job_polling') {
+    if (path == '/creation/tasks/task_polling') {
       pollCount += 1;
       return {
-        'jobId': 'job_polling',
-        'planId': lastJobBody?['planId'],
+        'taskId': lastGenerateBody?['taskId'] ?? 'task_polling',
         'creationType': 'storybook',
         'status': 'succeeded',
         'currentStepId': 'review',
@@ -2273,20 +2272,20 @@ class _PollingCreationSidecarApi extends _RunningCreationSidecarApi {
 
 class _SequencedPlanSidecarApi extends _FakeSidecarApi {
   int _nextPlanNumber = 1;
-  final createdPlanIds = <String>[];
-  final jobPlanIds = <String>[];
+  final createdTaskIds = <String>[];
+  final generatedTaskIds = <String>[];
 
   @override
   Future<Map<String, dynamic>> post(
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
-      final nextPlanId = 'plan_${_nextPlanNumber++}';
-      createdPlanIds.add(nextPlanId);
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
+      final nextTaskId = 'task_${_nextPlanNumber++}';
+      createdTaskIds.add(nextTaskId);
       return {
-        'planId': nextPlanId,
+        'taskId': nextTaskId,
         'creationType': body['creationType'] ?? 'storybook',
         'summary': 'Create a PDF from selected assets',
         'skillName': 'KidMemory storybook',
@@ -2294,13 +2293,13 @@ class _SequencedPlanSidecarApi extends _FakeSidecarApi {
         'requirements': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
-      lastJobBody = body;
-      jobPlanIds.add('${body['planId'] ?? ''}');
-      lastJobId = 'job_${jobPlanIds.length}';
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
+      final taskId = _taskIdFromTaskRoute(path);
+      lastTaskId = taskId;
+      lastGenerateBody = {...body, 'taskId': taskId};
+      generatedTaskIds.add(taskId);
       return {
-        'jobId': lastJobId,
-        'planId': body['planId'],
+        'taskId': taskId,
         'creationType': 'storybook',
         'status': 'succeeded',
         'currentStepId': 'publish',
@@ -2319,9 +2318,9 @@ class _SlowExportSidecarApi extends _FakeSidecarApi {
   void completeExport() {
     if (!exportCompleter.isCompleted) {
       exportCompleter.complete({
-        'artifactId': 'artifact-job-pdf',
+        'artifactId': 'artifact-task-pdf',
         'kind': lastExportBody?['target'] ?? 'pdf',
-        'jobId': lastJobId,
+        'taskId': lastTaskId,
         'localPath': lastExportBody?['targetPath'],
       });
     }
@@ -2332,7 +2331,7 @@ class _SlowExportSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/export')) {
       lastExportBody = body;
       return exportCompleter.future;
     }
@@ -2348,7 +2347,7 @@ class _FailingExportSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path.startsWith('/creation/jobs/') && path.endsWith('/export')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/export')) {
       exportRequests += 1;
       lastExportBody = body;
       throw const SidecarApiException('导出服务暂时不可用');
@@ -2365,8 +2364,8 @@ class _SlowShareSidecarApi extends _FakeSidecarApi {
   void completeShare() {
     if (!shareCompleter.isCompleted) {
       shareCompleter.complete({
-        'shareId': 'share_job_123456',
-        'shareUrl': 'http://localhost:3001/share/share_job_123456',
+        'shareId': 'share_task_123456',
+        'shareUrl': 'http://localhost:3001/share/share_task_123456',
         'artifactId': lastShareBody?['artifactId'],
       });
     }
@@ -2377,7 +2376,7 @@ class _SlowShareSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path.startsWith('/creation/jobs/') && path.endsWith('/share')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/share')) {
       shareRequests += 1;
       lastShareBody = body;
       return shareCompleter.future;
@@ -2395,7 +2394,7 @@ class _FailingShareSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path.startsWith('/creation/jobs/') && path.endsWith('/share')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/share')) {
       shareRequests += 1;
       lastShareBody = body;
       throw const SidecarApiException('分享服务暂时不可用');
@@ -2459,17 +2458,9 @@ class _CoverFailureSidecarApi extends _FakeSidecarApi {
     String path, [
     Map<String, dynamic> body = const {},
   ]) async {
-    if (path == '/creation/jobs/plan') {
-      lastPlanBody = body;
+    if (path == '/creation/tasks') {
+      lastTaskBody = body;
       throw const SidecarApiException('封面图生成失败：免费生图服务暂时不可用');
-    }
-    if (path == '/books/jobs') {
-      lastJobBody = body;
-      return {
-        'ok': false,
-        'status': 'failed',
-        'message': '封面图生成失败：免费生图服务暂时不可用',
-      };
     }
     return super.post(path, body);
   }
@@ -2511,13 +2502,13 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
         },
       };
     }
-    if (path == '/storage/export-artifacts/artifact-job-jpg/share') {
+    if (path == '/storage/export-artifacts/artifact-task-jpg/share') {
       return {
         'ok': true,
-        'url': 'https://project.supabase.co/signed/job_123456.jpg',
+        'url': 'https://project.supabase.co/signed/task_123456.jpg',
         'expiresInSeconds': 3600,
         'text':
-            'KidMemory 作品集：https://project.supabase.co/signed/job_123456.jpg\n链接有效期：3600 秒',
+            'KidMemory 作品集：https://project.supabase.co/signed/task_123456.jpg\n链接有效期：3600 秒',
       };
     }
     return super.get(path);
@@ -2569,26 +2560,22 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
         'cleanup': {'ok': true},
       };
     }
-    if (path.startsWith('/books/jobs/') &&
-        path.endsWith('/export/long-image')) {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/export')) {
       lastLongImageExportBody = body;
       return {
-        'exported': {'ok': true, 'path': body['targetPath']},
-        'artifact': {
-          'id': 'artifact-job-jpg',
-          'jobId': lastJobId,
-          'kind': 'long_image_jpg',
-          'localPath': body['targetPath'],
-          'storageProvider': 'local',
-          'storageStatus': 'local_only',
-        },
+        'artifactId': 'artifact-task-jpg',
+        'taskId': lastTaskId,
+        'kind': body['target'] ?? 'long_image_jpg',
+        'localPath': body['targetPath'],
+        'storageProvider': 'local',
+        'storageStatus': 'local_only',
       };
     }
-    if (path == '/storage/export-artifacts/artifact-job-jpg/sync') {
-      storageSyncArtifactIds.add('artifact-job-jpg');
+    if (path == '/storage/export-artifacts/artifact-task-jpg/sync') {
+      storageSyncArtifactIds.add('artifact-task-jpg');
       return {
         'enqueued': true,
-        'targetId': 'artifact-job-jpg',
+        'targetId': 'artifact-task-jpg',
         'status': 'pending',
       };
     }
@@ -2947,7 +2934,7 @@ class _MergedSearchSidecarApi extends _FakeSidecarApi {
 }
 
 class _MultiChildSidecarApi extends SidecarApi {
-  Map<String, dynamic>? lastJobBody;
+  Map<String, dynamic>? lastGenerateBody;
   final deletedAssetIds = <String>[];
   final calls = <String>[];
   String? lastChildrenName;
@@ -3013,14 +3000,14 @@ class _MultiChildSidecarApi extends SidecarApi {
         'child': {'id': body['id'], 'name': body['name'], 'metadata': {}},
       };
     }
-    if (path == '/books/jobs') {
-      lastJobBody = body;
-      return {'id': 'job_123456', 'status': 'generated'};
-    }
-    if (path == '/creation/jobs/plan') {
-      lastJobBody = body;
+    if (path == '/creation/tasks') {
+      lastGenerateBody = {
+        ...body,
+        if (!body.containsKey('settings'))
+          'settings': {'childId': 'child-2'},
+      };
       return {
-        'planId': 'plan_123456',
+        'taskId': 'task_123456',
         'creationType': body['creationType'] ?? 'storybook',
         'summary': 'Create a PDF from selected assets',
         'skillName': 'KidMemory storybook',
@@ -3028,10 +3015,9 @@ class _MultiChildSidecarApi extends SidecarApi {
         'requirements': _testPlanRequirements,
       };
     }
-    if (path == '/creation/jobs') {
+    if (path.startsWith('/creation/tasks/') && path.endsWith('/generate')) {
       return {
-        'jobId': 'job_123456',
-        'planId': body['planId'],
+        'taskId': 'task_123456',
         'creationType': 'storybook',
         'status': 'succeeded',
         'currentStepId': 'publish',

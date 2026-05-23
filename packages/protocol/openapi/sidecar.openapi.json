@@ -703,9 +703,9 @@
         ]
       }
     },
-    "/creation/jobs/plan": {
+    "/creation/tasks": {
       "post": {
-        "operationId": "CreationController_createPlan",
+        "operationId": "CreationController_createTask",
         "parameters": [],
         "responses": {
           "201": {
@@ -717,21 +717,55 @@
         ]
       }
     },
-    "/creation/jobs": {
+    "/creation/tasks/{taskId}/generate": {
       "post": {
-        "operationId": "CreationController_createJob",
+        "operationId": "CreationController_generateTask",
         "parameters": [],
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         },
         "tags": [
           "Creation"
         ]
-      }
+      },
+      "parameters": [
+        {
+          "name": "taskId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     },
-    "/creation/jobs/{jobId}/events": {
+    "/creation/tasks/{taskId}": {
+      "get": {
+        "operationId": "CreationController_getTask",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Creation"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "taskId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/creation/tasks/{taskId}/events": {
       "get": {
         "operationId": "CreationController_getEvents",
         "parameters": [],
@@ -746,7 +780,7 @@
       },
       "parameters": [
         {
-          "name": "jobId",
+          "name": "taskId",
           "in": "path",
           "required": true,
           "schema": {
@@ -755,7 +789,7 @@
         }
       ]
     },
-    "/creation/jobs/{jobId}/preview": {
+    "/creation/tasks/{taskId}/preview": {
       "get": {
         "operationId": "CreationController_preview",
         "parameters": [],
@@ -770,7 +804,7 @@
       },
       "parameters": [
         {
-          "name": "jobId",
+          "name": "taskId",
           "in": "path",
           "required": true,
           "schema": {
@@ -779,33 +813,9 @@
         }
       ]
     },
-    "/creation/jobs/{jobId}": {
-      "get": {
-        "operationId": "CreationController_getJob",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Creation"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "jobId",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/creation/jobs/{jobId}/export": {
+    "/creation/tasks/{taskId}/export": {
       "post": {
-        "operationId": "CreationController_exportJob",
+        "operationId": "CreationController_exportTask",
         "parameters": [],
         "responses": {
           "201": {
@@ -818,7 +828,7 @@
       },
       "parameters": [
         {
-          "name": "jobId",
+          "name": "taskId",
           "in": "path",
           "required": true,
           "schema": {
@@ -827,9 +837,9 @@
         }
       ]
     },
-    "/creation/jobs/{jobId}/share": {
+    "/creation/tasks/{taskId}/share": {
       "post": {
-        "operationId": "CreationController_shareJob",
+        "operationId": "CreationController_shareTask",
         "parameters": [],
         "responses": {
           "201": {
@@ -842,177 +852,7 @@
       },
       "parameters": [
         {
-          "name": "jobId",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs": {
-      "post": {
-        "operationId": "BooksController_createJob",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "get": {
-        "operationId": "BooksController_listJobs",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      }
-    },
-    "/books/jobs/{id}": {
-      "get": {
-        "operationId": "BooksController_getJob",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs/{id}/cancel": {
-      "post": {
-        "operationId": "BooksController_cancelJob",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs/{id}/retry": {
-      "post": {
-        "operationId": "BooksController_retryJob",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs/{id}/preview": {
-      "get": {
-        "operationId": "BooksController_preview",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs/{id}/export/pdf": {
-      "post": {
-        "operationId": "BooksController_exportPdf",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
-    "/books/jobs/{id}/export/long-image": {
-      "post": {
-        "operationId": "BooksController_exportLongImage",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Books"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
+          "name": "taskId",
           "in": "path",
           "required": true,
           "schema": {

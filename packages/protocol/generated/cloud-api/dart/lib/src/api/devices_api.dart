@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/device_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/register_device_request_dto.dart';
 
 class DevicesApi {
 
@@ -17,10 +19,10 @@ class DevicesApi {
   const DevicesApi(this._dio);
 
   /// Get device by ID
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -28,9 +30,9 @@ class DevicesApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [DeviceResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> devicesControllerGetDevice({ 
+  Future<Response<DeviceResponseDto>> devicesControllerGetDevice({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -60,14 +62,39 @@ class DevicesApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    DeviceResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DeviceResponseDto, DeviceResponseDto>(rawData, 'DeviceResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DeviceResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update device heartbeat
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -75,9 +102,9 @@ class DevicesApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [DeviceResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> devicesControllerHeartbeat({ 
+  Future<Response<DeviceResponseDto>> devicesControllerHeartbeat({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -107,13 +134,39 @@ class DevicesApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    DeviceResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DeviceResponseDto, DeviceResponseDto>(rawData, 'DeviceResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DeviceResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Register a device (idempotent by machineId)
-  /// 
+  ///
   ///
   /// Parameters:
+  /// * [registerDeviceRequestDto]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -121,9 +174,10 @@ class DevicesApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [DeviceResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> devicesControllerRegister({ 
+  Future<Response<DeviceResponseDto>> devicesControllerRegister({
+    required RegisterDeviceRequestDto registerDeviceRequestDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -141,18 +195,62 @@ class DevicesApi {
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(registerDeviceRequestDto);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    DeviceResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<DeviceResponseDto, DeviceResponseDto>(rawData, 'DeviceResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DeviceResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

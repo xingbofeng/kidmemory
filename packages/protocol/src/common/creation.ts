@@ -1,10 +1,9 @@
 export type CreationType = "storybook" | "memory_book" | "memoir_video";
 
-export type CreationPlanStatus = "ready" | "invalidated";
-
-export type CreationJobStatus =
-  | "creating"
-  | "running"
+export type CreationTaskStatus =
+  | "planning"
+  | "ready"
+  | "generating"
   | "succeeded"
   | "failed"
   | "exporting"
@@ -40,25 +39,10 @@ export interface CreationPlanRequirements {
   needsFfmpeg: boolean;
 }
 
-export interface CreationPlan {
-  planId: string;
-  creationType: CreationType;
-  goal: string;
-  assetIds: string[];
-  summary: string;
-  skillName: string;
-  steps: CreationStep[];
-  requirements: CreationPlanRequirements;
-  requirementItems: string[];
-  status: CreationPlanStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface CreationArtifact {
   artifactId: string;
-  kind: "pdf" | "mp4" | "web_share";
-  jobId: string;
+  taskId: string;
+  kind: "book_json" | "book_html" | "pdf" | "mp4" | "long_image_png" | "long_image_jpg" | "web_share";
   localPath?: string;
   shareId?: string;
   shareUrl?: string;
@@ -72,24 +56,40 @@ export interface CreationError {
   code?: string;
 }
 
-export interface CreationJob {
-  jobId: string;
-  planId: string;
+export interface CreationTask {
+  taskId: string;
   creationType: CreationType;
-  status: CreationJobStatus;
+  goal: string;
+  assetIds: string[];
+  status: CreationTaskStatus;
   currentStepId: string | null;
+  summary?: string;
+  skillName?: string;
   steps: CreationStep[];
+  requirements: CreationPlanRequirements;
+  requirementItems: string[];
   artifacts: CreationArtifact[];
   error: CreationError | null;
+  workspacePath: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreationEvent {
   eventId: string;
-  jobId: string;
+  taskId: string;
   stepId?: string;
-  type: "plan" | "job" | "step" | "export" | "share" | "error";
+  type: "plan" | "task" | "step" | "export" | "share" | "error";
   message: string;
+  createdAt: string;
+}
+
+export interface CreationExportArtifact {
+  artifactId: string;
+  taskId: string;
+  kind: "book_json" | "book_html" | "pdf" | "mp4" | "long_image_png" | "long_image_jpg" | "web_share";
+  localPath?: string;
+  shareId?: string;
+  shareUrl?: string;
   createdAt: string;
 }

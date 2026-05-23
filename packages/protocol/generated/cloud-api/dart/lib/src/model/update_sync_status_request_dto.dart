@@ -90,6 +90,8 @@ class UpdateSyncStatusRequestDto {
 
 
 enum UpdateSyncStatusRequestDtoStatusEnum {
+@JsonValue(r'uploaded')
+uploaded(r'uploaded'),
 @JsonValue(r'synced')
 synced(r'synced'),
 @JsonValue(r'failed')

@@ -42,7 +42,9 @@ import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
       provide: WebCompanionService,
       useFactory: async (appConfig: AppConfigService, prisma: PrismaService, dataset: DatasetService) => {
         let repository: PrismaWebCompanionRepository | InMemoryWebCompanionRepository;
-        try {
+        if (process.env.KIDMEMORY_OPENAPI_GENERATION === "1") {
+          repository = new InMemoryWebCompanionRepository();
+        } else try {
           await prisma.$queryRaw`SELECT 1`;
           repository = new PrismaWebCompanionRepository(prisma);
         } catch (error) {

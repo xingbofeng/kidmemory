@@ -59,12 +59,6 @@ const INVALID_PAYLOADS: InvalidPayloadCase[] = [
     body: { host: "localhost", evil: "drop table" },
     expectedIssueMessage: /evil/,
   },
-  {
-    name: "POST /books/jobs rejects non-array assetIds",
-    path: "/books/jobs",
-    body: { assetIds: "asset-1" },
-    expectedIssuePath: "assetIds",
-  },
 ];
 
 async function startApp() {

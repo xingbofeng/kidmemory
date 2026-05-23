@@ -126,20 +126,20 @@ void main() {
             selectedPageSize: 'A4 竖版  210 × 297 mm',
             selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
             selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
-            creationJobSteps: const [
-              CreationPlanStepVm(
+            creationTaskSteps: const [
+              CreationTaskStepVm(
                 stepId: 'compose',
                 label: 'Compose selected assets',
                 status: 'succeeded',
                 detail: 'Assets validated',
               ),
-              CreationPlanStepVm(
+              CreationTaskStepVm(
                 stepId: 'generate',
                 label: 'Generate PDF draft',
                 status: 'running',
                 detail: 'Running skill workspace',
               ),
-              CreationPlanStepVm(
+              CreationTaskStepVm(
                 stepId: 'review',
                 label: 'Review generated artifact',
                 status: 'pending',
@@ -258,7 +258,7 @@ void main() {
               '10:20:55  pg_ctl start: Examine the log output.',
               '10:20:56  pg_ctl: could not start server',
               '10:20:57  内置 PostgreSQL 将使用端口 54095',
-              '10:21:03  生成完成，已获得 jobId: job_123456',
+              '10:21:03  生成完成，已获得 taskId: task_123456',
               '10:21:18  Supabase Storage 同步完成',
               '10:21:20  sidecar 已更新状态',
             ],
@@ -280,7 +280,7 @@ void main() {
     );
 
     expect(find.textContaining('Request ID'), findsNothing);
-    expect(find.textContaining('jobId'), findsNothing);
+    expect(find.textContaining('taskId'), findsNothing);
     expect(find.textContaining('Supabase'), findsNothing);
     expect(find.textContaining('sidecar'), findsNothing);
     expect(find.textContaining('pg_ctl'), findsNothing);

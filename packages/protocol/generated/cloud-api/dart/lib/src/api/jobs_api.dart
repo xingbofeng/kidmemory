@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/job_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/update_job_status_request_dto.dart';
 
 class JobsApi {
 
@@ -17,7 +19,7 @@ class JobsApi {
   const JobsApi(this._dio);
 
   /// Get pending jobs for device
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [limit] - Maximum jobs to return
@@ -29,9 +31,9 @@ class JobsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<JobResponseDto>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> jobsControllerGetPendingJobs({ 
+  Future<Response<List<JobResponseDto>>> jobsControllerGetPendingJobs({
     num? limit,
     Object? deviceId,
     CancelToken? cancelToken,
@@ -68,14 +70,40 @@ class JobsApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<JobResponseDto>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<JobResponseDto>, JobResponseDto>(rawData, 'List<JobResponseDto>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<JobResponseDto>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update job status
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
+  /// * [updateJobStatusRequestDto]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -83,10 +111,11 @@ class JobsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [JobResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> jobsControllerUpdateStatus({ 
+  Future<Response<JobResponseDto>> jobsControllerUpdateStatus({
     required String id,
+    required UpdateJobStatusRequestDto updateJobStatusRequestDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -104,18 +133,62 @@ class JobsApi {
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(updateJobStatusRequestDto);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    JobResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<JobResponseDto, JobResponseDto>(rawData, 'JobResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<JobResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

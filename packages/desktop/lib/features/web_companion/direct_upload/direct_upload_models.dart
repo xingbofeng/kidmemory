@@ -1,4 +1,4 @@
-import 'package:kidmemory_protocol/kidmemory_protocol.dart';
+import '../../../core/sidecar/sidecar_dtos.dart';
 
 typedef DirectUploadConfig = CreateDirectUploadSessionResponseDto;
 typedef DirectUploadStatusItem = DirectUploadStatusItemDto;

@@ -72,14 +72,6 @@ Class | Method | HTTP request | Description
 [*AgentConfigApi*](doc/AgentConfigApi.md) | [**agentConfigControllerSetDefaultConfig**](doc/AgentConfigApi.md#agentconfigcontrollersetdefaultconfig) | **POST** /api/config/agent-configs/{id}/set-default |
 [*AgentConfigApi*](doc/AgentConfigApi.md) | [**agentConfigControllerTestConfig**](doc/AgentConfigApi.md#agentconfigcontrollertestconfig) | **POST** /api/config/agent-configs/{id}/test |
 [*AgentConfigApi*](doc/AgentConfigApi.md) | [**agentConfigControllerUpdateConfig**](doc/AgentConfigApi.md#agentconfigcontrollerupdateconfig) | **PUT** /api/config/agent-configs/{id} |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerCancelJob**](doc/BooksApi.md#bookscontrollercanceljob) | **POST** /books/jobs/{id}/cancel |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerCreateJob**](doc/BooksApi.md#bookscontrollercreatejob) | **POST** /books/jobs |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerExportLongImage**](doc/BooksApi.md#bookscontrollerexportlongimage) | **POST** /books/jobs/{id}/export/long-image |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerExportPdf**](doc/BooksApi.md#bookscontrollerexportpdf) | **POST** /books/jobs/{id}/export/pdf |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerGetJob**](doc/BooksApi.md#bookscontrollergetjob) | **GET** /books/jobs/{id} |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerListJobs**](doc/BooksApi.md#bookscontrollerlistjobs) | **GET** /books/jobs |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerPreview**](doc/BooksApi.md#bookscontrollerpreview) | **GET** /books/jobs/{id}/preview |
-[*BooksApi*](doc/BooksApi.md) | [**booksControllerRetryJob**](doc/BooksApi.md#bookscontrollerretryjob) | **POST** /books/jobs/{id}/retry |
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerClaudeReadiness**](doc/ConfigApi.md#configcontrollerclaudereadiness) | **POST** /config/check/claude |
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerHealth**](doc/ConfigApi.md#configcontrollerhealth) | **GET** /health |
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerInitializeSchema**](doc/ConfigApi.md#configcontrollerinitializeschema) | **POST** /schema/init |
@@ -91,13 +83,13 @@ Class | Method | HTTP request | Description
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerUpdatePaths**](doc/ConfigApi.md#configcontrollerupdatepaths) | **POST** /config/paths |
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerUpdatePostgres**](doc/ConfigApi.md#configcontrollerupdatepostgres) | **POST** /config/postgres |
 [*ConfigApi*](doc/ConfigApi.md) | [**configControllerUpdateSupabaseStorage**](doc/ConfigApi.md#configcontrollerupdatesupabasestorage) | **POST** /config/supabase-storage |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerCreateJob**](doc/CreationApi.md#creationcontrollercreatejob) | **POST** /creation/jobs |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerCreatePlan**](doc/CreationApi.md#creationcontrollercreateplan) | **POST** /creation/jobs/plan |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerExportJob**](doc/CreationApi.md#creationcontrollerexportjob) | **POST** /creation/jobs/{jobId}/export |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerGetEvents**](doc/CreationApi.md#creationcontrollergetevents) | **GET** /creation/jobs/{jobId}/events |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerGetJob**](doc/CreationApi.md#creationcontrollergetjob) | **GET** /creation/jobs/{jobId} |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerPreview**](doc/CreationApi.md#creationcontrollerpreview) | **GET** /creation/jobs/{jobId}/preview |
-[*CreationApi*](doc/CreationApi.md) | [**creationControllerShareJob**](doc/CreationApi.md#creationcontrollersharejob) | **POST** /creation/jobs/{jobId}/share |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerCreateTask**](doc/CreationApi.md#creationcontrollercreatetask) | **POST** /creation/tasks |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerExportTask**](doc/CreationApi.md#creationcontrollerexporttask) | **POST** /creation/tasks/{taskId}/export |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerGenerateTask**](doc/CreationApi.md#creationcontrollergeneratetask) | **POST** /creation/tasks/{taskId}/generate |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerGetEvents**](doc/CreationApi.md#creationcontrollergetevents) | **GET** /creation/tasks/{taskId}/events |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerGetTask**](doc/CreationApi.md#creationcontrollergettask) | **GET** /creation/tasks/{taskId} |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerPreview**](doc/CreationApi.md#creationcontrollerpreview) | **GET** /creation/tasks/{taskId}/preview |
+[*CreationApi*](doc/CreationApi.md) | [**creationControllerShareTask**](doc/CreationApi.md#creationcontrollersharetask) | **POST** /creation/tasks/{taskId}/share |
 [*DatasetApi*](doc/DatasetApi.md) | [**datasetControllerAddSearchCandidatePoolItems**](doc/DatasetApi.md#datasetcontrolleraddsearchcandidatepoolitems) | **POST** /search/candidate-pool/items |
 [*DatasetApi*](doc/DatasetApi.md) | [**datasetControllerCreateChild**](doc/DatasetApi.md#datasetcontrollercreatechild) | **POST** /children |
 [*DatasetApi*](doc/DatasetApi.md) | [**datasetControllerDeleteAsset**](doc/DatasetApi.md#datasetcontrollerdeleteasset) | **DELETE** /assets/{id} |
@@ -166,6 +158,3 @@ Endpoints do not require authorization.
 
 
 ## Author
-
-
-

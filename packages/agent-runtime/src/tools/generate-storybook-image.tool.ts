@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URLSearchParams } from "node:url";
 
-import type { AgentTool, ToolExecutionContext } from "./index.js";
+import type { AgentTool } from "./index.js";
 
 export type PollinationsStorybookImageToolOptions = {
   apiKey?: string;

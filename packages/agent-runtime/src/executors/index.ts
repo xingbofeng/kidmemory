@@ -7,6 +7,7 @@ export type {
 } from "./types.js";
 export { FakeExecutor } from "./fake-executor.js";
 export { OpenAIAgentExecutor } from "./agent/openai-agent-executor.js";
+export { OpenAICompatibleChatExecutor } from "./chat/openai-compatible-chat-executor.js";
 export {
   OpenAISandboxExecutor,
   createOpenAIRunnerConfig,

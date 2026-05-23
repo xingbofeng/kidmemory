@@ -409,24 +409,44 @@ paths:
         "201":
           description: ""
       tags: *a4
-  /creation/jobs/plan:
+  /creation/tasks:
     post:
-      operationId: CreationController_createPlan
+      operationId: CreationController_createTask
       parameters: []
       responses:
         "201":
           description: ""
       tags: &a5
         - Creation
-  /creation/jobs:
+  /creation/tasks/{taskId}/generate:
     post:
-      operationId: CreationController_createJob
+      operationId: CreationController_generateTask
       parameters: []
       responses:
-        "201":
+        "200":
           description: ""
       tags: *a5
-  /creation/jobs/{jobId}/events:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+  /creation/tasks/{taskId}:
+    get:
+      operationId: CreationController_getTask
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+  /creation/tasks/{taskId}/events:
     get:
       operationId: CreationController_getEvents
       parameters: []
@@ -435,12 +455,12 @@ paths:
           description: ""
       tags: *a5
     parameters:
-      - name: jobId
+      - name: taskId
         in: path
         required: true
         schema:
           type: string
-  /creation/jobs/{jobId}/preview:
+  /creation/tasks/{taskId}/preview:
     get:
       operationId: CreationController_preview
       parameters: []
@@ -449,149 +469,35 @@ paths:
           description: ""
       tags: *a5
     parameters:
-      - name: jobId
+      - name: taskId
         in: path
         required: true
         schema:
           type: string
-  /creation/jobs/{jobId}:
-    get:
-      operationId: CreationController_getJob
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      tags: *a5
-    parameters:
-      - name: jobId
-        in: path
-        required: true
-        schema:
-          type: string
-  /creation/jobs/{jobId}/export:
+  /creation/tasks/{taskId}/export:
     post:
-      operationId: CreationController_exportJob
+      operationId: CreationController_exportTask
       parameters: []
       responses:
         "201":
           description: ""
       tags: *a5
     parameters:
-      - name: jobId
+      - name: taskId
         in: path
         required: true
         schema:
           type: string
-  /creation/jobs/{jobId}/share:
+  /creation/tasks/{taskId}/share:
     post:
-      operationId: CreationController_shareJob
+      operationId: CreationController_shareTask
       parameters: []
       responses:
         "201":
           description: ""
       tags: *a5
     parameters:
-      - name: jobId
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs:
-    post:
-      operationId: BooksController_createJob
-      parameters: []
-      responses:
-        "201":
-          description: ""
-      tags: &a6
-        - Books
-    get:
-      operationId: BooksController_listJobs
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      tags: *a6
-  /books/jobs/{id}:
-    get:
-      operationId: BooksController_getJob
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs/{id}/cancel:
-    post:
-      operationId: BooksController_cancelJob
-      parameters: []
-      responses:
-        "201":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs/{id}/retry:
-    post:
-      operationId: BooksController_retryJob
-      parameters: []
-      responses:
-        "201":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs/{id}/preview:
-    get:
-      operationId: BooksController_preview
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs/{id}/export/pdf:
-    post:
-      operationId: BooksController_exportPdf
-      parameters: []
-      responses:
-        "201":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-  /books/jobs/{id}/export/long-image:
-    post:
-      operationId: BooksController_exportLongImage
-      parameters: []
-      responses:
-        "201":
-          description: ""
-      tags: *a6
-    parameters:
-      - name: id
+      - name: taskId
         in: path
         required: true
         schema:
@@ -603,7 +509,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: &a7
+      tags: &a6
         - WebCompanion
   /api/web-companion/sessions/{sessionId}:
     get:
@@ -612,7 +518,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -626,7 +532,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -640,7 +546,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -654,7 +560,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -673,7 +579,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -692,7 +598,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -706,7 +612,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -720,7 +626,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -734,7 +640,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -753,7 +659,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -767,7 +673,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -786,7 +692,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -800,7 +706,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: sessionId
         in: path
@@ -819,7 +725,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: shareToken
         in: path
@@ -833,7 +739,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: shareToken
         in: path
@@ -847,7 +753,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a7
+      tags: *a6
     parameters:
       - name: shareToken
         in: path
@@ -861,7 +767,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: &a8
+      tags: &a7
         - DirectUpload
   /api/web-companion/direct-upload/sessions/{sessionId}/objects:
     get:
@@ -870,7 +776,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a8
+      tags: *a7
     parameters:
       - name: sessionId
         in: path
@@ -884,7 +790,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a8
+      tags: *a7
     parameters:
       - name: sessionId
         in: path
@@ -898,7 +804,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a8
+      tags: *a7
     parameters:
       - name: sessionId
         in: path
@@ -912,7 +818,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a8
+      tags: *a7
     parameters:
       - name: sessionId
         in: path
@@ -926,7 +832,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: &a9
+      tags: &a8
         - LanReceiver
   /api/web-companion/lan/pair:
     post:
@@ -935,7 +841,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a9
+      tags: *a8
   /api/web-companion/lan/sessions/{sessionId}/upload:
     post:
       operationId: LanReceiverController_upload
@@ -943,7 +849,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: *a9
+      tags: *a8
     parameters:
       - name: sessionId
         in: path
@@ -957,7 +863,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a9
+      tags: *a8
     parameters:
       - name: sessionId
         in: path
@@ -971,7 +877,7 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a9
+      tags: *a8
   /mcp:
     post:
       operationId: StreamableHttpController_handlePostRequest
@@ -979,7 +885,7 @@ paths:
       responses:
         "201":
           description: ""
-      tags: &a10
+      tags: &a9
         - StreamableHttp
     get:
       operationId: StreamableHttpController_handleGetRequest
@@ -987,14 +893,14 @@ paths:
       responses:
         "200":
           description: ""
-      tags: *a10
+      tags: *a9
     delete:
       operationId: StreamableHttpController_handleDeleteRequest
       parameters: []
       responses:
         "200":
           description: ""
-      tags: *a10
+      tags: *a9
 info:
   title: KidMemory Sidecar API
   description: Local sidecar API for KidMemory desktop application

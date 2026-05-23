@@ -1,43 +1,48 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Param, Post, Res } from "@nestjs/common";
 import { ApiCode } from "@kidmemory/protocol";
 import type { Response } from "express";
 
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
 import { CreationService } from "./creation.service.ts";
 import {
-  CreateCreationJobDtoSchema,
-  CreateCreationPlanDtoSchema,
-  ExportCreationJobDtoSchema,
-  ShareCreationJobDtoSchema,
+  CreateCreationTaskDtoSchema,
+  ExportCreationTaskDtoSchema,
+  ShareCreationTaskDtoSchema,
 } from "./dto/creation.dto.ts";
 
-@Controller("creation/jobs")
+@Controller("creation/tasks")
 export class CreationController {
   constructor(@Inject(CreationService) private readonly creationService: CreationService) {}
 
-  @Post("plan")
-  async createPlan(@Body() body: unknown) {
-    const dto = parseDto(CreateCreationPlanDtoSchema, body, "creation/jobs/plan");
-    const result = await this.creationService.createPlan(dto);
-    return this.unwrap(result, "Creation plan failed");
-  }
-
   @Post()
-  async createJob(@Body() body: unknown) {
-    const dto = parseDto(CreateCreationJobDtoSchema, body, "creation/jobs");
-    const result = await this.creationService.createJob(dto);
-    return this.unwrap(result, "Creation job failed");
+  async createTask(@Body() body: unknown) {
+    const dto = parseDto(CreateCreationTaskDtoSchema, body, "creation/tasks");
+    const result = await this.creationService.createTask(dto);
+    return this.unwrap(result, "Creation task failed");
   }
 
-  @Get(":jobId/events")
-  async getEvents(@Param("jobId") jobId: string) {
-    const result = await this.creationService.getEvents(jobId);
+  @Post(":taskId/generate")
+  @HttpCode(HttpStatus.OK)
+  async generateTask(@Param("taskId") taskId: string) {
+    const result = await this.creationService.generateTask(taskId);
+    return this.unwrap(result, "Creation generation failed");
+  }
+
+  @Get(":taskId")
+  async getTask(@Param("taskId") taskId: string) {
+    const result = await this.creationService.getTask(taskId);
+    return this.unwrap(result, "Creation task lookup failed");
+  }
+
+  @Get(":taskId/events")
+  async getEvents(@Param("taskId") taskId: string) {
+    const result = await this.creationService.getEvents(taskId);
     return this.unwrap(result, "Creation events lookup failed");
   }
 
-  @Get(":jobId/preview")
-  async preview(@Param("jobId") jobId: string, @Res({ passthrough: true }) response: Response) {
-    const result = await this.creationService.getPreviewHtml(jobId);
+  @Get(":taskId/preview")
+  async preview(@Param("taskId") taskId: string, @Res({ passthrough: true }) response: Response) {
+    const result = await this.creationService.getPreviewHtml(taskId);
     if ("html" in result && typeof result.html === "string") {
       response.status(result.status).type("html");
       return result.html;
@@ -45,23 +50,17 @@ export class CreationController {
     return this.unwrap(result as { status: number; data: { message: string } }, "Creation preview failed");
   }
 
-  @Get(":jobId")
-  async getJob(@Param("jobId") jobId: string) {
-    const result = await this.creationService.getJob(jobId);
-    return this.unwrap(result, "Creation job lookup failed");
-  }
-
-  @Post(":jobId/export")
-  async exportJob(@Param("jobId") jobId: string, @Body() body: unknown) {
-    const dto = parseDto(ExportCreationJobDtoSchema, body, "creation/jobs/:jobId/export");
-    const result = await this.creationService.exportJob(jobId, dto);
+  @Post(":taskId/export")
+  async exportTask(@Param("taskId") taskId: string, @Body() body: unknown) {
+    const dto = parseDto(ExportCreationTaskDtoSchema, body, "creation/tasks/:taskId/export");
+    const result = await this.creationService.exportTask(taskId, dto);
     return this.unwrap(result, "Creation export failed");
   }
 
-  @Post(":jobId/share")
-  async shareJob(@Param("jobId") jobId: string, @Body() body: unknown) {
-    const dto = parseDto(ShareCreationJobDtoSchema, body, "creation/jobs/:jobId/share");
-    const result = await this.creationService.shareJob(jobId, dto);
+  @Post(":taskId/share")
+  async shareTask(@Param("taskId") taskId: string, @Body() body: unknown) {
+    const dto = parseDto(ShareCreationTaskDtoSchema, body, "creation/tasks/:taskId/share");
+    const result = await this.creationService.shareTask(taskId, dto);
     return this.unwrap(result, "Creation share failed");
   }
 

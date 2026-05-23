@@ -85,6 +85,24 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [CommitUploadItemRequestDto](doc/CommitUploadItemRequestDto.md)
+ - [CommitUploadItemResponseDto](doc/CommitUploadItemResponseDto.md)
+ - [CreateUploadFileDto](doc/CreateUploadFileDto.md)
+ - [CreateUploadItemsRequestDto](doc/CreateUploadItemsRequestDto.md)
+ - [CreateUploadItemsResponseDto](doc/CreateUploadItemsResponseDto.md)
+ - [CreatedUploadItemDto](doc/CreatedUploadItemDto.md)
+ - [DeviceResponseDto](doc/DeviceResponseDto.md)
+ - [DirectUploadConfigResponseDto](doc/DirectUploadConfigResponseDto.md)
+ - [JobResponseDto](doc/JobResponseDto.md)
+ - [RegisterDeviceRequestDto](doc/RegisterDeviceRequestDto.md)
+ - [SessionSummaryResponseDto](doc/SessionSummaryResponseDto.md)
+ - [ShareTokenValidationResponseDto](doc/ShareTokenValidationResponseDto.md)
+ - [SharedAssetDto](doc/SharedAssetDto.md)
+ - [SharedBookDto](doc/SharedBookDto.md)
+ - [SignedUploadTargetDto](doc/SignedUploadTargetDto.md)
+ - [UpdateJobStatusRequestDto](doc/UpdateJobStatusRequestDto.md)
+ - [UpdateSyncStatusRequestDto](doc/UpdateSyncStatusRequestDto.md)
+ - [UploadItemResponseDto](doc/UploadItemResponseDto.md)
 
 
 ## Documentation For Authorization

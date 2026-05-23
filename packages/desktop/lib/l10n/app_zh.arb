@@ -2380,7 +2380,7 @@
   "@datasetPreviewS852": {
     "description": "datasetPreviewS852"
   },
-  "datasetPreviewS952": "预览全部页面：缺少 jobId",
+  "datasetPreviewS952": "预览全部页面：缺少 taskId",
   "@datasetPreviewS952": {
     "description": "datasetPreviewS952"
   },
@@ -2571,7 +2571,7 @@
   "@exportPageS851": {
     "description": "exportPageS851"
   },
-  "exportPageS410": "导出失败：缺少 jobId",
+  "exportPageS410": "导出失败：缺少 taskId",
   "@exportPageS410": {
     "description": "exportPageS410"
   },
@@ -2995,11 +2995,11 @@
       }
     }
   },
-  "datasetPreviewOpenHistoryLog": "打开历史作品预览：{jobId}",
+  "datasetPreviewOpenHistoryLog": "打开历史作品预览：{taskId}",
   "@datasetPreviewOpenHistoryLog": {
     "description": "Open historical generated work preview log.",
     "placeholders": {
-      "jobId": {
+      "taskId": {
         "type": "String"
       }
     }
@@ -3013,11 +3013,11 @@
       }
     }
   },
-  "datasetPreviewOpenPageLog": "打开预览页面：{jobId}",
+  "datasetPreviewOpenPageLog": "打开预览页面：{taskId}",
   "@datasetPreviewOpenPageLog": {
     "description": "Open generated page preview log.",
     "placeholders": {
-      "jobId": {
+      "taskId": {
         "type": "String"
       }
     }
@@ -3142,11 +3142,11 @@
       }
     }
   },
-  "exportGenerationCompletedLog": "生成完成，已获得 jobId: {jobId}",
+  "exportGenerationCompletedLog": "生成完成，已获得 taskId: {taskId}",
   "@exportGenerationCompletedLog": {
     "description": "Generation completed log with job id.",
     "placeholders": {
-      "jobId": {
+      "taskId": {
         "type": "String"
       }
     }

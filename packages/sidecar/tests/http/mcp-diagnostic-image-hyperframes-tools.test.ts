@@ -12,7 +12,6 @@ const REQUIRED_TOOLS = [
   "get_indexing_status",
   "get_recent_logs",
   "generate_cover_image_preview",
-  "render_hyperframes_video",
 ];
 
 const FORBIDDEN_TOOLS = ["run_sql", "run_shell", "read_file"];
@@ -176,13 +175,4 @@ test("diagnostic/image/hyperframes MCP tools are callable", async (t) => {
   assert.equal(degradedCoverPayload.canSkipCoverAndContinue, true);
   assert.equal(degradedCoverPayload.privacyBoundary?.textOnly, true);
   assert.equal(degradedCoverPayload.privacyBoundary?.childPhotoUpload, false);
-
-  const renderPayload = parseToolJson(await client.callTool({
-    name: "render_hyperframes_video",
-    arguments: {
-      projectId: "demo-project",
-      prompt: "gentle family memories montage",
-    },
-  }));
-  assert.equal(typeof renderPayload.ok, "boolean");
 });

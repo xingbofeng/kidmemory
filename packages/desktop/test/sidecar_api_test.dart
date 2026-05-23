@@ -195,11 +195,11 @@ void main() {
   });
 
   test(
-    'DesktopSidecarGateway calls creation job orchestration routes',
+    'DesktopSidecarGateway calls task-first creation routes',
     () async {
       final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       final seen = <String>[];
-      var planBody = <String, dynamic>{};
+      var taskBody = <String, dynamic>{};
       addTearDown(() async => server.close(force: true));
 
       server.listen((request) async {
@@ -210,58 +210,82 @@ void main() {
             ? <String, dynamic>{}
             : jsonDecode(bodyText) as Map<String, dynamic>;
         Object data;
-        if (path == '/creation/jobs/plan') {
-          planBody = body;
+        if (path == '/creation/tasks') {
+          taskBody = body;
           data = {
-            'planId': 'plan_desktop_1',
+            'taskId': 'task_desktop_1',
             'creationType': body['creationType'],
+            'goal': body['goal'],
+            'assetIds': body['assetIds'],
+            'status': 'ready',
+            'currentStepId': 'plan',
             'summary': 'Backend plan summary',
             'skillName': 'KidMemory storybook',
             'steps': const <Map<String, dynamic>>[],
-            'requirements': const {
-              'minAssets': 1,
-              'recommendedAssets': 6,
-              'needsCloudImage': true,
-              'needsHyperframes': false,
-              'needsFfmpeg': false,
-            },
+            'requirements': const <String>[],
             'requirementItems': const <String>[],
-          };
-        } else if (path == '/creation/jobs') {
-          data = {
-            'jobId': 'job_desktop_1',
-            'planId': body['planId'],
-            'creationType': 'storybook',
-            'status': 'running',
-            'currentStepId': 'plan',
-            'steps': const <Map<String, dynamic>>[],
             'artifacts': const <Map<String, dynamic>>[],
             'error': null,
+            'workspacePath': '/tmp/kidmemory/task_desktop_1',
+            'createdAt': '2026-05-23T00:00:00.000Z',
+            'updatedAt': '2026-05-23T00:00:00.000Z',
           };
-        } else if (path == '/creation/jobs/job_desktop_1/events') {
+        } else if (path == '/creation/tasks/task_desktop_1/generate') {
+          data = {
+            'taskId': 'task_desktop_1',
+            'creationType': 'storybook',
+            'goal': 'Make a bedtime story',
+            'assetIds': const ['asset_a', 'asset_b'],
+            'status': 'succeeded',
+            'currentStepId': 'review',
+            'summary': 'Backend plan summary',
+            'skillName': 'KidMemory storybook',
+            'steps': const <Map<String, dynamic>>[],
+            'requirements': const <String>[],
+            'requirementItems': const <String>[],
+            'artifacts': const <Map<String, dynamic>>[],
+            'error': null,
+            'workspacePath': '/tmp/kidmemory/task_desktop_1',
+            'createdAt': '2026-05-23T00:00:00.000Z',
+            'updatedAt': '2026-05-23T00:00:00.000Z',
+          };
+        } else if (path == '/creation/tasks/task_desktop_1/events') {
           data = {'events': const <Map<String, dynamic>>[]};
-        } else if (path == '/creation/jobs/job_desktop_1/export') {
+        } else if (path == '/creation/tasks/task_desktop_1/export') {
           data = {
             'artifactId': 'artifact_desktop_pdf',
             'kind': body['target'],
-            'jobId': 'job_desktop_1',
+            'taskId': 'task_desktop_1',
+            'localPath': body['targetPath'],
+            'createdAt': '2026-05-23T00:00:00.000Z',
           };
-        } else if (path == '/creation/jobs/job_desktop_1/share') {
+        } else if (path == '/creation/tasks/task_desktop_1/share') {
           data = {
+            'artifactId': body['artifactId'],
+            'taskId': 'task_desktop_1',
+            'kind': 'web_share',
             'shareId': 'share_desktop_1',
             'shareUrl': 'http://localhost:3001/share/share_desktop_1',
-            'artifactId': body['artifactId'],
+            'createdAt': '2026-05-23T00:00:00.000Z',
           };
-        } else if (path == '/creation/jobs/job_desktop_1') {
+        } else if (path == '/creation/tasks/task_desktop_1') {
           data = {
-            'jobId': 'job_desktop_1',
-            'planId': 'plan_desktop_1',
+            'taskId': 'task_desktop_1',
             'creationType': 'storybook',
-            'status': 'running',
+            'goal': 'Make a bedtime story',
+            'assetIds': const ['asset_a', 'asset_b'],
+            'status': 'succeeded',
             'currentStepId': 'plan',
+            'summary': 'Backend plan summary',
+            'skillName': 'KidMemory storybook',
             'steps': const <Map<String, dynamic>>[],
+            'requirements': const <String>[],
+            'requirementItems': const <String>[],
             'artifacts': const <Map<String, dynamic>>[],
             'error': null,
+            'workspacePath': '/tmp/kidmemory/task_desktop_1',
+            'createdAt': '2026-05-23T00:00:00.000Z',
+            'updatedAt': '2026-05-23T00:00:00.000Z',
           };
         } else {
           request.response.statusCode = 404;
@@ -280,45 +304,46 @@ void main() {
         ),
       );
 
-      final plan = await gateway.createCreationPlanRaw(
+      final task = await gateway.createCreationTaskRaw(
         goal: 'Make a bedtime story',
         creationType: 'storybook',
         assetIds: const ['asset_a', 'asset_b'],
         settings: const {'tone': 'warm'},
       );
-      final job = await gateway.createCreationJobRaw(
-        planId: plan['planId'] as String,
+      final generated = await gateway.generateCreationTaskRaw(
+        taskId: task['taskId'] as String,
       );
-      final detail = await gateway.getCreationJobRaw(
-        jobId: job['jobId'] as String,
+      final detail = await gateway.getCreationTaskRaw(
+        taskId: task['taskId'] as String,
       );
-      final events = await gateway.getCreationJobEventsRaw(
-        jobId: job['jobId'] as String,
+      final events = await gateway.getCreationTaskEventsRaw(
+        taskId: task['taskId'] as String,
       );
-      final exported = await gateway.exportCreationJobRaw(
-        jobId: job['jobId'] as String,
+      final exported = await gateway.exportCreationTaskRaw(
+        taskId: task['taskId'] as String,
         target: 'pdf',
         targetPath: '/tmp/kidmemory.pdf',
       );
-      final shared = await gateway.shareCreationJobRaw(
-        jobId: job['jobId'] as String,
+      final shared = await gateway.shareCreationTaskRaw(
+        taskId: task['taskId'] as String,
         artifactId: exported['artifactId'] as String,
       );
 
-      expect(plan['planId'], 'plan_desktop_1');
-      expect(planBody['assetIds'], ['asset_a', 'asset_b']);
-      expect(planBody['settings'], {'tone': 'warm'});
-      expect(detail['jobId'], 'job_desktop_1');
+      expect(task['taskId'], 'task_desktop_1');
+      expect(taskBody['assetIds'], ['asset_a', 'asset_b']);
+      expect(taskBody.containsKey('settings'), isFalse);
+      expect(generated['status'], 'succeeded');
+      expect(detail['taskId'], 'task_desktop_1');
       expect(events['events'], isA<List<dynamic>>());
       expect(exported['kind'], 'pdf');
       expect(shared['shareUrl'], contains('/share/share_desktop_1'));
       expect(seen, [
-        'POST /creation/jobs/plan',
-        'POST /creation/jobs',
-        'GET /creation/jobs/job_desktop_1',
-        'GET /creation/jobs/job_desktop_1/events',
-        'POST /creation/jobs/job_desktop_1/export',
-        'POST /creation/jobs/job_desktop_1/share',
+        'POST /creation/tasks',
+        'POST /creation/tasks/task_desktop_1/generate',
+        'GET /creation/tasks/task_desktop_1',
+        'GET /creation/tasks/task_desktop_1/events',
+        'POST /creation/tasks/task_desktop_1/export',
+        'POST /creation/tasks/task_desktop_1/share',
       ]);
     },
   );

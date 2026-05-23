@@ -22,9 +22,9 @@ class ShareTokenValidationResponseDto {
 
     required  this.isValid,
 
-     this.shareToken,
-
      this.error,
+
+     this.shareToken,
   });
 
   @JsonKey(
@@ -41,18 +41,6 @@ class ShareTokenValidationResponseDto {
 
   @JsonKey(
     
-    name: r'shareToken',
-    required: false,
-    includeIfNull: false,
-  )
-
-
-  final Map<String, Object>? shareToken;
-
-
-
-  @JsonKey(
-    
     name: r'error',
     required: false,
     includeIfNull: false,
@@ -63,19 +51,31 @@ class ShareTokenValidationResponseDto {
 
 
 
+  @JsonKey(
+    
+    name: r'shareToken',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final Object? shareToken;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ShareTokenValidationResponseDto &&
       other.isValid == isValid &&
-      other.shareToken == shareToken &&
-      other.error == error;
+      other.error == error &&
+      other.shareToken == shareToken;
 
     @override
     int get hashCode =>
         isValid.hashCode +
-        shareToken.hashCode +
-        error.hashCode;
+        error.hashCode +
+        shareToken.hashCode;
 
   factory ShareTokenValidationResponseDto.fromJson(Map<String, dynamic> json) => _$ShareTokenValidationResponseDtoFromJson(json);
 

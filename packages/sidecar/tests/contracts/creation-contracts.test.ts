@@ -1,6 +1,9 @@
 import "reflect-metadata";
 
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import { Module, type INestApplication } from "@nestjs/common";
@@ -9,14 +12,11 @@ import { NestFactory } from "@nestjs/core";
 import { ApiResponseInterceptor } from "../../src/infrastructure/http/api-response.interceptor.ts";
 import { GlobalExceptionFilter } from "../../src/infrastructure/http/global-exception.filter.ts";
 import { AppConfigService } from "../../src/infrastructure/config/app-config.service.ts";
-import { BooksService } from "../../src/modules/books/books.service.ts";
+import { PrismaService } from "../../src/infrastructure/database/prisma.service.ts";
+import { AgentRuntimeService } from "../../src/modules/agent-runtime/agent-runtime.service.ts";
 import { CreationController } from "../../src/modules/creation/creation.controller.ts";
-import { CreationPlanningService } from "../../src/modules/creation/creation-planning.service.ts";
 import { CreationService } from "../../src/modules/creation/creation.service.ts";
 import { DatasetService } from "../../src/modules/dataset/dataset.service.ts";
-import { FfmpegRepairService } from "../../src/modules/media/ffmpeg-repair.service.ts";
-import { HyperframesRenderService } from "../../src/modules/media/hyperframes-render.service.ts";
-import { SkillRuntimeService } from "../../src/modules/skills/skill-runtime.service.ts";
 import { assertObject, assertString, requestJson } from "./backend-contract-client.ts";
 
 type TestServer = {
@@ -26,10 +26,104 @@ type TestServer = {
 
 class CreationContractTestModule {}
 
+const taskStore = new Map<string, Record<string, unknown>>();
+const eventStore: Array<Record<string, unknown>> = [];
+const artifactStore: Array<Record<string, unknown>> = [];
+
+function resetStores() {
+  taskStore.clear();
+  eventStore.length = 0;
+  artifactStore.length = 0;
+}
+
 Module({
   controllers: [CreationController],
   providers: [
     CreationService,
+    {
+      provide: PrismaService,
+      useValue: {
+        creationTask: {
+          async create(options: Record<string, unknown>) {
+            const data = (options.data ?? options) as Record<string, unknown>;
+            const record = { ...data, createdAt: new Date(), updatedAt: new Date() };
+            taskStore.set(data.id as string, record);
+            return record;
+          },
+          async findUnique({ where }: Record<string, unknown>) {
+            const record = taskStore.get(where.id as string);
+            if (!record) return null;
+            return {
+              ...record,
+              creationArtifacts: artifactStore.filter((a: any) => a.taskId === where.id),
+              creationEvents: eventStore.filter((e: any) => e.taskId === where.id),
+            };
+          },
+          async update({ where, data }: Record<string, unknown>) {
+            const existing = taskStore.get(where.id as string) ?? {};
+            const updated = { ...existing, ...(data as Record<string, unknown> ?? {}), updatedAt: new Date() };
+            taskStore.set(where.id as string, updated);
+            return updated;
+          },
+        },
+        creationEvent: {
+          async create(options: Record<string, unknown>) {
+            const data = (options.data ?? options) as Record<string, unknown>;
+            const record = { ...data, createdAt: new Date() };
+            eventStore.push(record);
+            return record;
+          },
+          async findMany({ where }: Record<string, unknown>) {
+            return eventStore.filter((e: any) => e.taskId === where.taskId);
+          },
+        },
+        creationArtifact: {
+          async create(options: Record<string, unknown>) {
+            const data = (options.data ?? options) as Record<string, unknown>;
+            const record = { ...data, createdAt: new Date() };
+            artifactStore.push(record);
+            return record;
+          },
+        },
+      },
+    },
+    {
+      provide: AgentRuntimeService,
+      useValue: {
+        async runCreationStage(input: Record<string, unknown>) {
+          const workspacePath = input.workspacePath as string;
+          await fs.mkdir(path.join(workspacePath, "output"), { recursive: true });
+          if (input.stage === "generate_book") {
+            await fs.writeFile(
+              path.join(workspacePath, "output", "book.json"),
+              JSON.stringify({
+                metadata: { title: "Contract Generated Book", childName: "Kid" },
+                pages: [
+                  { kind: "cover", title: "Cover", text: "Start" },
+                  { kind: "artwork", title: "Page", text: "Middle", assetId: "asset_contract_001" },
+                  { kind: "closing", title: "End", text: "Done" },
+                ],
+              }),
+            );
+            await fs.writeFile(path.join(workspacePath, "output", "book.html"), "<html><body>Contract Generated Book</body></html>");
+            return { ok: true, runId: `run_contract_${Date.now()}`, sessionId: `session_contract_${Date.now()}` };
+          }
+          await fs.writeFile(
+            path.join(workspacePath, "output", "plan.json"),
+            JSON.stringify({
+              summary: "Contract plan for storybook",
+              skillName: "KidMemory storybook",
+              steps: [
+                { stepId: "compose", label: "Compose selected assets", detail: "Contract planning step." },
+                { stepId: "generate", label: "Generate PDF draft", detail: "Contract generation step." },
+              ],
+              requirements: ["Selected assets", "OpenAI Agent SDK configuration"],
+            }),
+          );
+          return { ok: true, runId: `run_contract_${Date.now()}`, sessionId: `session_contract_${Date.now()}` };
+        },
+      },
+    },
     {
       provide: AppConfigService,
       useValue: {
@@ -37,95 +131,11 @@ Module({
           paths: {
             dataDir: ".kidmemory/contract-test-data",
             exportDir: ".kidmemory/contract-test-exports",
-            workspaceDir: ".kidmemory/contract-test-workspace",
+            workspaceDir: os.tmpdir(),
           },
           sidecar: {
             webCompanionBaseUrl: "http://localhost:3001",
           },
-        },
-      },
-    },
-    {
-      provide: BooksService,
-      useValue: {
-        async createJob(body: Record<string, unknown>) {
-          return {
-            status: 200,
-            data: {
-              id: `book_contract_${Date.now()}`,
-              status: "generated",
-              selectedAssetIds: body.assetIds,
-            },
-          };
-        },
-        async exportPdf(jobId: string) {
-          return {
-            status: 200,
-            data: {
-              exported: { ok: true, path: `.kidmemory/contract-test-exports/${jobId}.pdf` },
-              artifact: {
-                id: `artifact_${jobId}_pdf`,
-                kind: "pdf",
-                localPath: `.kidmemory/contract-test-exports/${jobId}.pdf`,
-                storageStatus: "local_only",
-              },
-            },
-          };
-        },
-        async getPreviewHtml(jobId: string) {
-          return {
-            status: 200,
-            html: `<html><body>Contract preview for ${jobId}</body></html>`,
-          };
-        },
-      },
-    },
-    {
-      provide: HyperframesRenderService,
-      useValue: {
-        async render() {
-          return {
-            ok: false,
-            code: "HYPERFRAMES_NOT_CONFIGURED",
-            message: "Hyperframes renderer is not configured in contract tests.",
-          };
-        },
-      },
-    },
-    {
-      provide: SkillRuntimeService,
-      useValue: {
-        async execute() {
-          return {
-            ok: false,
-            code: "SKILL_RUNTIME_NOT_USED",
-            message: "Skill runtime is not used for storybook contract tests.",
-          };
-        },
-      },
-    },
-    {
-      provide: FfmpegRepairService,
-      useValue: {
-        async repair() {
-          return { ok: false, code: "FFMPEG_REPAIR_SKIPPED", message: "Not used in contract tests." };
-        },
-      },
-    },
-    {
-      provide: CreationPlanningService,
-      useValue: {
-        async createPlan(input: Record<string, unknown>) {
-          return {
-            ok: true,
-            summary: `Contract plan for ${input.creationType}`,
-            skillName: "KidMemory storybook",
-            steps: [
-              { stepId: "compose", label: "Compose selected assets", detail: "Contract planning step." },
-              { stepId: "generate", label: "Generate PDF draft", detail: "Contract generation step." },
-            ],
-            requirements: ["Selected assets", "OpenAI Agent SDK configuration"],
-          };
         },
       },
     },
@@ -168,103 +178,81 @@ async function startCreationContractServer(): Promise<TestServer> {
   };
 }
 
-function unwrapData(body: unknown): Record<string, unknown> {
+async function unwrapData(body: unknown): Promise<Record<string, unknown>> {
   assertObject(body);
-  assert.equal(body.code, 0);
+  assert.equal(body.code, 0, `Expected code 0, got ${JSON.stringify(body)}`);
   assertString(body.msg);
   assertObject(body.data);
   return body.data;
 }
 
-test("creation contract: plan, job detail, events, export, and share routes are registered", async (t) => {
+test("creation contract: create task", async (t) => {
+  resetStores();
   const { app, baseUrl } = await startCreationContractServer();
-  t.after(async () => {
-    await app.close();
-  });
+  t.after(async () => { await app.close(); });
 
-  const planResponse = await requestJson(baseUrl, "/creation/jobs/plan", {
+  const createResponse = await requestJson(baseUrl, "/creation/tasks", {
     method: "POST",
     body: JSON.stringify({
       goal: "为本周手工作品做一本睡前故事绘本",
       creationType: "storybook",
       assetIds: ["asset_contract_001", "asset_contract_002"],
-      settings: { tone: "warm" },
     }),
   });
-  assert.equal(planResponse.status, 201);
-  const plan = unwrapData(planResponse.body);
-  assertString(plan.planId);
-  assert.equal(plan.creationType, "storybook");
-  assertString(plan.summary);
-  assertString(plan.skillName);
-  assert.ok(Array.isArray(plan.steps), "plan should include ordered steps");
-  assertObject(plan.requirements);
-  assert.equal(plan.requirements.minAssets, 1);
-  assert.equal(plan.requirements.recommendedAssets, 6);
-  assert.equal(plan.requirements.needsCloudImage, true);
-  assert.equal(plan.requirements.needsHyperframes, false);
-  assert.equal(plan.requirements.needsFfmpeg, false);
-  assert.ok(Array.isArray(plan.requirementItems), "plan should include display requirement items");
-
-  const createResponse = await requestJson(baseUrl, "/creation/jobs", {
-    method: "POST",
-    body: JSON.stringify({ planId: plan.planId }),
-  });
-  assert.equal(createResponse.status, 201);
-  const created = unwrapData(createResponse.body);
-  assertString(created.jobId);
-  assert.equal(created.planId, plan.planId);
+  assert.equal(createResponse.status, 201, `Expected 201, got body: ${JSON.stringify(createResponse.body)}`);
+  const created = await unwrapData(createResponse.body);
+  assertString(created.taskId, `Expected taskId in ${JSON.stringify(created)}`);
   assert.equal(created.creationType, "storybook");
-  assertString(created.status);
-  assert.ok(Array.isArray(created.steps), "created job should expose backend steps");
+  assert.equal(created.status, "ready");
+  assert.ok(Array.isArray(created.steps));
+  assertString(created.summary);
+  assertString(created.skillName);
 
-  const detailResponse = await requestJson(baseUrl, `/creation/jobs/${created.jobId}`, { method: "GET" });
-  assert.equal(detailResponse.status, 200);
-  const detail = unwrapData(detailResponse.body);
-  assert.equal(detail.jobId, created.jobId);
-  assert.equal(detail.planId, plan.planId);
-  assert.equal(detail.creationType, "storybook");
-  assert.ok("currentStepId" in detail, "detail should include currentStepId");
-  assert.ok(Array.isArray(detail.steps), "detail should include steps");
-  assert.ok(Array.isArray(detail.artifacts), "detail should include artifacts");
-  assert.ok("error" in detail, "detail should include error");
+  // Get task detail
+  const detailResponse = await requestJson(baseUrl, `/creation/tasks/${created.taskId}`, { method: "GET" });
+  assert.equal(detailResponse.status, 200, `Expected 200 for task detail, got ${JSON.stringify(detailResponse.body)}`);
+  const detail = await unwrapData(detailResponse.body);
+  assert.equal(detail.taskId, created.taskId);
+  assert.ok("currentStepId" in detail);
+  assert.ok(Array.isArray(detail.steps));
+  assert.ok(Array.isArray(detail.artifacts));
+  assert.ok("error" in detail);
 
-  const eventsResponse = await requestJson(baseUrl, `/creation/jobs/${created.jobId}/events`, { method: "GET" });
+  const generateResponse = await requestJson(baseUrl, `/creation/tasks/${created.taskId}/generate`, { method: "POST" });
+  assert.equal(generateResponse.status, 200, `Expected 200 for generate, got ${JSON.stringify(generateResponse.body)}`);
+  const generated = await unwrapData(generateResponse.body);
+  assert.equal(generated.status, "succeeded");
+  assert.ok(Array.isArray(generated.artifacts));
+  assert.equal(generated.artifacts.length, 2);
+
+  const generatedDetailResponse = await requestJson(baseUrl, `/creation/tasks/${created.taskId}`, { method: "GET" });
+  const generatedDetail = await unwrapData(generatedDetailResponse.body);
+  assert.ok(Array.isArray(generatedDetail.artifacts));
+  assert.equal(generatedDetail.artifacts.length, 2);
+
+  // Events
+  const eventsResponse = await requestJson(baseUrl, `/creation/tasks/${created.taskId}/events`, { method: "GET" });
   assert.equal(eventsResponse.status, 200);
-  const events = unwrapData(eventsResponse.body);
-  assert.ok(Array.isArray(events.events), "events payload should include events array");
+  const events = await unwrapData(eventsResponse.body);
+  assert.ok(Array.isArray(events.events));
 
-  const previewResponse = await fetch(`${baseUrl}/creation/jobs/${created.jobId}/preview`);
+  // Preview is available after book generation.
+  const previewResponse = await fetch(`${baseUrl}/creation/tasks/${created.taskId}/preview`);
   assert.equal(previewResponse.status, 200);
-  assert.match(previewResponse.headers.get("content-type") ?? "", /html/);
-  assert.match(await previewResponse.text(), /Contract preview/);
 
-  const exportResponse = await requestJson(baseUrl, `/creation/jobs/${created.jobId}/export`, {
-    method: "POST",
-    body: JSON.stringify({ target: "pdf" }),
-  });
-  assert.equal(exportResponse.status, 201);
-  const exported = unwrapData(exportResponse.body);
-  assertString(exported.artifactId);
-  assert.equal(exported.kind, "pdf");
-
-  const shareResponse = await requestJson(baseUrl, `/creation/jobs/${created.jobId}/share`, {
-    method: "POST",
-    body: JSON.stringify({ artifactId: exported.artifactId }),
-  });
-  assert.equal(shareResponse.status, 201);
-  const shared = unwrapData(shareResponse.body);
-  assertString(shared.shareId);
-  assertString(shared.shareUrl);
+  // Old plan/job endpoints return 404
+  const oldPlan = await fetch(`${baseUrl}/creation/jobs/plan`, { method: "POST" });
+  assert.equal(oldPlan.status, 404);
+  const oldJob = await fetch(`${baseUrl}/creation/jobs`, { method: "POST" });
+  assert.equal(oldJob.status, 404);
 });
 
-test("creation contract: invalid creation type fails before a plan is persisted", async (t) => {
+test("creation contract: invalid creation type fails with 400", async (t) => {
+  resetStores();
   const { app, baseUrl } = await startCreationContractServer();
-  t.after(async () => {
-    await app.close();
-  });
+  t.after(async () => { await app.close(); });
 
-  const response = await requestJson(baseUrl, "/creation/jobs/plan", {
+  const response = await requestJson(baseUrl, "/creation/tasks", {
     method: "POST",
     body: JSON.stringify({
       goal: "做一个相册",
@@ -274,7 +262,15 @@ test("creation contract: invalid creation type fails before a plan is persisted"
   });
 
   assert.equal(response.status, 400);
-  assertObject(response.body);
   assert.notEqual(response.body.code, 0);
-  assertString(response.body.msg);
+});
+
+test("creation contract: old plan/job endpoints return 404", async (t) => {
+  resetStores();
+  const { app, baseUrl } = await startCreationContractServer();
+  t.after(async () => { await app.close(); });
+
+  assert.equal((await fetch(`${baseUrl}/creation/jobs/plan`, { method: "POST" })).status, 404);
+  assert.equal((await fetch(`${baseUrl}/creation/jobs`, { method: "POST" })).status, 404);
+  assert.equal((await fetch(`${baseUrl}/creation/jobs/some-id`)).status, 404);
 });

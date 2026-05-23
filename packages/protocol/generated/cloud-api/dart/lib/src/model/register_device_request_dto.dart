@@ -59,7 +59,7 @@ class RegisterDeviceRequestDto {
   )
 
 
-  final RegisterDeviceRequestDtoPlatformEnum? platform;
+  final String? platform;
 
 
 
@@ -86,21 +86,4 @@ class RegisterDeviceRequestDto {
     return toJson().toString();
   }
 
-}
-
-
-enum RegisterDeviceRequestDtoPlatformEnum {
-@JsonValue(r'macos')
-macos(r'macos'),
-@JsonValue(r'windows')
-windows(r'windows'),
-@JsonValue(r'linux')
-linux(r'linux');
-
-const RegisterDeviceRequestDtoPlatformEnum(this.value);
-
-final String value;
-
-@override
-String toString() => value;
 }

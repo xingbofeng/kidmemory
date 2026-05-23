@@ -452,6 +452,61 @@ model AgentRun {
   @@map("agent_runs")
 }
 
+model CreationTask {
+  id               String   @id
+  creationType     String   @map("creation_type")
+  goal             String
+  assetIds         String[] @default([]) @map("asset_ids")
+  status           String
+  currentStepId    String?  @map("current_step_id")
+  summary          String?
+  skillName        String?  @map("skill_name")
+  steps            Json     @default("[]")
+  requirementItems String[] @default([]) @map("requirement_items")
+  workspacePath    String?  @map("workspace_path")
+  error            Json?
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  creationEvents    CreationEvent[]
+  creationArtifacts CreationArtifact[]
+
+  @@index([status], map: "idx_creation_tasks_status")
+  @@index([createdAt], map: "idx_creation_tasks_created_at")
+  @@map("creation_tasks")
+}
+
+model CreationEvent {
+  id        String   @id
+  taskId    String   @map("task_id")
+  stepId    String?  @map("step_id")
+  type      String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  task CreationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId], map: "idx_creation_events_task_id")
+  @@index([type], map: "idx_creation_events_type")
+  @@map("creation_events")
+}
+
+model CreationArtifact {
+  id        String   @id
+  taskId    String   @map("task_id")
+  kind      String
+  localPath String?  @map("local_path")
+  shareId   String?  @map("share_id")
+  shareUrl  String?  @map("share_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  task CreationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId], map: "idx_creation_artifacts_task_id")
+  @@index([kind], map: "idx_creation_artifacts_kind")
+  @@map("creation_artifacts")
+}
+
 model BackupSnapshot {
   id          String   @id
   manifest   Json

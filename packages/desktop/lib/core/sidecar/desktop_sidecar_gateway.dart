@@ -1,7 +1,9 @@
 import '../../shared/models/library_models.dart';
-import 'package:kidmemory_protocol/kidmemory_protocol.dart' hide AgentConfigApi;
+// ignore: unused_import
+import 'package:kidmemory_protocol/kidmemory_protocol.dart' as protocol;
 import 'agent_config_api.dart';
 import 'sidecar_api.dart';
+import 'sidecar_dtos.dart';
 
 class DesktopSidecarGateway {
   const DesktopSidecarGateway(this._api);
@@ -53,80 +55,61 @@ class DesktopSidecarGateway {
     );
   }
 
-  Future<CreateBookJobResultDto> createBookJobDto({
-    required CreateBookJobRequestDto payload,
-  }) async {
-    final raw = await _api.postStrict('/books/jobs', payload.toJson());
-    return CreateBookJobResponseDto.fromJson(raw);
-  }
-
-  Future<BookExportResultDto> exportBookDto({
-    required ExportBookInput payload,
-  }) async {
-    final raw = payload.format == 'pdf'
-        ? await _api.postStrict('/books/jobs/${payload.jobId}/export/pdf', {
-            'targetPath': payload.targetPath,
-          })
-        : await _api.postStrict(
-            '/books/jobs/${payload.jobId}/export/long-image',
-            {'targetPath': payload.targetPath, 'format': payload.format},
-          );
-    return BookExportResponseDto.fromJson(raw);
-  }
-
-  Future<Map<String, dynamic>> createCreationPlanRaw({
+  Future<Map<String, dynamic>> createCreationTaskRaw({
     required String goal,
     required String creationType,
     required List<String> assetIds,
     Map<String, dynamic> settings = const {},
   }) async {
-    return _api.postStrict('/creation/jobs/plan', {
+    return _api.postStrict('/creation/tasks', {
       'goal': goal,
       'creationType': creationType,
       'assetIds': assetIds,
-      if (settings.isNotEmpty) 'settings': settings,
     });
   }
 
-  Future<Map<String, dynamic>> createCreationJobRaw({
-    required String planId,
+  Future<Map<String, dynamic>> generateCreationTaskRaw({
+    required String taskId,
   }) async {
-    return _api.postStrict('/creation/jobs', {'planId': planId});
-  }
-
-  Future<Map<String, dynamic>> getCreationJobRaw({
-    required String jobId,
-  }) async {
-    return _api.getStrict('/creation/jobs/${Uri.encodeComponent(jobId)}');
-  }
-
-  Future<Map<String, dynamic>> getCreationJobEventsRaw({
-    required String jobId,
-  }) async {
-    return _api.getStrict(
-      '/creation/jobs/${Uri.encodeComponent(jobId)}/events',
+    return _api.postStrict(
+      '/creation/tasks/${Uri.encodeComponent(taskId)}/generate',
+      {},
     );
   }
 
-  Future<Map<String, dynamic>> exportCreationJobRaw({
-    required String jobId,
+  Future<Map<String, dynamic>> getCreationTaskRaw({
+    required String taskId,
+  }) async {
+    return _api.getStrict('/creation/tasks/${Uri.encodeComponent(taskId)}');
+  }
+
+  Future<Map<String, dynamic>> getCreationTaskEventsRaw({
+    required String taskId,
+  }) async {
+    return _api.getStrict(
+      '/creation/tasks/${Uri.encodeComponent(taskId)}/events',
+    );
+  }
+
+  Future<Map<String, dynamic>> exportCreationTaskRaw({
+    required String taskId,
     required String target,
     String? targetPath,
   }) async {
     return _api
-        .postStrict('/creation/jobs/${Uri.encodeComponent(jobId)}/export', {
+        .postStrict('/creation/tasks/${Uri.encodeComponent(taskId)}/export', {
           'target': target,
           if (targetPath != null && targetPath.trim().isNotEmpty)
             'targetPath': targetPath.trim(),
         });
   }
 
-  Future<Map<String, dynamic>> shareCreationJobRaw({
-    required String jobId,
+  Future<Map<String, dynamic>> shareCreationTaskRaw({
+    required String taskId,
     required String artifactId,
   }) async {
     return _api.postStrict(
-      '/creation/jobs/${Uri.encodeComponent(jobId)}/share',
+      '/creation/tasks/${Uri.encodeComponent(taskId)}/share',
       {'artifactId': artifactId},
     );
   }
@@ -266,7 +249,7 @@ class DesktopSidecarGateway {
         ok: false,
         service: 'openai',
         blocksGeneration: false,
-        message: '大模型接口未配置。',
+        message: 'Agent model endpoint is not configured.',
       );
     }
 
@@ -335,22 +318,8 @@ typedef PostgresConfigInput = PostgresConfigRequestDto;
 typedef PathsConfigInput = PathsConfigRequestDto;
 typedef SupabaseStorageConfigInput = SupabaseStorageConfigRequestDto;
 typedef UpdateAssetInput = UpdateAssetRequestDto;
-typedef CreateBookJobInput = CreateBookJobRequestDto;
 typedef AssetSearchInputPayload = AssetSearchRequestDto;
 typedef ImportAssetsInput = ImportAssetsRequestDto;
-typedef ExportBookInput = ExportBookInputPayload;
-
-class ExportBookInputPayload {
-  const ExportBookInputPayload({
-    required this.jobId,
-    required this.targetPath,
-    required this.format,
-  });
-
-  final String jobId;
-  final String targetPath;
-  final String format;
-}
 
 class ReadinessSnapshot {
   const ReadinessSnapshot({
@@ -545,17 +514,6 @@ extension ArtifactShareResultDtoExt on ArtifactShareResultDto {
   String get textValue => text ?? '';
 }
 
-extension BookExportResultDtoExt on BookExportResultDto {
-  ExportedPayloadDto get exportedPayload => exported ?? ExportedPayloadDto();
-  String get artifactId => artifact?.id ?? '';
-}
-
-extension ExportedPayloadDtoExt on ExportedPayloadDto {
-  bool get okValue => ok ?? false;
-  String get pathValue => path ?? '';
-  String get messageValue => message ?? '';
-}
-
 extension IndexingStatusDtoExt on IndexingStatusDto {
   int get pendingValue => pending ?? 0;
   int get runningValue => running ?? 0;
@@ -586,8 +544,6 @@ typedef SupabaseStorageTestResultDto = SupabaseStorageTestResponseDto;
 typedef EnqueueResultDto = EnqueueResponseDto;
 typedef StorageSyncRunResultDto = StorageSyncRunResponseDto;
 typedef ArtifactShareResultDto = ArtifactShareResponseDto;
-typedef BookExportResultDto = BookExportResponseDto;
-typedef ExportedPayloadDto = ExportedPayloadResponseDto;
 typedef IndexingStatusDto = IndexingStatusResponseDto;
 typedef ImportSampleResultDto = ImportSampleResponseDto;
 typedef EnsureChildResultDto = EnsureChildResponseDto;
@@ -619,7 +575,6 @@ extension AssetRecordDtoExt on AssetRecordDto {
 }
 
 typedef ImportAssetsResultDto = ImportAssetsResponseDto;
-typedef CreateBookJobResultDto = CreateBookJobResponseDto;
 typedef ResetSampleResultDto = ResetSampleResponseDto;
 typedef UpdateAssetResultDto = UpdateAssetResponseDto;
 
@@ -656,14 +611,6 @@ extension ImportAssetsResultDtoExt on ImportAssetsResultDto {
       duplicatesCount > 0 ||
       failedCount > 0 ||
       skippedCount > 0;
-}
-
-extension CreateBookJobResultDtoExt on CreateBookJobResultDto {
-  bool get okValue => (ok == true) || (success == true);
-  String get messageValue => message ?? '';
-  String get jobId => id ?? '';
-  String get statusValue => status ?? '';
-  bool get generated => statusValue == 'generated' || okValue;
 }
 
 extension ResetSampleResultDtoExt on ResetSampleResultDto {

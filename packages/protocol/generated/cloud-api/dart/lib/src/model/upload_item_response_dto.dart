@@ -24,7 +24,7 @@ class UploadItemResponseDto {
 
     required  this.sessionId,
 
-    required  this.childId,
+     this.childId,
 
      this.deviceId,
 
@@ -50,7 +50,7 @@ class UploadItemResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'id',
     required: true,
     includeIfNull: false,
@@ -62,7 +62,7 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'sessionId',
     required: true,
     includeIfNull: false,
@@ -74,19 +74,19 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'childId',
-    required: true,
+    required: false,
     includeIfNull: false,
   )
 
 
-  final String childId;
+  final String? childId;
 
 
 
   @JsonKey(
-    
+
     name: r'deviceId',
     required: false,
     includeIfNull: false,
@@ -98,7 +98,7 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'objectKey',
     required: true,
     includeIfNull: false,
@@ -110,7 +110,7 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'fileName',
     required: true,
     includeIfNull: false,
@@ -122,7 +122,7 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'fileSize',
     required: false,
     includeIfNull: false,
@@ -134,7 +134,7 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'mimeType',
     required: false,
     includeIfNull: false,
@@ -146,43 +146,43 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
   )
 
 
-  final String status;
+  final UploadItemResponseDtoStatusEnum status;
 
 
 
   @JsonKey(
-    
+
     name: r'uploadedAt',
     required: false,
     includeIfNull: false,
   )
 
 
-  final DateTime? uploadedAt;
+  final String? uploadedAt;
 
 
 
   @JsonKey(
-    
+
     name: r'syncedAt',
     required: false,
     includeIfNull: false,
   )
 
 
-  final DateTime? syncedAt;
+  final String? syncedAt;
 
 
 
   @JsonKey(
-    
+
     name: r'errorMessage',
     required: false,
     includeIfNull: false,
@@ -194,26 +194,26 @@ class UploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'createdAt',
     required: true,
     includeIfNull: false,
   )
 
 
-  final DateTime createdAt;
+  final String createdAt;
 
 
 
   @JsonKey(
-    
+
     name: r'updatedAt',
     required: true,
     includeIfNull: false,
   )
 
 
-  final DateTime updatedAt;
+  final String updatedAt;
 
 
 
@@ -264,3 +264,21 @@ class UploadItemResponseDto {
 
 }
 
+
+enum UploadItemResponseDtoStatusEnum {
+@JsonValue(r'pending')
+pending(r'pending'),
+@JsonValue(r'uploaded')
+uploaded(r'uploaded'),
+@JsonValue(r'synced')
+synced(r'synced'),
+@JsonValue(r'failed')
+failed(r'failed');
+
+const UploadItemResponseDtoStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}

@@ -68,12 +68,7 @@ abstract class AppLocalizations {
   final String localeName;
 
   static AppLocalizations? of(BuildContext context) {
-    try {
-      return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
-          AppLocalizationsZh();
-    } on FlutterError {
-      return AppLocalizationsZh();
-    }
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
@@ -4378,7 +4373,7 @@ abstract class AppLocalizations {
   /// datasetPreviewS952
   ///
   /// In zh, this message translates to:
-  /// **'预览全部页面：缺少 jobId'**
+  /// **'预览全部页面：缺少 taskId'**
   String get datasetPreviewS952;
 
   /// datasetSampleS696
@@ -4660,7 +4655,7 @@ abstract class AppLocalizations {
   /// exportPageS410
   ///
   /// In zh, this message translates to:
-  /// **'导出失败：缺少 jobId'**
+  /// **'导出失败：缺少 taskId'**
   String get exportPageS410;
 
   /// exportPageS649
@@ -4936,8 +4931,8 @@ abstract class AppLocalizations {
   /// Open historical generated work preview log.
   ///
   /// In zh, this message translates to:
-  /// **'打开历史作品预览：{jobId}'**
-  String datasetPreviewOpenHistoryLog(String jobId);
+  /// **'打开历史作品预览：{taskId}'**
+  String datasetPreviewOpenHistoryLog(String taskId);
 
   /// Status line in generation log details.
   ///
@@ -4948,8 +4943,8 @@ abstract class AppLocalizations {
   /// Open generated page preview log.
   ///
   /// In zh, this message translates to:
-  /// **'打开预览页面：{jobId}'**
-  String datasetPreviewOpenPageLog(String jobId);
+  /// **'打开预览页面：{taskId}'**
+  String datasetPreviewOpenPageLog(String taskId);
 
   /// Install runner attempt log.
   ///
@@ -5026,8 +5021,8 @@ abstract class AppLocalizations {
   /// Generation completed log with job id.
   ///
   /// In zh, this message translates to:
-  /// **'生成完成，已获得 jobId: {jobId}'**
-  String exportGenerationCompletedLog(String jobId);
+  /// **'生成完成，已获得 taskId: {taskId}'**
+  String exportGenerationCompletedLog(String taskId);
 
   /// Generation exception message.
   ///

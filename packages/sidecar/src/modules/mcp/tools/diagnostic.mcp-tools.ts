@@ -5,7 +5,6 @@ import { z } from "zod";
 import { FileLoggerService } from "../../../infrastructure/logging/file-logger.service.ts";
 import { ConfigService } from "../../config/config.service.ts";
 import { DatasetService } from "../../dataset/dataset.service.ts";
-import { HyperframesRenderService } from "../../media/hyperframes-render.service.ts";
 import { ImageGenerationService, isRecoverableImageFailure } from "../../media/image-generation.service.ts";
 
 const indexingStatusSchema = z.object({
@@ -25,13 +24,6 @@ const imagePreviewSchema = z.object({
   seed: z.number().int().nonnegative().optional(),
 });
 
-const hyperframesRenderSchema = z.object({
-  projectId: z.string(),
-  prompt: z.string().optional(),
-  targetPath: z.string().optional(),
-  traceId: z.string().optional(),
-});
-
 @Injectable()
 export class DiagnosticMcpTools {
   constructor(
@@ -39,7 +31,6 @@ export class DiagnosticMcpTools {
     @Inject(DatasetService) private readonly datasetService: DatasetService,
     @Inject(FileLoggerService) private readonly fileLogger: FileLoggerService,
     @Inject(ImageGenerationService) private readonly imageService: ImageGenerationService,
-    @Inject(HyperframesRenderService) private readonly hyperframesService: HyperframesRenderService,
   ) {}
 
   @Tool({
@@ -114,15 +105,6 @@ export class DiagnosticMcpTools {
       ...result,
       canSkipCoverAndContinue: isRecoverableImageFailure(result),
     });
-  }
-
-  @Tool({
-    name: "render_hyperframes_video",
-    description: "Render hyperframes output video and return output path or recoverable error.",
-    parameters: hyperframesRenderSchema,
-  })
-  async renderHyperframesVideo(input: z.infer<typeof hyperframesRenderSchema>) {
-    return toJson(await this.hyperframesService.render(input));
   }
 }
 

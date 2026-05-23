@@ -59,6 +59,13 @@ export class AgentConfigApplicationService {
   }
 
   /**
+   * Get the encrypted API key for a given configuration
+   */
+  async getEncryptedApiKey(configId: string): Promise<string | null> {
+    return await this.repository.getEncryptedApiKey(configId);
+  }
+
+  /**
    * Create a new agent configuration
    */
   async createConfig(input: CreateAgentConfigProps): Promise<AgentConfig> {

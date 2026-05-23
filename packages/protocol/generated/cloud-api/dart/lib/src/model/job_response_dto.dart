@@ -30,7 +30,7 @@ class JobResponseDto {
 
     required  this.status,
 
-     this.priority = 0,
+    required  this.priority,
 
      this.claimedAt,
 
@@ -44,7 +44,7 @@ class JobResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'id',
     required: true,
     includeIfNull: false,
@@ -56,7 +56,7 @@ class JobResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'deviceId',
     required: false,
     includeIfNull: false,
@@ -67,9 +67,8 @@ class JobResponseDto {
 
 
 
-      /// Job type
   @JsonKey(
-    
+
     name: r'type',
     required: true,
     includeIfNull: false,
@@ -80,22 +79,20 @@ class JobResponseDto {
 
 
 
-      /// Job payload (JSON)
   @JsonKey(
-    
+
     name: r'payload',
     required: true,
-    includeIfNull: false,
+    includeIfNull: true,
   )
 
 
-  final Object payload;
+  final Map<String, Object>? payload;
 
 
 
-      /// Job status
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
@@ -106,9 +103,8 @@ class JobResponseDto {
 
 
 
-      /// Priority (higher = more urgent)
   @JsonKey(
-    defaultValue: 0,
+
     name: r'priority',
     required: true,
     includeIfNull: false,
@@ -120,31 +116,31 @@ class JobResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'claimedAt',
     required: false,
     includeIfNull: false,
   )
 
 
-  final DateTime? claimedAt;
+  final String? claimedAt;
 
 
 
   @JsonKey(
-    
+
     name: r'completedAt',
     required: false,
     includeIfNull: false,
   )
 
 
-  final DateTime? completedAt;
+  final String? completedAt;
 
 
 
   @JsonKey(
-    
+
     name: r'errorMessage',
     required: false,
     includeIfNull: false,
@@ -156,26 +152,26 @@ class JobResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'createdAt',
     required: true,
     includeIfNull: false,
   )
 
 
-  final DateTime createdAt;
+  final String createdAt;
 
 
 
   @JsonKey(
-    
+
     name: r'updatedAt',
     required: true,
     includeIfNull: false,
   )
 
 
-  final DateTime updatedAt;
+  final String updatedAt;
 
 
 
@@ -200,7 +196,7 @@ class JobResponseDto {
         id.hashCode +
         deviceId.hashCode +
         type.hashCode +
-        payload.hashCode +
+        (payload == null ? 0 : payload.hashCode) +
         status.hashCode +
         priority.hashCode +
         claimedAt.hashCode +
@@ -220,20 +216,24 @@ class JobResponseDto {
 
 }
 
-/// Job type
+
 enum JobResponseDtoTypeEnum {
-    /// Job type
 @JsonValue(r'book_generation')
 bookGeneration(r'book_generation'),
-    /// Job type
 @JsonValue(r'asset_processing')
 assetProcessing(r'asset_processing'),
-    /// Job type
 @JsonValue(r'export_pdf')
 exportPdf(r'export_pdf'),
-    /// Job type
 @JsonValue(r'export_long_image')
-exportLongImage(r'export_long_image');
+exportLongImage(r'export_long_image'),
+@JsonValue(r'import')
+import_(r'import'),
+@JsonValue(r'sync')
+sync_(r'sync'),
+@JsonValue(r'export')
+export_(r'export'),
+@JsonValue(r'cleanup')
+cleanup(r'cleanup');
 
 const JobResponseDtoTypeEnum(this.value);
 
@@ -244,21 +244,16 @@ String toString() => value;
 }
 
 
-/// Job status
+
 enum JobResponseDtoStatusEnum {
-    /// Job status
 @JsonValue(r'pending')
 pending(r'pending'),
-    /// Job status
 @JsonValue(r'claimed')
 claimed(r'claimed'),
-    /// Job status
 @JsonValue(r'processing')
 processing(r'processing'),
-    /// Job status
 @JsonValue(r'completed')
 completed(r'completed'),
-    /// Job status
 @JsonValue(r'failed')
 failed(r'failed');
 
@@ -269,5 +264,3 @@ final String value;
 @override
 String toString() => value;
 }
-
-

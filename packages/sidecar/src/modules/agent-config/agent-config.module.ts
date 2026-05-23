@@ -103,6 +103,7 @@ Module({
   exports: [
     AgentConfigApplicationService,
     AGENT_CONFIG_REPOSITORY,
+    ENCRYPTION_PORT,
     AGENT_TESTING_PORT,
     AUDIT_LOGGER_PORT
   ]

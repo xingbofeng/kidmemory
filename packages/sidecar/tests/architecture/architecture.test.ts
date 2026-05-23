@@ -6,6 +6,19 @@ import test from "node:test";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
+function listTsFiles(dir: string): string[] {
+  const result: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      result.push(...listTsFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith(".ts")) {
+      result.push(fullPath);
+    }
+  }
+  return result;
+}
+
 test("prisma migrations are present for deploy-time schema management", () => {
   const migrationsDir = path.join(root, "prisma", "migrations");
   const migrationFile = path.join(migrationsDir, "init", "migration.sql");
@@ -65,7 +78,7 @@ test("prisma dataset semantic search stores and scores ORM-managed embeddings", 
   assert.doesNotMatch(source, /semanticScore:\s*0\.5/);
 });
 
-test("books generation has a single OpenAI Agents SDK production runner", () => {
+test("agent execution is isolated to the agent-runtime adapter", () => {
   for (const relativePath of [
     "src/modules/books/providers/agent.ts",
     "src/modules/books/providers/agent-runner-manager.ts",
@@ -73,24 +86,23 @@ test("books generation has a single OpenAI Agents SDK production runner", () => 
     "src/modules/books/providers/claude-agent-runner.ts",
     "src/modules/books/providers/local-agent-runner.ts",
     "src/modules/books/providers/publication-flow.ts",
+    "src/modules/books/providers/openai-sdk-agent-runner.ts",
+    "src/modules/skills/skill-runtime.service.ts",
+    "src/modules/media/hyperframes-render.service.ts",
   ]) {
     assert.equal(fs.existsSync(path.join(root, relativePath)), false, `${relativePath} should not remain in production source`);
   }
 
-  const domain = fs.readFileSync(path.join(root, "src", "modules", "books", "providers", "books.domain.ts"), "utf8");
-  assert.match(domain, /agentRunner\.generateBook/);
-  assert.doesNotMatch(domain, /runMockAgent|runClaudeAgent|body\.runner|临时兼容/);
-
-  const runner = fs.readFileSync(path.join(root, "src", "modules", "books", "providers", "openai-sdk-agent-runner.ts"), "utf8");
-  assert.match(runner, /@openai\/agents/);
-  assert.match(runner, /new RunnerCtor/);
-  // Compatible endpoints can fall back to chat.completions, but the primary production path
-  // must still be the OpenAI Agents SDK runner.
-  assert.match(runner, /shouldFallbackToChatCompletions/);
+  for (const file of listTsFiles(path.join(root, "src"))) {
+    const relative = path.relative(root, file);
+    if (relative.startsWith("src/modules/agent-runtime/")) continue;
+    const source = fs.readFileSync(file, "utf8");
+    assert.doesNotMatch(source, /@openai\/agents|OpenAISDKAgentRunner|SkillRuntimeService|HyperframesRenderService/);
+  }
 });
 
 test("sidecar uses nestjs as the production http runtime", () => {
-  for (const relativePath of ["src/modules/books", "src/modules/config", "src/modules/dataset", "src/infrastructure/config", "src/infrastructure/database", "src/infrastructure/jobs", "src/infrastructure/dataset-state"]) {
+  for (const relativePath of ["src/modules/config", "src/modules/dataset", "src/infrastructure/config", "src/infrastructure/database", "src/infrastructure/jobs", "src/infrastructure/dataset-state"]) {
     assert.equal(fs.statSync(path.join(root, relativePath)).isDirectory(), true);
   }
 
@@ -116,7 +128,6 @@ test("dataset asset delete API uses only the canonical DELETE route", () => {
 test("nestjs services use @Injectable decorator for standard NestJS DI", () => {
   const expected = new Map([
     ["dataset", /@Injectable\(\)\s+export class DatasetService/],
-    ["books", /@Injectable\(\)\s+export class BooksService/],
     ["config", /@Injectable\(\)\s+export class ConfigService/],
   ]);
 
@@ -152,10 +163,6 @@ test("sidecar follows standard nestjs package and module layout", () => {
     "src/modules/dataset/dataset.controller.ts",
     "src/modules/dataset/dataset.service.ts",
     "src/modules/dataset/providers/dataset.domain.ts",
-    "src/modules/books/books.module.ts",
-    "src/modules/books/books.controller.ts",
-    "src/modules/books/books.service.ts",
-    "src/modules/books/providers/books.domain.ts",
   ]) {
     assert.equal(fs.existsSync(path.join(root, relativePath)), true, `${relativePath} should exist`);
   }
@@ -272,7 +279,7 @@ test("feature modules do not embed database SQL", () => {
 });
 
 test("nestjs services inject explicit infrastructure providers instead of a sidecar context", () => {
-  for (const feature of ["config", "dataset", "books"]) {
+  for (const feature of ["config", "dataset"]) {
     const servicePath = path.join(root, "src", "modules", feature, `${feature}.service.ts`);
     const serviceSource = fs.readFileSync(servicePath, "utf8");
     assert.doesNotMatch(serviceSource, /SidecarContextService|SidecarContext\b/);
@@ -281,44 +288,39 @@ test("nestjs services inject explicit infrastructure providers instead of a side
 
 test("nestjs feature modules use dto files for request contracts", () => {
   for (const relativePath of [
-    "src/modules/books/dto/create-book-job.dto.ts",
     "src/modules/dataset/dto/import-sample.dto.ts",
   ]) {
     assert.equal(fs.existsSync(path.join(root, relativePath)), true, `${relativePath} should exist`);
   }
 
-  const booksController = fs.readFileSync(path.join(root, "src", "modules", "books", "books.controller.ts"), "utf8");
   const datasetController = fs.readFileSync(path.join(root, "src", "modules", "dataset", "dataset.controller.ts"), "utf8");
-  assert.match(booksController, /CreateBookJobDto/);
   assert.match(datasetController, /ImportSampleDto/);
 });
 
 test("nestjs controllers stay thin and delegate business work to feature services", () => {
-  const controllerFiles = ["books", "config", "dataset"].map((feature) => path.join(root, "src", "modules", feature, `${feature}.controller.ts`));
-  const domainFiles = ["books", "config", "dataset"].map((feature) => path.join(root, "src", "modules", feature, "providers", `${feature}.domain.ts`));
+  const controllerFiles = ["config", "dataset"].map((feature) => path.join(root, "src", "modules", feature, `${feature}.controller.ts`));
+  const domainFiles = ["config", "dataset"].map((feature) => path.join(root, "src", "modules", feature, "providers", `${feature}.domain.ts`));
   const controllers = controllerFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
   const domain = domainFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
 
-  assert.ok(domainFiles.length >= 3, "sidecar should be split across multiple domain services");
+  assert.ok(domainFiles.length >= 2, "sidecar should be split across multiple domain services");
 
-  for (const forbidden of ["buildAgentWorkspace", "exportHtmlToPdf", "checkPostgres", "importSampleDataset"]) {
+  for (const forbidden of ["checkPostgres", "importSampleDataset"]) {
     assert.equal(controllers.includes(forbidden), false, `controller should not orchestrate ${forbidden}`);
     assert.equal(domain.includes(forbidden), true, `domain should own ${forbidden}`);
   }
   assert.match(controllers, /Service/);
 });
 
-test("books module does not import dataset provider internals", () => {
-  const booksProvidersDir = path.join(root, "src", "modules", "books", "providers");
-  const offenders: string[] = [];
-  for (const file of fs.readdirSync(booksProvidersDir)) {
-    if (!file.endsWith(".ts")) continue;
-    const source = fs.readFileSync(path.join(booksProvidersDir, file), "utf8");
-    if (source.includes("../../dataset/providers/")) {
-      offenders.push(file);
-    }
+test("legacy book job module is removed from sidecar runtime", () => {
+  for (const relativePath of [
+    "src/modules/books/books.module.ts",
+    "src/modules/books/books.controller.ts",
+    "src/modules/books/books.service.ts",
+    "src/modules/books/providers/books.domain.ts",
+  ]) {
+    assert.equal(fs.existsSync(path.join(root, relativePath)), false, `${relativePath} should not remain in production source`);
   }
-  assert.deepEqual(offenders, [], `books providers should not import dataset provider internals:\n${offenders.join("\n")}`);
 });
 
 test("sidecar module internals avoid duplicated feature filenames", () => {
@@ -348,7 +350,6 @@ test("sidecar module internals avoid duplicated feature filenames", () => {
 
 test("nestjs services use standard constructor injection with private readonly", () => {
   const roots = [
-    path.join(root, "src", "modules", "books"),
     path.join(root, "src", "modules", "config"),
     path.join(root, "src", "modules", "dataset"),
   ];
@@ -365,5 +366,5 @@ test("nestjs services use standard constructor injection with private readonly",
     }
   }
 
-  assert.ok(servicesWithStandardInjection.length >= 3, `services should use standard NestJS constructor injection:\n${servicesWithStandardInjection.join("\n")}`);
+  assert.ok(servicesWithStandardInjection.length >= 2, `services should use standard NestJS constructor injection:\n${servicesWithStandardInjection.join("\n")}`);
 });

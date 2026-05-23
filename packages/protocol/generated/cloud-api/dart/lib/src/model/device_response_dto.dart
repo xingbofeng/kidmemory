@@ -91,7 +91,7 @@ class DeviceResponseDto {
   )
 
 
-  final DateTime lastHeartbeat;
+  final String lastHeartbeat;
 
 
 
@@ -103,7 +103,7 @@ class DeviceResponseDto {
   )
 
 
-  final DateTime createdAt;
+  final String createdAt;
 
 
 
@@ -115,7 +115,7 @@ class DeviceResponseDto {
   )
 
 
-  final DateTime updatedAt;
+  final String updatedAt;
 
 
 

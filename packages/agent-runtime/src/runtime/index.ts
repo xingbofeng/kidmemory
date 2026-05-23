@@ -250,6 +250,7 @@ export class AgentRuntime {
       skills,
       tools,
       mcpServers: this.mcpServers,
+      requiredOutputFiles: request.requiredOutputFiles ?? [],
     });
     const artifacts = (await new ArtifactScanner().scan({ workspaceDir: request.workspaceDir })).artifacts;
     await this.runAfterArtifactScan({ ...runContext, artifacts });
@@ -451,7 +452,7 @@ export class AgentRuntime {
     eventBus: AgentEventBus;
     skills: SkillDeckLoadResult;
     workspaceDir: string;
-  }): AgentTool[] {
+  }): Promise<AgentTool[]> {
     const [workspaceTools, skillTools, builtinTools, customTools] = await Promise.all([
       this.executorKind === "agent"
         ? Promise.resolve(createWorkspaceAgentTools({

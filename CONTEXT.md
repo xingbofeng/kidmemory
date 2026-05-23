@@ -33,7 +33,7 @@ This file is the short, stable project context Codex should read at session star
 - **Web Companion (`packages/web`)**: Vite React app for mobile upload, lightweight browsing, and sharing flows.
 - **Cloud API (`packages/cloud-api`)**: NestJS service for cloud upload, sharing, device sync, and deployment-facing API behavior.
 - **Protocol (`packages/protocol`)**: Shared protocol, OpenAPI artifacts, generated clients, error codes, and cross-package type contracts.
-- **Creation Orchestrator (`/creation/jobs`)**: Workflow orchestration entry that composes existing generation, agent, skill, export, and share capabilities instead of reimplementing them.
+- **Creation Tasks (`/creation/tasks`)**: Task-first workflow orchestration entry that composes planning, agent generation, export, and share capabilities behind a persisted task lifecycle.
 - **Agent Runtime SDK (`@kidmemory/agent-runtime`)**: A package-level SDK for controlled Generate-stage agent execution. It uses OpenAI Agents SDK as the single core with two executor modes: `OpenAISandboxExecutor` for SandboxAgent-native workspace capability, and `OpenAIAgentExecutor` for ordinary Agent + Runner execution against OpenAI-compatible providers with runtime-owned workspace tools. It is not a standalone service and does not replace the Sidecar as KidMemory's product-level trusted boundary.
 - **Dynamic Skill Discovery**: The runtime pattern where available agent skills are discovered from host-provided skill roots at execution time. Core runtime code should not encode KidMemory creation types or business-specific skill choices.
 - **Agent Workspace Control Directory (`.kidmemory/`)**: A workspace-local control directory for agent runtime metadata, skills, sessions, logs, and state. It is modeled after tool-specific workspace directories such as `.codex/` and keeps runtime control data next to the task workspace without turning the runtime into a service. The SDK may create default workspace runtime instructions in `.kidmemory/runtime.md` when they are missing.
@@ -43,7 +43,7 @@ This file is the short, stable project context Codex should read at session star
 - KidMemory is local-first. Family data should remain on the user's machine by default.
 - Desktop development should use one launch path per debugging session: either Xcode Run or `flutter run -d macos`, not both.
 - The sidecar is the trusted boundary for database access, local files, MCP tools, agent workspace setup, validation, and export operations.
-- `/creation/jobs` should act as an orchestration layer. If legacy endpoints are fully covered and verified by the new path, they can be removed directly with their obsolete tests.
+- `/creation/tasks` is the canonical creation API. Legacy `/creation/jobs` endpoints should remain removed once task routes cover planning, generation, preview, export, and share behavior.
 - AI agents should work inside controlled workspaces and should not directly access databases, secrets, object storage credentials, or arbitrary local files.
 - Generated book artifacts should be structured and validated before they reach preview, export, or publishing flows.
 - `packages/protocol` is the contract source for sidecar, cloud API, web, and desktop client integration.

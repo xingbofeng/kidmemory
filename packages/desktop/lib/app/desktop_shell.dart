@@ -144,14 +144,13 @@ class _DesktopShellState extends State<DesktopShell> {
   bool exported = false;
   bool shareCreating = false;
   CreationWorkflowPhase creationWorkflowPhase = CreationWorkflowPhase.preparing;
-  String? planId;
-  CreationPlanPreviewVm? creationPlan;
+  CreationTaskPreviewVm? creationTask;
   CreationFailureVm? creationFailure;
-  List<CreationPlanStepVm> creationJobSteps = const [];
+  List<CreationTaskStepVm> creationTaskSteps = const [];
   String generatedArtifactKind = '';
   String generatedArtifactPath = '';
   String previewFailureReason = '';
-  String? jobId;
+  String? taskId;
   String traceId = '';
   String requestId = '';
   String statusMessage = '';
@@ -191,7 +190,7 @@ class _DesktopShellState extends State<DesktopShell> {
   late final DesktopTraceContext desktopTraceContext;
   late final DesktopLogger desktopLogger;
   late final DesktopLogCleanupWorker desktopLogCleanupWorker;
-  Timer? _creationJobPollingTimer;
+  Timer? _creationTaskPollingTimer;
   int _bundledPostgresPort = _pgDefaultPort;
   bool _localizedDefaultsInitialized = false;
 
@@ -273,7 +272,7 @@ class _DesktopShellState extends State<DesktopShell> {
   void _setShellState(VoidCallback fn) {
     setState(fn);
     if (step != AppStep.generate) {
-      _stopCreationJobPolling();
+      _stopCreationTaskPolling();
     }
   }
 
@@ -303,7 +302,7 @@ class _DesktopShellState extends State<DesktopShell> {
 
   @override
   void dispose() {
-    _stopCreationJobPolling();
+    _stopCreationTaskPolling();
     _stopBundledPostgresIfRunning();
     super.dispose();
   }

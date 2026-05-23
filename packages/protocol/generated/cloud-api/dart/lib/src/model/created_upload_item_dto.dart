@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:kidmemory_protocol/src/model/signed_upload_target_dto.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -29,10 +30,12 @@ class CreatedUploadItemDto {
     required  this.objectKey,
 
     required  this.status,
+
+     this.signedUpload,
   });
 
   @JsonKey(
-    
+
     name: r'clientFileId',
     required: true,
     includeIfNull: false,
@@ -44,7 +47,7 @@ class CreatedUploadItemDto {
 
 
   @JsonKey(
-    
+
     name: r'uploadItemId',
     required: true,
     includeIfNull: false,
@@ -56,7 +59,7 @@ class CreatedUploadItemDto {
 
 
   @JsonKey(
-    
+
     name: r'assetId',
     required: true,
     includeIfNull: false,
@@ -68,7 +71,7 @@ class CreatedUploadItemDto {
 
 
   @JsonKey(
-    
+
     name: r'objectKey',
     required: true,
     includeIfNull: false,
@@ -80,7 +83,7 @@ class CreatedUploadItemDto {
 
 
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
@@ -88,6 +91,18 @@ class CreatedUploadItemDto {
 
 
   final String status;
+
+
+
+  @JsonKey(
+
+    name: r'signedUpload',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final SignedUploadTargetDto? signedUpload;
 
 
 
@@ -99,7 +114,8 @@ class CreatedUploadItemDto {
       other.uploadItemId == uploadItemId &&
       other.assetId == assetId &&
       other.objectKey == objectKey &&
-      other.status == status;
+      other.status == status &&
+      other.signedUpload == signedUpload;
 
     @override
     int get hashCode =>
@@ -107,7 +123,8 @@ class CreatedUploadItemDto {
         uploadItemId.hashCode +
         assetId.hashCode +
         objectKey.hashCode +
-        status.hashCode;
+        status.hashCode +
+        signedUpload.hashCode;
 
   factory CreatedUploadItemDto.fromJson(Map<String, dynamic> json) => _$CreatedUploadItemDtoFromJson(json);
 
@@ -119,4 +136,3 @@ class CreatedUploadItemDto {
   }
 
 }
-

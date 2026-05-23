@@ -2,15 +2,11 @@ import { DynamicModule, Module } from "@nestjs/common";
 import { McpModule, McpTransportType } from "@rekog/mcp-nest";
 
 import { InfrastructureModule } from "../../infrastructure/infrastructure.module.ts";
-import { BooksModule } from "../books/books.module.ts";
 import { ConfigModule } from "../config/config.module.ts";
 import { DatasetModule } from "../dataset/dataset.module.ts";
 import { MediaModule } from "../media/media.module.ts";
-import { SkillsModule } from "../skills/skills.module.ts";
 import { AssetMcpTools } from "./tools/asset.mcp-tools.ts";
-import { BookMcpTools } from "./tools/book.mcp-tools.ts";
 import { DiagnosticMcpTools } from "./tools/diagnostic.mcp-tools.ts";
-import { SkillRuntimeMcpTools } from "./tools/skill-runtime.mcp-tools.ts";
 
 const MCP_SERVER_NAME = "kidmemory-sidecar";
 
@@ -33,9 +29,7 @@ export class SidecarMcpModule {
         InfrastructureModule,
         ConfigModule,
         DatasetModule,
-        BooksModule,
         MediaModule,
-        SkillsModule,
         McpModule.forRoot({
           name: MCP_SERVER_NAME,
           version: "0.1.0",
@@ -47,12 +41,12 @@ export class SidecarMcpModule {
           },
         }),
         McpModule.forFeature(
-          [DiagnosticMcpTools, AssetMcpTools, BookMcpTools, SkillRuntimeMcpTools],
+          [DiagnosticMcpTools, AssetMcpTools],
           MCP_SERVER_NAME,
         ),
       ],
-      providers: [DiagnosticMcpTools, AssetMcpTools, BookMcpTools, SkillRuntimeMcpTools],
-      exports: [DiagnosticMcpTools, AssetMcpTools, BookMcpTools, SkillRuntimeMcpTools],
+      providers: [DiagnosticMcpTools, AssetMcpTools],
+      exports: [DiagnosticMcpTools, AssetMcpTools],
     } satisfies DynamicModule;
   }
 }

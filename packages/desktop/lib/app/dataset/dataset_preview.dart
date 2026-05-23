@@ -15,15 +15,15 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       );
       return;
     }
-    if (jobId == null || !generated) {
+    if (taskId == null || !generated) {
       _showSnackBar(AppLocalizations.of(context)!.datasetPreviewS853);
       _appendLog(AppLocalizations.of(context)!.datasetPreviewS521);
       return;
     }
-    final currentJobId = jobId!;
-    final previewUrl = '${api.baseUrl}/creation/jobs/$currentJobId/preview';
+    final currentTaskId = taskId!;
+    final previewUrl = '${api.baseUrl}/creation/tasks/$currentTaskId/preview';
     _appendLog(
-      AppLocalizations.of(context)!.datasetPreviewOpenHistoryLog(currentJobId),
+      AppLocalizations.of(context)!.datasetPreviewOpenHistoryLog(currentTaskId),
     );
     await _safeOpenExternalTarget(
       previewUrl,
@@ -46,7 +46,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
                   AppLocalizations.of(
                     context,
                   )!.datasetPreviewLogStatusLine(statusMessage),
-                  if (jobId?.trim().isNotEmpty == true) 'jobId: $jobId',
+                  if (taskId?.trim().isNotEmpty == true) 'taskId: $taskId',
                   if (requestId.trim().isNotEmpty) 'requestId: $requestId',
                   ...activityLog,
                 ].join('\n'),
@@ -65,19 +65,19 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
   }
 
   Future<void> _previewAllPages() async {
-    if (jobId == null || !generated) {
+    if (taskId == null || !generated) {
       _showSnackBar(AppLocalizations.of(context)!.datasetPreviewS852);
       _appendLog(AppLocalizations.of(context)!.datasetPreviewS952);
       return;
     }
-    final currentJobId = jobId!;
+    final currentTaskId = taskId!;
     if (generationCreationType == 'memoir_video') {
-      await _previewGeneratedVideo(currentJobId);
+      await _previewGeneratedVideo(currentTaskId);
       return;
     }
-    final previewUrl = '${api.baseUrl}/creation/jobs/$currentJobId/preview';
+    final previewUrl = '${api.baseUrl}/creation/tasks/$currentTaskId/preview';
     _appendLog(
-      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentJobId),
+      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentTaskId),
     );
     try {
       await openExternalTarget(previewUrl);
@@ -103,7 +103,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
     }
   }
 
-  Future<void> _previewGeneratedVideo(String currentJobId) async {
+  Future<void> _previewGeneratedVideo(String currentTaskId) async {
     final target = generatedArtifactPath.trim().isNotEmpty
         ? generatedArtifactPath.trim()
         : exportResult?.localPath.trim() ?? '';
@@ -119,7 +119,7 @@ extension _DesktopShellDatasetPreview on _DesktopShellState {
       return;
     }
     _appendLog(
-      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentJobId),
+      AppLocalizations.of(context)!.datasetPreviewOpenPageLog(currentTaskId),
     );
     try {
       await openExternalTarget(target);

@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/update_sync_status_request_dto.dart';
+import 'package:kidmemory_protocol/src/model/upload_item_response_dto.dart';
 
 class UploadItemsApi {
 
@@ -17,7 +19,7 @@ class UploadItemsApi {
   const UploadItemsApi(this._dio);
 
   /// Get pending sync upload items
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [offset] - Number of items to skip
@@ -30,9 +32,9 @@ class UploadItemsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<UploadItemResponseDto>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> uploadItemsControllerGetPendingSync({ 
+  Future<Response<List<UploadItemResponseDto>>> uploadItemsControllerGetPendingSync({
     num? offset,
     num? limit,
     Object? deviceId,
@@ -71,14 +73,40 @@ class UploadItemsApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<UploadItemResponseDto>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<UploadItemResponseDto>, UploadItemResponseDto>(rawData, 'List<UploadItemResponseDto>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<UploadItemResponseDto>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Update upload item sync status
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
+  /// * [updateSyncStatusRequestDto]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -86,10 +114,11 @@ class UploadItemsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [UploadItemResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> uploadItemsControllerUpdateSyncStatus({ 
+  Future<Response<UploadItemResponseDto>> uploadItemsControllerUpdateSyncStatus({
     required String id,
+    required UpdateSyncStatusRequestDto updateSyncStatusRequestDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -107,18 +136,62 @@ class UploadItemsApi {
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(updateSyncStatusRequestDto);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    UploadItemResponseDto? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<UploadItemResponseDto, UploadItemResponseDto>(rawData, 'UploadItemResponseDto', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<UploadItemResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
 }

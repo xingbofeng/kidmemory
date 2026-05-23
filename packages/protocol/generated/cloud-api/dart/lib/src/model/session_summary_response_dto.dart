@@ -67,7 +67,7 @@ class SessionSummaryResponseDto {
   )
 
 
-  final Map<String, Object> child;
+  final Object child;
 
 
 
@@ -115,7 +115,7 @@ class SessionSummaryResponseDto {
   )
 
 
-  final Map<String, Object> providers;
+  final Object providers;
 
 
 

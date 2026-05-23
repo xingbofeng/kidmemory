@@ -2228,7 +2228,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get datasetPreviewS852 => '请先完成生成，再打开预览全部页面';
 
   @override
-  String get datasetPreviewS952 => '预览全部页面：缺少 jobId';
+  String get datasetPreviewS952 => '预览全部页面：缺少 taskId';
 
   @override
   String get datasetSampleS696 => '温暖童趣';
@@ -2370,7 +2370,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportPageS851 => '请先完成生成，再导出';
 
   @override
-  String get exportPageS410 => '导出失败：缺少 jobId';
+  String get exportPageS410 => '导出失败：缺少 taskId';
 
   @override
   String get exportPageS649 => '正在准备导出目录...';
@@ -2592,8 +2592,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String datasetPreviewOpenHistoryLog(String jobId) {
-    return 'Opened historical work preview: $jobId';
+  String datasetPreviewOpenHistoryLog(String taskId) {
+    return 'Opened historical work preview: $taskId';
   }
 
   @override
@@ -2602,8 +2602,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String datasetPreviewOpenPageLog(String jobId) {
-    return 'Opened preview page: $jobId';
+  String datasetPreviewOpenPageLog(String taskId) {
+    return 'Opened preview page: $taskId';
   }
 
   @override
@@ -2667,8 +2667,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String exportGenerationCompletedLog(String jobId) {
-    return 'Generation completed with jobId: $jobId';
+  String exportGenerationCompletedLog(String taskId) {
+    return 'Generation completed with taskId: $taskId';
   }
 
   @override

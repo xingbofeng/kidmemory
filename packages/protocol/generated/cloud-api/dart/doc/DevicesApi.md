@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 
 # **devicesControllerGetDevice**
-> devicesControllerGetDevice(id)
+> DeviceResponseDto devicesControllerGetDevice(id)
 
 Get device by ID
 
@@ -24,10 +24,11 @@ Get device by ID
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDevicesApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
-    api.devicesControllerGetDevice(id);
+    final response = api.devicesControllerGetDevice(id);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling DevicesApi->devicesControllerGetDevice: $e\n');
 }
@@ -37,11 +38,11 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
-void (empty response body)
+[**DeviceResponseDto**](DeviceResponseDto.md)
 
 ### Authorization
 
@@ -50,12 +51,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **devicesControllerHeartbeat**
-> devicesControllerHeartbeat(id)
+> DeviceResponseDto devicesControllerHeartbeat(id)
 
 Update device heartbeat
 
@@ -64,10 +65,11 @@ Update device heartbeat
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDevicesApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
-    api.devicesControllerHeartbeat(id);
+    final response = api.devicesControllerHeartbeat(id);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling DevicesApi->devicesControllerHeartbeat: $e\n');
 }
@@ -77,11 +79,11 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
-void (empty response body)
+[**DeviceResponseDto**](DeviceResponseDto.md)
 
 ### Authorization
 
@@ -90,12 +92,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **devicesControllerRegister**
-> devicesControllerRegister()
+> DeviceResponseDto devicesControllerRegister(registerDeviceRequestDto)
 
 Register a device (idempotent by machineId)
 
@@ -104,20 +106,25 @@ Register a device (idempotent by machineId)
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDevicesApi();
+final RegisterDeviceRequestDto registerDeviceRequestDto = ; // RegisterDeviceRequestDto |
 
 try {
-    api.devicesControllerRegister();
+    final response = api.devicesControllerRegister(registerDeviceRequestDto);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling DevicesApi->devicesControllerRegister: $e\n');
 }
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **registerDeviceRequestDto** | [**RegisterDeviceRequestDto**](RegisterDeviceRequestDto.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**DeviceResponseDto**](DeviceResponseDto.md)
 
 ### Authorization
 
@@ -125,8 +132,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

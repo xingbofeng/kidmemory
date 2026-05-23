@@ -2,426 +2,358 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { Inject, Injectable, Optional } from "@nestjs/common";
+import { z } from "zod";
 import type {
   CreationArtifact,
+  CreationError,
   CreationEvent,
-  CreationJob,
-  CreationPlan,
   CreationStep,
+  CreationTask,
+  CreationTaskStatus,
   CreationType,
 } from "@kidmemory/protocol";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
-import type { ExportArtifact } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
-import { BooksService } from "../books/books.service.ts";
+import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
+import { AgentRuntimeService } from "../agent-runtime/agent-runtime.service.ts";
+import type { RuntimeStage } from "../agent-runtime/agent-runtime.contracts.ts";
+import { ensureTaskWorkspace, readBookJson, readPlanJson, writeTaskRequestJson } from "../agent-runtime/agent-runtime.workspace.ts";
+import { loadValidatedBookOutput } from "../books/providers/book-output.ts";
+import { exportHtmlToLongImage } from "../books/providers/long-image.ts";
+import { exportHtmlToPdf, verifyPdfWithPdfJs } from "../books/providers/pdf.ts";
 import { DatasetService } from "../dataset/dataset.service.ts";
-import { FfmpegRepairService } from "../media/ffmpeg-repair.service.ts";
-import { SkillRuntimeService } from "../skills/skill-runtime.service.ts";
-import { CreationPlanningService } from "./creation-planning.service.ts";
-import type {
-  CreateCreationJobDto,
-  CreateCreationPlanDto,
-  ExportCreationJobDto,
-  ShareCreationJobDto,
-} from "./dto/creation.dto.ts";
+import type { CreateCreationTaskDto, ExportCreationTaskDto, ShareCreationTaskDto } from "./dto/creation.dto.ts";
+import type { CreationTask as PrismaCreationTask } from "@prisma/client";
 
 type ServiceResult<T> = {
   status: number;
   data: T;
 };
 
-type CreationRecord = {
-  plans: Record<string, CreationPlan>;
-  jobs: Record<string, CreationJob>;
-  events: Record<string, CreationEvent[]>;
-  linkedBookJobs?: Record<string, string>;
-};
+const creationStepSchema = z.object({
+  stepId: z.string(),
+  label: z.string(),
+  status: z.enum(["pending", "running", "succeeded", "failed", "skipped"]),
+  detail: z.string().optional(),
+});
+
+const creationErrorSchema = z.object({
+  category: z.string(),
+  message: z.string(),
+  stepId: z.string().optional(),
+  code: z.string().optional(),
+});
 
 @Injectable()
 export class CreationService {
   constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(AgentRuntimeService) private readonly agentRuntime: AgentRuntimeService,
     @Inject(AppConfigService) private readonly config: AppConfigService,
-    @Inject(BooksService) private readonly booksService: BooksService,
-    @Inject(SkillRuntimeService) private readonly skillRuntime: SkillRuntimeService,
-    @Optional() @Inject(FfmpegRepairService) private readonly ffmpegRepairService?: FfmpegRepairService,
-    @Optional() @Inject(CreationPlanningService) private readonly planningService?: CreationPlanningService,
     @Optional() @Inject(DatasetService) private readonly datasetService?: Pick<
       DatasetService,
       "recordExportArtifact" | "enqueueExportArtifactStorageSync" | "runStorageSyncWorker" | "getExportArtifactShareMetadata"
     >,
   ) {}
 
-  async createPlan(dto: CreateCreationPlanDto): Promise<ServiceResult<CreationPlan | { message: string }>> {
-    const now = new Date().toISOString();
-    const planned = this.planningService ? await this.planningService.createPlan(dto) : undefined;
-    if (planned?.ok === false) {
-      return {
-        status: 500,
-        data: {
-          message: planned.message,
-        },
-      };
-    }
-    const planId = `plan_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const plan: CreationPlan = {
-      planId,
+  async createTask(dto: CreateCreationTaskDto): Promise<ServiceResult<CreationTask | { message: string }>> {
+    const taskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const workspacePath = path.join(this.config.config.paths.workspaceDir, "creation-tasks", taskId);
+
+    await ensureTaskWorkspace({ workspacePath, taskId, goal: dto.goal, assetIds: dto.assetIds, stage: "plan" });
+    await writeTaskRequestJson(workspacePath, { taskId, ...dto });
+
+    const task = await this.prisma.creationTask.create({
+      data: {
+        id: taskId,
+        creationType: dto.creationType,
+        goal: dto.goal,
+        assetIds: dto.assetIds,
+        status: "planning",
+        steps: JSON.stringify(this.defaultSteps(dto.creationType, "pending")),
+        workspacePath,
+      },
+    });
+
+    await this.addEvent(taskId, "plan", "Task created, running plan stage.");
+
+    const planResult = await this.agentRuntime.runCreationStage({
+      taskId,
+      workspacePath,
+      stage: "plan",
       creationType: dto.creationType,
-      goal: dto.goal,
-      assetIds: dto.assetIds,
-      summary: planned?.summary ?? this.summaryFor(dto.creationType, dto.goal, dto.assetIds.length),
-      skillName: planned?.skillName ?? this.skillNameFor(dto.creationType),
-      steps: planned ? this.normalizePlannedSteps(planned.steps) : this.stepsFor(dto.creationType, "pending"),
-      requirements: this.requirementsFor(dto.creationType),
-      requirementItems: planned?.requirements ?? this.requirementItemsFor(dto.creationType),
-      status: "ready",
-      createdAt: now,
-      updatedAt: now,
-    };
+      prompt: this.buildPlanPrompt(dto),
+      traceId: `creation_${taskId}_plan`,
+    });
 
-    const record = await this.readRecord();
-    record.plans[planId] = plan;
-    await this.writeRecord(record);
+    if (!planResult.ok) {
+      const failed = await this.prisma.creationTask.update({
+        where: { id: taskId },
+        data: {
+          status: "failed",
+          error: {
+            category: planResult.error?.category ?? "planning",
+            message: planResult.error?.message ?? "Plan stage failed.",
+            code: planResult.error?.code,
+          },
+        },
+      });
+      await this.addEvent(taskId, "error", planResult.error?.message ?? "Plan stage failed.");
+      return { status: 500, data: this.mapTask(failed) };
+    }
 
-    return { status: 201, data: plan };
+    const planJson = await readPlanJson(workspacePath);
+    if (!planJson) {
+      const failed = await this.prisma.creationTask.update({
+        where: { id: taskId },
+        data: { status: "failed", error: { category: "planning", message: "Plan stage completed but output/plan.json is missing or invalid." } },
+      });
+      await this.addEvent(taskId, "error", "Plan output not found.");
+      return { status: 500, data: this.mapTask(failed) };
+    }
+
+    const summary = typeof planJson.summary === "string" ? planJson.summary : "Plan created";
+    const skillName = typeof planJson.skillName === "string" ? planJson.skillName : this.skillNameFor(dto.creationType);
+    const planSteps = this.normalizePlanSteps(planJson.steps);
+    const requirementItems = Array.isArray(planJson.requirements) ? planJson.requirements.map(String) : [];
+
+    await this.prisma.creationTask.update({
+      where: { id: taskId },
+      data: {
+        status: "ready",
+        summary,
+        skillName,
+        steps: JSON.stringify(planSteps),
+        requirementItems,
+      },
+    });
+
+    await this.addEvent(taskId, "plan", `Plan ready: ${summary}`);
+
+    return { status: 201, data: this.mapTask({ ...task, status: "ready", summary, skillName }) };
   }
 
-  async createJob(dto: CreateCreationJobDto): Promise<ServiceResult<CreationJob | { message: string }>> {
-    const record = await this.readRecord();
-    const plan = record.plans[dto.planId];
-    if (!plan || plan.status !== "ready") {
-      return { status: 404, data: { message: "Creation plan not found or no longer valid." } };
+  async generateTask(taskId: string): Promise<ServiceResult<CreationTask | { message: string }>> {
+    const task = await this.prisma.creationTask.findUnique({ where: { id: taskId } });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+    if (task.status !== "ready") {
+      return { status: 409, data: { message: `Task is in status "${task.status}", expected "ready".` } };
     }
 
-    const now = new Date().toISOString();
-    const jobId = `creation_job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const steps = this.stepsFor(plan.creationType, "pending");
-    steps[0] = { ...steps[0], status: "succeeded", detail: "Plan confirmed." };
-    steps[1] = { ...steps[1], status: "running", detail: this.runningDetailFor(plan.creationType) };
-    let job: CreationJob = {
-      jobId,
-      planId: plan.planId,
-      creationType: plan.creationType,
-      status: "running",
-      currentStepId: steps[1]?.stepId ?? null,
-      steps,
-      artifacts: [],
-      error: null,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const creationType = task.creationType as CreationType;
+    const stage: RuntimeStage = creationType === "memoir_video" ? "generate_video" : "generate_book";
 
-    const events = [
-      this.event(jobId, "job", "Creation job accepted by the Sidecar.", now),
-      this.event(jobId, "step", this.runningDetailFor(plan.creationType), now, job.currentStepId ?? undefined),
-    ];
+    await this.prisma.creationTask.update({ where: { id: taskId }, data: { status: "generating" } });
+    await this.addEvent(taskId, "task", `Starting ${stage} stage.`);
 
-    if (plan.creationType === "memoir_video") {
-      const renderResult = await this.tryRenderMemoirVideo(plan, jobId);
-      if (renderResult.repairMessage) {
-        events.push(this.event(jobId, "step", renderResult.repairMessage, new Date().toISOString(), "generate"));
-      }
-      if (renderResult.ok === true) {
-        const artifact: CreationArtifact = {
-          artifactId: renderResult.artifactId,
-          kind: "mp4",
-          jobId,
-          localPath: renderResult.localPath,
-          createdAt: now,
-        };
-        job = {
-          ...job,
-          status: "succeeded",
-          currentStepId: "review",
-          artifacts: [artifact],
-          steps: job.steps.map((step) => {
-            if (step.stepId === "publish") return step;
-            return {
-              ...step,
-              status: "succeeded",
-              detail: step.stepId === "generate" ? "Rendered MP4 through Hyperframes skill runtime." : step.detail,
-            };
-          }),
-          updatedAt: new Date().toISOString(),
-        };
-        events.push(
-          this.event(jobId, "step", `Rendered Hyperframes MP4 at ${renderResult.localPath}.`, job.updatedAt, "generate"),
-        );
-      } else {
-        const failedAt = new Date().toISOString();
-        job = {
-          ...job,
+    const workspacePath = task.workspacePath ?? path.join(this.config.config.paths.workspaceDir, "creation-tasks", taskId);
+    const generateResult = await this.agentRuntime.runCreationStage({
+      taskId,
+      workspacePath,
+      stage,
+      creationType,
+      prompt: task.goal,
+      traceId: `creation_${taskId}_${stage}`,
+    });
+
+    if (!generateResult.ok) {
+      const failed = await this.prisma.creationTask.update({
+        where: { id: taskId },
+        data: {
           status: "failed",
           currentStepId: "generate",
-          steps: job.steps.map((step) => {
-            if (step.stepId !== "generate") return step;
-            return {
-              ...step,
-              status: "failed",
-              detail: renderResult.message,
-            };
-          }),
           error: {
-            category: renderResult.category,
-            message: renderResult.message,
-            stepId: "generate",
-            code: renderResult.code,
+            category: generateResult.error?.category ?? "generation",
+            message: generateResult.error?.message ?? "Generation stage failed.",
+            code: generateResult.error?.code,
           },
-          updatedAt: failedAt,
-        };
-        events.push(this.event(jobId, "error", renderResult.message, failedAt, "generate"));
-      }
-    } else {
-      const bookResult = await this.tryCreateBookJob(plan);
-      if (bookResult.ok === true) {
-        record.linkedBookJobs ??= {};
-        record.linkedBookJobs[jobId] = bookResult.bookJobId;
-        job = {
-          ...job,
-          status: "succeeded",
-          currentStepId: "review",
-          steps: job.steps.map((step) => {
-            if (step.stepId === "publish") return step;
-            return {
-              ...step,
-              status: "succeeded",
-              detail: step.stepId === "generate" ? "Generated through the existing book skill path." : step.detail,
-            };
-          }),
-          updatedAt: new Date().toISOString(),
-        };
-        events.push(
-          this.event(jobId, "step", `Generated book job ${bookResult.bookJobId} through BooksService.`, job.updatedAt, "generate"),
-        );
-      } else {
-        events.push(this.event(jobId, "step", bookResult.message, now, "generate"));
-      }
-    }
-
-    record.jobs[jobId] = job;
-    record.events[jobId] = events;
-    await this.writeRecord(record);
-
-    return { status: 201, data: job };
-  }
-
-  async getJob(jobId: string): Promise<ServiceResult<CreationJob | { message: string }>> {
-    const record = await this.readRecord();
-    const job = record.jobs[jobId];
-    if (!job) return { status: 404, data: { message: "Creation job not found." } };
-    return { status: 200, data: job };
-  }
-
-  async getEvents(jobId: string): Promise<ServiceResult<{ events: CreationEvent[] } | { message: string }>> {
-    const record = await this.readRecord();
-    if (!record.jobs[jobId]) return { status: 404, data: { message: "Creation job not found." } };
-    return { status: 200, data: { events: record.events[jobId] ?? [] } };
-  }
-
-  async getPreviewHtml(
-    jobId: string,
-  ): Promise<ServiceResult<{ message: string }> | { status: number; html: string }> {
-    const record = await this.readRecord();
-    const job = record.jobs[jobId];
-    if (!job) return { status: 404, data: { message: "Creation job not found." } };
-    if (job.creationType === "memoir_video") {
-      return { status: 422, data: { message: "Memoir video jobs do not provide a PDF page preview." } };
-    }
-
-    const bookJobId = record.linkedBookJobs?.[jobId];
-    if (!bookJobId) {
-      return { status: 409, data: { message: "Creation preview is not available until the book draft is generated." } };
-    }
-
-    try {
-      const result = await this.booksService.getPreviewHtml(bookJobId);
-      if (result && typeof result === "object" && "html" in result && typeof result.html === "string") {
-        return { status: result.status, html: result.html };
-      }
-      return {
-        status: this.statusFromResult(result, 500),
-        data: {
-          message: this.messageFromResult(result, "BooksService preview did not return HTML."),
         },
-      };
-    } catch (error) {
-      return {
-        status: 500,
-        data: { message: error instanceof Error ? error.message : "Unknown BooksService preview error." },
-      };
-    }
-  }
-
-  async exportJob(
-    jobId: string,
-    dto: ExportCreationJobDto,
-  ): Promise<ServiceResult<CreationArtifact | { message: string }>> {
-    const record = await this.readRecord();
-    const job = record.jobs[jobId];
-    if (!job) return { status: 404, data: { message: "Creation job not found." } };
-    if (dto.target === "mp4" && job.creationType !== "memoir_video") {
-      return { status: 422, data: { message: "Only memoir_video jobs can export MP4 artifacts." } };
-    }
-    if (dto.target === "pdf" && job.creationType === "memoir_video") {
-      return { status: 422, data: { message: "Memoir video jobs export MP4 artifacts." } };
-    }
-
-    const now = new Date().toISOString();
-    if (dto.target === "mp4" && job.creationType === "memoir_video") {
-      const existingMp4 = job.artifacts.find((artifact) => artifact.kind === "mp4" && artifact.localPath);
-      if (!existingMp4) {
-        return {
-          status: 409,
-          data: { message: "MP4 artifact is not available. Resolve the Hyperframes generation failure and regenerate first." },
-        };
-      }
-      const nextJob = this.withTerminalStep({
-        ...job,
-        status: "exported",
-        updatedAt: now,
       });
-      record.jobs[jobId] = nextJob;
-      record.events[jobId] = [
-        ...(record.events[jobId] ?? []),
-        this.event(jobId, "export", `Prepared MP4 export from ${existingMp4.localPath}.`, now),
-      ];
-      await this.writeRecord(record);
-
-      return { status: 201, data: existingMp4 };
+      await this.addEvent(taskId, "error", generateResult.error?.message ?? "Generation stage failed.");
+      return { status: 500, data: this.mapTask(failed) };
     }
 
-    if (dto.target === "pdf" && job.creationType !== "memoir_video") {
-      const bookJobId = record.linkedBookJobs?.[jobId];
-      if (bookJobId) {
-        const exported = await this.tryExportBookPdf(bookJobId, dto.targetPath);
-        if (exported.ok === false) {
-          return {
-            status: 500,
-            data: { message: exported.message },
-          };
-        }
-        const artifact: CreationArtifact = {
-          artifactId: exported.artifactId,
-          kind: "pdf",
-          jobId,
-          localPath: exported.localPath,
-          createdAt: now,
-        };
-        const nextJob = this.withTerminalStep({
-          ...job,
-          status: "exported",
-          artifacts: [...job.artifacts, artifact],
-          updatedAt: now,
-        });
-        record.jobs[jobId] = nextJob;
-        record.events[jobId] = [
-          ...(record.events[jobId] ?? []),
-          this.event(jobId, "export", `Exported PDF through BooksService job ${bookJobId}.`, now),
-        ];
-        await this.writeRecord(record);
+    await this.persistGeneratedArtifacts(taskId, creationType, workspacePath);
 
-        return { status: 201, data: artifact };
+    await this.prisma.creationTask.update({
+      where: { id: taskId },
+      data: {
+        status: "succeeded",
+        currentStepId: "review",
+      },
+    });
+    await this.addEvent(taskId, "task", `Generation succeeded for ${stage}.`);
+
+    const updated = await this.prisma.creationTask.findUnique({
+      where: { id: taskId },
+      include: { creationArtifacts: true, creationEvents: { orderBy: { createdAt: "asc" } } },
+    });
+    return { status: 200, data: updated ? this.mapTaskWithRelations(updated) : this.mapTask(task, "succeeded") };
+  }
+
+  private async persistGeneratedArtifacts(taskId: string, creationType: CreationType, workspacePath: string) {
+    const outputs = creationType === "memoir_video"
+      ? [{ kind: "mp4", localPath: path.join(workspacePath, "output", "video.mp4") }]
+      : [
+          { kind: "book_json", localPath: path.join(workspacePath, "output", "book.json") },
+          { kind: "book_html", localPath: path.join(workspacePath, "output", "book.html") },
+        ];
+
+    for (const output of outputs) {
+      const exists = await fs.stat(output.localPath).then((stat) => stat.isFile() && stat.size > 0).catch(() => false);
+      if (!exists) continue;
+      await this.prisma.creationArtifact.create({
+        data: {
+          id: `artifact_${taskId}_${output.kind}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          taskId,
+          kind: output.kind,
+          localPath: output.localPath,
+        },
+      });
+    }
+  }
+
+  async getTask(taskId: string): Promise<ServiceResult<CreationTask | { message: string }>> {
+    const task = await this.prisma.creationTask.findUnique({
+      where: { id: taskId },
+      include: { creationArtifacts: true, creationEvents: { orderBy: { createdAt: "asc" } } },
+    });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+    return { status: 200, data: this.mapTaskWithRelations(task) };
+  }
+
+  async getEvents(taskId: string): Promise<ServiceResult<{ events: CreationEvent[] } | { message: string }>> {
+    const task = await this.prisma.creationTask.findUnique({ where: { id: taskId } });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+
+    const events = await this.prisma.creationEvent.findMany({
+      where: { taskId },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return { status: 200, data: { events: events.map((e) => this.mapEvent(e)) } };
+  }
+
+  async getPreviewHtml(taskId: string): Promise<ServiceResult<{ message: string }> | { status: number; html: string }> {
+    const task = await this.prisma.creationTask.findUnique({ where: { id: taskId } });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+
+    const creationType = task.creationType as CreationType;
+    if (creationType === "memoir_video") {
+      return { status: 422, data: { message: "Memoir video tasks do not provide an HTML page preview." } };
+    }
+
+    const workspacePath = task.workspacePath ?? "";
+    const bookJson = await readBookJson(workspacePath);
+    if (!bookJson || !bookJson.metadata || !bookJson.pages) {
+      return { status: 409, data: { message: "Task preview is not available until the book draft is generated." } };
+    }
+
+    const title = (bookJson.metadata as Record<string, unknown>)?.title ?? "Preview";
+    const pages = (bookJson.pages as Array<Record<string, unknown>>) ?? [];
+    const html = this.renderPreviewHtml(title as string, pages);
+
+    return { status: 200, html };
+  }
+
+  async exportTask(taskId: string, dto: ExportCreationTaskDto): Promise<ServiceResult<CreationArtifact | { message: string }>> {
+    const task = await this.prisma.creationTask.findUnique({
+      where: { id: taskId },
+      include: { creationArtifacts: true },
+    });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+
+    const creationType = task.creationType as CreationType;
+    if (dto.target === "mp4" && creationType !== "memoir_video") {
+      return { status: 422, data: { message: "Only memoir_video tasks can export MP4 artifacts." } };
+    }
+    if (dto.target !== "mp4" && creationType === "memoir_video") {
+      return { status: 422, data: { message: "Memoir video tasks export MP4 artifacts." } };
+    }
+
+    const artifactId = `artifact_${taskId}_${dto.target}_${Date.now()}`;
+    const localPath = dto.targetPath ?? path.join(this.config.config.paths.exportDir, `${taskId}${this.exportExtension(dto.target)}`);
+
+    const workspacePath = task.workspacePath ?? "";
+    if (dto.target === "pdf" || dto.target === "long_image_png" || dto.target === "long_image_jpg") {
+      const output = await loadValidatedBookOutput(workspacePath, new Set(task.assetIds));
+      if (!output.ok) {
+        return { status: 422, data: { message: `Book artifact contract failed: ${output.errors.join("; ")}` } };
+      }
+      if (dto.target === "pdf") {
+        const exported = await exportHtmlToPdf(output.html, localPath);
+        if (!exported.ok) {
+          return { status: 500, data: { message: exported.message ?? "PDF export failed." } };
+        }
+        const verified = await verifyPdfWithPdfJs(localPath, output.book.pages.length);
+        if (!verified.ok) {
+          return { status: 500, data: { message: verified.message ?? "PDF verification failed." } };
+        }
+      } else {
+        const exported = await exportHtmlToLongImage({
+          html: output.html,
+          targetPath: localPath,
+          format: dto.target === "long_image_jpg" ? "jpg" : "png",
+        });
+        if (!exported.ok) {
+          return { status: 500, data: { message: exported.message ?? "Long image export failed." } };
+        }
       }
     }
 
-    const artifact: CreationArtifact = {
-      artifactId: `artifact_${jobId}_${dto.target}_${Date.now()}`,
-      kind: dto.target,
-      jobId,
-      localPath: dto.targetPath ?? path.join(this.config.config.paths.exportDir, `${jobId}.${dto.target}`),
-      createdAt: now,
-    };
-    const nextJob = this.withTerminalStep({
-      ...job,
-      status: "exported",
-      artifacts: [...job.artifacts, artifact],
-      updatedAt: now,
-    });
-    record.jobs[jobId] = nextJob;
-    record.events[jobId] = [
-      ...(record.events[jobId] ?? []),
-      this.event(jobId, "export", `Exported ${dto.target.toUpperCase()} artifact metadata.`, now),
-    ];
-    await this.writeRecord(record);
+    if (dto.target === "mp4") {
+      const mp4Path = path.join(workspacePath, "output", "video.mp4");
+      const mp4Exists = await fs.stat(mp4Path).then((s) => s.isFile()).catch(() => false);
+      if (!mp4Exists) {
+        return { status: 409, data: { message: "MP4 artifact is not available. Re-run generation first." } };
+      }
+      try {
+        await fs.mkdir(path.dirname(localPath), { recursive: true });
+        await fs.cp(mp4Path, localPath);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown copy error";
+        return { status: 500, data: { message: `Failed to export MP4 artifact: ${message}` } };
+      }
+    }
 
-    return { status: 201, data: artifact };
+    const artifact = await this.prisma.creationArtifact.create({
+      data: { id: artifactId, taskId, kind: dto.target, localPath },
+    });
+
+    await this.prisma.creationTask.update({
+      where: { id: taskId },
+      data: { status: "exported" },
+    });
+    await this.addEvent(taskId, "export", `Exported ${dto.target.toUpperCase()} artifact to ${localPath}.`);
+
+    return { status: 201, data: this.mapArtifact(artifact) };
   }
 
-  async shareJob(
-    jobId: string,
-    dto: ShareCreationJobDto,
-  ): Promise<ServiceResult<CreationArtifact | { message: string }>> {
-    const record = await this.readRecord();
-    const job = record.jobs[jobId];
-    if (!job) return { status: 404, data: { message: "Creation job not found." } };
-    const source = job.artifacts.find((artifact) => artifact.artifactId === dto.artifactId);
+  async shareTask(taskId: string, dto: ShareCreationTaskDto): Promise<ServiceResult<CreationArtifact | { message: string }>> {
+    const task = await this.prisma.creationTask.findUnique({
+      where: { id: taskId },
+      include: { creationArtifacts: true },
+    });
+    if (!task) return { status: 404, data: { message: "Creation task not found." } };
+
+    const source = task.creationArtifacts.find((a) => a.id === dto.artifactId);
     if (!source) return { status: 404, data: { message: "Creation artifact not found." } };
 
-    const now = new Date().toISOString();
-    const share = await this.createShareLink(job, source);
-    if (share.ok === false) {
-      return {
-        status: share.status,
-        data: {
-          message: share.message,
-        },
-      };
-    }
-    const artifact: CreationArtifact = {
-      artifactId: `artifact_${jobId}_share_${Date.now()}`,
-      kind: "web_share",
-      jobId,
-      shareId: share.shareId,
-      shareUrl: share.shareUrl,
-      createdAt: now,
-    };
-    record.jobs[jobId] = {
-      ...job,
-      status: "shared",
-      artifacts: [...job.artifacts, artifact],
-      updatedAt: now,
-    };
-    record.events[jobId] = [
-      ...(record.events[jobId] ?? []),
-      this.event(jobId, "share", `Created Web share link for ${source.kind.toUpperCase()} through storage sync.`, now),
-    ];
-    await this.writeRecord(record);
-
-    return { status: 201, data: artifact };
-  }
-
-  private async createShareLink(
-    job: CreationJob,
-    source: CreationArtifact,
-  ): Promise<
-    | { ok: true; shareId: string; shareUrl: string }
-    | { ok: false; status: number; message: string }
-  > {
     if (!source.localPath) {
-      return {
-        ok: false,
-        status: 409,
-        message: "Creation artifact has no local file path to share.",
-      };
+      return { status: 409, data: { message: "Creation artifact has no local file path to share." } };
     }
     if (!this.datasetService) {
-      return {
-        ok: false,
-        status: 503,
-        message: "Creation share service is not available in this Sidecar runtime.",
-      };
+      return { status: 503, data: { message: "Creation share service is not available in this Sidecar runtime." } };
     }
-    const kind = this.exportArtifactKindFor(source.kind);
+
+    const kind = source.kind === "pdf" || source.kind === "mp4" || source.kind === "long_image_png" || source.kind === "long_image_jpg" ? source.kind : undefined;
     if (!kind) {
-      return {
-        ok: false,
-        status: 422,
-        message: "Only PDF and MP4 creation artifacts can be shared.",
-      };
+      return { status: 422, data: { message: "Only PDF, MP4, and long image creation artifacts can be shared." } };
     }
 
     await this.datasetService.recordExportArtifact({
-      id: source.artifactId,
-      jobId: source.jobId,
+      id: source.id,
+      jobId: taskId,
       kind,
       localPath: source.localPath,
       storageProvider: "local",
@@ -429,336 +361,194 @@ export class CreationService {
     });
 
     const enqueued = await this.datasetService.enqueueExportArtifactStorageSync({
-      artifactId: source.artifactId,
-      childId: this.storageChildIdFor(job),
+      artifactId: source.id,
+      childId: `creation-${task.creationType}`,
     });
+
     if (!enqueued?.enqueued) {
       const reason = enqueued && "reason" in enqueued ? enqueued.reason : "unknown_error";
-      return {
-        ok: false,
-        status: 502,
-        message: `Export artifact could not be queued for storage sync: ${reason}.`,
-      };
+      return { status: 502, data: { message: `Export artifact could not be queued for storage sync: ${reason}.` } };
     }
 
     await this.datasetService.runStorageSyncWorker({ limit: 10 });
-    const metadata = await this.datasetService.getExportArtifactShareMetadata(source.artifactId);
+    const metadata = await this.datasetService.getExportArtifactShareMetadata(source.id);
     if (!metadata.ok || !metadata.url) {
-      return {
-        ok: false,
-        status: 502,
-        message: metadata.message || "Storage share link could not be created.",
-      };
+      return { status: 502, data: { message: metadata.message || "Storage share link could not be created." } };
     }
 
-    return {
-      ok: true,
-      shareId: source.artifactId,
-      shareUrl: metadata.url,
-    };
+    const shareArtifact = await this.prisma.creationArtifact.create({
+      data: {
+        id: `artifact_${taskId}_share_${Date.now()}`,
+        taskId,
+        kind: "web_share",
+        shareId: source.id,
+        shareUrl: metadata.url,
+      },
+    });
+
+    await this.prisma.creationTask.update({
+      where: { id: taskId },
+      data: { status: "shared" },
+    });
+    await this.addEvent(taskId, "share", `Created Web share link for ${kind.toUpperCase()}.`);
+
+    return { status: 201, data: this.mapArtifact(shareArtifact) };
   }
 
-  private exportArtifactKindFor(kind: CreationArtifact["kind"]): ExportArtifact["kind"] | undefined {
-    if (kind === "pdf" || kind === "mp4") return kind;
-    return undefined;
+  private async addEvent(taskId: string, type: CreationEvent["type"], message: string) {
+    await this.prisma.creationEvent.create({
+      data: {
+        id: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        taskId,
+        type,
+        message,
+      },
+    });
   }
 
-  private storageChildIdFor(job: CreationJob) {
-    return `creation-${job.creationType}`;
-  }
-
-  private stepsFor(creationType: CreationType, status: CreationStep["status"]): CreationStep[] {
-    const generateLabel = creationType === "memoir_video" ? "Generate MP4 with Hyperframes skill" : "Generate PDF draft";
+  private defaultSteps(creationType: CreationType, status: CreationStep["status"]): CreationStep[] {
+    const generateLabel = creationType === "memoir_video" ? "Generate MP4" : "Generate book draft";
     return [
       { stepId: "compose", label: "Compose selected assets", status },
-      { stepId: "plan", label: "Confirm persisted agent plan", status },
+      { stepId: "plan", label: "Confirm agent plan", status },
       { stepId: "generate", label: generateLabel, status },
       { stepId: "review", label: "Review generated artifact", status },
       { stepId: "publish", label: "Export and share", status },
     ];
   }
 
-  private normalizePlannedSteps(steps: CreationStep[]): CreationStep[] {
-    return steps.map((step) => ({
-      ...step,
-      status: step.status ?? "pending",
-    }));
+  private normalizePlanSteps(value: unknown): CreationStep[] {
+    if (!Array.isArray(value)) return this.defaultSteps("storybook", "pending");
+    return value.map((item) => {
+      if (!item || typeof item !== "object") return undefined;
+      const record = item as Record<string, unknown>;
+      const stepId = typeof record.stepId === "string" ? record.stepId.trim() : "";
+      const label = typeof record.label === "string" ? record.label.trim() : "";
+      const detail = typeof record.detail === "string" ? record.detail.trim() : undefined;
+      if (!stepId || !label) return undefined;
+      return { stepId, label, status: "pending" as const, detail };
+    }).filter(Boolean) as CreationStep[];
   }
 
-  private withTerminalStep(job: CreationJob): CreationJob {
-    return {
-      ...job,
-      currentStepId: "publish",
-      steps: job.steps.map((step) => ({ ...step, status: "succeeded" })),
-    };
+  private buildPlanPrompt(dto: CreateCreationTaskDto): string {
+    return JSON.stringify({
+      goal: dto.goal,
+      creationType: dto.creationType,
+      assetIds: dto.assetIds,
+      constraints: {
+        output: dto.creationType === "memoir_video" ? "MP4 video" : "PDF",
+        mainStages: ["compose", "plan", "generate", "review", "publish"],
+      },
+    });
   }
 
-  private skillNameFor(creationType: CreationType) {
+  private skillNameFor(creationType: CreationType): string {
     if (creationType === "memoir_video") return "Hyperframes skill";
     if (creationType === "memory_book") return "KidMemory memory book";
     return "KidMemory storybook";
   }
 
-  private summaryFor(creationType: CreationType, goal: string, assetCount: number) {
-    const output = creationType === "memoir_video" ? "MP4 video" : "PDF";
-    return `Create a ${output} from ${assetCount} selected assets for: ${goal}`;
-  }
-
-  private requirementsFor(creationType: CreationType) {
-    if (creationType === "memoir_video") {
-      return {
-        minAssets: 3,
-        recommendedAssets: 8,
-        needsCloudImage: false,
-        needsHyperframes: true,
-        needsFfmpeg: true,
-      };
-    }
-    if (creationType === "memory_book") {
-      return {
-        minAssets: 1,
-        recommendedAssets: 8,
-        needsCloudImage: true,
-        needsHyperframes: false,
-        needsFfmpeg: false,
-      };
-    }
+  private mapTask(task: Partial<PrismaCreationTask>, overrideStatus?: string): CreationTask {
+    const steps = this.parseSteps(task.steps);
+    const error = this.parseError(task.error);
     return {
-      minAssets: 1,
-      recommendedAssets: 6,
-      needsCloudImage: true,
-      needsHyperframes: false,
-      needsFfmpeg: false,
+      taskId: task.id ?? "",
+      creationType: (task.creationType ?? "storybook") as CreationType,
+      goal: task.goal ?? "",
+      assetIds: task.assetIds ?? [],
+      status: (overrideStatus ?? task.status ?? "failed") as CreationTaskStatus,
+      currentStepId: task.currentStepId ?? null,
+      summary: task.summary ?? undefined,
+      skillName: task.skillName ?? undefined,
+      steps,
+      requirements: { minAssets: 1, recommendedAssets: 6, needsCloudImage: true, needsHyperframes: false, needsFfmpeg: false },
+      requirementItems: task.requirementItems ?? [],
+      artifacts: [],
+      error,
+      workspacePath: task.workspacePath ?? "",
+      createdAt: task.createdAt?.toISOString?.() ?? new Date().toISOString(),
+      updatedAt: task.updatedAt?.toISOString?.() ?? new Date().toISOString(),
     };
   }
 
-  private requirementItemsFor(creationType: CreationType) {
-    if (creationType === "memoir_video") {
-      return ["Selected assets", "Hyperframes skill runtime", "FFmpeg available or auto-repaired"];
-    }
-    return ["Selected assets", "OpenAI Agent SDK configuration", "Local export directory"];
+  private parseSteps(raw: unknown): CreationStep[] {
+    const value = typeof raw === "string" ? this.parseJson(raw) : raw;
+    const parsed = z.array(creationStepSchema).safeParse(value);
+    return parsed.success ? parsed.data : [];
   }
 
-  private runningDetailFor(creationType: CreationType) {
-    if (creationType === "memoir_video") return "Preparing video generation environment and running Hyperframes skill steps.";
-    return "Preparing PDF generation through the existing book skill path.";
-  }
-
-  private async tryCreateBookJob(plan: CreationPlan): Promise<{ ok: true; bookJobId: string } | { ok: false; message: string }> {
-    try {
-      const result = await this.booksService.createJob({
-        assetIds: plan.assetIds,
-        goal: plan.goal,
-      });
-      const data = this.resultData(result);
-      if (data && typeof data === "object" && typeof data.id === "string" && data.status !== "failed") {
-        return { ok: true, bookJobId: data.id };
-      }
-      return { ok: false, message: this.messageFromResult(result, "BooksService did not return a generated book job.") };
-    } catch (error) {
-      return { ok: false, message: error instanceof Error ? error.message : "Unknown BooksService generation error." };
-    }
-  }
-
-  private async tryExportBookPdf(
-    bookJobId: string,
-    targetPath?: string,
-  ): Promise<{ ok: true; artifactId: string; localPath: string } | { ok: false; message: string }> {
-    try {
-      const result = await this.booksService.exportPdf(bookJobId, targetPath ? { targetPath } : {});
-      const data = this.resultData(result);
-      const artifact = data?.artifact;
-      const exported = data?.exported;
-      if (
-        artifact &&
-        typeof artifact === "object" &&
-        typeof artifact.id === "string" &&
-        typeof artifact.localPath === "string"
-      ) {
-        return { ok: true, artifactId: artifact.id, localPath: artifact.localPath };
-      }
-      if (exported && typeof exported === "object" && exported.ok === true && typeof exported.path === "string") {
-        return {
-          ok: true,
-          artifactId: `artifact_${bookJobId}_pdf_${Date.now()}`,
-          localPath: exported.path,
-        };
-      }
-      return { ok: false, message: this.messageFromResult(result, "BooksService PDF export did not return an artifact.") };
-    } catch (error) {
-      return { ok: false, message: error instanceof Error ? error.message : "Unknown BooksService export error." };
-    }
-  }
-
-  private async tryRenderMemoirVideo(
-    plan: CreationPlan,
-    jobId: string,
-  ): Promise<
-    | { ok: true; artifactId: string; localPath: string; repairMessage?: string }
-    | { ok: false; message: string; category: "hyperframes" | "environment"; code?: string; repairMessage?: string }
-  > {
-    try {
-      const input = {
-        projectId: jobId,
-        prompt: plan.goal,
-      };
-      const first = await this.renderMemoirVideoOnce(input, jobId);
-      if (first.ok === true) return first;
-
-      if (this.shouldRepairFfmpeg(first.code)) {
-        const repaired = await this.repairFfmpeg();
-        if (repaired.ok) {
-          const retry = await this.renderMemoirVideoOnce(input, jobId);
-          if (retry.ok === true) {
-            return { ...retry, repairMessage: repaired.message };
-          }
-          return { ...retry, repairMessage: repaired.message };
-        }
-        return {
-          ok: false,
-          message: repaired.message,
-          category: "environment",
-          code: repaired.code ?? "FFMPEG_REPAIR_FAILED",
-          repairMessage: repaired.message,
-        };
-      }
-
-      return first;
-    } catch (error) {
-      return {
-        ok: false,
-        message: error instanceof Error ? error.message : "Unknown Hyperframes generation error.",
-        category: "hyperframes",
-      };
-    }
-  }
-
-  private async renderMemoirVideoOnce(
-    input: { projectId: string; prompt: string },
-    jobId: string,
-  ): Promise<
-    | { ok: true; artifactId: string; localPath: string }
-    | { ok: false; message: string; category: "hyperframes" | "environment"; code?: string }
-  > {
-    const result = await this.skillRuntime.execute({
-      skillId: "hyperframes",
-      tool: "render_hyperframes_video",
-      arguments: input,
-      traceId: `creation_${jobId}`,
-    });
-    const data = this.resultData(result)?.toolResult ?? this.resultData(result);
-    const outputPath = this.hyperframesOutputPath(data);
-    if (data && typeof data === "object" && data.ok === true && outputPath) {
-      return {
-        ok: true,
-        artifactId: `artifact_${jobId}_mp4_${Date.now()}`,
-        localPath: outputPath,
-      };
-    }
-
-    const code = data && typeof data === "object" && typeof data.code === "string" ? data.code : undefined;
+  private parseError(raw: unknown): CreationError | null {
+    if (!raw) return null;
+    const value = typeof raw === "string" ? this.parseJson(raw) : raw;
+    const parsed = creationErrorSchema.safeParse(value);
+    if (!parsed.success) return null;
     return {
-      ok: false,
-      message: this.messageFromResult(result, "Hyperframes did not return an MP4 artifact."),
-      category: this.hyperframesFailureCategory(code),
-      code,
+      category: parsed.data.category as CreationError["category"],
+      message: parsed.data.message,
+      stepId: parsed.data.stepId,
+      code: parsed.data.code,
     };
   }
 
-  private async repairFfmpeg() {
-    if (!this.ffmpegRepairService) {
-      return {
-        ok: false,
-        code: "FFMPEG_REPAIR_UNAVAILABLE",
-        message: "FFmpeg repair service is not available in this Sidecar runtime.",
-      };
+  private parseJson(raw: string): unknown {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return undefined;
     }
-    return this.ffmpegRepairService.repair();
   }
 
-  private hyperframesOutputPath(data: unknown) {
-    if (!data || typeof data !== "object") return undefined;
-    const record = data as Record<string, unknown>;
-    for (const key of ["localPath", "outputPath", "path"]) {
-      const value = record[key];
-      if (typeof value === "string" && value.trim().length > 0) return value;
-    }
-    const artifact = record.artifact;
-    if (artifact && typeof artifact === "object") {
-      const localPath = (artifact as { localPath?: unknown }).localPath;
-      if (typeof localPath === "string" && localPath.trim().length > 0) return localPath;
-    }
-    return undefined;
-  }
-
-  private hyperframesFailureCategory(code?: string): "hyperframes" | "environment" {
-    if (!code) return "hyperframes";
-    return code.includes("FFMPEG") || code.includes("NOT_CONFIGURED") ? "environment" : "hyperframes";
-  }
-
-  private shouldRepairFfmpeg(code?: string) {
-    return typeof code === "string" && code.includes("FFMPEG");
-  }
-
-  private resultData(result: unknown): any {
-    if (result && typeof result === "object" && "data" in result) {
-      return (result as { data?: unknown }).data as any;
-    }
-    return result as any;
-  }
-
-  private messageFromResult(result: unknown, fallback: string) {
-    const data = this.resultData(result);
-    if (data && typeof data === "object" && typeof data.message === "string") return data.message;
-    if (data && typeof data === "object" && data.runner && typeof data.runner.message === "string") {
-      return data.runner.message;
-    }
-    return fallback;
-  }
-
-  private statusFromResult(result: unknown, fallback: number) {
-    if (result && typeof result === "object" && "status" in result) {
-      const status = (result as { status?: unknown }).status;
-      if (typeof status === "number") return status;
-    }
-    return fallback;
-  }
-
-  private event(
-    jobId: string,
-    type: CreationEvent["type"],
-    message: string,
-    createdAt: string,
-    stepId?: string,
-  ): CreationEvent {
+  private mapTaskWithRelations(task: PrismaCreationTask & { creationArtifacts?: Array<{ id: string; taskId: string; kind: string; localPath: string | null; shareId: string | null; shareUrl: string | null; createdAt: Date }>; creationEvents?: Array<{ id: string; taskId: string; stepId: string | null; type: string; message: string; createdAt: Date }> }): CreationTask {
+    const result = this.mapTask(task);
     return {
-      eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      jobId,
-      stepId,
-      type,
-      message,
-      createdAt,
+      ...result,
+      artifacts: (task.creationArtifacts ?? []).map((a) => this.mapArtifact(a)),
     };
   }
 
-  private async readRecord(): Promise<CreationRecord> {
-    try {
-      const raw = await fs.readFile(this.storePath, "utf8");
-      return JSON.parse(raw) as CreationRecord;
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error && (error as { code: string }).code === "ENOENT") {
-        return { plans: {}, jobs: {}, events: {}, linkedBookJobs: {} };
-      }
-      throw error;
-    }
+  private mapArtifact(a: { id: string; taskId: string; kind: string; localPath: string | null; shareId: string | null; shareUrl: string | null; createdAt: Date }): CreationArtifact {
+    return {
+      artifactId: a.id,
+      taskId: a.taskId,
+      kind: a.kind as CreationArtifact["kind"],
+      localPath: a.localPath ?? undefined,
+      shareId: a.shareId ?? undefined,
+      shareUrl: a.shareUrl ?? undefined,
+      createdAt: a.createdAt.toISOString?.() ?? new Date().toISOString(),
+    };
   }
 
-  private async writeRecord(record: CreationRecord) {
-    await fs.mkdir(path.dirname(this.storePath), { recursive: true });
-    await fs.writeFile(this.storePath, JSON.stringify(record, null, 2));
+  private mapEvent(e: { id: string; taskId: string; stepId: string | null; type: string; message: string; createdAt: Date }): CreationEvent {
+    return {
+      eventId: e.id,
+      taskId: e.taskId,
+      stepId: e.stepId ?? undefined,
+      type: e.type as CreationEvent["type"],
+      message: e.message,
+      createdAt: e.createdAt.toISOString?.() ?? new Date().toISOString(),
+    };
   }
 
-  private get storePath() {
-    return path.join(this.config.config.paths.dataDir, "creation", "state.json");
+  private exportExtension(target: ExportCreationTaskDto["target"]): string {
+    if (target === "mp4") return ".mp4";
+    if (target === "long_image_png") return ".png";
+    if (target === "long_image_jpg") return ".jpg";
+    return ".pdf";
+  }
+
+  private renderPreviewHtml(title: string, pages: Array<Record<string, unknown>>): string {
+    const pageHtml = pages.map((page, i) => {
+      const pageTitle = page.title ?? `Page ${i + 1}`;
+      const text = page.text ?? "";
+      return `<div class="page"><h2>${this.escapeHtml(String(pageTitle))}</h2><p>${this.escapeHtml(String(text))}</p></div>`;
+    }).join("\n");
+
+    return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${this.escapeHtml(title)}</title>
+<style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px}.page{margin-bottom:30px;padding:20px;border:1px solid #ddd;border-radius:8px}</style>
+</head><body><h1>${this.escapeHtml(title)}</h1>${pageHtml}</body></html>`;
+  }
+
+  private escapeHtml(str: string): string {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 }
