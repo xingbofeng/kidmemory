@@ -7,6 +7,17 @@ import '../../shared/widgets/content.dart';
 import '../../shared/widgets/layout.dart';
 import '../../../l10n/app_localizations.dart';
 
+const creationComposeIconAsset = 'assets/icons/library/65-creation-compose.png';
+const creationPlanIconAsset = 'assets/icons/library/66-creation-plan.png';
+const creationSummaryBearsIconAsset =
+    'assets/icons/library/71-creation-summary-bears.png';
+const creationTopBearIconAsset =
+    'assets/icons/library/72-creation-top-bear.png';
+const creationVideoBoardIconAsset =
+    'assets/icons/library/73-creation-video-board.png';
+const creationEmptyPhotosIconAsset =
+    'assets/icons/library/74-creation-empty-photos.png';
+
 class ExportResultVm {
   const ExportResultVm({
     required this.kind,
@@ -364,9 +375,26 @@ class GenerateExportPage extends StatelessWidget {
         generated || exported || exportResult != null || shareCreating;
     final showPreviewFailurePanel =
         generated && previewFailureReason.trim().isNotEmpty;
+    final compactPrepareLayout =
+        creationPhase == CreationWorkflowPhase.preparing &&
+        !generated &&
+        !exported;
     return PageFrame(
       title: AppLocalizations.of(context)!.assetStudioTitle,
       subtitle: AppLocalizations.of(context)!.generateExportS909,
+      framePadding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+      contentTopSpacing: 6,
+      decoration: Padding(
+        padding: const EdgeInsets.only(right: 410),
+        child: Transform.translate(
+          offset: const Offset(0, 12),
+          child: SizedBox(
+            width: 210,
+            height: 66,
+            child: Image.asset(creationTopBearIconAsset, fit: BoxFit.contain),
+          ),
+        ),
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final controlPanel = GenerateSettingsPanel(
@@ -390,151 +418,238 @@ class GenerateExportPage extends StatelessWidget {
                 : null,
             onPreviewAllPages: onPreviewAllPages,
           );
-          final mainContent = SingleChildScrollView(
-            child: Column(
-              children: [
-                CreationStageStepper(currentStage: mainStage),
+          final prepareMainColumn = Column(
+            children: [
+              CreationStageStepper(currentStage: mainStage),
+              const SizedBox(height: 5),
+              SmartGenerateActions(
+                selectedCount: selectedCount,
+                generating: generating,
+                selectedCreationType: selectedCreationType,
+                onGeneratePictureBook: canGenerate
+                    ? (onGeneratePictureBook ?? onGenerate)
+                    : null,
+                onGenerateMemoryAlbum: canGenerate
+                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                    : null,
+                onGenerateMemoryVideo: canGenerate
+                    ? (onGenerateMemoryVideo ?? onGenerate)
+                    : null,
+              ),
+              const SizedBox(height: 5),
+              AssetInputCard(
+                count: selectedCount,
+                onViewSelectedAssets: onViewSelectedAssets,
+              ),
+            ],
+          );
+          final prepareMainColumnNarrow = Column(
+            children: [
+              CreationStageStepper(currentStage: mainStage),
+              const SizedBox(height: 1),
+              SmartGenerateActions(
+                selectedCount: selectedCount,
+                generating: generating,
+                selectedCreationType: selectedCreationType,
+                onGeneratePictureBook: canGenerate
+                    ? (onGeneratePictureBook ?? onGenerate)
+                    : null,
+                onGenerateMemoryAlbum: canGenerate
+                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                    : null,
+                onGenerateMemoryVideo: canGenerate
+                    ? (onGenerateMemoryVideo ?? onGenerate)
+                    : null,
+              ),
+              const SizedBox(height: 1),
+              AssetInputCard(
+                count: selectedCount,
+                onViewSelectedAssets: onViewSelectedAssets,
+              ),
+            ],
+          );
+          final mainColumn = Column(
+            children: [
+              CreationStageStepper(currentStage: mainStage),
+              const SizedBox(height: 1),
+              SmartGenerateActions(
+                selectedCount: selectedCount,
+                generating: generating,
+                selectedCreationType: selectedCreationType,
+                onGeneratePictureBook: canGenerate
+                    ? (onGeneratePictureBook ?? onGenerate)
+                    : null,
+                onGenerateMemoryAlbum: canGenerate
+                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                    : null,
+                onGenerateMemoryVideo: canGenerate
+                    ? (onGenerateMemoryVideo ?? onGenerate)
+                    : null,
+              ),
+              const SizedBox(height: 1),
+              AssetInputCard(
+                count: selectedCount,
+                onViewSelectedAssets: onViewSelectedAssets,
+              ),
+              if (generated) ...[
                 const SizedBox(height: 16),
-                SmartGenerateActions(
+                GeneratedWorkSummary(
                   selectedCount: selectedCount,
+                  generationState: generationState,
+                  styleText: styleText,
+                  sizeText: sizeText,
+                  exportLabel: exportLabel,
+                  exported: exported,
+                ),
+              ],
+              if (showGenerationProgress) ...[
+                const SizedBox(height: 16),
+                GenerationFlowProgress(
+                  selectedCount: selectedCount,
+                  generated: generated,
                   generating: generating,
-                  selectedCreationType: selectedCreationType,
-                  onGeneratePictureBook: canGenerate
-                      ? (onGeneratePictureBook ?? onGenerate)
-                      : null,
-                  onGenerateMemoryAlbum: canGenerate
-                      ? (onGenerateMemoryAlbum ?? onGenerate)
-                      : null,
-                  onGenerateMemoryVideo: canGenerate
-                      ? (onGenerateMemoryVideo ?? onGenerate)
-                      : null,
+                  exported: exported,
+                  creationPhase: creationPhase,
+                  exportLabel: exportLabel,
+                  backendSteps: creationTaskSteps,
                 ),
+              ],
+              if (showPlanConfirmation) ...[
                 const SizedBox(height: 16),
-                generated
-                    ? GeneratedWorkSummary(
-                        selectedCount: selectedCount,
-                        generationState: generationState,
-                        styleText: styleText,
-                        sizeText: sizeText,
-                        exportLabel: exportLabel,
-                        exported: exported,
-                      )
-                    : GenerationEntrySummary(
-                        selectedCount: selectedCount,
-                        styleText: styleText,
-                        sizeText: sizeText,
-                        onViewSelectedAssets: onViewSelectedAssets,
-                      ),
-                const SizedBox(height: 16),
-                AssetInputCard(
-                  count: selectedCount,
-                  onViewSelectedAssets: onViewSelectedAssets,
+                CreationPlanConfirmationPanel(
+                  plan: creationTask!,
+                  onConfirm: onConfirmPlan,
+                  onEditRequest: onEditCreationRequest,
                 ),
-                if (showGenerationProgress) ...[
-                  const SizedBox(height: 16),
-                  GenerationFlowProgress(
-                    selectedCount: selectedCount,
-                    generated: generated,
-                    generating: generating,
-                    exported: exported,
-                    creationPhase: creationPhase,
-                    exportLabel: exportLabel,
-                    backendSteps: creationTaskSteps,
-                  ),
-                ],
-                if (showPlanConfirmation) ...[
-                  const SizedBox(height: 16),
-                  CreationPlanConfirmationPanel(
-                    plan: creationTask!,
-                    onConfirm: onConfirmPlan,
-                    onEditRequest: onEditCreationRequest,
-                  ),
-                ],
-                if (showPreviewPanel) ...[
-                  const SizedBox(height: 16),
-                  CreativePreviewPanel(
-                    selectedCount: selectedCount,
-                    generated: generated,
-                    generating: generating,
-                  ),
-                ],
-                if (showPreviewFailurePanel) ...[
-                  const SizedBox(height: 16),
-                  PreviewFailureActionPanel(
-                    reason: previewFailureReason,
-                    onOpenFolder: onOpenPreviewFailureFolder,
-                    onViewLog: onViewLogDetails,
-                  ),
-                ],
-                if (showCoverFailureActions) ...[
-                  const SizedBox(height: 16),
-                  CoverFailureActionPanel(
-                    requestId: requestId,
-                    onRetry: onGenerate,
-                    onViewLog: onViewLogDetails,
-                  ),
-                ],
+              ],
+              if (showPreviewPanel) ...[
                 const SizedBox(height: 16),
-                if (!showCoverFailureActions &&
-                    _shouldShowGenerationError(context, statusMessage))
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: GenerationErrorActionsPanel(
-                      statusMessage: statusMessage,
-                      requestId: requestId,
-                      failure: creationFailure,
-                      creationType: selectedCreationType,
-                      onRetry: onGenerate,
-                      onEditRequest: onEditCreationRequest,
-                      onViewLogs: onViewLogDetails,
-                    ),
-                  ),
-                if (showActivityPanel) ...[
-                  ActivityTimelinePanel(
-                    generated: generated,
-                    generating: generating,
-                    exported: exported,
-                    creationPhase: creationPhase,
+                CreativePreviewPanel(
+                  selectedCount: selectedCount,
+                  generated: generated,
+                  generating: generating,
+                ),
+              ],
+              if (showPreviewFailurePanel) ...[
+                const SizedBox(height: 16),
+                PreviewFailureActionPanel(
+                  reason: previewFailureReason,
+                  onOpenFolder: onOpenPreviewFailureFolder,
+                  onViewLog: onViewLogDetails,
+                ),
+              ],
+              if (showCoverFailureActions) ...[
+                const SizedBox(height: 16),
+                CoverFailureActionPanel(
+                  requestId: requestId,
+                  onRetry: onGenerate,
+                  onViewLog: onViewLogDetails,
+                ),
+              ],
+              if (!showCoverFailureActions &&
+                  _shouldShowGenerationError(context, statusMessage)) ...[
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: GenerationErrorActionsPanel(
                     statusMessage: statusMessage,
                     requestId: requestId,
-                    logLines: logLines,
-                    onViewDetails: onViewLogDetails,
+                    failure: creationFailure,
+                    creationType: selectedCreationType,
+                    onRetry: onGenerate,
+                    onEditRequest: onEditCreationRequest,
+                    onViewLogs: onViewLogDetails,
                   ),
-                ],
-                if (showExportPanel) ...[
-                  const SizedBox(height: 16),
-                  ExportResultPanel(
-                    result: exportResult,
-                    generated: generated,
-                    shareCreating: shareCreating,
-                    onOpenExportFolder: onOpenExportFolder,
-                    onCreateShareLink: onCreateShareLink,
-                    onCopyShareText: onCopyShareText,
-                    onOpenShareLink: onOpenShareLink,
-                    onCopyLongImage: onCopyLongImage,
-                    onViewLogDetails: onViewLogDetails,
-                  ),
-                ],
+                ),
               ],
-            ),
+              if (showActivityPanel) ...[
+                ActivityTimelinePanel(
+                  generated: generated,
+                  generating: generating,
+                  exported: exported,
+                  creationPhase: creationPhase,
+                  statusMessage: statusMessage,
+                  requestId: requestId,
+                  logLines: logLines,
+                  onViewDetails: onViewLogDetails,
+                ),
+              ],
+              if (showExportPanel) ...[
+                const SizedBox(height: 16),
+                ExportResultPanel(
+                  result: exportResult,
+                  generated: generated,
+                  shareCreating: shareCreating,
+                  onOpenExportFolder: onOpenExportFolder,
+                  onCreateShareLink: onCreateShareLink,
+                  onCopyShareText: onCopyShareText,
+                  onOpenShareLink: onOpenShareLink,
+                  onCopyLongImage: onCopyLongImage,
+                  onViewLogDetails: onViewLogDetails,
+                ),
+              ],
+            ],
           );
           if (constraints.maxWidth < 980) {
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  mainContent,
+                  compactPrepareLayout ? prepareMainColumnNarrow : mainColumn,
                   const SizedBox(height: 18),
                   controlPanel,
                 ],
               ),
             );
           }
+          if (compactPrepareLayout) {
+            return ScrollConfiguration(
+              behavior: const MaterialScrollBehavior().copyWith(
+                scrollbars: false,
+              ),
+              child: SingleChildScrollView(
+                primary: false,
+                physics: const ClampingScrollPhysics(),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: prepareMainColumn),
+                    const SizedBox(width: 14),
+                    SizedBox(
+                      width: 336,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 1),
+                        child: controlPanel,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          final mainContent = ScrollConfiguration(
+            behavior: const MaterialScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: SingleChildScrollView(primary: false, child: mainColumn),
+          );
+          final sidebarContent = ScrollConfiguration(
+            behavior: const MaterialScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
+            child: SingleChildScrollView(
+              primary: false,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: controlPanel,
+              ),
+            ),
+          );
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: mainContent),
-              const SizedBox(width: 22),
-              SizedBox(width: 380, child: controlPanel),
+              const SizedBox(width: 14),
+              SizedBox(width: 336, child: sidebarContent),
             ],
           );
         },
@@ -594,54 +709,55 @@ class CreationStageStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final stages = [
       _StageStepData(
         stage: CreationMainStage.prepare,
-        title: l10n.creationPhasePreparing,
+        title: '准备创作',
+        subtitle: '明确目标与素材',
         iconAsset: editIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.plan,
-        title: l10n.creationPhasePlanConfirm,
-        iconAsset: completeIconAsset,
+        title: '计划确认',
+        subtitle: '生成创作计划',
+        iconAsset: fileIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.generate,
-        title: l10n.creationPhaseGenerating,
+        title: '生成中',
+        subtitle: 'AI 正在创作',
         iconAsset: magicStarIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.preview,
-        title: l10n.creationPhasePreviewResult,
+        title: '结果预览',
+        subtitle: '查看创作成果',
         iconAsset: viewIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.share,
-        title: l10n.creationPhaseExportShare,
-        iconAsset: cloudUploadIconAsset,
+        title: '导出分享',
+        subtitle: '保存或分享作品',
+        iconAsset: linkIconAsset,
       ),
     ];
     final currentIndex = stages.indexWhere(
       (step) => step.stage == currentStage,
     );
     return SurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(13, 10, 13, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.creationFlowTitle,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+            '创作流程',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 7),
+          Row(
             children: [
-              for (var index = 0; index < stages.length; index++)
-                SizedBox(
-                  width: 122,
+              for (var index = 0; index < stages.length; index++) ...[
+                Expanded(
                   child: _StageStep(
                     index: index + 1,
                     data: stages[index],
@@ -649,6 +765,8 @@ class CreationStageStepper extends StatelessWidget {
                     complete: index < currentIndex,
                   ),
                 ),
+                if (index < stages.length - 1) const SizedBox(width: 4),
+              ],
             ],
           ),
         ],
@@ -661,11 +779,13 @@ class _StageStepData {
   const _StageStepData({
     required this.stage,
     required this.title,
+    required this.subtitle,
     required this.iconAsset,
   });
 
   final CreationMainStage stage;
   final String title;
+  final String subtitle;
   final String iconAsset;
 }
 
@@ -693,8 +813,8 @@ class _StageStep extends StatelessWidget {
         ? const Color(0xfff0f7ed)
         : const Color(0xfff6f0e8);
     return Container(
-      constraints: const BoxConstraints(minHeight: 70),
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
+      constraints: const BoxConstraints(minHeight: 78),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(12),
@@ -708,7 +828,7 @@ class _StageStep extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 13,
+                radius: 12,
                 backgroundColor: active || complete
                     ? const Color(0xff168542)
                     : const Color(0xffd8cbbd),
@@ -716,21 +836,35 @@ class _StageStep extends StatelessWidget {
                   '$index',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
               const SizedBox(width: 6),
-              AppAssetIcon(data.iconAsset, size: 17),
+              AppAssetIcon(data.iconAsset, size: 20),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             data.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: foreground, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: foreground,
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+            ),
+          ),
+          Text(
+            data.subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xff7a6a5b),
+              fontSize: 11.5,
+              height: 1.3,
+            ),
           ),
         ],
       ),
@@ -784,7 +918,9 @@ String _creationPhaseLabel(
 String _creationTypeLabel(BuildContext context, String creationType) {
   return switch (creationType) {
     'memory_book' => AppLocalizations.of(context)!.generateExportS740,
-    'memoir_video' => AppLocalizations.of(context)!.generateExportS727,
+    'memoir_video' => AppLocalizations.of(
+      context,
+    )!.assetLibraryBatchGenerateVideoLabel,
     _ => AppLocalizations.of(context)!.generateExportS721,
   };
 }
@@ -828,108 +964,141 @@ class SmartGenerateActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final startAction = switch (selectedCreationType) {
+      'memory_book' => onGenerateMemoryAlbum,
+      'memoir_video' => onGenerateMemoryVideo,
+      _ => onGeneratePictureBook,
+    };
+    final canStart = selectedCount > 0 && !generating;
     return SurfaceCard(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  AppLocalizations.of(context)!.generateExportS237,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                ),
-              ),
-              _StatusChip(
-                label: selectedCount == 0
-                    ? AppLocalizations.of(context)!.generateExportS800
-                    : AppLocalizations.of(
-                        context,
-                      )!.generateExportSelectedAssetsLabel(selectedCount),
-                color: selectedCount == 0
-                    ? const Color(0xff9a5a14)
-                    : const Color(0xff168542),
-                background: selectedCount == 0
-                    ? const Color(0xfffff4d8)
-                    : const Color(0xffe8f4ea),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)!.generateExportS883,
-            style: TextStyle(color: Color(0xff6f6258)),
+            '你想为孩子创作什么？',
+            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 14),
-          TextField(
-            enabled: !generating,
-            decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)!.generateExportS243,
-              prefixIcon: const Padding(
-                padding: EdgeInsets.all(12),
-                child: AppAssetIcon(magicStarIconAsset, size: 20),
-              ),
-              filled: true,
-              fillColor: const Color(0xfffffcf7),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xffe8dccb)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xffe8dccb)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xff3f8c55)),
-              ),
+          const SizedBox(height: 4),
+          const Text(
+            '输入创作目标，KidMemory 会为你生成合适的内容。',
+            style: TextStyle(
+              color: Color(0xff6f6258),
+              height: 1.35,
+              fontSize: 14,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 5),
+          Container(
+            constraints: const BoxConstraints(minHeight: 46),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            decoration: BoxDecoration(
+              color: const Color(0xfffffdf9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xffeadccf)),
+            ),
+            child: Row(
+              children: [
+                const AppAssetIcon(magicStarIconAsset, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    enabled: !generating,
+                    style: const TextStyle(fontSize: 15),
+                    decoration: const InputDecoration(
+                      hintText: '例如：用春游照片做一本 8 页绘本',
+                      border: InputBorder.none,
+                      isCollapsed: true,
+                      hintStyle: TextStyle(
+                        color: Color(0xff8f8072),
+                        fontSize: 14.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  '0 / 200',
+                  style: TextStyle(
+                    color: Color(0xff8f8072),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            '选择创作类型',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 5),
           Row(
             children: [
               Expanded(
                 child: _CreativeTypeCard(
                   title: AppLocalizations.of(context)!.generateExportS721,
-                  description: AppLocalizations.of(context)!.generateExportS717,
-                  iconAsset: bookIconAsset,
+                  description: '将照片和故事变成精美绘本',
+                  tagText: '6-24 页',
+                  iconAsset: creationComposeIconAsset,
+                  iconSize: 80,
                   selected: selectedCreationType == 'storybook',
                   onPressed: onGeneratePictureBook,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 6),
               Expanded(
                 child: _CreativeTypeCard(
                   title: AppLocalizations.of(context)!.generateExportS740,
-                  description: AppLocalizations.of(context)!.generateExportS532,
-                  iconAsset: timelineIconAsset,
+                  description: '整理成长记录与珍贵瞬间',
+                  tagText: '10-40 页',
+                  iconAsset: bearDocumentIconAsset,
+                  iconSize: 76,
                   selected: selectedCreationType == 'memory_book',
                   onPressed: onGenerateMemoryAlbum,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 6),
               Expanded(
                 child: _CreativeTypeCard(
-                  title: AppLocalizations.of(context)!.generateExportS727,
-                  description: AppLocalizations.of(context)!.generateExportS738,
-                  iconAsset: playIconAsset,
+                  title: AppLocalizations.of(
+                    context,
+                  )!.assetLibraryBatchGenerateVideoLabel,
+                  description: '生成带字幕和音乐的视频',
+                  tagText: '1-10 分钟',
+                  iconAsset: creationVideoBoardIconAsset,
+                  iconSize: 76,
                   selected: selectedCreationType == 'memoir_video',
                   onPressed: onGenerateMemoryVideo,
                 ),
               ),
             ],
           ),
-          if (selectedCount == 0) ...[
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.generateExportS859,
-              style: TextStyle(
-                color: Color(0xff9a5a14),
-                fontWeight: FontWeight.w700,
+          const SizedBox(height: 7),
+          _AssetStatusStrip(selectedCount: selectedCount),
+          const SizedBox(height: 7),
+          PrimaryButton(
+            label: AppLocalizations.of(
+              context,
+            )!.generateExportStartPlanningAction,
+            onPressed: canStart ? startAction : null,
+            height: 42,
+            fontSize: 15,
+            backgroundColor: const Color(0xff83b88e),
+            disabledBackgroundColor: const Color(0xffcfe1d3),
+            disabledForegroundColor: const Color(0xfff6faf7),
+          ),
+          if (!canStart) ...[
+            const SizedBox(height: 9),
+            const Center(
+              child: Text(
+                '请先选择素材，才能开始为孩子创作精彩内容哦～',
+                style: TextStyle(
+                  color: Color(0xffc0aa90),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -943,55 +1112,116 @@ class _CreativeTypeCard extends StatelessWidget {
   const _CreativeTypeCard({
     required this.title,
     required this.description,
+    required this.tagText,
     required this.iconAsset,
+    this.iconSize = 42,
     required this.selected,
     required this.onPressed,
   });
 
   final String title;
   final String description;
+  final String tagText;
   final String iconAsset;
+  final double iconSize;
   final bool selected;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final foreground = selected
-        ? const Color(0xff14773c)
+        ? const Color(0xff157b41)
         : const Color(0xff2d241c);
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onPressed,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 106),
-        padding: const EdgeInsets.all(14),
+        constraints: const BoxConstraints(minHeight: 124),
+        padding: const EdgeInsets.fromLTRB(17, 14, 13, 14),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xffe8f4ea) : const Color(0xfffffcf7),
+          color: selected ? const Color(0xffedf8ef) : const Color(0xfffffcf8),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xffb6dec0) : const Color(0xffe8dccb),
+            color: selected ? const Color(0xffa9d6b4) : const Color(0xffe6d9c9),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            AppAssetIcon(iconAsset, size: 22),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: foreground, fontWeight: FontWeight.w900),
+            Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppAssetIcon(iconAsset, size: iconSize),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: foreground,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15.5,
+                          ),
+                        ),
+                        Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xff7a6a5b),
+                            fontSize: 12.8,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xfffff0dc),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            tagText,
+                            style: const TextStyle(
+                              color: Color(0xff8d6025),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 5),
-            Text(
-              description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xff7a6a5b),
-                fontSize: 12,
-                height: 1.3,
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: selected ? 10 : 11,
+                height: selected ? 10 : 11,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xff4aa062)
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xff4aa062)
+                        : const Color(0xffd6c9b7),
+                    width: selected ? 0 : 1,
+                  ),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ],
@@ -1001,265 +1231,209 @@ class _CreativeTypeCard extends StatelessWidget {
   }
 }
 
+class _AssetStatusStrip extends StatelessWidget {
+  const _AssetStatusStrip({required this.selectedCount});
+
+  final int selectedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
+      decoration: BoxDecoration(
+        color: const Color(0xfffffcf7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffeadccf)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const AppAssetIcon(imageIconAsset, size: 21),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '素材状态',
+                        style: TextStyle(
+                          color: Color(0xff5b4f45),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        '已选择 $selectedCount 项素材',
+                        style: const TextStyle(
+                          color: Color(0xff2e261f),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const Text(
+                        '建议至少选择 6 项素材，效果更好',
+                        style: TextStyle(
+                          color: Color(0xff7a6a5b),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          SizedBox(
+            width: 252,
+            child: Column(
+              children: [
+                const Row(
+                  children: [
+                    CircleAvatar(radius: 4, backgroundColor: Color(0xffd9a48f)),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6),
+                        child: Divider(
+                          color: Color(0xffdfd4c6),
+                          thickness: 1,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    CircleAvatar(radius: 4, backgroundColor: Color(0xff86ad87)),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6),
+                        child: Divider(
+                          color: Color(0xffdfd4c6),
+                          thickness: 1,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    CircleAvatar(radius: 4, backgroundColor: Color(0xffc9c2b7)),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '0（当前）',
+                      style: TextStyle(
+                        color: Color(0xffbe957f),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10,
+                      ),
+                    ),
+                    Text(
+                      '6（建议）',
+                      style: TextStyle(
+                        color: Color(0xff4f8d58),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10,
+                      ),
+                    ),
+                    Text(
+                      '12+（更佳）',
+                      style: TextStyle(
+                        color: Color(0xff8b8074),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 19,
+            height: 19,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xffd9cbbb)),
+              color: const Color(0xfffffcf7),
+              shape: BoxShape.circle,
+            ),
+            child: const Text(
+              '?',
+              style: TextStyle(
+                color: Color(0xff9f907f),
+                fontWeight: FontWeight.w800,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DashedOutlineBox extends StatelessWidget {
+  const _DashedOutlineBox({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: const _DashedRRectPainter(),
+      child: ClipRRect(borderRadius: BorderRadius.circular(14), child: child),
+    );
+  }
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  const _DashedRRectPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final border = Paint()
+      ..color = const Color(0xffb98f68)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            border.strokeWidth / 2,
+            border.strokeWidth / 2,
+            size.width - border.strokeWidth,
+            size.height - border.strokeWidth,
+          ),
+          const Radius.circular(14),
+        ),
+      );
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        const dash = 8.0;
+        const gap = 4.0;
+        final next = math.min(distance + dash, metric.length);
+        canvas.drawPath(metric.extractPath(distance, next), border);
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter oldDelegate) {
+    return false;
+  }
+}
+
 void _noop() {}
 
 int _estimatedPageCount(int selectedCount) {
   if (selectedCount <= 0) return 1;
   return selectedCount * 3 > 12 ? 12 : selectedCount * 3;
-}
-
-class GenerationReadinessBadge extends StatelessWidget {
-  const GenerationReadinessBadge({
-    required this.generated,
-    required this.generating,
-    required this.exported,
-    super.key,
-  });
-
-  final bool generated;
-  final bool generating;
-  final bool exported;
-
-  @override
-  Widget build(BuildContext context) {
-    final title = exported
-        ? AppLocalizations.of(context)!.generateExportS128
-        : generated
-        ? AppLocalizations.of(context)!.generateExportS731
-        : generating
-        ? AppLocalizations.of(context)!.generateExportS718
-        : AppLocalizations.of(context)!.generateExportS272;
-    final subtitle = exported
-        ? AppLocalizations.of(context)!.generateExportS328
-        : generated
-        ? AppLocalizations.of(context)!.generateExportS335
-        : generating
-        ? AppLocalizations.of(context)!.generateExportS651
-        : AppLocalizations.of(context)!.generateExportS427;
-    final color = generated || exported
-        ? const Color(0xff2faa61)
-        : const Color(0xffffbd54);
-    final icon = generated || exported
-        ? completeIconAsset
-        : generating
-        ? refreshIconAsset
-        : addIconAsset;
-
-    return SurfaceCard(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundColor: color,
-            child: AppAssetIcon(icon, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(color: color, fontWeight: FontWeight.w900),
-              ),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 12, color: Color(0xff77685e)),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class GenerationEntrySummary extends StatelessWidget {
-  const GenerationEntrySummary({
-    required this.selectedCount,
-    required this.styleText,
-    required this.sizeText,
-    required this.onViewSelectedAssets,
-    super.key,
-  });
-
-  final int selectedCount;
-  final String styleText;
-  final String sizeText;
-  final VoidCallback onViewSelectedAssets;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasAssets = selectedCount > 0;
-    return SurfaceCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              color: hasAssets
-                  ? const Color(0xffe8f4ea)
-                  : const Color(0xfffff4d8),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: hasAssets
-                    ? const Color(0xffb6dec0)
-                    : const Color(0xffefd39a),
-              ),
-            ),
-            child: AppAssetIcon(
-              hasAssets ? completeIconAsset : dashedAddIconAsset,
-              size: 34,
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.generateExportS473,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 10,
-                  children: [
-                    _TaskFact(
-                      label: AppLocalizations.of(
-                        context,
-                      )!.generateExportTaskGoalLabel,
-                      value: AppLocalizations.of(
-                        context,
-                      )!.generateExportTaskGoalPictureBook,
-                    ),
-                    _TaskFact(
-                      label: AppLocalizations.of(context)!.generateExportS708,
-                      value: hasAssets
-                          ? AppLocalizations.of(context)!.generateExportS813
-                          : AppLocalizations.of(context)!.generateExportS819,
-                      emphasis: !hasAssets,
-                    ),
-                    _TaskFact(
-                      label: AppLocalizations.of(context)!.generateExportS460,
-                      value: AppLocalizations.of(
-                        context,
-                      )!.contentMetricItemCount(selectedCount),
-                    ),
-                    _TaskFact(
-                      label: AppLocalizations.of(
-                        context,
-                      )!.generateExportSuggestedAssetsLabel,
-                      value: AppLocalizations.of(
-                        context,
-                      )!.generateExportSuggestedAssetsValue,
-                    ),
-                    _TaskFact(
-                      label: AppLocalizations.of(context)!.generateExportS884,
-                      value: AppLocalizations.of(context)!
-                          .generateExportLongImageOption(
-                            _compactOption(context, sizeText),
-                          ),
-                    ),
-                    _TaskFact(
-                      label: AppLocalizations.of(context)!.generateExportS956,
-                      value: _compactOption(context, styleText),
-                    ),
-                  ],
-                ),
-                if (!hasAssets) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    AppLocalizations.of(context)!.generateExportS868,
-                    style: TextStyle(color: Color(0xff7a6a5b), height: 1.45),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          SizedBox(
-            width: 180,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _StatusChip(
-                  label: hasAssets
-                      ? AppLocalizations.of(context)!.generateExportS795
-                      : AppLocalizations.of(context)!.generateExportS800,
-                  color: hasAssets
-                      ? const Color(0xff168542)
-                      : const Color(0xff9a5a14),
-                  background: hasAssets
-                      ? const Color(0xffe8f4ea)
-                      : const Color(0xfffff4d8),
-                ),
-                const SizedBox(height: 10),
-                SecondaryButton(
-                  label: hasAssets
-                      ? AppLocalizations.of(context)!.generateExportS627
-                      : AppLocalizations.of(context)!.generateExportS324,
-                  iconAsset: gridIconAsset,
-                  onPressed: onViewSelectedAssets,
-                ),
-                const SizedBox(height: 10),
-                SecondaryButton(
-                  label: AppLocalizations.of(context)!.generateExportS102,
-                  iconAsset: magicStarIconAsset,
-                  onPressed: onViewSelectedAssets,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TaskFact extends StatelessWidget {
-  const _TaskFact({
-    required this.label,
-    required this.value,
-    this.emphasis = false,
-  });
-
-  final String label;
-  final String value;
-  final bool emphasis;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 180,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    decoration: BoxDecoration(
-      color: emphasis ? const Color(0xfffff4d8) : const Color(0xfffffcf7),
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: const Color(0xffe8dccb)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Color(0xff7a6a5b), fontSize: 12),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: emphasis ? const Color(0xff9a5a14) : const Color(0xff2d241c),
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _StatusChip extends StatelessWidget {
@@ -1686,80 +1860,105 @@ class AssetInputCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasAssets = count > 0;
     return SurfaceCard(
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(16, 11, 16, 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hasAssets
-                      ? AppLocalizations.of(
-                          context,
-                        )!.generateExportAssetInputSelectedTitle(count)
-                      : AppLocalizations.of(context)!.generateExportS808,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  hasAssets
-                      ? AppLocalizations.of(context)!.generateExportS893
-                      : AppLocalizations.of(context)!.generateExportS889,
-                  style: const TextStyle(
-                    color: Color(0xff7a6a5b),
-                    height: 1.45,
-                  ),
-                ),
-                SizedBox(height: 12),
-                if (hasAssets)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      for (var index = 0; index < math.min(count, 8); index++)
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xfffff4d8),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xffe8dccb)),
-                          ),
-                          child: const AppAssetIcon(imageIconAsset, size: 20),
-                        ),
-                      if (count > 8)
-                        Text(
-                          '+${count - 8}',
-                          style: const TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            direction: Axis.vertical,
+          Row(
             children: [
-              SecondaryButton(
-                label: hasAssets
-                    ? AppLocalizations.of(context)!.generateExportS923
-                    : AppLocalizations.of(context)!.generateExportS324,
-                iconAsset: gridIconAsset,
-                onPressed: onViewSelectedAssets,
+              const Text(
+                '素材准备',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
               ),
-              SecondaryButton(
-                label: hasAssets
-                    ? AppLocalizations.of(context)!.generateExportS841
-                    : AppLocalizations.of(context)!.generateExportS102,
-                iconAsset: magicStarIconAsset,
-                onPressed: onViewSelectedAssets,
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  '从素材库选择，或让 AI 帮你挑选合适的素材',
+                  style: TextStyle(color: Color(0xff7a6a5b), fontSize: 13),
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(0, -10),
+                child: const AppAssetIcon(leafIconAsset, size: 18),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: _DashedOutlineBox(
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 94),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    color: const Color(0xfffffdf9),
+                    child: Row(
+                      children: [
+                        const AppAssetIcon(
+                          creationEmptyPhotosIconAsset,
+                          size: 36,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                hasAssets ? '已选择 $count 项素材' : '还没有选择素材',
+                                style: const TextStyle(
+                                  color: Color(0xff2e261f),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                hasAssets
+                                    ? '这些素材将用于本次创作，你可以继续补充。'
+                                    : '去素材库选择照片、视频或者音频开始创作吧',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xff7a6a5b),
+                                  fontSize: 12,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              SizedBox(
+                width: 188,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SecondaryButton(
+                      label: AppLocalizations.of(context)!.generateExportS324,
+                      iconAsset: gridIconAsset,
+                      onPressed: onViewSelectedAssets,
+                      fullWidth: true,
+                      height: 32,
+                      fontSize: 14,
+                    ),
+                    const SizedBox(height: 6),
+                    SecondaryButton(
+                      label: 'AI 帮我挑素材',
+                      iconAsset: magicStarIconAsset,
+                      onPressed: onViewSelectedAssets,
+                      fullWidth: true,
+                      height: 32,
+                      fontSize: 14,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1914,43 +2113,6 @@ class _PreviewTile extends StatelessWidget {
           ],
         ),
       ),
-    ),
-  );
-}
-
-class GenerationEntryLog extends StatelessWidget {
-  const GenerationEntryLog({required this.statusMessage, super.key});
-
-  final String statusMessage;
-
-  @override
-  Widget build(BuildContext context) => SurfaceCard(
-    child: Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.generateExportS108,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(
-                  context,
-                )!.generateExportActivityEmptyMessage(statusMessage),
-                style: const TextStyle(color: Color(0xff6f6258), height: 1.45),
-              ),
-            ],
-          ),
-        ),
-        SecondaryButton(
-          label: AppLocalizations.of(context)!.generateExportS726,
-          iconAsset: timelineIconAsset,
-          onPressed: null,
-        ),
-      ],
     ),
   );
 }
@@ -2619,6 +2781,11 @@ class GenerateSettingsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!generated &&
+        !exported &&
+        creationPhase == CreationWorkflowPhase.preparing) {
+      return _CreationSidebarSummary(selectedCount: selectedCount);
+    }
     final exportLabel = _exportDisplayName(context, exportText);
     final hasAssets = selectedCount > 0;
     final planReady = creationPhase == CreationWorkflowPhase.planReady;
@@ -2748,6 +2915,169 @@ class GenerateSettingsPanel extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CreationSidebarSummary extends StatelessWidget {
+  const _CreationSidebarSummary({required this.selectedCount});
+
+  final int selectedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return SurfaceCard(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(
+                Icons.assignment_rounded,
+                size: 20,
+                color: Color(0xff8d6f55),
+              ),
+              SizedBox(width: 8),
+              Text(
+                '本次创作摘要',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const _SummaryStateTile(
+            iconAsset: bookIconAsset,
+            tint: Color(0xffe8f4ea),
+            label: '创作类型',
+            value: '尚未选择',
+          ),
+          const SizedBox(height: 6),
+          const _SummaryStateTile(
+            iconAsset: starIconAsset,
+            tint: Color(0xfffff4d8),
+            label: '目标状态',
+            value: '未填写目标',
+          ),
+          const SizedBox(height: 6),
+          _SummaryStateTile(
+            iconAsset: imageIconAsset,
+            tint: const Color(0xffecf4ff),
+            label: '已选素材',
+            value: '$selectedCount 项 / 建议至少 6 项',
+          ),
+          const SizedBox(height: 6),
+          const _SummaryStateTile(
+            iconAsset: rightArrowIconAsset,
+            tint: Color(0xffe8f4ea),
+            label: '下一步',
+            value: '选择素材并开始规划',
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: SizedBox(
+              width: 304,
+              height: 164,
+              child: Image.asset(
+                creationSummaryBearsIconAsset,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            decoration: BoxDecoration(
+              color: const Color(0xfffffcf8),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xffeadccf)),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline_rounded,
+                  size: 18,
+                  color: Color(0xffd7a64f),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '好的素材是精彩创作的第一步，可以先去素材库看看哦！',
+                    style: TextStyle(
+                      color: Color(0xff6f6258),
+                      height: 1.45,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryStateTile extends StatelessWidget {
+  const _SummaryStateTile({
+    required this.iconAsset,
+    required this.tint,
+    required this.label,
+    required this.value,
+  });
+
+  final String iconAsset;
+  final Color tint;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xfffffcf8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xffeadccf)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: tint,
+            child: AppAssetIcon(iconAsset, size: 15),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xff7a6a5b),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Color(0xff3b3128),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

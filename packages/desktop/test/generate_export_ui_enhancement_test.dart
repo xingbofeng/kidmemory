@@ -90,7 +90,7 @@ void main() {
       ),
     );
 
-    expect(find.text('等待选择素材'), findsWidgets);
+    expect(find.textContaining('已选择 0 项素材'), findsWidgets);
     expect(find.text('AI 帮我挑素材'), findsWidgets);
     expect(find.text('开始规划'), findsOneWidget);
 
@@ -98,6 +98,352 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(generateCalls, 0);
+  });
+
+  testWidgets('prepare stage avoids bottom overflow on first screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1080, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: GenerateExportPage(
+            selectedCount: 0,
+            generated: false,
+            generating: false,
+            exported: false,
+            creationPhase: CreationWorkflowPhase.preparing,
+            statusMessage: '等待生成',
+            requestId: '',
+            logLines: const [],
+            templateOptions: const ['温暖童趣'],
+            pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+            styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+            exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+            selectedTemplate: '温暖童趣',
+            selectedPageSize: 'A4 竖版  210 × 297 mm',
+            selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+            selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+            onGenerate: () {},
+            onConfirmPlan: () {},
+            onExport: () {},
+            onExportTargetChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('素材准备'), findsOneWidget);
+  });
+
+  testWidgets('prepare stage avoids overflow in narrow layout branch', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(930, 680));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: GenerateExportPage(
+            selectedCount: 0,
+            generated: false,
+            generating: false,
+            exported: false,
+            creationPhase: CreationWorkflowPhase.preparing,
+            statusMessage: '等待生成',
+            requestId: '',
+            logLines: const [],
+            templateOptions: const ['温暖童趣'],
+            pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+            styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+            exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+            selectedTemplate: '温暖童趣',
+            selectedPageSize: 'A4 竖版  210 × 297 mm',
+            selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+            selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+            onGenerate: () {},
+            onConfirmPlan: () {},
+            onExport: () {},
+            onExportTargetChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('素材准备'), findsOneWidget);
+  });
+
+  testWidgets('prepare stage keeps no overflow at 1000x600', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: GenerateExportPage(
+            selectedCount: 0,
+            generated: false,
+            generating: false,
+            exported: false,
+            creationPhase: CreationWorkflowPhase.preparing,
+            statusMessage: '等待生成',
+            requestId: '',
+            logLines: const [],
+            templateOptions: const ['温暖童趣'],
+            pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+            styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+            exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+            selectedTemplate: '温暖童趣',
+            selectedPageSize: 'A4 竖版  210 × 297 mm',
+            selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+            selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+            onGenerate: () {},
+            onConfirmPlan: () {},
+            onExport: () {},
+            onExportTargetChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('prepare stage avoids overflow with larger text scale', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1180, 680));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Builder(
+          builder: (context) {
+            final data = MediaQuery.of(context);
+            return MediaQuery(
+              data: data.copyWith(textScaler: const TextScaler.linear(1.2)),
+              child: Scaffold(
+                body: GenerateExportPage(
+                  selectedCount: 0,
+                  generated: false,
+                  generating: false,
+                  exported: false,
+                  creationPhase: CreationWorkflowPhase.preparing,
+                  statusMessage: '等待生成',
+                  requestId: '',
+                  logLines: const [],
+                  templateOptions: const ['温暖童趣'],
+                  pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+                  styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+                  exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+                  selectedTemplate: '温暖童趣',
+                  selectedPageSize: 'A4 竖版  210 × 297 mm',
+                  selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+                  selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+                  onGenerate: () {},
+                  onConfirmPlan: () {},
+                  onExport: () {},
+                  onExportTargetChanged: (_) {},
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('素材准备'), findsOneWidget);
+  });
+
+  testWidgets('prepare stage avoids overflow at 1000x560', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 560));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: GenerateExportPage(
+            selectedCount: 0,
+            generated: false,
+            generating: false,
+            exported: false,
+            creationPhase: CreationWorkflowPhase.preparing,
+            statusMessage: '等待生成',
+            requestId: '',
+            logLines: const [],
+            templateOptions: const ['温暖童趣'],
+            pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+            styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+            exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+            selectedTemplate: '温暖童趣',
+            selectedPageSize: 'A4 竖版  210 × 297 mm',
+            selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+            selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+            onGenerate: () {},
+            onConfirmPlan: () {},
+            onExport: () {},
+            onExportTargetChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('prepare stage avoids overflow in wide low-height viewport', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 520));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Builder(
+          builder: (context) {
+            final mediaQuery = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.1)),
+              child: Scaffold(
+                body: GenerateExportPage(
+                  selectedCount: 0,
+                  generated: false,
+                  generating: false,
+                  exported: false,
+                  creationPhase: CreationWorkflowPhase.preparing,
+                  statusMessage: '等待生成',
+                  requestId: '',
+                  logLines: const [],
+                  templateOptions: const ['温暖童趣'],
+                  pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+                  styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+                  exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+                  selectedTemplate: '温暖童趣',
+                  selectedPageSize: 'A4 竖版  210 × 297 mm',
+                  selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+                  selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+                  onGenerate: () {},
+                  onConfirmPlan: () {},
+                  onExport: () {},
+                  onExportTargetChanged: (_) {},
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('prepare stage avoids overflow in wide very-low viewport', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 430));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Builder(
+          builder: (context) {
+            final mediaQuery = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.2)),
+              child: Scaffold(
+                body: GenerateExportPage(
+                  selectedCount: 0,
+                  generated: false,
+                  generating: false,
+                  exported: false,
+                  creationPhase: CreationWorkflowPhase.preparing,
+                  statusMessage: '等待生成',
+                  requestId: '',
+                  logLines: const [],
+                  templateOptions: const ['温暖童趣'],
+                  pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+                  styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+                  exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+                  selectedTemplate: '温暖童趣',
+                  selectedPageSize: 'A4 竖版  210 × 297 mm',
+                  selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+                  selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+                  onGenerate: () {},
+                  onConfirmPlan: () {},
+                  onExport: () {},
+                  onExportTargetChanged: (_) {},
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('prepare stage keeps material module actions visible at first screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 620));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Builder(
+          builder: (context) {
+            final mediaQuery = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.15)),
+              child: Scaffold(
+                body: GenerateExportPage(
+                  selectedCount: 0,
+                  generated: false,
+                  generating: false,
+                  exported: false,
+                  creationPhase: CreationWorkflowPhase.preparing,
+                  statusMessage: '等待生成',
+                  requestId: '',
+                  logLines: const [],
+                  templateOptions: const ['温暖童趣'],
+                  pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+                  styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+                  exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+                  selectedTemplate: '温暖童趣',
+                  selectedPageSize: 'A4 竖版  210 × 297 mm',
+                  selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+                  selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+                  onGenerate: () {},
+                  onConfirmPlan: () {},
+                  onExport: () {},
+                  onExportTargetChanged: (_) {},
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('素材准备'), findsOneWidget);
+    expect(find.text('去素材库选择'), findsOneWidget);
+    expect(find.text('AI 帮我挑素材'), findsOneWidget);
   });
 
   testWidgets('generating stage shows backend steps without fake percent', (
@@ -233,7 +579,7 @@ void main() {
 
     expect(find.text('生成儿童绘本'), findsWidgets);
     expect(find.text('生成成长纪念册'), findsOneWidget);
-    expect(find.text('生成回忆录视频'), findsOneWidget);
+    expect(find.text('生成回忆视频'), findsOneWidget);
     expect(find.text('Request ID: req_24fc'), findsNothing);
   });
 

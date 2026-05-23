@@ -10,6 +10,8 @@ class PageFrame extends StatelessWidget {
     this.status,
     this.decoration,
     this.leading,
+    this.framePadding = const EdgeInsets.fromLTRB(24, 18, 24, 22),
+    this.contentTopSpacing = 22,
     super.key,
   });
 
@@ -19,12 +21,14 @@ class PageFrame extends StatelessWidget {
   final Widget? status;
   final Widget? decoration;
   final Widget? leading;
+  final EdgeInsets framePadding;
+  final double contentTopSpacing;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       key: ValueKey(title),
-      padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
+      padding: framePadding,
       child: LayoutBuilder(
         builder: (context, constraints) => Column(
           children: [
@@ -61,7 +65,7 @@ class PageFrame extends StatelessWidget {
                       ?decoration,
                     ],
                   ),
-            const SizedBox(height: 22),
+            SizedBox(height: contentTopSpacing),
             Expanded(child: child),
           ],
         ),
@@ -190,6 +194,11 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.iconAsset,
     this.height = 58,
+    this.backgroundColor = const Color(0xff28a65a),
+    this.foregroundColor = Colors.white,
+    this.disabledBackgroundColor,
+    this.disabledForegroundColor,
+    this.fontSize = 19,
     super.key,
   });
 
@@ -198,6 +207,11 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   final String? iconAsset;
   final double height;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color? disabledBackgroundColor;
+  final Color? disabledForegroundColor;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -210,15 +224,17 @@ class PrimaryButton extends StatelessWidget {
         child: FilledButton(
           onPressed: onPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xff28a65a),
-            foregroundColor: Colors.white,
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            disabledBackgroundColor: disabledBackgroundColor,
+            disabledForegroundColor: disabledForegroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
             textStyle: const TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w800,
-            ),
+            ).copyWith(fontSize: fontSize),
           ),
           child: _ButtonLabel(label: label, icon: icon, iconAsset: iconAsset),
         ),
