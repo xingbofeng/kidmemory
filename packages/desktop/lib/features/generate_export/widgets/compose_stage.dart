@@ -33,19 +33,20 @@ class SmartGenerateActions extends StatelessWidget {
       _ => onGeneratePictureBook,
     };
     final canStart = selectedCount > 0 && !generating;
+    final l10n = AppLocalizations.of(context)!;
     return SurfaceCard(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '你想为孩子创作什么？',
+            l10n.generateExportS237,
             style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 4),
-          const Text(
-            '输入创作目标，KidMemory 会为你生成合适的内容。',
-            style: TextStyle(
+          Text(
+            l10n.generateExportGoalSubtitle,
+            style: const TextStyle(
               color: Color(0xff6f6258),
               height: 1.35,
               fontSize: 14,
@@ -68,11 +69,11 @@ class SmartGenerateActions extends StatelessWidget {
                   child: TextField(
                     enabled: !generating,
                     style: const TextStyle(fontSize: 15),
-                    decoration: const InputDecoration(
-                      hintText: '例如：用春游照片做一本 8 页绘本',
+                    decoration: InputDecoration(
+                      hintText: l10n.generateExportGoalHint,
                       border: InputBorder.none,
                       isCollapsed: true,
-                      hintStyle: TextStyle(
+                      hintStyle: const TextStyle(
                         color: Color(0xff8f8072),
                         fontSize: 14.5,
                       ),
@@ -92,9 +93,9 @@ class SmartGenerateActions extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            '选择创作类型',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+          Text(
+            l10n.generateExportCreationTypeTitle,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 5),
           Row(
@@ -102,8 +103,8 @@ class SmartGenerateActions extends StatelessWidget {
               Expanded(
                 child: _CreativeTypeCard(
                   title: AppLocalizations.of(context)!.generateExportS721,
-                  description: '将照片和故事变成精美绘本',
-                  tagText: '6-24 页',
+                  description: l10n.generateExportStorybookDescription,
+                  tagText: l10n.generateExportStorybookTag,
                   iconAsset: creationComposeIconAsset,
                   iconSize: 80,
                   selected: selectedCreationType == 'storybook',
@@ -114,8 +115,8 @@ class SmartGenerateActions extends StatelessWidget {
               Expanded(
                 child: _CreativeTypeCard(
                   title: AppLocalizations.of(context)!.generateExportS740,
-                  description: '整理成长记录与珍贵瞬间',
-                  tagText: '10-40 页',
+                  description: l10n.generateExportMemoryBookDescription,
+                  tagText: l10n.generateExportMemoryBookTag,
                   iconAsset: bearDocumentIconAsset,
                   iconSize: 76,
                   selected: selectedCreationType == 'memory_book',
@@ -128,8 +129,8 @@ class SmartGenerateActions extends StatelessWidget {
                   title: AppLocalizations.of(
                     context,
                   )!.assetLibraryBatchGenerateVideoLabel,
-                  description: '生成带字幕和音乐的视频',
-                  tagText: '1-10 分钟',
+                  description: l10n.generateExportMemoryVideoDescription,
+                  tagText: l10n.generateExportMemoryVideoTag,
                   iconAsset: creationVideoBoardIconAsset,
                   iconSize: 76,
                   selected: selectedCreationType == 'memoir_video',
@@ -154,10 +155,10 @@ class SmartGenerateActions extends StatelessWidget {
           ),
           if (!canStart) ...[
             const SizedBox(height: 9),
-            const Center(
+            Center(
               child: Text(
-                '请先选择素材，才能开始为孩子创作精彩内容哦～',
-                style: TextStyle(
+                l10n.generateExportSelectAssetsBeforeStart,
+                style: const TextStyle(
                   color: Color(0xffc0aa90),
                   fontWeight: FontWeight.w400,
                   fontSize: 13,
@@ -301,6 +302,7 @@ class _AssetStatusStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
       decoration: BoxDecoration(
@@ -320,25 +322,25 @@ class _AssetStatusStrip extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '素材状态',
-                        style: TextStyle(
+                      Text(
+                        l10n.generateExportS821,
+                        style: const TextStyle(
                           color: Color(0xff5b4f45),
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),
                       Text(
-                        '已选择 $selectedCount 项素材',
+                        l10n.generateExportSelectedAssetCount(selectedCount),
                         style: const TextStyle(
                           color: Color(0xff2e261f),
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
                       ),
-                      const Text(
-                        '建议至少选择 6 项素材，效果更好',
-                        style: TextStyle(
+                      Text(
+                        l10n.generateExportAssetRecommendation,
+                        style: const TextStyle(
                           color: Color(0xff7a6a5b),
                           fontSize: 11,
                         ),
@@ -382,28 +384,28 @@ class _AssetStatusStrip extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 7),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '0（当前）',
-                      style: TextStyle(
+                      l10n.generateExportAssetProgressCurrent,
+                      style: const TextStyle(
                         color: Color(0xffbe957f),
                         fontWeight: FontWeight.w500,
                         fontSize: 10,
                       ),
                     ),
                     Text(
-                      '6（建议）',
-                      style: TextStyle(
+                      l10n.generateExportAssetProgressRecommended,
+                      style: const TextStyle(
                         color: Color(0xff4f8d58),
                         fontWeight: FontWeight.w500,
                         fontSize: 10,
                       ),
                     ),
                     Text(
-                      '12+（更佳）',
-                      style: TextStyle(
+                      l10n.generateExportAssetProgressBetter,
+                      style: const TextStyle(
                         color: Color(0xff8b8074),
                         fontWeight: FontWeight.w500,
                         fontSize: 10,
@@ -505,6 +507,7 @@ class AssetInputCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasAssets = count > 0;
+    final l10n = AppLocalizations.of(context)!;
     return SurfaceCard(
       padding: const EdgeInsets.fromLTRB(16, 11, 16, 13),
       child: Column(
@@ -512,15 +515,21 @@ class AssetInputCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
-                '素材准备',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+              Text(
+                l10n.generateExportAssetPreparationTitle,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '从素材库选择，或让 AI 帮你挑选合适的素材',
-                  style: TextStyle(color: Color(0xff7a6a5b), fontSize: 13),
+                  l10n.generateExportAssetPreparationSubtitle,
+                  style: const TextStyle(
+                    color: Color(0xff7a6a5b),
+                    fontSize: 13,
+                  ),
                 ),
               ),
               Transform.translate(
@@ -552,7 +561,11 @@ class AssetInputCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                hasAssets ? '已选择 $count 项素材' : '还没有选择素材',
+                                hasAssets
+                                    ? l10n.generateExportSelectedAssetCount(
+                                        count,
+                                      )
+                                    : l10n.generateExportNoSelectedAssets,
                                 style: const TextStyle(
                                   color: Color(0xff2e261f),
                                   fontWeight: FontWeight.w900,
@@ -562,8 +575,8 @@ class AssetInputCard extends StatelessWidget {
                               const SizedBox(height: 3),
                               Text(
                                 hasAssets
-                                    ? '这些素材将用于本次创作，你可以继续补充。'
-                                    : '去素材库选择照片、视频或者音频开始创作吧',
+                                    ? l10n.generateExportSelectedAssetsReadyHint
+                                    : l10n.generateExportSelectAssetsEmptyHint,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -596,7 +609,7 @@ class AssetInputCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     SecondaryButton(
-                      label: 'AI 帮我挑素材',
+                      label: l10n.generateExportS102,
                       iconAsset: magicStarIconAsset,
                       onPressed: onViewSelectedAssets,
                       fullWidth: true,

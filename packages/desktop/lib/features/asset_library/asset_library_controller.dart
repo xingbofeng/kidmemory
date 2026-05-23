@@ -1,7 +1,7 @@
-part of 'asset_library_page.dart';
+import '../../shared/models/library_models.dart';
 
-class _AssetLibraryPageWindow {
-  const _AssetLibraryPageWindow({
+class AssetLibraryPageWindow {
+  const AssetLibraryPageWindow({
     required this.currentPage,
     required this.totalPages,
     required this.pageAssets,
@@ -12,8 +12,8 @@ class _AssetLibraryPageWindow {
   final List<AssetVm> pageAssets;
 }
 
-class _AssetLibraryController {
-  const _AssetLibraryController._();
+class AssetLibraryController {
+  const AssetLibraryController._();
 
   static List<AssetVm> displayedAssets({
     required List<AssetVm> baseAssets,
@@ -32,7 +32,7 @@ class _AssetLibraryController {
     );
   }
 
-  static _AssetLibraryPageWindow pageWindow({
+  static AssetLibraryPageWindow pageWindow({
     required List<AssetVm> assets,
     required int pageIndex,
     required int pageSize,
@@ -45,7 +45,7 @@ class _AssetLibraryController {
         .skip(currentPage * pageSize)
         .take(pageSize)
         .toList();
-    return _AssetLibraryPageWindow(
+    return AssetLibraryPageWindow(
       currentPage: currentPage,
       totalPages: totalPages,
       pageAssets: pageAssets,

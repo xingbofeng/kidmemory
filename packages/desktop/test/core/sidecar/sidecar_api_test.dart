@@ -194,157 +194,154 @@ void main() {
     ]);
   });
 
-  test(
-    'DesktopSidecarGateway calls task-first creation routes',
-    () async {
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      final seen = <String>[];
-      var taskBody = <String, dynamic>{};
-      addTearDown(() async => server.close(force: true));
+  test('DesktopSidecarGateway calls task-first creation routes', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final seen = <String>[];
+    var taskBody = <String, dynamic>{};
+    addTearDown(() async => server.close(force: true));
 
-      server.listen((request) async {
-        final path = request.uri.path;
-        seen.add('${request.method} $path');
-        final bodyText = await utf8.decoder.bind(request).join();
-        final body = bodyText.isEmpty
-            ? <String, dynamic>{}
-            : jsonDecode(bodyText) as Map<String, dynamic>;
-        Object data;
-        if (path == '/creation/tasks') {
-          taskBody = body;
-          data = {
-            'taskId': 'task_desktop_1',
-            'creationType': body['creationType'],
-            'goal': body['goal'],
-            'assetIds': body['assetIds'],
-            'status': 'ready',
-            'currentStepId': 'plan',
-            'summary': 'Backend plan summary',
-            'skillName': 'KidMemory storybook',
-            'steps': const <Map<String, dynamic>>[],
-            'requirements': const <String>[],
-            'requirementItems': const <String>[],
-            'artifacts': const <Map<String, dynamic>>[],
-            'error': null,
-            'workspacePath': '/tmp/kidmemory/task_desktop_1',
-            'createdAt': '2026-05-23T00:00:00.000Z',
-            'updatedAt': '2026-05-23T00:00:00.000Z',
-          };
-        } else if (path == '/creation/tasks/task_desktop_1/generate') {
-          data = {
-            'taskId': 'task_desktop_1',
-            'creationType': 'storybook',
-            'goal': 'Make a bedtime story',
-            'assetIds': const ['asset_a', 'asset_b'],
-            'status': 'succeeded',
-            'currentStepId': 'review',
-            'summary': 'Backend plan summary',
-            'skillName': 'KidMemory storybook',
-            'steps': const <Map<String, dynamic>>[],
-            'requirements': const <String>[],
-            'requirementItems': const <String>[],
-            'artifacts': const <Map<String, dynamic>>[],
-            'error': null,
-            'workspacePath': '/tmp/kidmemory/task_desktop_1',
-            'createdAt': '2026-05-23T00:00:00.000Z',
-            'updatedAt': '2026-05-23T00:00:00.000Z',
-          };
-        } else if (path == '/creation/tasks/task_desktop_1/events') {
-          data = {'events': const <Map<String, dynamic>>[]};
-        } else if (path == '/creation/tasks/task_desktop_1/export') {
-          data = {
-            'artifactId': 'artifact_desktop_pdf',
-            'kind': body['target'],
-            'taskId': 'task_desktop_1',
-            'localPath': body['targetPath'],
-            'createdAt': '2026-05-23T00:00:00.000Z',
-          };
-        } else if (path == '/creation/tasks/task_desktop_1/share') {
-          data = {
-            'artifactId': body['artifactId'],
-            'taskId': 'task_desktop_1',
-            'kind': 'web_share',
-            'shareId': 'share_desktop_1',
-            'shareUrl': 'http://localhost:3001/share/share_desktop_1',
-            'createdAt': '2026-05-23T00:00:00.000Z',
-          };
-        } else if (path == '/creation/tasks/task_desktop_1') {
-          data = {
-            'taskId': 'task_desktop_1',
-            'creationType': 'storybook',
-            'goal': 'Make a bedtime story',
-            'assetIds': const ['asset_a', 'asset_b'],
-            'status': 'succeeded',
-            'currentStepId': 'plan',
-            'summary': 'Backend plan summary',
-            'skillName': 'KidMemory storybook',
-            'steps': const <Map<String, dynamic>>[],
-            'requirements': const <String>[],
-            'requirementItems': const <String>[],
-            'artifacts': const <Map<String, dynamic>>[],
-            'error': null,
-            'workspacePath': '/tmp/kidmemory/task_desktop_1',
-            'createdAt': '2026-05-23T00:00:00.000Z',
-            'updatedAt': '2026-05-23T00:00:00.000Z',
-          };
-        } else {
-          request.response.statusCode = 404;
-          data = {'path': path};
-        }
-        request.response
-          ..headers.contentType = ContentType.json
-          ..write(jsonEncode({'code': 0, 'msg': 'ok', 'data': data}));
-        await request.response.close();
-      });
+    server.listen((request) async {
+      final path = request.uri.path;
+      seen.add('${request.method} $path');
+      final bodyText = await utf8.decoder.bind(request).join();
+      final body = bodyText.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(bodyText) as Map<String, dynamic>;
+      Object data;
+      if (path == '/creation/tasks') {
+        taskBody = body;
+        data = {
+          'taskId': 'task_desktop_1',
+          'creationType': body['creationType'],
+          'goal': body['goal'],
+          'assetIds': body['assetIds'],
+          'status': 'ready',
+          'currentStepId': 'plan',
+          'summary': 'Backend plan summary',
+          'skillName': 'KidMemory storybook',
+          'steps': const <Map<String, dynamic>>[],
+          'requirements': const <String>[],
+          'requirementItems': const <String>[],
+          'artifacts': const <Map<String, dynamic>>[],
+          'error': null,
+          'workspacePath': '/tmp/kidmemory/task_desktop_1',
+          'createdAt': '2026-05-23T00:00:00.000Z',
+          'updatedAt': '2026-05-23T00:00:00.000Z',
+        };
+      } else if (path == '/creation/tasks/task_desktop_1/generate') {
+        data = {
+          'taskId': 'task_desktop_1',
+          'creationType': 'storybook',
+          'goal': 'Make a bedtime story',
+          'assetIds': const ['asset_a', 'asset_b'],
+          'status': 'succeeded',
+          'currentStepId': 'review',
+          'summary': 'Backend plan summary',
+          'skillName': 'KidMemory storybook',
+          'steps': const <Map<String, dynamic>>[],
+          'requirements': const <String>[],
+          'requirementItems': const <String>[],
+          'artifacts': const <Map<String, dynamic>>[],
+          'error': null,
+          'workspacePath': '/tmp/kidmemory/task_desktop_1',
+          'createdAt': '2026-05-23T00:00:00.000Z',
+          'updatedAt': '2026-05-23T00:00:00.000Z',
+        };
+      } else if (path == '/creation/tasks/task_desktop_1/events') {
+        data = {'events': const <Map<String, dynamic>>[]};
+      } else if (path == '/creation/tasks/task_desktop_1/export') {
+        data = {
+          'artifactId': 'artifact_desktop_pdf',
+          'kind': body['target'],
+          'taskId': 'task_desktop_1',
+          'localPath': body['targetPath'],
+          'createdAt': '2026-05-23T00:00:00.000Z',
+        };
+      } else if (path == '/creation/tasks/task_desktop_1/share') {
+        data = {
+          'artifactId': body['artifactId'],
+          'taskId': 'task_desktop_1',
+          'kind': 'web_share',
+          'shareId': 'share_desktop_1',
+          'shareUrl': 'http://localhost:3001/share/share_desktop_1',
+          'createdAt': '2026-05-23T00:00:00.000Z',
+        };
+      } else if (path == '/creation/tasks/task_desktop_1') {
+        data = {
+          'taskId': 'task_desktop_1',
+          'creationType': 'storybook',
+          'goal': 'Make a bedtime story',
+          'assetIds': const ['asset_a', 'asset_b'],
+          'status': 'succeeded',
+          'currentStepId': 'plan',
+          'summary': 'Backend plan summary',
+          'skillName': 'KidMemory storybook',
+          'steps': const <Map<String, dynamic>>[],
+          'requirements': const <String>[],
+          'requirementItems': const <String>[],
+          'artifacts': const <Map<String, dynamic>>[],
+          'error': null,
+          'workspacePath': '/tmp/kidmemory/task_desktop_1',
+          'createdAt': '2026-05-23T00:00:00.000Z',
+          'updatedAt': '2026-05-23T00:00:00.000Z',
+        };
+      } else {
+        request.response.statusCode = 404;
+        data = {'path': path};
+      }
+      request.response
+        ..headers.contentType = ContentType.json
+        ..write(jsonEncode({'code': 0, 'msg': 'ok', 'data': data}));
+      await request.response.close();
+    });
 
-      final gateway = DesktopSidecarGateway(
-        SidecarApi(
-          baseUrl: 'http://${server.address.host}:${server.port}',
-          retries: 0,
-        ),
-      );
+    final gateway = DesktopSidecarGateway(
+      SidecarApi(
+        baseUrl: 'http://${server.address.host}:${server.port}',
+        retries: 0,
+      ),
+    );
 
-      final task = await gateway.createCreationTaskRaw(
-        goal: 'Make a bedtime story',
-        creationType: 'storybook',
-        assetIds: const ['asset_a', 'asset_b'],
-        settings: const {'tone': 'warm'},
-      );
-      final generated = await gateway.generateCreationTaskRaw(
-        taskId: task['taskId'] as String,
-      );
-      final detail = await gateway.getCreationTaskRaw(
-        taskId: task['taskId'] as String,
-      );
-      final events = await gateway.getCreationTaskEventsRaw(
-        taskId: task['taskId'] as String,
-      );
-      final exported = await gateway.exportCreationTaskRaw(
-        taskId: task['taskId'] as String,
-        target: 'pdf',
-        targetPath: '/tmp/kidmemory.pdf',
-      );
-      final shared = await gateway.shareCreationTaskRaw(
-        taskId: task['taskId'] as String,
-        artifactId: exported['artifactId'] as String,
-      );
+    final task = await gateway.createCreationTaskRaw(
+      goal: 'Make a bedtime story',
+      creationType: 'storybook',
+      assetIds: const ['asset_a', 'asset_b'],
+      settings: const {'tone': 'warm'},
+    );
+    final generated = await gateway.generateCreationTaskRaw(
+      taskId: task['taskId'] as String,
+    );
+    final detail = await gateway.getCreationTaskRaw(
+      taskId: task['taskId'] as String,
+    );
+    final events = await gateway.getCreationTaskEventsRaw(
+      taskId: task['taskId'] as String,
+    );
+    final exported = await gateway.exportCreationTaskRaw(
+      taskId: task['taskId'] as String,
+      target: 'pdf',
+      targetPath: '/tmp/kidmemory.pdf',
+    );
+    final shared = await gateway.shareCreationTaskRaw(
+      taskId: task['taskId'] as String,
+      artifactId: exported['artifactId'] as String,
+    );
 
-      expect(task['taskId'], 'task_desktop_1');
-      expect(taskBody['assetIds'], ['asset_a', 'asset_b']);
-      expect(taskBody.containsKey('settings'), isFalse);
-      expect(generated['status'], 'succeeded');
-      expect(detail['taskId'], 'task_desktop_1');
-      expect(events['events'], isA<List<dynamic>>());
-      expect(exported['kind'], 'pdf');
-      expect(shared['shareUrl'], contains('/share/share_desktop_1'));
-      expect(seen, [
-        'POST /creation/tasks',
-        'POST /creation/tasks/task_desktop_1/generate',
-        'GET /creation/tasks/task_desktop_1',
-        'GET /creation/tasks/task_desktop_1/events',
-        'POST /creation/tasks/task_desktop_1/export',
-        'POST /creation/tasks/task_desktop_1/share',
-      ]);
-    },
-  );
+    expect(task['taskId'], 'task_desktop_1');
+    expect(taskBody['assetIds'], ['asset_a', 'asset_b']);
+    expect(taskBody.containsKey('settings'), isFalse);
+    expect(generated['status'], 'succeeded');
+    expect(detail['taskId'], 'task_desktop_1');
+    expect(events['events'], isA<List<dynamic>>());
+    expect(exported['kind'], 'pdf');
+    expect(shared['shareUrl'], contains('/share/share_desktop_1'));
+    expect(seen, [
+      'POST /creation/tasks',
+      'POST /creation/tasks/task_desktop_1/generate',
+      'GET /creation/tasks/task_desktop_1',
+      'GET /creation/tasks/task_desktop_1/events',
+      'POST /creation/tasks/task_desktop_1/export',
+      'POST /creation/tasks/task_desktop_1/share',
+    ]);
+  });
 }

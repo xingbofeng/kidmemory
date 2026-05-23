@@ -3,12 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kidmemory_desktop/features/sample_dataset/sample_dataset_page.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   testWidgets('sample dataset page shows placeholder previews when empty', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: SampleDatasetPage(
             imported: false,

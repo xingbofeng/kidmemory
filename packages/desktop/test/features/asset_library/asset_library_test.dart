@@ -4,6 +4,8 @@ import 'package:kidmemory_desktop/features/asset_library/asset_library_page.dart
 import 'package:kidmemory_desktop/shared/models/library_models.dart';
 import 'package:kidmemory_desktop/shared/widgets/content.dart';
 
+import '../../localized_test_app.dart';
+
 const _okImportReport = AssetImportReport(
   imported: 1,
   duplicates: 0,
@@ -36,7 +38,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: AssetLibraryPage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -87,7 +89,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: AssetLibraryPage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -134,7 +136,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
-        MaterialApp(
+        localizedTestApp(
           home: Scaffold(
             body: AssetLibraryPage(
               children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -183,7 +185,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
-        MaterialApp(
+        localizedTestApp(
           home: Scaffold(
             body: AssetLibraryPage(
               children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -221,7 +223,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     var deleteCalled = false;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: AssetLibraryPage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -500,7 +502,7 @@ void main() {
     Set<String>? replaced;
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: AssetLibraryPage(
             children: const [ChildVm(id: 'child-1', name: '澄澄')],
@@ -566,7 +568,7 @@ Widget _assetLibraryHarness({
   ValueChanged<String>? onToggle,
   Future<AssetImportReport> Function()? onImportFiles,
 }) {
-  return MaterialApp(
+  return localizedTestApp(
     home: Scaffold(
       body: AssetLibraryPage(
         children: children,

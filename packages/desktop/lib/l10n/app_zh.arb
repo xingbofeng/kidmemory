@@ -4289,5 +4289,159 @@
   "feedbackRequestKeyword": "请",
   "@feedbackRequestKeyword": {
     "description": "Keyword used to classify request prompts as warning toasts."
+  },
+  "generateExportGoalSubtitle": "输入创作目标，KidMemory 会为你生成合适的内容。",
+  "@generateExportGoalSubtitle": {
+    "description": "Subtitle for the creation goal input section."
+  },
+  "generateExportGoalHint": "例如：用春游照片做一本 8 页绘本",
+  "@generateExportGoalHint": {
+    "description": "Hint text for the creation goal input."
+  },
+  "generateExportCreationTypeTitle": "选择创作类型",
+  "@generateExportCreationTypeTitle": {
+    "description": "Title above creation type cards."
+  },
+  "generateExportStorybookDescription": "将照片和故事变成精美绘本",
+  "@generateExportStorybookDescription": {
+    "description": "Description for the storybook creation type."
+  },
+  "generateExportStorybookTag": "6-24 页",
+  "@generateExportStorybookTag": {
+    "description": "Page count tag for the storybook creation type."
+  },
+  "generateExportMemoryBookDescription": "整理成长记录与珍贵瞬间",
+  "@generateExportMemoryBookDescription": {
+    "description": "Description for the memory book creation type."
+  },
+  "generateExportMemoryBookTag": "10-40 页",
+  "@generateExportMemoryBookTag": {
+    "description": "Page count tag for the memory book creation type."
+  },
+  "generateExportMemoryVideoDescription": "生成带字幕和音乐的视频",
+  "@generateExportMemoryVideoDescription": {
+    "description": "Description for the memory video creation type."
+  },
+  "generateExportMemoryVideoTag": "1-10 分钟",
+  "@generateExportMemoryVideoTag": {
+    "description": "Duration tag for the memory video creation type."
+  },
+  "generateExportSelectAssetsBeforeStart": "请先选择素材，才能开始为孩子创作精彩内容哦～",
+  "@generateExportSelectAssetsBeforeStart": {
+    "description": "Hint shown when generation is disabled because no assets are selected."
+  },
+  "generateExportSelectedAssetCount": "已选择 {count} 项素材",
+  "@generateExportSelectedAssetCount": {
+    "description": "Selected asset count text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportAssetRecommendation": "建议至少选择 6 项素材，效果更好",
+  "@generateExportAssetRecommendation": {
+    "description": "Recommended selected asset count hint."
+  },
+  "generateExportAssetProgressCurrent": "0（当前）",
+  "@generateExportAssetProgressCurrent": {
+    "description": "Current marker label for selected asset progress."
+  },
+  "generateExportAssetProgressRecommended": "6（建议）",
+  "@generateExportAssetProgressRecommended": {
+    "description": "Recommended marker label for selected asset progress."
+  },
+  "generateExportAssetProgressBetter": "12+（更佳）",
+  "@generateExportAssetProgressBetter": {
+    "description": "Better marker label for selected asset progress."
+  },
+  "generateExportAssetPreparationTitle": "素材准备",
+  "@generateExportAssetPreparationTitle": {
+    "description": "Title for the asset preparation card."
+  },
+  "generateExportAssetPreparationSubtitle": "从素材库选择，或让 AI 帮你挑选合适的素材",
+  "@generateExportAssetPreparationSubtitle": {
+    "description": "Subtitle for the asset preparation card."
+  },
+  "generateExportNoSelectedAssets": "还没有选择素材",
+  "@generateExportNoSelectedAssets": {
+    "description": "Empty selected assets state."
+  },
+  "generateExportSelectedAssetsReadyHint": "这些素材将用于本次创作，你可以继续补充。",
+  "@generateExportSelectedAssetsReadyHint": {
+    "description": "Hint shown when assets are selected."
+  },
+  "generateExportSelectAssetsEmptyHint": "去素材库选择照片、视频或者音频开始创作吧",
+  "@generateExportSelectAssetsEmptyHint": {
+    "description": "Hint shown when no assets are selected."
+  },
+  "creationStagePrepareSubtitle": "明确目标与素材",
+  "@creationStagePrepareSubtitle": {
+    "description": "Subtitle for the prepare creation stage."
+  },
+  "creationStagePlanSubtitle": "生成创作计划",
+  "@creationStagePlanSubtitle": {
+    "description": "Subtitle for the plan confirmation creation stage."
+  },
+  "creationStageGenerateTitle": "生成中",
+  "@creationStageGenerateTitle": {
+    "description": "Title for the generating creation stage."
+  },
+  "creationStageGenerateSubtitle": "AI 正在创作",
+  "@creationStageGenerateSubtitle": {
+    "description": "Subtitle for the generating creation stage."
+  },
+  "creationStagePreviewTitle": "结果预览",
+  "@creationStagePreviewTitle": {
+    "description": "Title for the preview creation stage."
+  },
+  "creationStagePreviewSubtitle": "查看创作成果",
+  "@creationStagePreviewSubtitle": {
+    "description": "Subtitle for the preview creation stage."
+  },
+  "creationStageShareTitle": "导出分享",
+  "@creationStageShareTitle": {
+    "description": "Title for the share/export creation stage."
+  },
+  "creationStageShareSubtitle": "保存或分享作品",
+  "@creationStageShareSubtitle": {
+    "description": "Subtitle for the share/export creation stage."
+  },
+  "generateExportCreationSummaryTitle": "本次创作摘要",
+  "@generateExportCreationSummaryTitle": {
+    "description": "Title for the creation sidebar summary."
+  },
+  "generateExportSummaryTypeEmpty": "尚未选择",
+  "@generateExportSummaryTypeEmpty": {
+    "description": "Empty creation type summary value."
+  },
+  "generateExportSummaryGoalLabel": "目标状态",
+  "@generateExportSummaryGoalLabel": {
+    "description": "Goal status summary label."
+  },
+  "generateExportSummaryGoalEmpty": "未填写目标",
+  "@generateExportSummaryGoalEmpty": {
+    "description": "Empty creation goal summary value."
+  },
+  "generateExportSummarySelectedAssetsValue": "{count} 项 / 建议至少 6 项",
+  "@generateExportSummarySelectedAssetsValue": {
+    "description": "Selected assets summary value.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportSummaryNextStepLabel": "下一步",
+  "@generateExportSummaryNextStepLabel": {
+    "description": "Next step summary label."
+  },
+  "generateExportSummaryNextStepValue": "选择素材并开始规划",
+  "@generateExportSummaryNextStepValue": {
+    "description": "Next step summary value."
+  },
+  "generateExportMaterialTip": "好的素材是精彩创作的第一步，可以先去素材库看看哦！",
+  "@generateExportMaterialTip": {
+    "description": "Tip shown in the creation sidebar summary."
   }
 }

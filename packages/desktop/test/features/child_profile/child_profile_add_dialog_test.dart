@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/app/desktop_shell.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   testWidgets('child profile add dialog accepts text input', (
     WidgetTester tester,
@@ -15,11 +17,8 @@ void main() {
 
     final api = _DialogInputFakeSidecarApi();
     await tester.pumpWidget(
-      MaterialApp(
-        home: DesktopShell(
-          api: api,
-          localReadinessDetectionEnabled: false,
-        ),
+      localizedTestApp(
+        home: DesktopShell(api: api, localReadinessDetectionEnabled: false),
       ),
     );
     await tester.pumpAndSettle();
@@ -60,10 +59,7 @@ class _DialogInputFakeSidecarApi extends SidecarApi {
   @override
   Future<Map<String, dynamic>> get(String path) async {
     if (path == '/config/ui') {
-      return {
-        'ok': true,
-        'data': {},
-      };
+      return {'ok': true, 'data': {}};
     }
     if (path == '/config/status') {
       return {

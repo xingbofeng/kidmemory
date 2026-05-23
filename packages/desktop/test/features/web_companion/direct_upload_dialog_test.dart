@@ -5,6 +5,8 @@ import 'package:kidmemory_desktop/features/web_companion/direct_upload/direct_up
 import 'package:kidmemory_desktop/features/web_companion/direct_upload/direct_upload_models.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   final config = DirectUploadConfig(
     sessionId: 'sess-001',
@@ -29,7 +31,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1280, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(
           body: DirectUploadDialog(
             config: config,
@@ -122,7 +124,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     var taps = 0;
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: Scaffold(body: DirectUploadEntryButton(onTap: () => taps += 1)),
       ),
     );

@@ -147,6 +147,5 @@ extension _DesktopShellPages on _DesktopShellState {
   void _updateGenerationExportTarget(String target) {
     if (target == generationExportTarget) return;
     _setShellState(() => generationExportTarget = target);
-    _invalidateCreationPlanForInputChange();
   }
 }

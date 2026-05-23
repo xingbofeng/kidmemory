@@ -197,6 +197,7 @@ class _CreationSidebarSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SurfaceCard(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       child: Column(
@@ -204,46 +205,49 @@ class _CreationSidebarSummary extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(
+            children: [
+              const Icon(
                 Icons.assignment_rounded,
                 size: 20,
                 color: Color(0xff8d6f55),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                '本次创作摘要',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                l10n.generateExportCreationSummaryTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          const _SummaryStateTile(
+          _SummaryStateTile(
             iconAsset: bookIconAsset,
-            tint: Color(0xffe8f4ea),
-            label: '创作类型',
-            value: '尚未选择',
+            tint: const Color(0xffe8f4ea),
+            label: l10n.generateExportS279,
+            value: l10n.generateExportSummaryTypeEmpty,
           ),
           const SizedBox(height: 6),
-          const _SummaryStateTile(
+          _SummaryStateTile(
             iconAsset: starIconAsset,
-            tint: Color(0xfffff4d8),
-            label: '目标状态',
-            value: '未填写目标',
+            tint: const Color(0xfffff4d8),
+            label: l10n.generateExportSummaryGoalLabel,
+            value: l10n.generateExportSummaryGoalEmpty,
           ),
           const SizedBox(height: 6),
           _SummaryStateTile(
             iconAsset: imageIconAsset,
             tint: const Color(0xffecf4ff),
-            label: '已选素材',
-            value: '$selectedCount 项 / 建议至少 6 项',
+            label: l10n.generateExportS460,
+            value: l10n.generateExportSummarySelectedAssetsValue(selectedCount),
           ),
           const SizedBox(height: 6),
-          const _SummaryStateTile(
+          _SummaryStateTile(
             iconAsset: rightArrowIconAsset,
-            tint: Color(0xffe8f4ea),
-            label: '下一步',
-            value: '选择素材并开始规划',
+            tint: const Color(0xffe8f4ea),
+            label: l10n.generateExportSummaryNextStepLabel,
+            value: l10n.generateExportSummaryNextStepValue,
           ),
           const SizedBox(height: 20),
           Center(
@@ -265,19 +269,19 @@ class _CreationSidebarSummary extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xffeadccf)),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.lightbulb_outline_rounded,
                   size: 18,
                   color: Color(0xffd7a64f),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '好的素材是精彩创作的第一步，可以先去素材库看看哦！',
-                    style: TextStyle(
+                    l10n.generateExportMaterialTip,
+                    style: const TextStyle(
                       color: Color(0xff6f6258),
                       height: 1.45,
                       fontSize: 14,

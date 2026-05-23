@@ -20,7 +20,10 @@ void main() {
       },
     );
 
-    expect(env['DATABASE_URL'], 'postgresql://user:pass@db.example:5432/kidmemory');
+    expect(
+      env['DATABASE_URL'],
+      'postgresql://user:pass@db.example:5432/kidmemory',
+    );
     expect(env['POSTGRES_URL'], isNull);
     expect(env['KIDMEMORY_SIDECAR_HOST'], '127.0.0.1');
     expect(env['KIDMEMORY_SIDECAR_PORT'], '4317');

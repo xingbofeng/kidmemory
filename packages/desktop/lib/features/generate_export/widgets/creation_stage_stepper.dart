@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/chrome.dart';
 import '../../../shared/widgets/layout.dart';
 import '../generate_export_models.dart';
@@ -11,35 +12,36 @@ class CreationStageStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final stages = [
       _StageStepData(
         stage: CreationMainStage.prepare,
-        title: '准备创作',
-        subtitle: '明确目标与素材',
+        title: l10n.creationPhasePreparing,
+        subtitle: l10n.creationStagePrepareSubtitle,
         iconAsset: editIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.plan,
-        title: '计划确认',
-        subtitle: '生成创作计划',
+        title: l10n.creationPhasePlanConfirm,
+        subtitle: l10n.creationStagePlanSubtitle,
         iconAsset: fileIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.generate,
-        title: '生成中',
-        subtitle: 'AI 正在创作',
+        title: l10n.creationStageGenerateTitle,
+        subtitle: l10n.creationStageGenerateSubtitle,
         iconAsset: magicStarIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.preview,
-        title: '结果预览',
-        subtitle: '查看创作成果',
+        title: l10n.creationStagePreviewTitle,
+        subtitle: l10n.creationStagePreviewSubtitle,
         iconAsset: viewIconAsset,
       ),
       _StageStepData(
         stage: CreationMainStage.share,
-        title: '导出分享',
-        subtitle: '保存或分享作品',
+        title: l10n.creationStageShareTitle,
+        subtitle: l10n.creationStageShareSubtitle,
         iconAsset: linkIconAsset,
       ),
     ];
@@ -52,7 +54,7 @@ class CreationStageStepper extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '创作流程',
+            l10n.creationFlowTitle,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 7),

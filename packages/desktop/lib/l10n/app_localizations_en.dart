@@ -3423,4 +3423,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackRequestKeyword => 'please';
+
+  @override
+  String get generateExportGoalSubtitle =>
+      'Describe the goal, and KidMemory will generate matching content.';
+
+  @override
+  String get generateExportGoalHint =>
+      'For example: make an 8-page storybook from spring outing photos';
+
+  @override
+  String get generateExportCreationTypeTitle => 'Choose creation type';
+
+  @override
+  String get generateExportStorybookDescription =>
+      'Turn photos and stories into a polished storybook';
+
+  @override
+  String get generateExportStorybookTag => '6-24 pages';
+
+  @override
+  String get generateExportMemoryBookDescription =>
+      'Organize growth records and treasured moments';
+
+  @override
+  String get generateExportMemoryBookTag => '10-40 pages';
+
+  @override
+  String get generateExportMemoryVideoDescription =>
+      'Generate a video with subtitles and music';
+
+  @override
+  String get generateExportMemoryVideoTag => '1-10 minutes';
+
+  @override
+  String get generateExportSelectAssetsBeforeStart =>
+      'Select assets first before creating something wonderful for your child.';
+
+  @override
+  String generateExportSelectedAssetCount(int count) {
+    return '$count assets selected';
+  }
+
+  @override
+  String get generateExportAssetRecommendation =>
+      'Select at least 6 assets for better results';
+
+  @override
+  String get generateExportAssetProgressCurrent => '0 (current)';
+
+  @override
+  String get generateExportAssetProgressRecommended => '6 (recommended)';
+
+  @override
+  String get generateExportAssetProgressBetter => '12+ (better)';
+
+  @override
+  String get generateExportAssetPreparationTitle => 'Asset preparation';
+
+  @override
+  String get generateExportAssetPreparationSubtitle =>
+      'Choose from the asset library, or let AI help pick the right assets';
+
+  @override
+  String get generateExportNoSelectedAssets => 'No assets selected yet';
+
+  @override
+  String get generateExportSelectedAssetsReadyHint =>
+      'These assets will be used for this creation. You can add more.';
+
+  @override
+  String get generateExportSelectAssetsEmptyHint =>
+      'Choose photos, videos, or audio from the asset library to start.';
+
+  @override
+  String get creationStagePrepareSubtitle => 'Clarify goals and assets';
+
+  @override
+  String get creationStagePlanSubtitle => 'Generate a creation plan';
+
+  @override
+  String get creationStageGenerateTitle => 'Generating';
+
+  @override
+  String get creationStageGenerateSubtitle => 'AI is creating';
+
+  @override
+  String get creationStagePreviewTitle => 'Preview result';
+
+  @override
+  String get creationStagePreviewSubtitle => 'Review the generated work';
+
+  @override
+  String get creationStageShareTitle => 'Export and share';
+
+  @override
+  String get creationStageShareSubtitle => 'Save or share the work';
+
+  @override
+  String get generateExportCreationSummaryTitle => 'Creation summary';
+
+  @override
+  String get generateExportSummaryTypeEmpty => 'Not selected yet';
+
+  @override
+  String get generateExportSummaryGoalLabel => 'Goal status';
+
+  @override
+  String get generateExportSummaryGoalEmpty => 'No goal entered';
+
+  @override
+  String generateExportSummarySelectedAssetsValue(int count) {
+    return '$count items / at least 6 recommended';
+  }
+
+  @override
+  String get generateExportSummaryNextStepLabel => 'Next step';
+
+  @override
+  String get generateExportSummaryNextStepValue =>
+      'Select assets and start planning';
+
+  @override
+  String get generateExportMaterialTip =>
+      'Great assets are the first step to a great creation. Visit the asset library first.';
 }

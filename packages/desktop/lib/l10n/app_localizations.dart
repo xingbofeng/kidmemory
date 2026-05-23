@@ -6174,6 +6174,222 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'请'**
   String get feedbackRequestKeyword;
+
+  /// Subtitle for the creation goal input section.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入创作目标，KidMemory 会为你生成合适的内容。'**
+  String get generateExportGoalSubtitle;
+
+  /// Hint text for the creation goal input.
+  ///
+  /// In zh, this message translates to:
+  /// **'例如：用春游照片做一本 8 页绘本'**
+  String get generateExportGoalHint;
+
+  /// Title above creation type cards.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择创作类型'**
+  String get generateExportCreationTypeTitle;
+
+  /// Description for the storybook creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'将照片和故事变成精美绘本'**
+  String get generateExportStorybookDescription;
+
+  /// Page count tag for the storybook creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'6-24 页'**
+  String get generateExportStorybookTag;
+
+  /// Description for the memory book creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'整理成长记录与珍贵瞬间'**
+  String get generateExportMemoryBookDescription;
+
+  /// Page count tag for the memory book creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'10-40 页'**
+  String get generateExportMemoryBookTag;
+
+  /// Description for the memory video creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成带字幕和音乐的视频'**
+  String get generateExportMemoryVideoDescription;
+
+  /// Duration tag for the memory video creation type.
+  ///
+  /// In zh, this message translates to:
+  /// **'1-10 分钟'**
+  String get generateExportMemoryVideoTag;
+
+  /// Hint shown when generation is disabled because no assets are selected.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先选择素材，才能开始为孩子创作精彩内容哦～'**
+  String get generateExportSelectAssetsBeforeStart;
+
+  /// Selected asset count text.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择 {count} 项素材'**
+  String generateExportSelectedAssetCount(int count);
+
+  /// Recommended selected asset count hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'建议至少选择 6 项素材，效果更好'**
+  String get generateExportAssetRecommendation;
+
+  /// Current marker label for selected asset progress.
+  ///
+  /// In zh, this message translates to:
+  /// **'0（当前）'**
+  String get generateExportAssetProgressCurrent;
+
+  /// Recommended marker label for selected asset progress.
+  ///
+  /// In zh, this message translates to:
+  /// **'6（建议）'**
+  String get generateExportAssetProgressRecommended;
+
+  /// Better marker label for selected asset progress.
+  ///
+  /// In zh, this message translates to:
+  /// **'12+（更佳）'**
+  String get generateExportAssetProgressBetter;
+
+  /// Title for the asset preparation card.
+  ///
+  /// In zh, this message translates to:
+  /// **'素材准备'**
+  String get generateExportAssetPreparationTitle;
+
+  /// Subtitle for the asset preparation card.
+  ///
+  /// In zh, this message translates to:
+  /// **'从素材库选择，或让 AI 帮你挑选合适的素材'**
+  String get generateExportAssetPreparationSubtitle;
+
+  /// Empty selected assets state.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有选择素材'**
+  String get generateExportNoSelectedAssets;
+
+  /// Hint shown when assets are selected.
+  ///
+  /// In zh, this message translates to:
+  /// **'这些素材将用于本次创作，你可以继续补充。'**
+  String get generateExportSelectedAssetsReadyHint;
+
+  /// Hint shown when no assets are selected.
+  ///
+  /// In zh, this message translates to:
+  /// **'去素材库选择照片、视频或者音频开始创作吧'**
+  String get generateExportSelectAssetsEmptyHint;
+
+  /// Subtitle for the prepare creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'明确目标与素材'**
+  String get creationStagePrepareSubtitle;
+
+  /// Subtitle for the plan confirmation creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成创作计划'**
+  String get creationStagePlanSubtitle;
+
+  /// Title for the generating creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成中'**
+  String get creationStageGenerateTitle;
+
+  /// Subtitle for the generating creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 正在创作'**
+  String get creationStageGenerateSubtitle;
+
+  /// Title for the preview creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'结果预览'**
+  String get creationStagePreviewTitle;
+
+  /// Subtitle for the preview creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看创作成果'**
+  String get creationStagePreviewSubtitle;
+
+  /// Title for the share/export creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出分享'**
+  String get creationStageShareTitle;
+
+  /// Subtitle for the share/export creation stage.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存或分享作品'**
+  String get creationStageShareSubtitle;
+
+  /// Title for the creation sidebar summary.
+  ///
+  /// In zh, this message translates to:
+  /// **'本次创作摘要'**
+  String get generateExportCreationSummaryTitle;
+
+  /// Empty creation type summary value.
+  ///
+  /// In zh, this message translates to:
+  /// **'尚未选择'**
+  String get generateExportSummaryTypeEmpty;
+
+  /// Goal status summary label.
+  ///
+  /// In zh, this message translates to:
+  /// **'目标状态'**
+  String get generateExportSummaryGoalLabel;
+
+  /// Empty creation goal summary value.
+  ///
+  /// In zh, this message translates to:
+  /// **'未填写目标'**
+  String get generateExportSummaryGoalEmpty;
+
+  /// Selected assets summary value.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 项 / 建议至少 6 项'**
+  String generateExportSummarySelectedAssetsValue(int count);
+
+  /// Next step summary label.
+  ///
+  /// In zh, this message translates to:
+  /// **'下一步'**
+  String get generateExportSummaryNextStepLabel;
+
+  /// Next step summary value.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择素材并开始规划'**
+  String get generateExportSummaryNextStepValue;
+
+  /// Tip shown in the creation sidebar summary.
+  ///
+  /// In zh, this message translates to:
+  /// **'好的素材是精彩创作的第一步，可以先去素材库看看哦！'**
+  String get generateExportMaterialTip;
 }
 
 class _AppLocalizationsDelegate

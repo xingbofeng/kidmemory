@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/features/generate_export/generate_export_page.dart';
 
-import 'localized_test_app.dart';
+import '../../localized_test_app.dart';
 
 void main() {
   testWidgets('prepare stage shows five-step flow without generated panels', (
@@ -314,7 +314,9 @@ void main() {
           builder: (context) {
             final mediaQuery = MediaQuery.of(context);
             return MediaQuery(
-              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.1)),
+              data: mediaQuery.copyWith(
+                textScaler: const TextScaler.linear(1.1),
+              ),
               child: Scaffold(
                 body: GenerateExportPage(
                   selectedCount: 0,
@@ -361,7 +363,9 @@ void main() {
           builder: (context) {
             final mediaQuery = MediaQuery.of(context);
             return MediaQuery(
-              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.2)),
+              data: mediaQuery.copyWith(
+                textScaler: const TextScaler.linear(1.2),
+              ),
               child: Scaffold(
                 body: GenerateExportPage(
                   selectedCount: 0,
@@ -396,55 +400,58 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('prepare stage keeps material module actions visible at first screen', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1280, 620));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'prepare stage keeps material module actions visible at first screen',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 620));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(
-      localizedTestApp(
-        home: Builder(
-          builder: (context) {
-            final mediaQuery = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQuery.copyWith(textScaler: const TextScaler.linear(1.15)),
-              child: Scaffold(
-                body: GenerateExportPage(
-                  selectedCount: 0,
-                  generated: false,
-                  generating: false,
-                  exported: false,
-                  creationPhase: CreationWorkflowPhase.preparing,
-                  statusMessage: '等待生成',
-                  requestId: '',
-                  logLines: const [],
-                  templateOptions: const ['温暖童趣'],
-                  pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
-                  styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
-                  exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
-                  selectedTemplate: '温暖童趣',
-                  selectedPageSize: 'A4 竖版  210 × 297 mm',
-                  selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
-                  selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
-                  onGenerate: () {},
-                  onConfirmPlan: () {},
-                  onExport: () {},
-                  onExportTargetChanged: (_) {},
+      await tester.pumpWidget(
+        localizedTestApp(
+          home: Builder(
+            builder: (context) {
+              final mediaQuery = MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQuery.copyWith(
+                  textScaler: const TextScaler.linear(1.15),
                 ),
-              ),
-            );
-          },
+                child: Scaffold(
+                  body: GenerateExportPage(
+                    selectedCount: 0,
+                    generated: false,
+                    generating: false,
+                    exported: false,
+                    creationPhase: CreationWorkflowPhase.preparing,
+                    statusMessage: '等待生成',
+                    requestId: '',
+                    logLines: const [],
+                    templateOptions: const ['温暖童趣'],
+                    pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+                    styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+                    exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+                    selectedTemplate: '温暖童趣',
+                    selectedPageSize: 'A4 竖版  210 × 297 mm',
+                    selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+                    selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+                    onGenerate: () {},
+                    onConfirmPlan: () {},
+                    onExport: () {},
+                    onExportTargetChanged: (_) {},
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('素材准备'), findsOneWidget);
-    expect(find.text('去素材库选择'), findsOneWidget);
-    expect(find.text('AI 帮我挑素材'), findsOneWidget);
-  });
+      expect(tester.takeException(), isNull);
+      expect(find.text('素材准备'), findsOneWidget);
+      expect(find.text('去素材库选择'), findsOneWidget);
+      expect(find.text('AI 帮我挑素材'), findsOneWidget);
+    },
+  );
 
   testWidgets('generating stage shows backend steps without fake percent', (
     tester,

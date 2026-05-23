@@ -81,10 +81,9 @@ void main() {
     expect(
       violations,
       isEmpty,
-      reason:
-          'Found ${violations.length} hardcoded Chinese strings in lib/. '
+      reason: 'Found ${violations.length} hardcoded Chinese strings in lib/. '
           'All UI strings must use AppLocalizations.of(context) instead.\n'
-          'Run: dart test test/i18n_coverage_test.dart',
+          'Run: dart test test/l10n/i18n_coverage_test.dart',
     );
   });
 }

@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/app/desktop_shell.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   testWidgets('child profile edit saves name and can clear birthday', (
     WidgetTester tester,
@@ -23,11 +25,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: DesktopShell(
-          api: api,
-          localReadinessDetectionEnabled: false,
-        ),
+      localizedTestApp(
+        home: DesktopShell(api: api, localReadinessDetectionEnabled: false),
       ),
     );
     await tester.pumpAndSettle();
@@ -64,11 +63,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: DesktopShell(
-          api: api,
-          localReadinessDetectionEnabled: false,
-        ),
+      localizedTestApp(
+        home: DesktopShell(api: api, localReadinessDetectionEnabled: false),
       ),
     );
     await tester.pumpAndSettle();
@@ -79,9 +75,10 @@ void main() {
 }
 
 class _EditDialogFakeSidecarApi extends SidecarApi {
-  _EditDialogFakeSidecarApi({required List<Map<String, dynamic>> initialChildren})
-    : children = initialChildren,
-      super(baseUrl: 'http://127.0.0.1:0', retries: 0);
+  _EditDialogFakeSidecarApi({
+    required List<Map<String, dynamic>> initialChildren,
+  }) : children = initialChildren,
+       super(baseUrl: 'http://127.0.0.1:0', retries: 0);
 
   final List<Map<String, dynamic>> children;
   String? lastPatchedBirthday;
@@ -89,10 +86,7 @@ class _EditDialogFakeSidecarApi extends SidecarApi {
   @override
   Future<Map<String, dynamic>> get(String path) async {
     if (path == '/config/ui') {
-      return {
-        'ok': true,
-        'data': {},
-      };
+      return {'ok': true, 'data': {}};
     }
     if (path == '/config/status') {
       return {

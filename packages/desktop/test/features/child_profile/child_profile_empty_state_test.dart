@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kidmemory_desktop/app/desktop_shell.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 
+import '../../localized_test_app.dart';
+
 void main() {
   testWidgets('child profile shows empty state without fallback data', (
     WidgetTester tester,
@@ -12,7 +14,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      MaterialApp(home: DesktopShell(api: _EmptySidecarApi())),
+      localizedTestApp(home: DesktopShell(api: _EmptySidecarApi())),
     );
     await tester.pumpAndSettle();
 
@@ -37,7 +39,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      MaterialApp(home: DesktopShell(api: _EmptySidecarApi())),
+      localizedTestApp(home: DesktopShell(api: _EmptySidecarApi())),
     );
     await tester.pumpAndSettle();
 
@@ -54,7 +56,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     final api = _EmptySidecarApi();
-    await tester.pumpWidget(MaterialApp(home: DesktopShell(api: api)));
+    await tester.pumpWidget(localizedTestApp(home: DesktopShell(api: api)));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('查看示例'));

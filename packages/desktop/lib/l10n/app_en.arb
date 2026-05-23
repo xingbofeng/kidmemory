@@ -4289,5 +4289,159 @@
   "feedbackRequestKeyword": "please",
   "@feedbackRequestKeyword": {
     "description": "Keyword used to classify request prompts as warning toasts."
+  },
+  "generateExportGoalSubtitle": "Describe the goal, and KidMemory will generate matching content.",
+  "@generateExportGoalSubtitle": {
+    "description": "Subtitle for the creation goal input section."
+  },
+  "generateExportGoalHint": "For example: make an 8-page storybook from spring outing photos",
+  "@generateExportGoalHint": {
+    "description": "Hint text for the creation goal input."
+  },
+  "generateExportCreationTypeTitle": "Choose creation type",
+  "@generateExportCreationTypeTitle": {
+    "description": "Title above creation type cards."
+  },
+  "generateExportStorybookDescription": "Turn photos and stories into a polished storybook",
+  "@generateExportStorybookDescription": {
+    "description": "Description for the storybook creation type."
+  },
+  "generateExportStorybookTag": "6-24 pages",
+  "@generateExportStorybookTag": {
+    "description": "Page count tag for the storybook creation type."
+  },
+  "generateExportMemoryBookDescription": "Organize growth records and treasured moments",
+  "@generateExportMemoryBookDescription": {
+    "description": "Description for the memory book creation type."
+  },
+  "generateExportMemoryBookTag": "10-40 pages",
+  "@generateExportMemoryBookTag": {
+    "description": "Page count tag for the memory book creation type."
+  },
+  "generateExportMemoryVideoDescription": "Generate a video with subtitles and music",
+  "@generateExportMemoryVideoDescription": {
+    "description": "Description for the memory video creation type."
+  },
+  "generateExportMemoryVideoTag": "1-10 minutes",
+  "@generateExportMemoryVideoTag": {
+    "description": "Duration tag for the memory video creation type."
+  },
+  "generateExportSelectAssetsBeforeStart": "Select assets first before creating something wonderful for your child.",
+  "@generateExportSelectAssetsBeforeStart": {
+    "description": "Hint shown when generation is disabled because no assets are selected."
+  },
+  "generateExportSelectedAssetCount": "{count} assets selected",
+  "@generateExportSelectedAssetCount": {
+    "description": "Selected asset count text.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportAssetRecommendation": "Select at least 6 assets for better results",
+  "@generateExportAssetRecommendation": {
+    "description": "Recommended selected asset count hint."
+  },
+  "generateExportAssetProgressCurrent": "0 (current)",
+  "@generateExportAssetProgressCurrent": {
+    "description": "Current marker label for selected asset progress."
+  },
+  "generateExportAssetProgressRecommended": "6 (recommended)",
+  "@generateExportAssetProgressRecommended": {
+    "description": "Recommended marker label for selected asset progress."
+  },
+  "generateExportAssetProgressBetter": "12+ (better)",
+  "@generateExportAssetProgressBetter": {
+    "description": "Better marker label for selected asset progress."
+  },
+  "generateExportAssetPreparationTitle": "Asset preparation",
+  "@generateExportAssetPreparationTitle": {
+    "description": "Title for the asset preparation card."
+  },
+  "generateExportAssetPreparationSubtitle": "Choose from the asset library, or let AI help pick the right assets",
+  "@generateExportAssetPreparationSubtitle": {
+    "description": "Subtitle for the asset preparation card."
+  },
+  "generateExportNoSelectedAssets": "No assets selected yet",
+  "@generateExportNoSelectedAssets": {
+    "description": "Empty selected assets state."
+  },
+  "generateExportSelectedAssetsReadyHint": "These assets will be used for this creation. You can add more.",
+  "@generateExportSelectedAssetsReadyHint": {
+    "description": "Hint shown when assets are selected."
+  },
+  "generateExportSelectAssetsEmptyHint": "Choose photos, videos, or audio from the asset library to start.",
+  "@generateExportSelectAssetsEmptyHint": {
+    "description": "Hint shown when no assets are selected."
+  },
+  "creationStagePrepareSubtitle": "Clarify goals and assets",
+  "@creationStagePrepareSubtitle": {
+    "description": "Subtitle for the prepare creation stage."
+  },
+  "creationStagePlanSubtitle": "Generate a creation plan",
+  "@creationStagePlanSubtitle": {
+    "description": "Subtitle for the plan confirmation creation stage."
+  },
+  "creationStageGenerateTitle": "Generating",
+  "@creationStageGenerateTitle": {
+    "description": "Title for the generating creation stage."
+  },
+  "creationStageGenerateSubtitle": "AI is creating",
+  "@creationStageGenerateSubtitle": {
+    "description": "Subtitle for the generating creation stage."
+  },
+  "creationStagePreviewTitle": "Preview result",
+  "@creationStagePreviewTitle": {
+    "description": "Title for the preview creation stage."
+  },
+  "creationStagePreviewSubtitle": "Review the generated work",
+  "@creationStagePreviewSubtitle": {
+    "description": "Subtitle for the preview creation stage."
+  },
+  "creationStageShareTitle": "Export and share",
+  "@creationStageShareTitle": {
+    "description": "Title for the share/export creation stage."
+  },
+  "creationStageShareSubtitle": "Save or share the work",
+  "@creationStageShareSubtitle": {
+    "description": "Subtitle for the share/export creation stage."
+  },
+  "generateExportCreationSummaryTitle": "Creation summary",
+  "@generateExportCreationSummaryTitle": {
+    "description": "Title for the creation sidebar summary."
+  },
+  "generateExportSummaryTypeEmpty": "Not selected yet",
+  "@generateExportSummaryTypeEmpty": {
+    "description": "Empty creation type summary value."
+  },
+  "generateExportSummaryGoalLabel": "Goal status",
+  "@generateExportSummaryGoalLabel": {
+    "description": "Goal status summary label."
+  },
+  "generateExportSummaryGoalEmpty": "No goal entered",
+  "@generateExportSummaryGoalEmpty": {
+    "description": "Empty creation goal summary value."
+  },
+  "generateExportSummarySelectedAssetsValue": "{count} items / at least 6 recommended",
+  "@generateExportSummarySelectedAssetsValue": {
+    "description": "Selected assets summary value.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generateExportSummaryNextStepLabel": "Next step",
+  "@generateExportSummaryNextStepLabel": {
+    "description": "Next step summary label."
+  },
+  "generateExportSummaryNextStepValue": "Select assets and start planning",
+  "@generateExportSummaryNextStepValue": {
+    "description": "Next step summary value."
+  },
+  "generateExportMaterialTip": "Great assets are the first step to a great creation. Visit the asset library first.",
+  "@generateExportMaterialTip": {
+    "description": "Tip shown in the creation sidebar summary."
   }
 }

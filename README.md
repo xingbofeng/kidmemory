@@ -313,7 +313,7 @@ cd packages/sidecar && npx tsx --test tests/architecture/architecture.test.ts
 # desktop
 cd packages/desktop && flutter analyze
 cd packages/desktop && flutter test
-cd packages/desktop && flutter test test/sidecar_api_test.dart
+cd packages/desktop && flutter test test/core/sidecar/sidecar_api_test.dart
 cd packages/desktop && flutter run -d macos
 
 # web

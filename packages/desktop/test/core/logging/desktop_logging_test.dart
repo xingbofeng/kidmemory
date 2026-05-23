@@ -20,7 +20,9 @@ void main() {
   });
 
   test('DesktopLogger writes JSONL and redacts sensitive fields', () async {
-    final tempDir = await Directory.systemTemp.createTemp('desktop-logger-test-');
+    final tempDir = await Directory.systemTemp.createTemp(
+      'desktop-logger-test-',
+    );
     addTearDown(() async => tempDir.delete(recursive: true));
 
     final logger = DesktopLogger(logsDirectoryPath: tempDir.path);
@@ -58,12 +60,16 @@ void main() {
   });
 
   test('DesktopLogCleanupWorker deletes stale JSONL files', () async {
-    final tempDir = await Directory.systemTemp.createTemp('desktop-log-cleanup-test-');
+    final tempDir = await Directory.systemTemp.createTemp(
+      'desktop-log-cleanup-test-',
+    );
     addTearDown(() async => tempDir.delete(recursive: true));
 
     final stale = File('${tempDir.path}/desktop-2020-01-01.jsonl');
     await stale.writeAsString('{"event":"old"}\n');
-    await stale.setLastModified(DateTime.now().subtract(const Duration(days: 30)));
+    await stale.setLastModified(
+      DateTime.now().subtract(const Duration(days: 30)),
+    );
 
     final fresh = File('${tempDir.path}/desktop-2099-01-01.jsonl');
     await fresh.writeAsString('{"event":"new"}\n');

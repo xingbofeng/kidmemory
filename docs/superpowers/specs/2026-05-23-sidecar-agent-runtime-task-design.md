@@ -452,10 +452,9 @@ Rewrite:
 - [ ] `packages/sidecar/tests/http/mcp-diagnostic-image-hyperframes-tools.test.ts`
 - [ ] `packages/sidecar/tests/architecture/architecture.test.ts`
 - [ ] `packages/sidecar/tests/integration/prisma-migration.test.ts`
-- [ ] `packages/desktop/test/sidecar_api_test.dart`
-- [ ] `packages/desktop/test/generate_export_ui_enhancement_test.dart`
-- [ ] `packages/desktop/test/app_test.dart`
-- [ ] `packages/desktop/test/visual_golden_test.dart`
+- [ ] `packages/desktop/test/core/sidecar/sidecar_api_test.dart`
+- [ ] `packages/desktop/test/features/generate_export/generate_export_ui_enhancement_test.dart`
+- [ ] `packages/desktop/test/features/app/app_test.dart`
 
 Delete or rewrite if installer-only skill support remains:
 

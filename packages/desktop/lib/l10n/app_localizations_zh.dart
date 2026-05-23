@@ -3385,4 +3385,116 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get feedbackRequestKeyword => '请';
+
+  @override
+  String get generateExportGoalSubtitle => '输入创作目标，KidMemory 会为你生成合适的内容。';
+
+  @override
+  String get generateExportGoalHint => '例如：用春游照片做一本 8 页绘本';
+
+  @override
+  String get generateExportCreationTypeTitle => '选择创作类型';
+
+  @override
+  String get generateExportStorybookDescription => '将照片和故事变成精美绘本';
+
+  @override
+  String get generateExportStorybookTag => '6-24 页';
+
+  @override
+  String get generateExportMemoryBookDescription => '整理成长记录与珍贵瞬间';
+
+  @override
+  String get generateExportMemoryBookTag => '10-40 页';
+
+  @override
+  String get generateExportMemoryVideoDescription => '生成带字幕和音乐的视频';
+
+  @override
+  String get generateExportMemoryVideoTag => '1-10 分钟';
+
+  @override
+  String get generateExportSelectAssetsBeforeStart => '请先选择素材，才能开始为孩子创作精彩内容哦～';
+
+  @override
+  String generateExportSelectedAssetCount(int count) {
+    return '已选择 $count 项素材';
+  }
+
+  @override
+  String get generateExportAssetRecommendation => '建议至少选择 6 项素材，效果更好';
+
+  @override
+  String get generateExportAssetProgressCurrent => '0（当前）';
+
+  @override
+  String get generateExportAssetProgressRecommended => '6（建议）';
+
+  @override
+  String get generateExportAssetProgressBetter => '12+（更佳）';
+
+  @override
+  String get generateExportAssetPreparationTitle => '素材准备';
+
+  @override
+  String get generateExportAssetPreparationSubtitle => '从素材库选择，或让 AI 帮你挑选合适的素材';
+
+  @override
+  String get generateExportNoSelectedAssets => '还没有选择素材';
+
+  @override
+  String get generateExportSelectedAssetsReadyHint => '这些素材将用于本次创作，你可以继续补充。';
+
+  @override
+  String get generateExportSelectAssetsEmptyHint => '去素材库选择照片、视频或者音频开始创作吧';
+
+  @override
+  String get creationStagePrepareSubtitle => '明确目标与素材';
+
+  @override
+  String get creationStagePlanSubtitle => '生成创作计划';
+
+  @override
+  String get creationStageGenerateTitle => '生成中';
+
+  @override
+  String get creationStageGenerateSubtitle => 'AI 正在创作';
+
+  @override
+  String get creationStagePreviewTitle => '结果预览';
+
+  @override
+  String get creationStagePreviewSubtitle => '查看创作成果';
+
+  @override
+  String get creationStageShareTitle => '导出分享';
+
+  @override
+  String get creationStageShareSubtitle => '保存或分享作品';
+
+  @override
+  String get generateExportCreationSummaryTitle => '本次创作摘要';
+
+  @override
+  String get generateExportSummaryTypeEmpty => '尚未选择';
+
+  @override
+  String get generateExportSummaryGoalLabel => '目标状态';
+
+  @override
+  String get generateExportSummaryGoalEmpty => '未填写目标';
+
+  @override
+  String generateExportSummarySelectedAssetsValue(int count) {
+    return '$count 项 / 建议至少 6 项';
+  }
+
+  @override
+  String get generateExportSummaryNextStepLabel => '下一步';
+
+  @override
+  String get generateExportSummaryNextStepValue => '选择素材并开始规划';
+
+  @override
+  String get generateExportMaterialTip => '好的素材是精彩创作的第一步，可以先去素材库看看哦！';
 }

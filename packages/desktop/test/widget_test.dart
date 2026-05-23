@@ -5,6 +5,8 @@ import 'package:kidmemory_desktop/app/desktop_shell.dart';
 import 'package:kidmemory_desktop/core/sidecar/sidecar_api.dart';
 import 'package:kidmemory_desktop/shared/widgets/chrome.dart';
 
+import 'localized_test_app.dart';
+
 void main() {
   Future<void> gotoStep(WidgetTester tester, String label) async {
     await tester.tap(
@@ -24,7 +26,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      MaterialApp(home: DesktopShell(api: _WidgetFakeSidecarApi())),
+      localizedTestApp(home: DesktopShell(api: _WidgetFakeSidecarApi())),
     );
 
     await gotoStep(tester, '孩子档案');
