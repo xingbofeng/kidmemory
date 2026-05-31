@@ -25,6 +25,12 @@ import {
   type UploadItemStatusType,
 } from "../../src/modules/web-companion/constants.ts";
 
+function assertErrorMessageIncludes(error: unknown, expected: string) {
+  assert.ok(error instanceof Error, "expected rejection to be an Error");
+  assert.ok(error.message.includes(expected), `expected "${error.message}" to include "${expected}"`);
+  return true;
+}
+
 describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false : "DATABASE_URL is not configured" }, () => {
   let service: WebCompanionService;
   let prisma: PrismaService;
@@ -35,28 +41,21 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
   let createdSessionIds: string[] = [];
 
   beforeEach(async () => {
-    try {
-      appConfig = new AppConfigService();
-      await new PrismaMigrationService(appConfig).deploy();
-      prisma = new PrismaService();
-      await prisma.$connect();
-      dataset = new DatasetService(new DatasetStateService(new PrismaDatasetDbService(prisma)), appConfig);
-      service = new WebCompanionService(appConfig, new PrismaWebCompanionRepository(prisma), dataset);
+    appConfig = new AppConfigService();
+    await new PrismaMigrationService(appConfig).deploy();
+    prisma = new PrismaService();
+    await prisma.$connect();
+    dataset = new DatasetService(new DatasetStateService(new PrismaDatasetDbService(prisma)), appConfig);
+    service = new WebCompanionService(appConfig, new PrismaWebCompanionRepository(prisma), dataset);
 
-      // Create test child
-      await prisma.child.upsert({
-        where: { id: testChildId },
-        create: { id: testChildId, name: "Test Child Commit" },
-        update: { name: "Test Child Commit" },
-      });
-    } catch (error) {
-      console.log("Skipping integration tests: database not available");
-      throw error;
-    }
+    await prisma.child.upsert({
+      where: { id: testChildId },
+      create: { id: testChildId, name: "Test Child Commit" },
+      update: { name: "Test Child Commit" },
+    });
   });
 
   afterEach(async () => {
-    // Cleanup
     if (prisma && createdSessionIds.length > 0) {
       for (const sessionId of createdSessionIds) {
         await prisma.uploadSession.deleteMany({ where: { id: sessionId } });
@@ -69,7 +68,6 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
   });
 
   test("Task 2.33: concurrent commit idempotency", async () => {
-    // 1. Create session and upload item
     const sessionResponse = await service.createSession({
       childId: testChildId,
       expiresInMinutes: 60,
@@ -93,13 +91,11 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
 
     const uploadItem = itemsResponse.items[0];
 
-    // Update status to UPLOADING to allow commit
     await prisma.uploadItem.update({
       where: { id: uploadItem.uploadItemId },
       data: { status: UploadItemStatus.UPLOADING },
     });
 
-    // 2. Make concurrent commit requests
     const concurrentCommits = 10;
     const commitRequests = Array.from({ length: concurrentCommits }, () =>
       service.commitUploadItem(
@@ -265,10 +261,7 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
           remoteEtag: "test-etag",
         }
       ),
-      (err: any) => {
-        assert.ok(err.message.includes("Object key mismatch"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "Object key mismatch")
     );
   });
 
@@ -480,10 +473,7 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
           remoteEtag: "test-etag",
         }
       ),
-      (err: any) => {
-        assert.ok(err.message.includes("Invalid status transition"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "Invalid status transition")
     );
 
     // 4. Update to UPLOADING
@@ -526,10 +516,7 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
         ],
         provider: StorageProvider.LAN,
       }),
-      (err: any) => {
-        assert.ok(err.message.includes("closed"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "closed")
     );
   });
 });

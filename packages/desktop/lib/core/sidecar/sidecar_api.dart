@@ -220,7 +220,6 @@ class SidecarApi {
     debugPrint(
       'Sidecar $method $path failed after ${retries + 1} attempts: $lastError',
     );
-    // Throw the last error instead of returning empty object
     if (lastError is SidecarApiException) {
       throw lastError;
     }
@@ -237,9 +236,7 @@ class SidecarApi {
       try {
         final json = await _sendOnce(method, path, const {}, context);
         final unwrapped = _unwrapApiResponse(json);
-        // If the unwrapped data is a list, return it
         if (unwrapped is List<dynamic>) return unwrapped;
-        // Otherwise return empty list
         return const [];
       } catch (error) {
         lastError = error;
@@ -254,7 +251,6 @@ class SidecarApi {
     debugPrint(
       'Sidecar $method $path failed after ${retries + 1} attempts: $lastError',
     );
-    // Throw the last error instead of returning empty list
     if (lastError is SidecarApiException) {
       throw lastError;
     }
@@ -267,7 +263,6 @@ class SidecarApi {
   /// Unwraps unified API response format { code, msg, data }
   /// Returns the data field if code == 0, otherwise throws SidecarApiException
   dynamic _unwrapApiResponse(Object? json) {
-    // Check if response is in unified API format
     if (json is Map<String, dynamic> &&
         json.containsKey('code') &&
         json.containsKey('msg') &&
@@ -278,15 +273,12 @@ class SidecarApi {
         throw SidecarApiException(apiResponse.msg, code: apiResponse.code);
       }
 
-      // Return unwrapped data
       final data = apiResponse.data;
       if (data is Map<String, dynamic>) return data;
       if (data is List<dynamic>) return data;
-      // For null or other types, return empty map
       return data ?? {};
     }
 
-    // Fallback for non-API format responses (e.g., file downloads)
     if (json is Map<String, dynamic>) return json;
     if (json is List<dynamic>) return json;
     return {};
@@ -321,7 +313,6 @@ class SidecarApi {
           .join()
           .timeout(timeout);
       if (response.statusCode >= 400) {
-        // Try to parse error response in unified format
         if (text.isNotEmpty) {
           try {
             final json = jsonDecode(text);
@@ -336,7 +327,6 @@ class SidecarApi {
               );
             }
           } catch (e) {
-            // If parsing fails, fall through to generic error
             if (e is SidecarApiException) rethrow;
           }
         }

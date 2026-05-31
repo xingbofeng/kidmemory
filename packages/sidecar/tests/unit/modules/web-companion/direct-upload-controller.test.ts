@@ -155,6 +155,33 @@ interface FakePullbackStore {
   }>;
 }
 
+interface DirectUploadConfigError {
+  code: "web_companion_direct_upload_config_missing";
+  missingConfigKeys: string[];
+}
+
+async function captureRejected(operation: Promise<unknown>): Promise<unknown> {
+  try {
+    await operation;
+    assert.fail("expected operation to reject");
+  } catch (error) {
+    return error;
+  }
+}
+
+function assertDirectUploadConfigError(error: unknown): asserts error is DirectUploadConfigError {
+  assert.equal(typeof error, "object");
+  assert.notEqual(error, null);
+
+  const payload = error as {
+    code?: unknown;
+    missingConfigKeys?: unknown;
+  };
+  assert.equal(payload.code, "web_companion_direct_upload_config_missing");
+  assert.ok(Array.isArray(payload.missingConfigKeys));
+  assert.ok(payload.missingConfigKeys.every((key) => typeof key === "string"));
+}
+
 function createFakePullbackStore() {
   const state: FakePullbackStore = { rows: new Map() };
   return {
@@ -258,14 +285,9 @@ test(
       SUPABASE_URL: "",
       SUPABASE_ANON_KEY: "",
     });
-    const result = await controller.createSession({ childId: "child_test" }).then(
-      (r) => ({ ok: true, value: r }),
-      (err: unknown) => ({ ok: false, error: err }),
-    );
-    assert.equal(result.ok, false);
-    const err = (result as { ok: false; error: any }).error;
+    const err = await captureRejected(controller.createSession({ childId: "child_test" }));
+    assertDirectUploadConfigError(err);
     assert.equal(err.code, "web_companion_direct_upload_config_missing");
-    assert.ok(Array.isArray(err.missingConfigKeys));
     assert.ok(err.missingConfigKeys.includes("SUPABASE_URL"));
     assert.ok(err.missingConfigKeys.includes("SUPABASE_ANON_KEY"));
   },

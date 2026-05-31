@@ -1,8 +1,11 @@
 import "reflect-metadata";
+import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import helmet from "helmet";
 import cors from "cors";
+import type { NextFunction, Request, Response } from "express";
+import { ApiCode } from "@kidmemory/protocol";
 
 import { AppModule } from "./app.module.ts";
 import { loadConfigFromEnv } from "./infrastructure/config/app-config.service.ts";
@@ -15,6 +18,7 @@ import { SessionQuotaMiddleware } from "./infrastructure/security/session-quota.
 import { InputValidationMiddleware } from "./infrastructure/security/input-validation.middleware.ts";
 
 async function bootstrap() {
+  const logger = new Logger("SidecarBootstrap");
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
@@ -22,31 +26,26 @@ async function bootstrap() {
   const config = loadConfigFromEnv();
   const httpConfig = HttpRuntimeConfigService.fromEnv();
 
-  // Enable shutdown hooks
   app.enableShutdownHooks();
 
-  // Configure CORS
   app.use(cors(httpConfig.getCorsOptions()));
 
-  // Configure security headers
   if (httpConfig.getConfig().security.enableHelmet) {
     app.use(helmet(httpConfig.getHelmetOptions()));
   }
 
-  // Configure body size limits
   const localeMiddleware = createLocaleMiddleware();
   app.use(localeMiddleware.use.bind(localeMiddleware));
 
-  app.use('/api', (req: any, res: any, next: any) => {
-    // Express built-in body parser limits
+  app.use('/api', (req: Request, res: Response, next: NextFunction) => {
     if (req.get('content-type')?.includes('application/json')) {
       const limit = httpConfig.getConfig().bodyLimits.json;
       if (req.get('content-length')) {
-        const size = parseInt(req.get('content-length') || '0');
+        const size = Number.parseInt(req.get('content-length') || '0', 10);
         const limitBytes = parseSize(limit);
         if (size > limitBytes) {
           return res.status(413).json({
-            code: 12000, // ApiCode.INVALID_PARAMS
+            code: ApiCode.INVALID_PARAMS,
             msg: `Request payload exceeds limit of ${limit}`,
             data: {
               timestamp: new Date().toISOString(),
@@ -59,30 +58,20 @@ async function bootstrap() {
     next();
   });
 
-  // Configure global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Configure global response interceptor (for dual-format support)
   app.useGlobalInterceptors(new ApiResponseInterceptor());
 
-  // Configure security middlewares (按顺序执行)
   const inputValidationMiddleware = app.get(InputValidationMiddleware);
   const rateLimitMiddleware = app.get(RateLimitMiddleware);
   const sessionQuotaMiddleware = app.get(SessionQuotaMiddleware);
 
-  // 1. 输入验证（最快，阻止明显的恶意请求）
   app.use(inputValidationMiddleware.use.bind(inputValidationMiddleware));
 
-  // 2. 速率限制（阻止高频攻击）
   app.use(rateLimitMiddleware.use.bind(rateLimitMiddleware));
 
-  // 3. 会话配额限制（针对创建会话的特定保护）
   app.use(sessionQuotaMiddleware.use.bind(sessionQuotaMiddleware));
 
-  // 将 sessionQuotaMiddleware 暴露给全局，供 WebCompanionService 使用
-  (global as any).sessionQuotaMiddleware = sessionQuotaMiddleware;
-
-  // Configure Swagger/OpenAPI documentation
   const swaggerConfig = new DocumentBuilder()
     .setTitle('KidMemory Sidecar API')
     .setDescription('Local sidecar API for KidMemory desktop application')
@@ -101,24 +90,22 @@ async function bootstrap() {
     jsonDocumentUrl: 'docs/openapi.json',
   });
 
-  // Graceful shutdown handling
   process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    logger.log('SIGTERM received, shutting down gracefully');
     await app.close();
     process.exit(0);
   });
 
   process.on('SIGINT', async () => {
-    console.log('SIGINT received, shutting down gracefully');
+    logger.log('SIGINT received, shutting down gracefully');
     await app.close();
     process.exit(0);
   });
 
   await app.listen(config.sidecar.port, config.sidecar.host);
-  console.log(`Sidecar HTTP server listening on ${config.sidecar.host}:${config.sidecar.port}`);
+  logger.log(`Sidecar HTTP server listening on ${config.sidecar.host}:${config.sidecar.port}`);
 }
 
-// Helper function to parse size strings like "5mb" to bytes
 function parseSize(size: string): number {
   const units: Record<string, number> = {
     b: 1,

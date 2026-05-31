@@ -1,7 +1,16 @@
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+export interface CreateDirectUploadSessionRequest {
+  childId: string;
+}
 
-export type CreateDirectUploadSessionRequest =
-  components["schemas"]["CreateDirectUploadSessionRequestDto"];
-
-export type CreateDirectUploadSessionResponse =
-  components["schemas"]["CreateDirectUploadSessionResponseDto"];
+export interface CreateDirectUploadSessionResponse {
+  sessionId: string;
+  childId: string;
+  bucket: string;
+  sessionPath: string;
+  supabaseUrl: string;
+  anonKey: string;
+  publicUrl: string;
+  recommendedClientLimit: number;
+  expiresAtHintSeconds: number;
+  token: string;
+}

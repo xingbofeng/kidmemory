@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
@@ -7,7 +5,7 @@ import '../../../../l10n/app_localizations.dart';
 import 'child_profile_empty_artwork.dart';
 
 class EmptyPrivacyCard extends StatelessWidget {
-  const EmptyPrivacyCard();
+  const EmptyPrivacyCard({super.key});
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -80,6 +78,7 @@ class EmptyPrivacyCard extends StatelessWidget {
 
 class EmptyPrivacyRow extends StatelessWidget {
   const EmptyPrivacyRow({
+    super.key,
     required this.iconAsset,
     required this.title,
     required this.text,
@@ -137,7 +136,7 @@ class EmptyPrivacyRow extends StatelessWidget {
 }
 
 class DataOwnershipBanner extends StatelessWidget {
-  const DataOwnershipBanner({this.compact = false});
+  const DataOwnershipBanner({super.key, this.compact = false});
 
   final bool compact;
 

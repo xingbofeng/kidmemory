@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const UpdateSupabaseStorageDtoSchema = z
   .object({
@@ -17,4 +16,4 @@ export const UpdateSupabaseStorageDtoSchema = z
   })
   .strict();
 
-export type UpdateSupabaseStorageDto = components["schemas"]["SupabaseStorageConfigRequestDto"];
+export type UpdateSupabaseStorageDto = z.infer<typeof UpdateSupabaseStorageDtoSchema>;

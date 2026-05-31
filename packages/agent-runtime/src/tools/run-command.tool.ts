@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 
 import type { AgentTool } from "../index.js";
+import { readRequiredString, readStringArray } from "./path-policy.js";
 
 const DEFAULT_ALLOWED_COMMANDS = ["node", "npm", "npx", "python", "python3"];
 
@@ -36,19 +37,19 @@ async function runWorkspaceCommand(
   options: { workspaceDir: string; timeoutMs?: number; allowedCommands?: string[] },
   input: unknown,
 ) {
-  const command = readCommand(input);
-  const args = readArgs(input);
+  const command = readRequiredString(input, "command", "Missing required command.");
+  const args = readStringArray(input, "args");
   const allowedCommands = new Set(options.allowedCommands ?? DEFAULT_ALLOWED_COMMANDS);
   if (!allowedCommands.has(command)) {
     throw new Error(`Command is not allowed: ${command}`);
   }
 
   return new Promise((resolve, reject) => {
-	    const child = spawn(command, args, {
-	      cwd: options.workspaceDir,
-	      env: minimalCommandEnv(),
-	      stdio: ["ignore", "pipe", "pipe"],
-	    });
+    const child = spawn(command, args, {
+      cwd: options.workspaceDir,
+      env: minimalCommandEnv(),
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     const timeout = setTimeout(() => {
       child.kill("SIGTERM");
       reject(new Error(`Command timed out after ${options.timeoutMs ?? 60_000}ms.`));
@@ -83,22 +84,4 @@ function minimalCommandEnv(): NodeJS.ProcessEnv {
     if (value) env[key] = value;
   }
   return env;
-}
-
-function readCommand(input: unknown): string {
-  if (!input || typeof input !== "object" || !("command" in input)) {
-    throw new Error("Missing required command.");
-  }
-  const value = (input as Record<string, unknown>).command;
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error("Missing required command.");
-  }
-  return value.trim();
-}
-
-function readArgs(input: unknown): string[] {
-  if (!input || typeof input !== "object" || !("args" in input)) return [];
-  const value = (input as Record<string, unknown>).args;
-  if (!Array.isArray(value)) return [];
-  return value.map((item) => String(item));
 }

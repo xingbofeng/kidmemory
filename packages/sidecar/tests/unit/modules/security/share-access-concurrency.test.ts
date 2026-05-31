@@ -9,6 +9,7 @@
 
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
 import { ShareIpLimiterService } from '../../../../src/modules/web-companion/share-ip-limiter.service.ts';
 
 describe('Share Access Concurrency', () => {
@@ -153,18 +154,13 @@ describe('Share Access Concurrency', () => {
   });
 
   describe('AccessCount Atomic Increment', () => {
-    it('should document that Prisma atomic increment is used', () => {
-      // This test documents that incrementShareTokenAccess uses Prisma's atomic increment
-      // Implementation in prisma-share-token.repository.ts:
-      //   accessCount: { increment: 1 }
-      // 
-      // This ensures that concurrent requests will correctly increment the counter
-      // without race conditions, as Prisma translates this to an atomic SQL UPDATE:
-      //   UPDATE share_token SET access_count = access_count + 1 WHERE id = ?
-      //
-      // Actual concurrent testing would require a real database and is better suited
-      // for integration tests.
-      assert.ok(true, 'Prisma atomic increment is used for accessCount');
+    it('uses Prisma atomic increment for share token access counts', () => {
+      const source = readFileSync(
+        'src/modules/web-companion/prisma-share-token.repository.ts',
+        'utf8',
+      );
+
+      assert.match(source, /accessCount:\s*\{\s*increment:\s*1\s*\}/);
     });
   });
 });

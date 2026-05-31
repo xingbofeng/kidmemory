@@ -7,7 +7,44 @@ import {
   loadConfigFromEnv,
   redactConfig,
 } from "../../../../src/infrastructure/config/app-config.service.ts";
+import type { PrismaMigrationService } from "../../../../src/infrastructure/database/prisma-migration.service.ts";
+import type { PrismaService } from "../../../../src/infrastructure/database/prisma.service.ts";
 import { ConfigService } from "../../../../src/modules/config/config.service.ts";
+
+type RuntimeConfigRecord = {
+  key: string;
+  value: unknown;
+};
+
+type ConfigServiceTestOptions = {
+  runtimeConfigRows?: RuntimeConfigRecord[];
+  upserts?: RuntimeConfigRecord[];
+  storageFetch?: typeof fetch;
+};
+
+function createConfigService(
+  appConfig: AppConfigService,
+  options: ConfigServiceTestOptions = {},
+) {
+  const prisma = {
+    runtimeConfig: {
+      async findMany() {
+        return options.runtimeConfigRows ?? [];
+      },
+      async upsert(input: { create: RuntimeConfigRecord }) {
+        options.upserts?.push(input.create);
+        return input.create;
+      },
+    },
+  } as unknown as PrismaService;
+  const migrations = {
+    async deployWithRepair() {
+      return { ok: true };
+    },
+  } as unknown as PrismaMigrationService;
+
+  return new ConfigService(appConfig, prisma, migrations, options.storageFetch);
+}
 
 test("loads startup .env values without treating setup config as env fallback", () => {
   const config = loadConfigFromEnv({
@@ -170,29 +207,25 @@ test("OpenAI 配置在未设置时默认为空", () => {
 
 test("loads Storage setup config from database runtime config", async () => {
   const appConfig = new AppConfigService(loadConfigFromEnv({}));
-  const prisma = {
-    runtimeConfig: {
-      findMany: async () => [
-        {
-          key: "supabaseStorage",
-          value: {
-            url: "https://kidmemory.supabase.co",
-            bucket: "kidmemory-assets",
-            serviceRoleKey: "supabase-service-secret",
-            publicBaseUrl: "https://cdn.example.test/storage",
-            s3: {
-              endpoint: "https://project-ref.storage.supabase.co/storage/v1/s3",
-              region: "auto",
-              accessKeyId: "s3-access-key",
-              secretAccessKey: "s3-secret-key",
-            },
+  const service = createConfigService(appConfig, {
+    runtimeConfigRows: [
+      {
+        key: "supabaseStorage",
+        value: {
+          url: "https://kidmemory.supabase.co",
+          bucket: "kidmemory-assets",
+          serviceRoleKey: "supabase-service-secret",
+          publicBaseUrl: "https://cdn.example.test/storage",
+          s3: {
+            endpoint: "https://project-ref.storage.supabase.co/storage/v1/s3",
+            region: "auto",
+            accessKeyId: "s3-access-key",
+            secretAccessKey: "s3-secret-key",
           },
         },
-      ],
-      upsert: async () => ({}),
-    },
-  };
-  const service = new ConfigService(appConfig, prisma as any);
+      },
+    ],
+  });
 
   const status = await service.status();
 
@@ -205,17 +238,8 @@ test("loads Storage setup config from database runtime config", async () => {
 
 test("persists setup config updates to database runtime config", async () => {
   const appConfig = new AppConfigService(loadConfigFromEnv({}));
-  const upserts: Array<{ key: string; value: unknown }> = [];
-  const prisma = {
-    runtimeConfig: {
-      findMany: async () => [],
-      upsert: async (input: { create: { key: string; value: unknown } }) => {
-        upserts.push(input.create);
-        return {};
-      },
-    },
-  };
-  const service = new ConfigService(appConfig, prisma as any);
+  const upserts: RuntimeConfigRecord[] = [];
+  const service = createConfigService(appConfig, { upserts });
 
   await service.updateSupabaseStorage({
     url: "https://kidmemory.supabase.co",
@@ -242,7 +266,7 @@ test("updates local data root and keeps workspace and exports as siblings", () =
 
 test("updates config paths from the setup page request body", async () => {
   const appConfig = new AppConfigService(loadConfigFromEnv({}));
-  const service = new ConfigService(appConfig, {} as any);
+  const service = createConfigService(appConfig);
 
   const result = service.updatePaths({
     dataDir: "/tmp/kidmemory-local/data",
@@ -260,7 +284,7 @@ test("updates config paths from the setup page request body", async () => {
 
 test("updates Supabase Storage config from the setup page request body", async () => {
   const appConfig = new AppConfigService(loadConfigFromEnv({}));
-  const service = new ConfigService(appConfig, {} as any);
+  const service = createConfigService(appConfig);
 
   const result = await service.updateSupabaseStorage({
     url: "https://kidmemory.supabase.co",
@@ -300,9 +324,11 @@ test("tests Supabase Storage connection through config service", async () => {
     bucket: "kidmemory-assets",
   });
   const calls: string[] = [];
-  const service = new ConfigService(appConfig, {} as any, {} as any, async (url, init: RequestInit = {}) => {
-    calls.push(`${init.method || "GET"} ${url}`);
-    return new Response(init.method === "GET" ? "ok" : null, { status: 200 });
+  const service = createConfigService(appConfig, {
+    storageFetch: async (url, init: RequestInit = {}) => {
+      calls.push(`${init.method || "GET"} ${url}`);
+      return new Response(init.method === "GET" ? "ok" : null, { status: 200 });
+    },
   });
 
   const result = await service.testSupabaseStorage();
@@ -321,8 +347,10 @@ test("Supabase Storage connection test returns actionable bucket errors", async 
     serviceRoleKey: "supabase-service-secret",
     bucket: "missing-bucket",
   });
-  const service = new ConfigService(appConfig, {} as any, {} as any, async () => {
-    return new Response("not found", { status: 404 });
+  const service = createConfigService(appConfig, {
+    storageFetch: async () => {
+      return new Response("not found", { status: 404 });
+    },
   });
 
   const result = await service.testSupabaseStorage();

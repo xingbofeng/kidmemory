@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import type { AgentTool } from "../index.js";
-import { isIgnoredWorkspaceRelativePath, readNumber, readToolPath, resolveReadableWorkspacePath } from "./path-policy.js";
+import { isIgnoredWorkspaceRelativePath, readNumber, readString, readToolPath, resolveReadableWorkspacePath } from "./path-policy.js";
 
 const DEFAULT_SEARCH_LIMIT = 250;
 
@@ -24,7 +24,7 @@ export function createSearchFilesTool(options: { workspaceDir: string }): AgentT
     },
     risk: "low",
     execute: async (input) => {
-      const query = readQuery(input);
+      const query = readString(input, "query");
       const limit = Math.max(1, Math.floor(readNumber(input, "limit", DEFAULT_SEARCH_LIMIT)));
       const resolved = resolveReadableWorkspacePath(options.workspaceDir, readToolPath(input));
       const matches = await searchTextFiles(resolved.absolutePath, options.workspaceDir, query, limit);
@@ -36,12 +36,6 @@ export function createSearchFilesTool(options: { workspaceDir: string }): AgentT
       };
     },
   };
-}
-
-function readQuery(input: unknown): string {
-  if (!input || typeof input !== "object" || !("query" in input)) return "";
-  const value = (input as Record<string, unknown>).query;
-  return typeof value === "string" ? value : String(value ?? "");
 }
 
 async function searchTextFiles(rootDir: string, workspaceDir: string, query: string, limit: number) {

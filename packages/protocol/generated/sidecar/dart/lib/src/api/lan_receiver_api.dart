@@ -17,7 +17,7 @@ class LanReceiverApi {
   const LanReceiverApi(this._dio);
 
   /// lanReceiverControllerDiscover
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class LanReceiverApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> lanReceiverControllerDiscover({ 
+  Future<Response<void>> lanReceiverControllerDiscover({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,7 +62,7 @@ class LanReceiverApi {
   }
 
   /// lanReceiverControllerDiscoverDevices
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -74,7 +74,7 @@ class LanReceiverApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> lanReceiverControllerDiscoverDevices({ 
+  Future<Response<void>> lanReceiverControllerDiscoverDevices({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -107,10 +107,10 @@ class LanReceiverApi {
   }
 
   /// lanReceiverControllerGetSessionStatus
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -120,7 +120,7 @@ class LanReceiverApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> lanReceiverControllerGetSessionStatus({ 
+  Future<Response<void>> lanReceiverControllerGetSessionStatus({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -154,7 +154,7 @@ class LanReceiverApi {
   }
 
   /// lanReceiverControllerPair
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -166,7 +166,7 @@ class LanReceiverApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> lanReceiverControllerPair({ 
+  Future<Response<void>> lanReceiverControllerPair({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -199,10 +199,10 @@ class LanReceiverApi {
   }
 
   /// lanReceiverControllerUpload
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -212,7 +212,7 @@ class LanReceiverApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> lanReceiverControllerUpload({ 
+  Future<Response<void>> lanReceiverControllerUpload({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

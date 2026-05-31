@@ -5,6 +5,8 @@ import test from "node:test";
 
 import { NestFactory } from "@nestjs/core";
 
+import { useMcpTestEnv } from "./mcp-test-helpers.ts";
+
 async function startApp(cacheBust) {
   const suffix = cacheBust ? `?cache=${encodeURIComponent(cacheBust)}` : "";
   const { AppModule } = await import(`../../src/app.module.ts${suffix}`);
@@ -19,24 +21,11 @@ async function startApp(cacheBust) {
 }
 
 test("MCP endpoint exists when KIDMEMORY_MCP_ENABLED=true", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp(`enabled-${Date.now()}`);
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const response = await fetch(`${baseUrl}/mcp`, { method: "GET" });
@@ -44,24 +33,11 @@ test("MCP endpoint exists when KIDMEMORY_MCP_ENABLED=true", async (t) => {
 });
 
 test("MCP endpoint is not registered when KIDMEMORY_MCP_ENABLED=false", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "false";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t, { enabled: false });
 
   const { app, baseUrl } = await startApp(`disabled-${Date.now()}`);
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const response = await fetch(`${baseUrl}/mcp`, { method: "GET" });

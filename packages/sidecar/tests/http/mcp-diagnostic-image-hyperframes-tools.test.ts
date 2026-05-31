@@ -7,6 +7,8 @@ import { NestFactory } from "@nestjs/core";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
+import { parseToolJson, useMcpTestEnv } from "./mcp-test-helpers.ts";
+
 const REQUIRED_TOOLS = [
   "get_config_status",
   "get_indexing_status",
@@ -37,55 +39,12 @@ async function connectClient(baseUrl: string) {
   return client;
 }
 
-function parseToolJson(result: Awaited<ReturnType<Client["callTool"]>>) {
-  const first = result.content?.[0];
-  if (!first || !("text" in first) || typeof first.text !== "string") {
-    return {};
-  }
-
-  const decoded = decodeNestedJson(first.text);
-  if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
-    return decoded as Record<string, unknown>;
-  }
-  return {};
-}
-
-function decodeNestedJson(value: string): unknown {
-  let current: unknown = value;
-
-  for (let i = 0; i < 3; i += 1) {
-    if (typeof current !== "string") {
-      break;
-    }
-    try {
-      current = JSON.parse(current);
-    } catch {
-      break;
-    }
-  }
-
-  return current;
-}
-
 test("diagnostic/image/hyperframes MCP tools are discoverable", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const client = await connectClient(baseUrl);
@@ -106,24 +65,11 @@ test("diagnostic/image/hyperframes MCP tools are discoverable", async (t) => {
 });
 
 test("diagnostic/image/hyperframes MCP tools are callable", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const client = await connectClient(baseUrl);

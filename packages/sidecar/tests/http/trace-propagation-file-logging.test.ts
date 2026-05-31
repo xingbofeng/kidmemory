@@ -8,54 +8,33 @@ import test from "node:test";
 import { NestFactory } from "@nestjs/core";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import type { NextFunction, Request, Response } from "express";
 import { FileLoggerService } from "../../src/infrastructure/logging/file-logger.service.ts";
 import {
   REQUEST_HEADER,
   TRACE_HEADER,
   TraceContextService,
 } from "../../src/infrastructure/logging/trace-context.service.ts";
+import { useTestEnv } from "../test-env.ts";
+import { parseToolJson, useMcpTestEnv } from "./mcp-test-helpers.ts";
 
-function decodeToolJson(result: Awaited<ReturnType<Client["callTool"]>>) {
-  const first = result.content?.[0];
-  if (!first || !("text" in first) || typeof first.text !== "string") {
-    return {} as Record<string, unknown>;
-  }
-
-  let current: unknown = first.text;
-  for (let i = 0; i < 3; i += 1) {
-    if (typeof current !== "string") break;
-    try {
-      current = JSON.parse(current);
-    } catch {
-      break;
-    }
-  }
-
-  if (current && typeof current === "object" && !Array.isArray(current)) {
-    return current as Record<string, unknown>;
-  }
-
-  return {} as Record<string, unknown>;
-}
+type TraceRequest = Request & {
+  traceId?: string;
+  requestId?: string;
+};
 
 test("trace header is logged and queryable via get_recent_logs", async (t) => {
-  const tempRoot = path.join(os.tmpdir(), `kidmemory-trace-${Date.now()}`);
-  const previous = {
-    mcpEnabled: process.env.KIDMEMORY_MCP_ENABLED,
-    mcpPath: process.env.KIDMEMORY_MCP_PATH,
-    rootDir: process.env.KIDMEMORY_ROOT_DIR,
-  };
+  useMcpTestEnv(t);
 
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
-  process.env.KIDMEMORY_ROOT_DIR = tempRoot;
+  const tempRoot = path.join(os.tmpdir(), `kidmemory-trace-${Date.now()}`);
+  useTestEnv(t, { KIDMEMORY_ROOT_DIR: tempRoot });
 
   const { AppModule } = await import(`../../src/app.module.ts?trace-logging=${Date.now()}`);
   const app = await NestFactory.create(AppModule, { logger: false });
   const fileLogger = app.get(FileLoggerService);
   const traceContext = app.get(TraceContextService);
 
-  app.use((req: any, res: any, next: any) => {
+  app.use((req: TraceRequest, res: Response, next: NextFunction) => {
     const startedAt = Date.now();
     const traceId = traceContext.normalizeTraceId(req.get(TRACE_HEADER));
     const requestId = traceContext.normalizeRequestId(req.get(REQUEST_HEADER) ?? req.requestId);
@@ -107,9 +86,6 @@ test("trace header is logged and queryable via get_recent_logs", async (t) => {
 
   t.after(async () => {
     await app.close();
-    restoreEnv("KIDMEMORY_MCP_ENABLED", previous.mcpEnabled);
-    restoreEnv("KIDMEMORY_MCP_PATH", previous.mcpPath);
-    restoreEnv("KIDMEMORY_ROOT_DIR", previous.rootDir);
   });
 
   const traceId = `trace-http-header-e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -143,16 +119,10 @@ test("trace header is logged and queryable via get_recent_logs", async (t) => {
 });
 
 test("trace header propagates into provider logs even without explicit tool trace argument", async (t) => {
-  const tempRoot = path.join(os.tmpdir(), `kidmemory-trace-provider-${Date.now()}`);
-  const previous = {
-    mcpEnabled: process.env.KIDMEMORY_MCP_ENABLED,
-    mcpPath: process.env.KIDMEMORY_MCP_PATH,
-    rootDir: process.env.KIDMEMORY_ROOT_DIR,
-  };
+  useMcpTestEnv(t);
 
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
-  process.env.KIDMEMORY_ROOT_DIR = tempRoot;
+  const tempRoot = path.join(os.tmpdir(), `kidmemory-trace-provider-${Date.now()}`);
+  useTestEnv(t, { KIDMEMORY_ROOT_DIR: tempRoot });
 
   const { AppModule } = await import(`../../src/app.module.ts?trace-provider=${Date.now()}`);
   const app = await NestFactory.create(AppModule, { logger: false });
@@ -167,9 +137,6 @@ test("trace header propagates into provider logs even without explicit tool trac
 
   t.after(async () => {
     await app.close();
-    restoreEnv("KIDMEMORY_MCP_ENABLED", previous.mcpEnabled);
-    restoreEnv("KIDMEMORY_MCP_PATH", previous.mcpPath);
-    restoreEnv("KIDMEMORY_ROOT_DIR", previous.rootDir);
   });
 
   const traceId = "trace-provider-header-e2e";
@@ -203,7 +170,7 @@ test("trace header propagates into provider logs even without explicit tool trac
     await client.close();
   });
 
-  const logsPayload = decodeToolJson(await client.callTool({
+  const logsPayload = parseToolJson(await client.callTool({
     name: "get_recent_logs",
     arguments: { limit: 200 },
   }));
@@ -215,17 +182,9 @@ test("trace header propagates into provider logs even without explicit tool trac
   assert.equal(hasProviderTrace, true, "expected provider log entry to inherit HTTP traceId");
 });
 
-function restoreEnv(key: string, value: string | undefined) {
-  if (value === undefined) {
-    delete process.env[key];
-    return;
-  }
-  process.env[key] = value;
-}
-
 async function waitForLogs(client: Client, traceId: string) {
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    const logsPayload = decodeToolJson(await client.callTool({
+    const logsPayload = parseToolJson(await client.callTool({
       name: "get_recent_logs",
       arguments: { limit: 200 },
     }));
@@ -236,7 +195,7 @@ async function waitForLogs(client: Client, traceId: string) {
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  const lastPayload = decodeToolJson(await client.callTool({
+  const lastPayload = parseToolJson(await client.callTool({
     name: "get_recent_logs",
     arguments: { limit: 200 },
   }));

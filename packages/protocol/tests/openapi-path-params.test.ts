@@ -120,4 +120,29 @@ describe("OpenAPI path parameters", () => {
       "Generated TS client should keep requestBody type for commitUploadItem",
     );
   });
+
+  test("generated TypeScript clients keep empty component maps typed as unknown", () => {
+    const files = [
+      "generated/cloud-api/ts/index.d.ts",
+      "generated/sidecar/ts/index.d.ts",
+      "scripts/generate-ts-client.mjs",
+    ];
+    const offenders = files.filter((file) =>
+      readFileSync(path.resolve(process.cwd(), file), "utf8").includes("Record<string, any>"),
+    );
+
+    assert.deepEqual(offenders, [], `Generated TS client any maps found:\n${offenders.join("\n")}`);
+  });
+
+  test("generated Dart clients do not keep broad build_runner constraints", () => {
+    const files = [
+      "generated/cloud-api/dart/pubspec.yaml",
+      "generated/sidecar/dart/pubspec.yaml",
+    ];
+    const offenders = files.filter((file) =>
+      readFileSync(path.resolve(process.cwd(), file), "utf8").includes("build_runner: any"),
+    );
+
+    assert.deepEqual(offenders, [], `Generated Dart pubspec broad constraints found:\n${offenders.join("\n")}`);
+  });
 });

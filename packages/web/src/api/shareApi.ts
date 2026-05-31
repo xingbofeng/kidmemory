@@ -1,9 +1,3 @@
-/**
- * Share API Module
- * 
- * Handles all share-related API calls
- */
-
 import { httpClient } from '../lib/http-client';
 import type { ShareTokenValidation } from '../types/shareBook';
 import type { SharedAsset } from '../types/shareBrowse';

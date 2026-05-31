@@ -58,6 +58,7 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
     );
     if (!mounted) return;
     await refreshDataset();
+    if (!mounted) return;
     _appendLog(
       AppLocalizations.of(
         context,

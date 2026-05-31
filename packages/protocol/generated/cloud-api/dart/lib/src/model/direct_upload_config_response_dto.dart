@@ -24,7 +24,7 @@ class DirectUploadConfigResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'anonKey',
     required: true,
     includeIfNull: false,
@@ -55,4 +55,3 @@ class DirectUploadConfigResponseDto {
   }
 
 }
-

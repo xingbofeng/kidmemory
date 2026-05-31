@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { test } from "node:test";
 
-import { MemoryDatasetDb, buildSelectedAssetPayload, importSampleDataset, listAssets } from "../../../../src/modules/dataset/providers/sample-dataset.ts";
+import {
+  MemoryDatasetDb,
+  buildSelectedAssetPayload,
+  importSampleDataset,
+  listAssets,
+  type SampleAsset,
+  type SampleDb,
+} from "../../../../src/modules/dataset/providers/sample-dataset.ts";
+import type { Child } from "../../../../src/infrastructure/dataset-state/memory-dataset-db.ts";
 
 test("imports sample dataset idempotently and supports type filtering", async () => {
   const db = createMemoryDb();
@@ -58,14 +66,19 @@ test("memory dataset db can fetch an imported child by id", async () => {
   assert.equal(child?.name, "小朋友");
 });
 
-function createMemoryDb() {
+type TestMemoryDb = SampleDb & {
+  children: Map<string, Child>;
+  assets: Map<string, SampleAsset>;
+};
+
+function createMemoryDb(): TestMemoryDb {
   return {
-    children: new Map(),
-    assets: new Map(),
-    async upsertChild(child: any) {
+    children: new Map<string, Child>(),
+    assets: new Map<string, SampleAsset>(),
+    async upsertChild(child: Child) {
       this.children.set(child.id, child);
     },
-    async upsertAsset(asset: any) {
+    async upsertAsset(asset: SampleAsset) {
       this.assets.set(asset.id, asset);
     },
     async getChildren() {
@@ -74,11 +87,14 @@ function createMemoryDb() {
     async getChild(id: string) {
       return this.children.get(id);
     },
-    async getAssets(filter: any = {}) {
-      return [...this.assets.values()].filter((asset: any) => !filter.type || asset.type === filter.type);
+    async getAssets(filter: { type?: string; childId?: string } = {}) {
+      return [...this.assets.values()].filter((asset) => !filter.type || asset.type === filter.type);
     },
     async getAssetsByIds(ids: string[]) {
-      return ids.map((id) => this.assets.get(id)).filter(Boolean);
+      return ids.flatMap((id) => {
+        const asset = this.assets.get(id);
+        return asset ? [asset] : [];
+      });
     },
   };
 }

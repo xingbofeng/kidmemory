@@ -19,124 +19,59 @@ vi.mock('../../lib/http-client', () => ({
 }))
 
 const mockHttpClient = vi.mocked(httpClient)
+const renderAssetBrowser = () => render(<AssetBrowser sessionId="session-123" sessionToken="token-abc" />)
 
 describe('AssetBrowser', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockHttpClient.get.mockResolvedValue({
-      assets: [
-        {
-          id: 'asset-1',
-          name: '我的画作',
-          type: 'drawing',
-          thumbnailUrl: '/sample-assets/sun-garden.png',
-          createdAt: '2024-01-15'
-        },
-        {
-          id: 'asset-2',
-          name: '生日照片',
-          type: 'photo',
-          thumbnailUrl: '/sample-assets/birthday-boy.png',
-          createdAt: '2024-01-14'
-        }
-      ]
-    })
+    mockHttpClient.get.mockResolvedValue([
+      {
+        id: 'asset-1',
+        title: '我的画作',
+        type: 'drawing',
+        previewUrl: '/sample-assets/sun-garden.png',
+        createdAt: '2024-01-15'
+      },
+      {
+        id: 'asset-2',
+        title: '生日照片',
+        type: 'photo',
+        previewUrl: '/sample-assets/birthday-boy.png',
+        createdAt: '2024-01-14'
+      }
+    ])
   })
 
   it('displays assets in grid layout', async () => {
-    // Mock API response
-    mockHttpClient.get.mockResolvedValueOnce({
-        assets: [
-          {
-            id: 'asset-1',
-            name: '我的画作',
-            type: 'drawing',
-            thumbnailUrl: '/sample-assets/sun-garden.png',
-            createdAt: '2024-01-15'
-          },
-          {
-            id: 'asset-2',
-            name: '生日照片',
-            type: 'photo',
-            thumbnailUrl: '/sample-assets/birthday-boy.png',
-            createdAt: '2024-01-14'
-          }
-        ]
-    })
-
-    render(<AssetBrowser childId="child-123" />)
+    renderAssetBrowser()
 
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
       expect(screen.getByText('生日照片')).toBeInTheDocument()
     })
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/children/child-123/assets')
+    expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/sessions/session-123/recent?token=token-abc&limit=20')
   })
 
   it('filters assets by type', async () => {
-    // Mock API response with multiple asset types
-    mockHttpClient.get.mockResolvedValueOnce({
-        assets: [
-          {
-            id: 'asset-1',
-            name: '我的画作',
-            type: 'drawing',
-            thumbnailUrl: '/sample-assets/sun-garden.png',
-            createdAt: '2024-01-15'
-          },
-          {
-            id: 'asset-2',
-            name: '生日照片',
-            type: 'photo',
-            thumbnailUrl: '/sample-assets/birthday-boy.png',
-            createdAt: '2024-01-14'
-          }
-        ]
-    })
+    renderAssetBrowser()
 
-    render(<AssetBrowser childId="child-123" />)
-
-    // Wait for initial load
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
     })
 
-    // Click on drawing filter
     const drawingFilter = screen.getByRole('button', { name: /绘画/ })
     fireEvent.click(drawingFilter)
 
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
-      // Photo should be filtered out
       expect(screen.queryByText('生日照片')).not.toBeInTheDocument()
     })
   })
 
   it('searches assets by keyword', async () => {
-    // Mock API response
-    mockHttpClient.get.mockResolvedValueOnce({
-        assets: [
-          {
-            id: 'asset-1',
-            name: '我的画作',
-            type: 'drawing',
-            thumbnailUrl: '/sample-assets/sun-garden.png',
-            createdAt: '2024-01-15'
-          },
-          {
-            id: 'asset-2',
-            name: '生日照片',
-            type: 'photo',
-            thumbnailUrl: '/sample-assets/birthday-boy.png',
-            createdAt: '2024-01-14'
-          }
-        ]
-    })
+    renderAssetBrowser()
 
-    render(<AssetBrowser childId="child-123" />)
-
-    // Wait for loading to complete first
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
     })
@@ -151,9 +86,8 @@ describe('AssetBrowser', () => {
   })
 
   it('shows empty state when no assets found', async () => {
-    render(<AssetBrowser childId="child-123" />)
+    renderAssetBrowser()
 
-    // Wait for loading to complete first
     await waitFor(() => {
       expect(screen.getByText('我的画作')).toBeInTheDocument()
     })
@@ -167,14 +101,12 @@ describe('AssetBrowser', () => {
   })
 
   it('shows asset thumbnails and metadata', async () => {
-    render(<AssetBrowser childId="child-123" />)
+    renderAssetBrowser()
 
     await waitFor(() => {
-      // Check for thumbnail images
       const thumbnails = screen.getAllByRole('img')
       expect(thumbnails.length).toBeGreaterThan(0)
 
-      // Check for asset types - use getAllByText since there are multiple instances
       const drawingLabels = screen.getAllByText(/绘画/)
       expect(drawingLabels.length).toBeGreaterThan(0)
 
@@ -186,12 +118,10 @@ describe('AssetBrowser', () => {
   it('handles loading and error states', async () => {
     mockHttpClient.get.mockRejectedValueOnce(new Error('加载失败'))
 
-    render(<AssetBrowser childId="invalid-child" />)
+    renderAssetBrowser()
 
-    // Should show loading initially
     expect(screen.getByText(/加载中/)).toBeInTheDocument()
 
-    // Should show error for invalid child
     await waitFor(() => {
       expect(screen.getByText(/加载失败/)).toBeInTheDocument()
     })

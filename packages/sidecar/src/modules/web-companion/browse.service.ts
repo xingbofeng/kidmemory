@@ -1,12 +1,51 @@
 import crypto from 'node:crypto';
-import type { components } from '@kidmemory/protocol/generated/sidecar/ts';
 
-export type RecentUploadDto = components['schemas']['RecentUploadDto'];
-export type AssetDetailDto = components['schemas']['AssetDetailDto'];
-export type BookSummaryDto = components['schemas']['BookSummaryDto'];
-export type BookDetailDto = components['schemas']['BookDetailDto'];
-export type SharedAssetDto = components['schemas']['SharedAssetDto'];
-export type SharedBookDto = components['schemas']['SharedBookDto'];
+export interface RecentUploadDto {
+  id: string;
+  title: string;
+  type: string;
+  childId: string;
+  createdAt: string;
+  previewUrl: string;
+}
+
+export interface AssetDetailDto extends RecentUploadDto {
+  description?: string;
+  tags: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface BookSummaryDto {
+  id: string;
+  title: string;
+  childId: string;
+  createdAt: string;
+  status: string;
+  previewUrl: string;
+}
+
+export interface BookDetailDto extends BookSummaryDto {
+  description?: string;
+  pageCount?: number;
+}
+
+export interface SharedAssetDto {
+  id: string;
+  title: string;
+  type: string;
+  createdAt: string;
+  previewUrl: string;
+}
+
+export interface SharedBookDto {
+  id: string;
+  title: string;
+  createdAt: string;
+  status: string;
+  description?: unknown;
+  previewUrl: string;
+  pageCount?: unknown;
+}
 
 export interface GetRecentUploadsInput {
   sessionId: string;
@@ -32,7 +71,6 @@ export interface GetBookDetailsInput {
   bookId: string;
 }
 
-// Share-specific inputs
 export interface GetSharedAssetsInput {
   shareToken: string;
   limit?: number;
@@ -70,7 +108,7 @@ export interface BrowseAssetRecord {
   createdAt: string;
   description?: string | null;
   tags?: unknown;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface BrowseBookRecord {
@@ -79,7 +117,7 @@ export interface BrowseBookRecord {
   childId?: string | null;
   createdAt: string;
   status: string;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface BrowseRepository {
@@ -101,10 +139,8 @@ export class BrowseService {
   async getRecentUploads(input: GetRecentUploadsInput): Promise<RecentUploadDto[]> {
     const { sessionId, token, limit = 20 } = input;
 
-    // Validate session and token
     const session = await this.validateSession(sessionId, token);
 
-    // Validate and clamp limit
     const clampedLimit = this.validateLimit(limit);
 
     const assets = await this.repository.findRecentAssets({ childId: session.childId, limit: clampedLimit });
@@ -122,7 +158,6 @@ export class BrowseService {
   async getAssetDetails(input: GetAssetDetailsInput): Promise<AssetDetailDto> {
     const { sessionId, token, assetId } = input;
 
-    // Validate session and token
     const session = await this.validateSession(sessionId, token);
 
     const row = await this.repository.findAssetForChild({ assetId, childId: session.childId });
@@ -147,13 +182,10 @@ export class BrowseService {
   async getBooksList(input: GetBooksListInput): Promise<BookSummaryDto[]> {
     const { sessionId, token, childId } = input;
 
-    // Validate session and token
     const session = await this.validateSession(sessionId, token);
 
-    // Use specified childId or default to session's child
     const targetChildId = childId || session.childId;
 
-    // Ensure the requested childId matches the session's child for security
     if (childId && childId !== session.childId) {
       throw new Error('Access denied to specified child');
     }
@@ -173,7 +205,6 @@ export class BrowseService {
   async getBookDetails(input: GetBookDetailsInput): Promise<BookDetailDto> {
     const { sessionId, token, bookId } = input;
 
-    // Validate session and token
     const session = await this.validateSession(sessionId, token);
 
     const row = await this.repository.findBookForChild({ bookId, childId: session.childId });
@@ -188,17 +219,15 @@ export class BrowseService {
       childId: row.childId || session.childId,
       createdAt: row.createdAt,
       status: row.status,
-      description: row.metadata?.description,
+      description: this.getStringMetadata(row.metadata, 'description'),
       previewUrl: this.generateBookPreviewUrl(row.id),
-      pageCount: row.metadata?.pageCount
+      pageCount: this.getNumberMetadata(row.metadata, 'pageCount')
     };
   }
 
-  // Share-specific methods
   async getSharedAssets(input: GetSharedAssetsInput): Promise<SharedAssetDto[]> {
     const { shareToken, limit = 20 } = input;
 
-    // Validate share token and get context
     const shareContext = await this.validateShareToken(shareToken);
 
     if (shareContext.resourceType === 'specific_book') {
@@ -219,12 +248,10 @@ export class BrowseService {
   async getSharedBook(input: GetSharedBookInput): Promise<SharedBookDto> {
     const { shareToken, bookId } = input;
 
-    // Validate share token and get context
     const shareContext = await this.validateShareToken(shareToken);
 
     let targetBookId = bookId;
 
-    // If share token is for a specific book, use that book ID
     if (shareContext.resourceType === 'specific_book') {
       if (bookId && bookId !== shareContext.resourceId) {
         throw new Error('Book ID does not match share token');
@@ -254,7 +281,6 @@ export class BrowseService {
   }
 
   private async validateSession(sessionId: string, token: string): Promise<SessionValidation> {
-    // Hash the token for comparison
     const tokenHash = this.hashToken(token);
 
     const session = await this.repository.findSessionByToken({ sessionId, tokenHash });
@@ -263,14 +289,12 @@ export class BrowseService {
       throw new Error('Session not found or token invalid');
     }
 
-    // Check if session is expired
     const now = new Date();
     const expiresAt = new Date(session.expiresAt);
     if (now > expiresAt) {
       throw new Error('Session expired');
     }
 
-    // Check if session is active
     if (session.status !== 'active') {
       throw new Error('Session not active');
     }
@@ -291,19 +315,16 @@ export class BrowseService {
       throw new Error('Share token not found');
     }
 
-    // Check if token is active
     if (token.status !== 'active') {
       throw new Error('Share token has been revoked');
     }
 
-    // Check expiration
     const now = new Date();
     const expiresAt = new Date(token.expiresAt);
     if (now > expiresAt) {
       throw new Error('Share token has expired');
     }
 
-    // Check access count limit
     if (token.maxAccessCount && token.accessCount >= token.maxAccessCount) {
       throw new Error('Share token access limit exceeded');
     }
@@ -327,23 +348,21 @@ export class BrowseService {
   }
 
   private generateBookPreviewUrl(bookId: string): string {
-    // Generate API-relative book preview URL
     return `/api/books/${bookId}/preview`;
   }
 
-  private parseTags(tags: any): string[] {
+  private parseTags(tags: unknown): string[] {
     if (!tags) return [];
 
-    // If it's already an array, return it
-    if (Array.isArray(tags)) return tags;
+    if (Array.isArray(tags)) {
+      return tags.filter((tag): tag is string => typeof tag === 'string');
+    }
 
-    // If it's a string, try to parse as JSON
     if (typeof tags === 'string') {
       try {
-        const parsed = JSON.parse(tags);
-        return Array.isArray(parsed) ? parsed : [];
+        const parsed: unknown = JSON.parse(tags);
+        return this.parseTags(parsed);
       } catch {
-        // If JSON parsing fails, treat as a single tag
         return [tags];
       }
     }
@@ -352,7 +371,16 @@ export class BrowseService {
   }
 
   private validateLimit(limit: number): number {
-    // Clamp limit between 1 and 100
     return Math.max(1, Math.min(100, limit));
+  }
+
+  private getStringMetadata(metadata: Record<string, unknown> | null | undefined, key: string): string | undefined {
+    const value = metadata?.[key];
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  private getNumberMetadata(metadata: Record<string, unknown> | null | undefined, key: string): number | undefined {
+    const value = metadata?.[key];
+    return typeof value === 'number' ? value : undefined;
   }
 }

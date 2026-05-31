@@ -9,14 +9,14 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**agentConfigControllerCreateConfig**](AgentConfigApi.md#agentconfigcontrollercreateconfig) | **POST** /api/config/agent-configs | 
-[**agentConfigControllerDeleteConfig**](AgentConfigApi.md#agentconfigcontrollerdeleteconfig) | **DELETE** /api/config/agent-configs/{id} | 
-[**agentConfigControllerGetConfig**](AgentConfigApi.md#agentconfigcontrollergetconfig) | **GET** /api/config/agent-configs/{id} | 
-[**agentConfigControllerGetDefaultConfig**](AgentConfigApi.md#agentconfigcontrollergetdefaultconfig) | **GET** /api/config/agent-configs/default | 
-[**agentConfigControllerListConfigs**](AgentConfigApi.md#agentconfigcontrollerlistconfigs) | **GET** /api/config/agent-configs | 
-[**agentConfigControllerSetDefaultConfig**](AgentConfigApi.md#agentconfigcontrollersetdefaultconfig) | **POST** /api/config/agent-configs/{id}/set-default | 
-[**agentConfigControllerTestConfig**](AgentConfigApi.md#agentconfigcontrollertestconfig) | **POST** /api/config/agent-configs/{id}/test | 
-[**agentConfigControllerUpdateConfig**](AgentConfigApi.md#agentconfigcontrollerupdateconfig) | **PUT** /api/config/agent-configs/{id} | 
+[**agentConfigControllerCreateConfig**](AgentConfigApi.md#agentconfigcontrollercreateconfig) | **POST** /api/config/agent-configs |
+[**agentConfigControllerDeleteConfig**](AgentConfigApi.md#agentconfigcontrollerdeleteconfig) | **DELETE** /api/config/agent-configs/{id} |
+[**agentConfigControllerGetConfig**](AgentConfigApi.md#agentconfigcontrollergetconfig) | **GET** /api/config/agent-configs/{id} |
+[**agentConfigControllerGetDefaultConfig**](AgentConfigApi.md#agentconfigcontrollergetdefaultconfig) | **GET** /api/config/agent-configs/default |
+[**agentConfigControllerListConfigs**](AgentConfigApi.md#agentconfigcontrollerlistconfigs) | **GET** /api/config/agent-configs |
+[**agentConfigControllerSetDefaultConfig**](AgentConfigApi.md#agentconfigcontrollersetdefaultconfig) | **POST** /api/config/agent-configs/{id}/set-default |
+[**agentConfigControllerTestConfig**](AgentConfigApi.md#agentconfigcontrollertestconfig) | **POST** /api/config/agent-configs/{id}/test |
+[**agentConfigControllerUpdateConfig**](AgentConfigApi.md#agentconfigcontrollerupdateconfig) | **PUT** /api/config/agent-configs/{id} |
 
 
 # **agentConfigControllerCreateConfig**
@@ -65,7 +65,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getAgentConfigApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.agentConfigControllerDeleteConfig(id);
@@ -78,7 +78,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -105,7 +105,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getAgentConfigApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.agentConfigControllerGetConfig(id);
@@ -118,7 +118,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -217,7 +217,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getAgentConfigApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.agentConfigControllerSetDefaultConfig(id);
@@ -230,7 +230,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -257,7 +257,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getAgentConfigApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.agentConfigControllerTestConfig(id);
@@ -270,7 +270,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -297,7 +297,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getAgentConfigApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.agentConfigControllerUpdateConfig(id);
@@ -310,7 +310,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -326,4 +326,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

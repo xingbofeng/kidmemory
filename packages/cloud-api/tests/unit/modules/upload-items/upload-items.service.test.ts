@@ -1,24 +1,34 @@
 import { describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
-import { UploadItemsService } from '../../../../src/modules/upload-items/upload-items.service.ts';
+import {
+  UploadItemsService,
+  type UploadItemsPrismaClient,
+} from '../../../../src/modules/upload-items/upload-items.service.ts';
+
+function makeUploadItemsPrisma(
+  overrides: Partial<UploadItemsPrismaClient['uploadItem']> = {},
+): UploadItemsPrismaClient {
+  return {
+    uploadItem: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      update: async () => ({}),
+      ...overrides,
+    },
+  };
+}
 
 describe('UploadItemsService', () => {
   it('coerces string limit/offset query values before Prisma findMany', async () => {
     const findMany = mock.fn(async () => []);
-    const count = mock.fn(async () => 0);
-
-    const service = new UploadItemsService({
-      uploadItem: {
-        findMany,
-        count,
-      },
-    } as never);
+    const service = new UploadItemsService(makeUploadItemsPrisma({ findMany }));
 
     await service.getPendingSync({
       deviceId: 'device-1',
-      limit: '5' as unknown as number,
-      offset: '2' as unknown as number,
+      limit: '5',
+      offset: '2',
     });
 
     const firstCallArgs = findMany.mock.calls[0]?.arguments[0] as {
@@ -37,18 +47,11 @@ describe('UploadItemsService', () => {
 
   it('falls back to safe defaults for invalid query values', async () => {
     const findMany = mock.fn(async () => []);
-    const count = mock.fn(async () => 0);
-
-    const service = new UploadItemsService({
-      uploadItem: {
-        findMany,
-        count,
-      },
-    } as never);
+    const service = new UploadItemsService(makeUploadItemsPrisma({ findMany }));
 
     await service.getPendingSync({
-      limit: 'abc' as unknown as number,
-      offset: '-10' as unknown as number,
+      limit: 'abc',
+      offset: '-10',
     });
 
     const firstCallArgs = findMany.mock.calls[0]?.arguments[0] as {
@@ -58,5 +61,11 @@ describe('UploadItemsService', () => {
 
     assert.equal(firstCallArgs.take, 10);
     assert.equal(firstCallArgs.skip, 0);
+  });
+
+  it('keeps upload item response mapping in one shared helper', () => {
+    const source = fs.readFileSync('src/modules/upload-items/upload-items.service.ts', 'utf8');
+
+    assert.equal(source.match(/fileSize: item\.fileSize/g)?.length, 1);
   });
 });

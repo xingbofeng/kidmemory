@@ -19,7 +19,7 @@ import { messageService } from './message.service.js';
 
 @Injectable()
 export class ApiResponseInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<{ locale?: Locale }>();
@@ -57,8 +57,7 @@ export class ApiResponseInterceptor implements NestInterceptor {
     );
   }
 
-  private isNewFormat(data: any): boolean {
-    // Check if data already has the new format structure
+  private isNewFormat(data: unknown): boolean {
     return (
       data &&
       typeof data === 'object' &&

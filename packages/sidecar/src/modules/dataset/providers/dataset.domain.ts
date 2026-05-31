@@ -18,8 +18,12 @@ const EMBEDDING_DIMENSION = 1536;
 const RETRY_BACKOFF_SECONDS = [5, 15, 30, 60];
 
 type DatasetDependencies = {
-  datasetState: DatasetStateService;
-  config?: AppConfigService;
+  datasetState: Pick<DatasetStateService, "activatePersistent" | "current">;
+  config?: {
+    config: {
+      paths: Pick<AppConfigService["config"]["paths"], "dataDir">;
+    };
+  };
   embedText?: (text: string) => Promise<number[]>;
   inferAssetMetadata?: (input: { assetId: string; imagePath: string; childId: string }) => Promise<{
     title?: string;

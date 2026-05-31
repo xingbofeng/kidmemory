@@ -141,42 +141,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/jobs/pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get pending jobs for device */
-        get: operations["JobsController_getPendingJobs"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/jobs/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** Update job status */
-        put: operations["JobsController_updateStatus"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/web-companion/direct-upload/sessions/{sessionId}/config": {
         parameters: {
             query?: never;
@@ -352,41 +316,28 @@ export interface components {
             syncedAt?: string;
             errorMessage?: string;
         };
-        JobResponseDto: {
-            id: string;
-            deviceId?: string;
-            /** @enum {string} */
-            type: "book_generation" | "asset_processing" | "export_pdf" | "export_long_image" | "import" | "sync" | "export" | "cleanup";
-            payload: {
-                [key: string]: unknown;
-            } | null;
-            /** @enum {string} */
-            status: "pending" | "claimed" | "processing" | "completed" | "failed";
-            priority: number;
-            claimedAt?: string;
-            completedAt?: string;
-            errorMessage?: string;
-            createdAt: string;
-            updatedAt: string;
-        };
-        UpdateJobStatusRequestDto: {
-            /** @enum {string} */
-            status: "pending" | "claimed" | "processing" | "completed" | "failed";
-            claimedAt?: string;
-            completedAt?: string;
-            errorMessage?: string;
-        };
         DirectUploadConfigResponseDto: {
             anonKey: string;
+        };
+        TrustedUploadSessionChildDto: {
+            id: string;
+            displayName: string;
+        };
+        ProviderAvailabilityDto: {
+            available: boolean;
+        };
+        DirectUploadProvidersDto: {
+            lan: components["schemas"]["ProviderAvailabilityDto"];
+            supabase: components["schemas"]["ProviderAvailabilityDto"];
         };
         SessionSummaryResponseDto: {
             sessionId: string;
             status: string;
-            child: Record<string, never>;
+            child: components["schemas"]["TrustedUploadSessionChildDto"];
             expiresAt: string;
             maxItems: number;
             usedItems: number;
-            providers: Record<string, never>;
+            providers: components["schemas"]["DirectUploadProvidersDto"];
         };
         CreateUploadFileDto: {
             clientFileId: string;
@@ -434,10 +385,19 @@ export interface components {
             uploadItemId: string;
             status: string;
         };
+        ShareTokenAccessDto: {
+            id: string;
+            childId: string;
+            /** @enum {string} */
+            resourceType: "specific_book" | "child_assets";
+            resourceId?: string;
+            /** @enum {string} */
+            accessType: "read";
+        };
         ShareTokenValidationResponseDto: {
             isValid: boolean;
             error?: string;
-            shareToken?: Record<string, never>;
+            shareToken?: components["schemas"]["ShareTokenAccessDto"];
         };
         SharedAssetDto: {
             id: string;
@@ -663,71 +623,6 @@ export interface operations {
                 content?: never;
             };
             /** @description Item not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    JobsController_getPendingJobs: {
-        parameters: {
-            query?: {
-                /** @description Maximum jobs to return */
-                limit?: number;
-                /** @description Filter by device ID (null = unassigned) */
-                deviceId?: unknown;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Pending jobs retrieved */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobResponseDto"][];
-                };
-            };
-        };
-    };
-    JobsController_updateStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateJobStatusRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Status updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobResponseDto"];
-                };
-            };
-            /** @description Invalid status transition */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Job not found */
             404: {
                 headers: {
                     [name: string]: unknown;

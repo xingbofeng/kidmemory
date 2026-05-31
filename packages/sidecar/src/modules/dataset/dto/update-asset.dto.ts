@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 const AssetTagSchema = z.string().trim().min(1).max(64);
 
@@ -13,4 +12,4 @@ export const UpdateAssetDtoSchema = z
   })
   .strict();
 
-export type UpdateAssetDto = components["schemas"]["UpdateAssetRequestDto"];
+export type UpdateAssetDto = z.infer<typeof UpdateAssetDtoSchema>;

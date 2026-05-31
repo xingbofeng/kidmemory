@@ -24,11 +24,31 @@ type TestServer = {
   baseUrl: string;
 };
 
+type CreationStoreRecord = Record<string, unknown> & {
+  id?: unknown;
+  taskId?: unknown;
+};
+
+type PrismaWhereInput = {
+  where: Record<string, unknown>;
+};
+
+type PrismaWriteInput = PrismaWhereInput & {
+  data?: Record<string, unknown>;
+};
+
 class CreationContractTestModule {}
 
-const taskStore = new Map<string, Record<string, unknown>>();
-const eventStore: Array<Record<string, unknown>> = [];
-const artifactStore: Array<Record<string, unknown>> = [];
+const taskStore = new Map<string, CreationStoreRecord>();
+const eventStore: CreationStoreRecord[] = [];
+const artifactStore: CreationStoreRecord[] = [];
+
+test("creation contract names use current removed-route wording", async () => {
+  const source = await fs.readFile(new URL(import.meta.url), "utf8");
+  const historicalPhrase = ["old", "plan/job endpoints"].join(" ");
+
+  assert.equal(source.includes(historicalPhrase), false);
+});
 
 function resetStores() {
   taskStore.clear();
@@ -50,18 +70,18 @@ Module({
             taskStore.set(data.id as string, record);
             return record;
           },
-          async findUnique({ where }: Record<string, unknown>) {
+          async findUnique({ where }: PrismaWhereInput) {
             const record = taskStore.get(where.id as string);
             if (!record) return null;
             return {
               ...record,
-              creationArtifacts: artifactStore.filter((a: any) => a.taskId === where.id),
-              creationEvents: eventStore.filter((e: any) => e.taskId === where.id),
+              creationArtifacts: artifactStore.filter((artifact) => artifact.taskId === where.id),
+              creationEvents: eventStore.filter((event) => event.taskId === where.id),
             };
           },
-          async update({ where, data }: Record<string, unknown>) {
+          async update({ where, data }: PrismaWriteInput) {
             const existing = taskStore.get(where.id as string) ?? {};
-            const updated = { ...existing, ...(data as Record<string, unknown> ?? {}), updatedAt: new Date() };
+            const updated = { ...existing, ...(data ?? {}), updatedAt: new Date() };
             taskStore.set(where.id as string, updated);
             return updated;
           },
@@ -73,8 +93,8 @@ Module({
             eventStore.push(record);
             return record;
           },
-          async findMany({ where }: Record<string, unknown>) {
-            return eventStore.filter((e: any) => e.taskId === where.taskId);
+          async findMany({ where }: PrismaWhereInput) {
+            return eventStore.filter((event) => event.taskId === where.taskId);
           },
         },
         creationArtifact: {
@@ -240,7 +260,7 @@ test("creation contract: create task", async (t) => {
   const previewResponse = await fetch(`${baseUrl}/creation/tasks/${created.taskId}/preview`);
   assert.equal(previewResponse.status, 200);
 
-  // Old plan/job endpoints return 404
+  // Removed plan/job routes return 404.
   const oldPlan = await fetch(`${baseUrl}/creation/jobs/plan`, { method: "POST" });
   assert.equal(oldPlan.status, 404);
   const oldJob = await fetch(`${baseUrl}/creation/jobs`, { method: "POST" });
@@ -265,7 +285,7 @@ test("creation contract: invalid creation type fails with 400", async (t) => {
   assert.notEqual(response.body.code, 0);
 });
 
-test("creation contract: old plan/job endpoints return 404", async (t) => {
+test("creation contract: removed plan/job routes return 404", async (t) => {
   resetStores();
   const { app, baseUrl } = await startCreationContractServer();
   t.after(async () => { await app.close(); });

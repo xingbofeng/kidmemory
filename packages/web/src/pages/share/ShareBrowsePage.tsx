@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/errors'
 import { validateShareToken, getSharedAssets } from '../../api/shareApi'
-import type { SharedAsset, ShareTokenValidation } from '../../types/shareBrowse'
+import type { SharedAsset } from '../../types/shareBrowse'
 import { ShareLoading } from '../../components/share/ShareLoading'
 import { ShareError } from '../../components/share/ShareError'
 import { ShareBrowseHeader } from '../../components/share-browse/ShareBrowseHeader'
@@ -15,12 +15,11 @@ interface ShareBrowsePageProps {
 
 export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
   const { t } = useTranslation()
-  const [, setValidation] = useState<ShareTokenValidation | null>(null)
   const [assets, setAssets] = useState<SharedAsset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const validateAndLoadContent = async () => {
+  const validateAndLoadContent = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -32,22 +31,19 @@ export function ShareBrowsePage({ shareToken }: ShareBrowsePageProps) {
         return
       }
 
-      setValidation(validationData)
       const assetsData = await getSharedAssets(shareToken)
       setAssets(assetsData)
     } catch (err) {
-      console.error('Failed to load shared content:', err)
       const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : t('share.loadBookFailed')
       setError(message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [shareToken, t])
 
   useEffect(() => {
     validateAndLoadContent()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shareToken])
+  }, [validateAndLoadContent])
 
   if (loading) {
     return <ShareLoading />

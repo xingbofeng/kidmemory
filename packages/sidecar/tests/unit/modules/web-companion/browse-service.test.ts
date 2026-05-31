@@ -1,105 +1,67 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { BrowseService } from '../../../../src/modules/web-companion/browse.service.ts';
-import type { BrowseRepository } from '../../../../src/modules/web-companion/browse.service.ts';
+import type {
+  BrowseAssetRecord,
+  BrowseBookRecord,
+  BrowseRepository,
+  SessionValidation,
+} from '../../../../src/modules/web-companion/browse.service.ts';
 
 class FakeBrowseRepository implements BrowseRepository {
-  session: any = {
-    id: 'session_123',
-    child_id: 'child_456',
-    token_hash: 'hash_abc',
-    expires_at: new Date(Date.now() + 3600000).toISOString(),
+  session: SessionValidation | null = {
+    sessionId: 'session_123',
+    childId: 'child_456',
+    tokenHash: 'hash_abc',
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
     status: 'active'
   };
-  assets: any[] = [
+  assets: BrowseAssetRecord[] = [
     {
       id: 'asset_1',
       title: 'Test Photo 1',
       type: 'image',
-      created_at: new Date().toISOString(),
-      child_id: 'child_456'
+      createdAt: new Date().toISOString(),
+      childId: 'child_456'
     },
     {
       id: 'asset_2',
       title: 'Test Photo 2',
       type: 'image',
-      created_at: new Date().toISOString(),
-      child_id: 'child_456'
+      createdAt: new Date().toISOString(),
+      childId: 'child_456'
     }
   ];
-  books: any[] = [
+  books: BrowseBookRecord[] = [
     {
       id: 'book_1',
       title: 'My First Book',
-      child_id: 'child_456',
-      created_at: new Date().toISOString(),
+      childId: 'child_456',
+      createdAt: new Date().toISOString(),
       status: 'completed'
     }
   ];
 
   async findSessionByToken() {
-    return this.session ? {
-      sessionId: this.session.id,
-      childId: this.session.child_id,
-      tokenHash: this.session.token_hash,
-      expiresAt: this.session.expires_at,
-      status: this.session.status,
-    } : null;
+    return this.session;
   }
 
   async findRecentAssets(input: { childId: string; limit: number }) {
     return this.assets
-      .filter((asset) => asset.child_id === input.childId)
-      .slice(0, input.limit)
-      .map((asset) => ({
-        id: asset.id,
-        title: asset.title,
-        type: asset.type,
-        childId: asset.child_id,
-        createdAt: asset.created_at,
-        description: asset.description,
-        tags: asset.tags,
-        metadata: asset.metadata,
-      }));
+      .filter((asset) => asset.childId === input.childId)
+      .slice(0, input.limit);
   }
 
   async findAssetForChild(input: { assetId: string; childId: string }) {
-    const asset = this.assets.find((candidate) => candidate.id === input.assetId && candidate.child_id === input.childId);
-    return asset ? {
-      id: asset.id,
-      title: asset.title,
-      type: asset.type,
-      childId: asset.child_id,
-      createdAt: asset.created_at,
-      description: asset.description,
-      tags: asset.tags,
-      metadata: asset.metadata,
-    } : null;
+    return this.assets.find((candidate) => candidate.id === input.assetId && candidate.childId === input.childId) ?? null;
   }
 
   async findBooksForChild(childId: string) {
-    return this.books
-      .filter((book) => book.child_id === childId)
-      .map((book) => ({
-        id: book.id,
-        title: book.title,
-        childId: book.child_id,
-        createdAt: book.created_at,
-        status: book.status,
-        metadata: book.metadata,
-      }));
+    return this.books.filter((book) => book.childId === childId);
   }
 
   async findBookForChild(input: { bookId: string; childId: string }) {
-    const book = this.books.find((candidate) => candidate.id === input.bookId && candidate.child_id === input.childId);
-    return book ? {
-      id: book.id,
-      title: book.title,
-      childId: book.child_id,
-      createdAt: book.created_at,
-      status: book.status,
-      metadata: book.metadata,
-    } : null;
+    return this.books.find((candidate) => candidate.id === input.bookId && candidate.childId === input.childId) ?? null;
   }
 
   async findShareTokenByHash() {
@@ -175,8 +137,8 @@ describe('BrowseService', () => {
         id: 'asset_1',
         title: 'Other Child Asset',
         type: 'image',
-        child_id: 'other_child',
-        created_at: new Date().toISOString()
+        childId: 'other_child',
+        createdAt: new Date().toISOString()
       }];
 
       await assert.rejects(
@@ -233,10 +195,10 @@ describe('BrowseService', () => {
   describe('session validation', () => {
     it('should reject expired sessions', async () => {
       repository.session = {
-        id: 'session_123',
-        child_id: 'child_456',
-        token_hash: 'hash_abc',
-        expires_at: new Date(Date.now() - 3600000).toISOString(),
+        sessionId: 'session_123',
+        childId: 'child_456',
+        tokenHash: 'hash_abc',
+        expiresAt: new Date(Date.now() - 3600000).toISOString(),
         status: 'active'
       };
 
@@ -252,10 +214,10 @@ describe('BrowseService', () => {
 
     it('should reject closed sessions', async () => {
       repository.session = {
-        id: 'session_123',
-        child_id: 'child_456',
-        token_hash: 'hash_abc',
-        expires_at: new Date(Date.now() + 3600000).toISOString(),
+        sessionId: 'session_123',
+        childId: 'child_456',
+        tokenHash: 'hash_abc',
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
         status: 'closed'
       };
 

@@ -1,16 +1,5 @@
-/**
- * Sidecar API Module
- * 
- * Handles all sidecar-related API calls
- * (Currently web app doesn't directly call sidecar APIs, but this module
- * is created for future use and consistency)
- */
-
 import { httpClient } from '../lib/http-client';
 
-/**
- * Health check
- */
 export interface HealthCheckResult {
   status: 'ok';
   timestamp: string;
@@ -19,5 +8,3 @@ export interface HealthCheckResult {
 export async function healthCheck(): Promise<HealthCheckResult> {
   return httpClient.get<HealthCheckResult>('/api/health');
 }
-
-// Additional sidecar API methods will be added here as needed

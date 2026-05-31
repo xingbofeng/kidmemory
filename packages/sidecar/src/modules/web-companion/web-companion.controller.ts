@@ -28,11 +28,22 @@ import {
   Query,
 } from "@nestjs/common";
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 import { WebCompanionService } from "./web-companion.service.ts";
-import { BrowseService } from "./browse.service.ts";
-import { ShareTokenService } from "./share-token.service.ts";
+import {
+  BrowseService,
+  type AssetDetailDto,
+  type BookDetailDto,
+  type BookSummaryDto,
+  type RecentUploadDto,
+  type SharedAssetDto,
+  type SharedBookDto,
+} from "./browse.service.ts";
+import {
+  ShareTokenService,
+  type ShareTokenDto,
+  type ShareTokenValidation,
+} from "./share-token.service.ts";
 import { CreateUploadItemsDtoSchema } from "./dto/create-upload-items.dto.ts";
 import type {
   CreateSessionRequest,
@@ -46,23 +57,46 @@ import type {
   SessionSummaryResponse,
   SessionDetailResponse,
 } from "./types.ts";
-type RecentUploadDto = components["schemas"]["RecentUploadDto"];
-type AssetDetailDto = components["schemas"]["AssetDetailDto"];
-type BookSummaryDto = components["schemas"]["BookSummaryDto"];
-type BookDetailDto = components["schemas"]["BookDetailDto"];
-type SharedAssetDto = components["schemas"]["SharedAssetDto"];
-type SharedBookDto = components["schemas"]["SharedBookDto"];
-type ShareTokenDto = components["schemas"]["ShareTokenDto"];
 
-type CreateShareTokenRequestDto = components["schemas"]["CreateShareTokenRequestDto"];
-type ShareTokenValidationResponseDto = components["schemas"]["ShareTokenValidationResponseDto"];
+type CreateShareTokenRequestDto = Parameters<ShareTokenService["createShareToken"]>[0];
+type ShareTokenValidationResponseDto = ShareTokenValidation;
+
+type WebCompanionControllerService = Pick<
+  WebCompanionService,
+  | "createSession"
+  | "getSessionSummary"
+  | "getSessionDetail"
+  | "createUploadItems"
+  | "commitUploadItem"
+  | "retryUploadItem"
+  | "closeSession"
+>;
+
+type BrowseControllerService = Pick<
+  BrowseService,
+  | "getRecentUploads"
+  | "getAssetDetails"
+  | "getBooksList"
+  | "getBookDetails"
+  | "getSharedAssets"
+  | "getSharedBook"
+>;
+
+type ShareTokenControllerService = Pick<
+  ShareTokenService,
+  "createShareToken" | "revokeShareToken" | "validateShareToken"
+>;
 
 export class WebCompanionController {
-  private readonly webCompanionService: WebCompanionService;
-  private readonly browseService: BrowseService;
-  private readonly shareTokenService: ShareTokenService;
+  private readonly webCompanionService: WebCompanionControllerService;
+  private readonly browseService: BrowseControllerService;
+  private readonly shareTokenService: ShareTokenControllerService;
 
-  constructor(webCompanionService: WebCompanionService, browseService: BrowseService, shareTokenService: ShareTokenService) {
+  constructor(
+    webCompanionService: WebCompanionControllerService,
+    browseService: BrowseControllerService,
+    shareTokenService: ShareTokenControllerService,
+  ) {
     this.webCompanionService = webCompanionService;
     this.browseService = browseService;
     this.shareTokenService = shareTokenService;
@@ -155,7 +189,6 @@ export class WebCompanionController {
     return this.closeSession(sessionId, request);
   }
 
-  // Browse endpoints
   async getRecentUploads(
     sessionId: string,
     token?: string,
@@ -237,7 +270,6 @@ export class WebCompanionController {
     }
   }
 
-  // Share token endpoints
   async createShareToken(
     sessionId: string,
     request: CreateShareTokenRequestDto,
@@ -275,7 +307,6 @@ export class WebCompanionController {
     }
   }
 
-  // Public share access endpoint (no session required)
   async accessSharedContent(
     shareToken: string,
     clientIp?: string,
@@ -292,7 +323,6 @@ export class WebCompanionController {
     }
   }
 
-  // Public shared assets endpoint (no session required)
   async getSharedAssets(
     shareToken: string,
     limit?: string,
@@ -308,7 +338,6 @@ export class WebCompanionController {
     }
   }
 
-  // Public shared book endpoint (no session required)
   async getSharedBook(
     shareToken: string,
     bookId?: string,
@@ -363,7 +392,6 @@ export class WebCompanionController {
 
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
 
-    // Map share service errors to HTTP status codes
     if (message.includes('Session not found') || message.includes('token invalid')) {
       throw new HttpException(
         { error: 'unauthorized', message },
@@ -451,7 +479,6 @@ Post("sessions/:sessionId/submit")(proto, "submitSession", desc("submitSession")
 Param("sessionId")(proto, "submitSession", 0);
 Body()(proto, "submitSession", 1);
 
-// Browse endpoints
 Get("sessions/:sessionId/recent")(proto, "getRecentUploads", desc("getRecentUploads"));
 Param("sessionId")(proto, "getRecentUploads", 0);
 Query("token")(proto, "getRecentUploads", 1);
@@ -472,7 +499,6 @@ Param("sessionId")(proto, "getBookDetails", 0);
 Param("bookId")(proto, "getBookDetails", 1);
 Query("token")(proto, "getBookDetails", 2);
 
-// Share token endpoints
 Post("sessions/:sessionId/share")(proto, "createShareToken", desc("createShareToken"));
 HttpCode(HttpStatus.CREATED)(proto, "createShareToken", desc("createShareToken"));
 Param("sessionId")(proto, "createShareToken", 0);
@@ -484,13 +510,11 @@ Param("sessionId")(proto, "revokeShareToken", 0);
 Param("shareTokenId")(proto, "revokeShareToken", 1);
 Query("token")(proto, "revokeShareToken", 2);
 
-// Public share access endpoint
 Get("share/:shareToken/access")(proto, "accessSharedContent", desc("accessSharedContent"));
 Param("shareToken")(proto, "accessSharedContent", 0);
 Query("clientIp")(proto, "accessSharedContent", 1);
 Query("userAgent")(proto, "accessSharedContent", 2);
 
-// Public shared content endpoints
 Get("share/:shareToken/assets")(proto, "getSharedAssets", desc("getSharedAssets"));
 Param("shareToken")(proto, "getSharedAssets", 0);
 Query("limit")(proto, "getSharedAssets", 1);

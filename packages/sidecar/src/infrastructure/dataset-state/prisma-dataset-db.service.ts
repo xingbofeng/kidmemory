@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
 
+import { isPrismaNotFoundError } from "../database/prisma-errors.ts";
 import { PrismaService } from "../database/prisma.service.ts";
 import type {
   Child,
@@ -140,7 +141,7 @@ export class PrismaDatasetDbService implements SampleDb {
       const asset = await this.prisma.asset.update({ where: { id }, data });
       return rowToAsset(asset);
     } catch (error) {
-      if (isPrismaNotFound(error)) return null;
+      if (isPrismaNotFoundError(error)) return null;
       throw error;
     }
   }
@@ -182,7 +183,7 @@ export class PrismaDatasetDbService implements SampleDb {
       await this.prisma.assetEmbedding.deleteMany({ where: { assetId } });
       return { assetId: asset.id, metadataVersion: asset.embeddingVersion };
     } catch (error) {
-      if (isPrismaNotFound(error)) return null;
+      if (isPrismaNotFoundError(error)) return null;
       throw error;
     }
   }
@@ -476,7 +477,7 @@ export class PrismaDatasetDbService implements SampleDb {
       });
       return rowToAsset(asset);
     } catch (error) {
-      if (isPrismaNotFound(error)) return null;
+      if (isPrismaNotFoundError(error)) return null;
       throw error;
     }
   }
@@ -526,7 +527,7 @@ export class PrismaDatasetDbService implements SampleDb {
       });
       return rowToExportArtifact(row);
     } catch (error) {
-      if (isPrismaNotFound(error)) return null;
+      if (isPrismaNotFoundError(error)) return null;
       throw error;
     }
   }
@@ -759,8 +760,4 @@ function dateOnly(value: Date) {
 
 function isPrismaUniqueConflict(error: unknown) {
   return (error as { code?: unknown })?.code === "P2002";
-}
-
-function isPrismaNotFound(error: unknown) {
-  return (error as { code?: unknown })?.code === "P2025";
 }

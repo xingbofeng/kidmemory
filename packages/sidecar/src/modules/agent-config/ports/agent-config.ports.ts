@@ -111,8 +111,8 @@ export interface AuditLoggerPort {
   logConfigChange(
     configId: string,
     action: 'CREATE' | 'UPDATE' | 'DELETE' | 'SET_DEFAULT' | 'TEST',
-    oldValues: any,
-    newValues: any,
+    oldValues: unknown,
+    newValues: unknown,
     userId?: string
   ): Promise<void>;
 }

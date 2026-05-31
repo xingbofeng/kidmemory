@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/library_models.dart';
@@ -10,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 
 class ChildProfilePortrait extends StatelessWidget {
   const ChildProfilePortrait({
+    super.key,
     required this.childName,
     required this.imagePath,
   });
@@ -49,7 +48,11 @@ AssetVm? childProfileImageAsset(List<AssetVm> assets) {
 }
 
 class DeleteChildButton extends StatelessWidget {
-  const DeleteChildButton({required this.onPressed, this.compact = false});
+  const DeleteChildButton({
+    super.key,
+    required this.onPressed,
+    this.compact = false,
+  });
 
   final VoidCallback onPressed;
   final bool compact;
@@ -91,6 +94,7 @@ class DeleteChildButton extends StatelessWidget {
 
 class ProfileHeaderScene extends StatelessWidget {
   const ProfileHeaderScene({
+    super.key,
     required this.children,
     required this.selectedChildId,
     required this.onChildChanged,

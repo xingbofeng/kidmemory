@@ -17,7 +17,7 @@ class SecurityMonitorApi {
   const SecurityMonitorApi(this._dio);
 
   /// securityMonitorControllerGetSecurityHealth
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class SecurityMonitorApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> securityMonitorControllerGetSecurityHealth({ 
+  Future<Response<void>> securityMonitorControllerGetSecurityHealth({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,7 +62,7 @@ class SecurityMonitorApi {
   }
 
   /// securityMonitorControllerGetSecurityStats
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -74,7 +74,7 @@ class SecurityMonitorApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> securityMonitorControllerGetSecurityStats({ 
+  Future<Response<void>> securityMonitorControllerGetSecurityStats({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,

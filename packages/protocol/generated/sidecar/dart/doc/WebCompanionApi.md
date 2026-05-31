@@ -9,23 +9,23 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**webCompanionControllerAccessSharedContent**](WebCompanionApi.md#webcompanioncontrolleraccesssharedcontent) | **GET** /api/web-companion/share/{shareToken}/access | 
-[**webCompanionControllerCloseSession**](WebCompanionApi.md#webcompanioncontrollerclosesession) | **POST** /api/web-companion/sessions/{sessionId}/close | 
-[**webCompanionControllerCommitUploadItem**](WebCompanionApi.md#webcompanioncontrollercommituploaditem) | **PUT** /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/commit | 
-[**webCompanionControllerCreateSession**](WebCompanionApi.md#webcompanioncontrollercreatesession) | **POST** /api/web-companion/sessions | 
-[**webCompanionControllerCreateShareToken**](WebCompanionApi.md#webcompanioncontrollercreatesharetoken) | **POST** /api/web-companion/sessions/{sessionId}/share | 
-[**webCompanionControllerCreateUploadItems**](WebCompanionApi.md#webcompanioncontrollercreateuploaditems) | **POST** /api/web-companion/sessions/{sessionId}/items | 
-[**webCompanionControllerGetAssetDetails**](WebCompanionApi.md#webcompanioncontrollergetassetdetails) | **GET** /api/web-companion/sessions/{sessionId}/assets/{assetId} | 
-[**webCompanionControllerGetBookDetails**](WebCompanionApi.md#webcompanioncontrollergetbookdetails) | **GET** /api/web-companion/sessions/{sessionId}/books/{bookId} | 
-[**webCompanionControllerGetBooksList**](WebCompanionApi.md#webcompanioncontrollergetbookslist) | **GET** /api/web-companion/sessions/{sessionId}/books | 
-[**webCompanionControllerGetRecentUploads**](WebCompanionApi.md#webcompanioncontrollergetrecentuploads) | **GET** /api/web-companion/sessions/{sessionId}/recent | 
-[**webCompanionControllerGetSessionDetail**](WebCompanionApi.md#webcompanioncontrollergetsessiondetail) | **GET** /api/web-companion/sessions/{sessionId}/detail | 
-[**webCompanionControllerGetSessionSummary**](WebCompanionApi.md#webcompanioncontrollergetsessionsummary) | **GET** /api/web-companion/sessions/{sessionId} | 
-[**webCompanionControllerGetSharedAssets**](WebCompanionApi.md#webcompanioncontrollergetsharedassets) | **GET** /api/web-companion/share/{shareToken}/assets | 
-[**webCompanionControllerGetSharedBook**](WebCompanionApi.md#webcompanioncontrollergetsharedbook) | **GET** /api/web-companion/share/{shareToken}/book | 
-[**webCompanionControllerRetryUploadItem**](WebCompanionApi.md#webcompanioncontrollerretryuploaditem) | **POST** /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/retry | 
-[**webCompanionControllerRevokeShareToken**](WebCompanionApi.md#webcompanioncontrollerrevokesharetoken) | **POST** /api/web-companion/sessions/{sessionId}/share/{shareTokenId}/revoke | 
-[**webCompanionControllerSubmitSession**](WebCompanionApi.md#webcompanioncontrollersubmitsession) | **POST** /api/web-companion/sessions/{sessionId}/submit | 
+[**webCompanionControllerAccessSharedContent**](WebCompanionApi.md#webcompanioncontrolleraccesssharedcontent) | **GET** /api/web-companion/share/{shareToken}/access |
+[**webCompanionControllerCloseSession**](WebCompanionApi.md#webcompanioncontrollerclosesession) | **POST** /api/web-companion/sessions/{sessionId}/close |
+[**webCompanionControllerCommitUploadItem**](WebCompanionApi.md#webcompanioncontrollercommituploaditem) | **PUT** /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/commit |
+[**webCompanionControllerCreateSession**](WebCompanionApi.md#webcompanioncontrollercreatesession) | **POST** /api/web-companion/sessions |
+[**webCompanionControllerCreateShareToken**](WebCompanionApi.md#webcompanioncontrollercreatesharetoken) | **POST** /api/web-companion/sessions/{sessionId}/share |
+[**webCompanionControllerCreateUploadItems**](WebCompanionApi.md#webcompanioncontrollercreateuploaditems) | **POST** /api/web-companion/sessions/{sessionId}/items |
+[**webCompanionControllerGetAssetDetails**](WebCompanionApi.md#webcompanioncontrollergetassetdetails) | **GET** /api/web-companion/sessions/{sessionId}/assets/{assetId} |
+[**webCompanionControllerGetBookDetails**](WebCompanionApi.md#webcompanioncontrollergetbookdetails) | **GET** /api/web-companion/sessions/{sessionId}/books/{bookId} |
+[**webCompanionControllerGetBooksList**](WebCompanionApi.md#webcompanioncontrollergetbookslist) | **GET** /api/web-companion/sessions/{sessionId}/books |
+[**webCompanionControllerGetRecentUploads**](WebCompanionApi.md#webcompanioncontrollergetrecentuploads) | **GET** /api/web-companion/sessions/{sessionId}/recent |
+[**webCompanionControllerGetSessionDetail**](WebCompanionApi.md#webcompanioncontrollergetsessiondetail) | **GET** /api/web-companion/sessions/{sessionId}/detail |
+[**webCompanionControllerGetSessionSummary**](WebCompanionApi.md#webcompanioncontrollergetsessionsummary) | **GET** /api/web-companion/sessions/{sessionId} |
+[**webCompanionControllerGetSharedAssets**](WebCompanionApi.md#webcompanioncontrollergetsharedassets) | **GET** /api/web-companion/share/{shareToken}/assets |
+[**webCompanionControllerGetSharedBook**](WebCompanionApi.md#webcompanioncontrollergetsharedbook) | **GET** /api/web-companion/share/{shareToken}/book |
+[**webCompanionControllerRetryUploadItem**](WebCompanionApi.md#webcompanioncontrollerretryuploaditem) | **POST** /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/retry |
+[**webCompanionControllerRevokeShareToken**](WebCompanionApi.md#webcompanioncontrollerrevokesharetoken) | **POST** /api/web-companion/sessions/{sessionId}/share/{shareTokenId}/revoke |
+[**webCompanionControllerSubmitSession**](WebCompanionApi.md#webcompanioncontrollersubmitsession) | **POST** /api/web-companion/sessions/{sessionId}/submit |
 
 
 # **webCompanionControllerAccessSharedContent**
@@ -38,7 +38,7 @@ Method | HTTP request | Description
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
+final String shareToken = shareToken_example; // String |
 
 try {
     api.webCompanionControllerAccessSharedContent(shareToken);
@@ -51,7 +51,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
+ **shareToken** | **String**|  |
 
 ### Return type
 
@@ -78,7 +78,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerCloseSession(sessionId);
@@ -91,7 +91,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -118,8 +118,8 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String uploadItemId = uploadItemId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String uploadItemId = uploadItemId_example; // String |
 
 try {
     api.webCompanionControllerCommitUploadItem(sessionId, uploadItemId);
@@ -132,8 +132,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **uploadItemId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **uploadItemId** | **String**|  |
 
 ### Return type
 
@@ -196,7 +196,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerCreateShareToken(sessionId);
@@ -209,7 +209,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -236,7 +236,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerCreateUploadItems(sessionId);
@@ -249,7 +249,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -276,8 +276,8 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String assetId = assetId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String assetId = assetId_example; // String |
 
 try {
     api.webCompanionControllerGetAssetDetails(sessionId, assetId);
@@ -290,8 +290,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **assetId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **assetId** | **String**|  |
 
 ### Return type
 
@@ -318,8 +318,8 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String bookId = bookId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String bookId = bookId_example; // String |
 
 try {
     api.webCompanionControllerGetBookDetails(sessionId, bookId);
@@ -332,8 +332,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **bookId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **bookId** | **String**|  |
 
 ### Return type
 
@@ -360,7 +360,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerGetBooksList(sessionId);
@@ -373,7 +373,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -400,7 +400,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerGetRecentUploads(sessionId);
@@ -413,7 +413,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -440,7 +440,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerGetSessionDetail(sessionId);
@@ -453,7 +453,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -480,7 +480,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerGetSessionSummary(sessionId);
@@ -493,7 +493,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -520,7 +520,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
+final String shareToken = shareToken_example; // String |
 
 try {
     api.webCompanionControllerGetSharedAssets(shareToken);
@@ -533,7 +533,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
+ **shareToken** | **String**|  |
 
 ### Return type
 
@@ -560,7 +560,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String shareToken = shareToken_example; // String | 
+final String shareToken = shareToken_example; // String |
 
 try {
     api.webCompanionControllerGetSharedBook(shareToken);
@@ -573,7 +573,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **shareToken** | **String**|  | 
+ **shareToken** | **String**|  |
 
 ### Return type
 
@@ -600,8 +600,8 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String uploadItemId = uploadItemId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String uploadItemId = uploadItemId_example; // String |
 
 try {
     api.webCompanionControllerRetryUploadItem(sessionId, uploadItemId);
@@ -614,8 +614,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **uploadItemId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **uploadItemId** | **String**|  |
 
 ### Return type
 
@@ -642,8 +642,8 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
-final String shareTokenId = shareTokenId_example; // String | 
+final String sessionId = sessionId_example; // String |
+final String shareTokenId = shareTokenId_example; // String |
 
 try {
     api.webCompanionControllerRevokeShareToken(sessionId, shareTokenId);
@@ -656,8 +656,8 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
- **shareTokenId** | **String**|  | 
+ **sessionId** | **String**|  |
+ **shareTokenId** | **String**|  |
 
 ### Return type
 
@@ -684,7 +684,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.webCompanionControllerSubmitSession(sessionId);
@@ -697,7 +697,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -713,4 +713,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

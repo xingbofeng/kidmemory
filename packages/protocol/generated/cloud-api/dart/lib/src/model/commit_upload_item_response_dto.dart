@@ -26,7 +26,7 @@ class CommitUploadItemResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'uploadItemId',
     required: true,
     includeIfNull: false,
@@ -38,7 +38,7 @@ class CommitUploadItemResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
@@ -71,4 +71,3 @@ class CommitUploadItemResponseDto {
   }
 
 }
-

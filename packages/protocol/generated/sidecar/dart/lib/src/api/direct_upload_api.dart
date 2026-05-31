@@ -17,7 +17,7 @@ class DirectUploadApi {
   const DirectUploadApi(this._dio);
 
   /// directUploadControllerCreateSession
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class DirectUploadApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> directUploadControllerCreateSession({ 
+  Future<Response<void>> directUploadControllerCreateSession({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,10 +62,10 @@ class DirectUploadApi {
   }
 
   /// directUploadControllerGetSessionConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -75,7 +75,7 @@ class DirectUploadApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> directUploadControllerGetSessionConfig({ 
+  Future<Response<void>> directUploadControllerGetSessionConfig({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -109,10 +109,10 @@ class DirectUploadApi {
   }
 
   /// directUploadControllerGetStatus
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -122,7 +122,7 @@ class DirectUploadApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> directUploadControllerGetStatus({ 
+  Future<Response<void>> directUploadControllerGetStatus({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -156,10 +156,10 @@ class DirectUploadApi {
   }
 
   /// directUploadControllerListObjects
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -169,7 +169,7 @@ class DirectUploadApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> directUploadControllerListObjects({ 
+  Future<Response<void>> directUploadControllerListObjects({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -203,10 +203,10 @@ class DirectUploadApi {
   }
 
   /// directUploadControllerPullback
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -216,7 +216,7 @@ class DirectUploadApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> directUploadControllerPullback({ 
+  Future<Response<void>> directUploadControllerPullback({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

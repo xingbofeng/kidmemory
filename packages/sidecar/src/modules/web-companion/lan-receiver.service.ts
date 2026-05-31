@@ -1,12 +1,7 @@
-/**
- * LAN Receiver 服务
- *
- * 负责局域网设备发现、配对和直传文件接收
- */
-
 import crypto from "node:crypto";
 import { promises as dns } from "node:dns";
 import os from "node:os";
+import { Logger } from "@nestjs/common";
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { DatasetService } from "../dataset/dataset.service.ts";
 
@@ -39,26 +34,23 @@ export interface LanReceiverRepository {
   deleteExpiredSessions(now: Date): Promise<void>;
 }
 
-/**
- * LAN Receiver 核心服务
- *
- * 职责：
- * 1. 设备发现和广播
- * 2. 设备配对和会话管理
- * 3. 局域网直传文件接收
- * 4. 网络错误处理和重试
- * 5. 安全验证和访问控制
- */
+type LanReceiverAppConfig = AppConfigService["config"] & {
+  lanReceiver?: Partial<LanReceiverConfig>;
+};
+
+type LanReceiverError = Error & {
+  code: LanReceiverErrorCodeType;
+};
+
 export class LanReceiverService {
+  private readonly logger = new Logger(LanReceiverService.name);
   private readonly appConfigService: AppConfigService;
   private readonly repository: LanReceiverRepository;
   private readonly datasetService: DatasetService;
   private readonly config: LanReceiverConfig;
 
-  // 内存中的会话存储（用于快速访问）
   private readonly activeSessions = new Map<string, LanSession>();
 
-  // 当前上传计数器（用于并发控制）
   private readonly uploadCounters = new Map<string, number>();
   private cleanupTimer: NodeJS.Timeout | null = null;
 
@@ -71,23 +63,15 @@ export class LanReceiverService {
     this.repository = repository;
     this.datasetService = datasetService;
 
-    // 合并配置
+    const appConfig = appConfigService.config as LanReceiverAppConfig;
     this.config = {
       ...DEFAULT_LAN_CONFIG,
-      ...(appConfigService.config as any).lanReceiver,
+      ...appConfig.lanReceiver,
     };
 
-    // 启动清理任务
     this.startCleanupTask();
   }
 
-  // ============================================================================
-  // 设备发现
-  // ============================================================================
-
-  /**
-   * 获取设备发现信息
-   */
   async getDiscoveryInfo(): Promise<LanDiscoveryResponse> {
     const networkInfo = await this.getNetworkInfo();
 
@@ -108,14 +92,10 @@ export class LanReceiverService {
     };
   }
 
-  /**
-   * 发现局域网设备
-   */
   async discoverLanDevices(options: NetworkDiscoveryOptions): Promise<NetworkDiscoveryResult> {
     const { timeout, serviceType = this.config.discoveryService } = options;
 
     try {
-      // 使用 mDNS 发现设备
       const devices = await this.performMdnsDiscovery(serviceType, timeout);
 
       return { devices };
@@ -130,17 +110,7 @@ export class LanReceiverService {
     }
   }
 
-  // ============================================================================
-  // 设备配对
-  // ============================================================================
-
-  /**
-   * 处理设备配对请求
-   */
   async handlePairRequest(request: LanPairRequest): Promise<LanPairResponse> {
-    console.log(`[LanReceiverService] Pairing request from device: ${request.deviceId}`);
-
-    // 验证配对码（如果提供）
     if (request.pairingCode && !this.validatePairingCode(request.pairingCode)) {
       throw this.createError(LanReceiverErrorCode.PAIRING_FAILED, "Invalid pairing code");
     }
@@ -150,7 +120,6 @@ export class LanReceiverService {
       throw this.createError(LanReceiverErrorCode.PAIRING_FAILED, "childId is required for LAN pairing");
     }
 
-    // 生成会话
     const sessionId = this.generateLanSessionId();
     const token = this.generateSecureToken();
     const tokenHash = this.hashToken(token);
@@ -168,12 +137,9 @@ export class LanReceiverService {
       currentUploads: 0,
     };
 
-    // 保存会话
     await this.saveLanSession(session);
     this.activeSessions.set(sessionId, session);
     this.uploadCounters.set(sessionId, 0);
-
-    console.log(`[LanReceiverService] LAN session created: ${sessionId}`);
 
     return {
       success: true,
@@ -187,21 +153,11 @@ export class LanReceiverService {
     };
   }
 
-  // ============================================================================
-  // 文件上传
-  // ============================================================================
-
-  /**
-   * 处理局域网直传文件上传
-   */
   async handleDirectUpload(
     sessionId: string,
     token: string,
     files: LanUploadFile[],
   ): Promise<LanUploadResponse> {
-    console.log(`[LanReceiverService] Direct upload for session ${sessionId}, files: ${files.length}`);
-
-    // 验证会话和token
     const validation = await this.validateLanToken(sessionId, token);
     if (!validation.valid) {
       throw this.createError(validation.errorCode as LanReceiverErrorCodeType, "Invalid session or token");
@@ -209,7 +165,6 @@ export class LanReceiverService {
 
     const session = validation.session!;
 
-    // 检查并发上传限制
     const currentUploads = this.uploadCounters.get(sessionId) || 0;
     if (currentUploads + files.length > session.maxConcurrentUploads) {
       throw this.createError(
@@ -218,24 +173,24 @@ export class LanReceiverService {
       );
     }
 
-    // 验证文件
     this.validateUploadFiles(files);
 
     const uploadedFiles: LanUploadResponse["uploadedFiles"] = [];
     const errors: LanUploadResponse["errors"] = [];
 
-    // 更新上传计数器
     this.uploadCounters.set(sessionId, currentUploads + files.length);
 
     try {
-      // 处理每个文件
       for (const file of files) {
         try {
           const result = await this.processDirectUploadFile(session, file);
           uploadedFiles.push(result);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          console.error(`[LanReceiverService] Failed to process file ${file.originalname}:`, error);
+          this.logger.error(
+            `[LanReceiverService] Failed to process file ${file.originalname}`,
+            error instanceof Error ? error.stack : String(error),
+          );
 
           errors.push({
             filename: file.originalname,
@@ -245,27 +200,20 @@ export class LanReceiverService {
         }
       }
 
-      console.log(`[LanReceiverService] Direct upload completed: ${uploadedFiles.length} success, ${errors.length} errors`);
-
       return {
         success: errors.length === 0,
         uploadedFiles,
         errors,
       };
     } finally {
-      // 减少上传计数器
       const newCount = Math.max(0, (this.uploadCounters.get(sessionId) || 0) - files.length);
       this.uploadCounters.set(sessionId, newCount);
 
-      // 更新会话的当前上传数
       session.currentUploads = newCount;
       this.activeSessions.set(sessionId, session);
     }
   }
 
-  /**
-   * 获取LAN会话状态
-   */
   async getLanSessionStatus(sessionId: string, token: string): Promise<LanSessionStatusResponse> {
     const validation = await this.validateLanToken(sessionId, token);
     if (!validation.valid) {
@@ -285,19 +233,10 @@ export class LanReceiverService {
     };
   }
 
-  // ============================================================================
-  // Token 验证
-  // ============================================================================
-
-  /**
-   * 验证LAN会话token
-   */
   async validateLanToken(sessionId: string, token: string): Promise<LanTokenValidationResult> {
     try {
-      // 先从内存缓存查找
       let session = this.activeSessions.get(sessionId);
 
-      // 如果内存中没有，从数据库加载
       if (!session) {
         session = await this.getLanSessionById(sessionId);
         if (session) {
@@ -309,37 +248,31 @@ export class LanReceiverService {
         return { valid: false, errorCode: LanReceiverErrorCode.SESSION_NOT_FOUND };
       }
 
-      // 检查过期
       if (session.expiresAt < new Date()) {
-        // 清理过期会话
         this.activeSessions.delete(sessionId);
         this.uploadCounters.delete(sessionId);
         return { valid: false, errorCode: LanReceiverErrorCode.SESSION_EXPIRED };
       }
 
-      // 验证token
       const tokenHash = this.hashToken(token);
       if (!this.constantTimeCompare(session.tokenHash, tokenHash)) {
         return { valid: false, errorCode: LanReceiverErrorCode.TOKEN_INVALID };
       }
 
-      // 更新最后访问时间
       session.lastSeenAt = new Date();
       this.activeSessions.set(sessionId, session);
 
       return { valid: true, session };
     } catch (error) {
-      console.error(`[LanReceiverService] Token validation error:`, error);
+      this.logger.error(
+        "[LanReceiverService] Token validation error",
+        error instanceof Error ? error.stack : String(error),
+      );
       return { valid: false, errorCode: LanReceiverErrorCode.SESSION_NOT_FOUND };
     }
   }
 
-  // ============================================================================
-  // 私有辅助方法
-  // ============================================================================
-
   private generateDeviceId(): string {
-    // 基于MAC地址或其他硬件信息生成稳定的设备ID
     const hostname = os.hostname();
     return `desktop-${crypto.createHash("md5").update(hostname).digest("hex").slice(0, 8)}`;
   }
@@ -369,13 +302,11 @@ export class LanReceiverService {
   }
 
   private validatePairingCode(code: string): boolean {
-    // 简单的6位数字配对码验证
     return /^\d{6}$/.test(code);
   }
 
   private validateUploadFiles(files: LanUploadFile[]): void {
     for (const file of files) {
-      // 检查文件大小
       if (file.size > this.config.maxFileSizeBytes) {
         throw this.createError(
           LanReceiverErrorCode.FILE_SIZE_EXCEEDED,
@@ -383,7 +314,6 @@ export class LanReceiverService {
         );
       }
 
-      // 检查文件类型
       if (!this.config.allowedFileTypes.includes(file.mimetype)) {
         throw this.createError(
           LanReceiverErrorCode.FILE_TYPE_NOT_SUPPORTED,
@@ -399,7 +329,6 @@ export class LanReceiverService {
   ): Promise<LanUploadResponse["uploadedFiles"][0]> {
     const assetId = this.generateAssetId();
 
-    // 保存文件到临时位置
     const fs = await import("node:fs/promises");
     const path = await import("node:path");
     const os = await import("node:os");
@@ -408,10 +337,8 @@ export class LanReceiverService {
     const tempFilePath = path.join(tempDir, file.originalname);
 
     try {
-      // 写入文件
       await fs.writeFile(tempFilePath, file.buffer);
 
-      // 使用 DatasetService 导入文件
       const importResult = await this.datasetService.importAssets({
         childId: session.childId,
         paths: [tempFilePath],
@@ -424,8 +351,6 @@ export class LanReceiverService {
 
       const importedAsset = importResult.imported[0];
 
-      console.log(`[LanReceiverService] File imported successfully: ${file.originalname} -> ${assetId}`);
-
       return {
         filename: file.originalname,
         assetId,
@@ -433,7 +358,6 @@ export class LanReceiverService {
         localPath: importedAsset.path || tempFilePath,
       };
     } finally {
-      // 清理临时文件
       try {
         await fs.unlink(tempFilePath);
         await fs.rmdir(tempDir);
@@ -451,7 +375,6 @@ export class LanReceiverService {
     const os = await import("node:os");
     const interfaces = os.networkInterfaces();
 
-    // 查找第一个非回环的IPv4地址
     for (const name of Object.keys(interfaces)) {
       const iface = interfaces[name];
       if (iface) {
@@ -516,14 +439,10 @@ export class LanReceiverService {
   }
 
   private createError(code: LanReceiverErrorCodeType, message?: string): Error {
-    const error = new Error(message || `LAN Receiver Error: ${code}`);
-    (error as any).code = code;
+    const error = new Error(message || `LAN Receiver Error: ${code}`) as LanReceiverError;
+    error.code = code;
     return error;
   }
-
-  // ============================================================================
-  // 数据库操作
-  // ============================================================================
 
   private async saveLanSession(session: LanSession): Promise<void> {
     await this.repository.saveLanSession(session);
@@ -538,10 +457,12 @@ export class LanReceiverService {
   }
 
   private startCleanupTask(): void {
-    // 每5分钟清理过期会话
     this.cleanupTimer = setInterval(() => {
       this.cleanupExpiredSessions().catch(error => {
-        console.error("[LanReceiverService] Cleanup task error:", error);
+        this.logger.error(
+          "[LanReceiverService] Cleanup task error",
+          error instanceof Error ? error.stack : String(error),
+        );
       });
     }, 5 * 60 * 1000);
     this.cleanupTimer.unref?.();
@@ -558,21 +479,15 @@ export class LanReceiverService {
     const now = new Date();
     const expiredSessions: string[] = [];
 
-    // 检查内存中的会话
     for (const [sessionId, session] of this.activeSessions.entries()) {
       if (session.expiresAt < now) {
         expiredSessions.push(sessionId);
       }
     }
 
-    // 清理过期会话
     for (const sessionId of expiredSessions) {
       this.activeSessions.delete(sessionId);
       this.uploadCounters.delete(sessionId);
-    }
-
-    if (expiredSessions.length > 0) {
-      console.log(`[LanReceiverService] Cleaned up ${expiredSessions.length} expired sessions`);
     }
 
     await this.repository.deleteExpiredSessions(now);

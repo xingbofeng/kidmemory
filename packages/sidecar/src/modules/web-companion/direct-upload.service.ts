@@ -12,6 +12,7 @@ import {
   AppConfigService,
   assertWebCompanionDirectUploadReady,
 } from "../../infrastructure/config/app-config.service.ts";
+import { trimTrailingSlash } from "../../infrastructure/url/trailing-slash.ts";
 
 import type {
   CreateDirectUploadSessionRequest,
@@ -31,8 +32,6 @@ import {
   applyDirectUploadPullbackTransition,
   type DirectUploadPullbackStatus,
 } from "./direct-upload-pullback-state.ts";
-
-// ---- Gateways ---------------------------------------------------------------
 
 /**
  * Storage 网关：sidecar 用 service role key（若配置）或 anon key 通过 Supabase Storage REST 调用 list / download。
@@ -94,8 +93,10 @@ export interface DirectUploadIdFactory {
   nextSessionId(): string;
 }
 
+type DirectUploadAppConfig = Pick<AppConfigService, "config">;
+
 export interface DirectUploadServiceDeps {
-  appConfig: AppConfigService;
+  appConfig: DirectUploadAppConfig;
   storage: DirectUploadStorageGateway;
   assets: DirectUploadAssetGateway;
   pullback: DirectUploadPullbackStore;
@@ -113,10 +114,8 @@ interface SessionStoreEntry {
   token: string;
 }
 
-// ---- Service ---------------------------------------------------------------
-
 export class DirectUploadService {
-  private readonly appConfig: AppConfigService;
+  private readonly appConfig: DirectUploadAppConfig;
   private readonly storage: DirectUploadStorageGateway;
   private readonly assets: DirectUploadAssetGateway;
   private readonly pullbackStore: DirectUploadPullbackStore;
@@ -133,17 +132,12 @@ export class DirectUploadService {
     this.pullbackStore = deps.pullback;
     this.idFactory = deps.idFactory;
     this.childExists = deps.childExists;
-    this.sessionStore = deps.sessionStore || new Map();
+    this.sessionStore = deps.sessionStore ?? new Map();
 
-    // 启动定期清理任务：每小时清理过期会话
     this.startCleanupTimer();
   }
 
-  /**
-   * 启动定期清理过期会话的定时器
-   */
   private startCleanupTimer(): void {
-    // 每小时清理一次
     this.cleanupTimer = setInterval(() => {
       this.cleanupExpiredSessions();
     }, 60 * 60 * 1000);
@@ -154,28 +148,16 @@ export class DirectUploadService {
     }
   }
 
-  /**
-   * 清理过期的会话
-   */
   private cleanupExpiredSessions(): void {
     const now = new Date();
-    let cleanedCount = 0;
 
     for (const [sessionId, entry] of this.sessionStore.entries()) {
       if (entry.expiresAt < now) {
         this.sessionStore.delete(sessionId);
-        cleanedCount++;
       }
-    }
-
-    if (cleanedCount > 0) {
-      console.log(`[DirectUploadService] Cleaned up ${cleanedCount} expired sessions`);
     }
   }
 
-  /**
-   * 停止清理定时器（用于测试或服务关闭）
-   */
   destroy(): void {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
@@ -186,7 +168,6 @@ export class DirectUploadService {
   async createSession(
     request: CreateDirectUploadSessionRequest,
   ): Promise<CreateDirectUploadSessionResponse> {
-    // 拒绝在缺失必需配置时签发会话
     assertWebCompanionDirectUploadReady(this.appConfig.config);
 
     const childId = (request.childId || "").trim();
@@ -196,7 +177,6 @@ export class DirectUploadService {
       throw error;
     }
 
-    // 0.1: 验证 childId 是否存在于数据库
     if (this.childExists) {
       const exists = await this.childExists(childId);
       if (!exists) {
@@ -218,12 +198,9 @@ export class DirectUploadService {
       supabaseUrl: config.supabaseStorage.url,
     });
 
-    // 计算过期时间（默认 3 小时）
     const expiresAt = new Date(
-      Date.now() + config.webCompanionDirectUpload.expiresAtHintSeconds * 1000
+      Date.now() + config.webCompanionDirectUpload.expiresAtHintSeconds * 1000,
     );
-
-    // 0.2: 生成一次性 token
     const token = generateSecureToken();
 
     this.sessionStore.set(sessionId, { childId, bucket, expiresAt, token });
@@ -269,7 +246,7 @@ export class DirectUploadService {
 
   async pullback(
     sessionId: string,
-    request: PullbackDirectUploadRequest,
+    request?: Partial<PullbackDirectUploadRequest> | null,
   ): Promise<PullbackDirectUploadResponse> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
     const bucket = this.appConfig.config.webCompanionDirectUpload.bucket;
@@ -284,7 +261,6 @@ export class DirectUploadService {
       throw error;
     }
 
-    // 0.2: 验证 token
     if (request.token !== session.token) {
       const error = new Error("Invalid session token.");
       (error as Error & { code?: string }).code = "invalid_token";
@@ -298,8 +274,9 @@ export class DirectUploadService {
       prefix: `${sessionId}/`,
     });
 
-    const targetObjects = request.objectKeys && request.objectKeys.length > 0
-      ? remoteObjects.filter((o) => request.objectKeys!.includes(o.objectKey))
+    const requestedObjectKeys = request.objectKeys;
+    const targetObjects = requestedObjectKeys && requestedObjectKeys.length > 0
+      ? remoteObjects.filter((object) => requestedObjectKeys.includes(object.objectKey))
       : remoteObjects;
 
     const results: PullbackDirectUploadItemResult[] = [];
@@ -347,7 +324,6 @@ export class DirectUploadService {
       objectKey: object.objectKey,
     });
 
-    // 幂等：已经 ready 的对象不重复 import
     if (row.status === "ready") {
       return {
         objectKey: row.objectKey,
@@ -357,7 +333,6 @@ export class DirectUploadService {
       };
     }
 
-    // pending_remote → downloading
     let downloading = applyDirectUploadPullbackTransition(toRecord(row), {
       type: "begin_download",
     });
@@ -422,8 +397,6 @@ export class DirectUploadService {
   }
 }
 
-// ---- Helpers ----------------------------------------------------------------
-
 function buildPublicUrl(
   publicBase: string,
   params: { sessionId: string; childId: string; bucket: string; supabaseUrl: string },
@@ -438,14 +411,11 @@ function buildPublicUrl(
   return `${base}/direct-upload?${query.toString()}`;
 }
 
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
-}
-
 function classifyError(error: unknown): string {
   if (error instanceof Error) {
-    if (error.message.toLowerCase().includes("not found")) return "remote_object_missing";
-    if (error.message.toLowerCase().includes("import")) return "asset_import_failed";
+    const message = error.message.toLowerCase();
+    if (message.includes("not found")) return "remote_object_missing";
+    if (message.includes("import")) return "asset_import_failed";
   }
   return "remote_download_failed";
 }
@@ -465,11 +435,7 @@ function toRecord(row: DirectUploadPullbackRow) {
   };
 }
 
-// ---- Re-exports for tests ---------------------------------------------------
-
 export type { CreateDirectUploadSessionRequest, CreateDirectUploadSessionResponse };
-
-// ---- Helpers (private) ------------------------------------------------------
 
 function generateSecureToken(): string {
   const bytes = new Uint8Array(32);

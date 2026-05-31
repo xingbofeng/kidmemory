@@ -86,7 +86,6 @@ export class AgentConfigController {
 
   async createConfig(request: unknown): Promise<AgentConfigDto> {
     try {
-      // Validate request using Zod
       const validatedRequest = parseDto(CreateAgentConfigDtoSchema, request, "agent-config");
 
       const config = await this.applicationService.createConfig(validatedRequest);
@@ -98,7 +97,6 @@ export class AgentConfigController {
 
   async updateConfig(id: string, request: unknown): Promise<AgentConfigDto> {
     try {
-      // Validate request using Zod
       const validatedRequest = parseDto(UpdateAgentConfigDtoSchema, request, "agent-config");
 
       const config = await this.applicationService.updateConfig(id, validatedRequest);
@@ -178,7 +176,6 @@ export class AgentConfigController {
 
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
 
-    // Map common error patterns to appropriate HTTP status codes
     if (message.includes('not found') || message.includes('Agent configuration not found')) {
       throw new HttpException(
         { code: 'CONFIG_NOT_FOUND', message },

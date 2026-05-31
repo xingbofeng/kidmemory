@@ -37,6 +37,7 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
   }
 
   Future<AssetSearchResult> searchAssetsInline(AssetSearchInput request) async {
+    final l10n = AppLocalizations.of(context)!;
     final data = await gateway.searchAssetsDto(
       payload: AssetSearchInputPayload(
         childId: request.childId,
@@ -60,27 +61,25 @@ extension _DesktopShellDatasetActions on _DesktopShellState {
         .toList();
     final status = data.codeValue.isNotEmpty
         ? (data.messageValue.isNotEmpty ? data.messageValue : data.codeValue)
-        : AppLocalizations.of(
-            context,
-          )!.datasetSearchCompletedStatus(data.totalValue);
+        : l10n.datasetSearchCompletedStatus(data.totalValue);
     return AssetSearchResult(assets: results, statusMessage: status);
   }
 
   Future<String> refreshSearchIndexingMessage() async {
+    final l10n = AppLocalizations.of(context)!;
     final childId = selectedChildId;
     if (childId == null || childId.isEmpty) {
-      return AppLocalizations.of(context)!.datasetS857;
+      return l10n.datasetS857;
     }
     final data = await gateway.getIndexingStatusDto(childId: childId);
     final indexing =
         data.pendingValue + data.runningValue + data.retryWaitValue;
-    final base = AppLocalizations.of(
-      context,
-    )!.datasetSearchIndexingBaseStatus(data.searchableValue, indexing);
+    final base = l10n.datasetSearchIndexingBaseStatus(
+      data.searchableValue,
+      indexing,
+    );
     return data.failedValue > 0
-        ? AppLocalizations.of(
-            context,
-          )!.datasetSearchIndexingFailedStatus(base, data.failedValue)
+        ? l10n.datasetSearchIndexingFailedStatus(base, data.failedValue)
         : base;
   }
 

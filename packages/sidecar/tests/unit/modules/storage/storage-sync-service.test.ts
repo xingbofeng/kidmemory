@@ -2,13 +2,19 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { MemoryDatasetDb } from "../../../../src/infrastructure/dataset-state/memory-dataset-db.ts";
-import { createStorageSyncService } from "../../../../src/modules/storage/providers/storage-sync.ts";
+import {
+  createStorageSyncService,
+  type StorageProviderForSync,
+} from "../../../../src/modules/storage/providers/storage-sync.ts";
+
+type UploadFileInput = Parameters<StorageProviderForSync["uploadFile"]>[0];
+type UploadFileResult = Awaited<ReturnType<StorageProviderForSync["uploadFile"]>>;
 
 function buildService(options: {
-  uploadFile?: (input: { localPath: string; objectPath: string }) => Promise<any>;
+  uploadFile?: (input: UploadFileInput) => Promise<UploadFileResult>;
 } = {}) {
   const db = new MemoryDatasetDb();
-  const uploadCalls: { localPath: string; objectPath: string }[] = [];
+  const uploadCalls: UploadFileInput[] = [];
   const service = createStorageSyncService({
     db,
     provider: {

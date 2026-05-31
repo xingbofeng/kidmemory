@@ -7,7 +7,6 @@ describe('Protocol API DTO Architecture (cloud-api)', () => {
   const root = process.cwd();
   const dtoFiles = [
     'src/modules/devices/devices.dto.ts',
-    'src/modules/jobs/jobs.dto.ts',
     'src/modules/upload-items/upload-items.dto.ts',
     'src/modules/web-companion/web-companion.dto.ts',
   ];
@@ -29,6 +28,11 @@ describe('Protocol API DTO Architecture (cloud-api)', () => {
         content,
         /\btype\s+\w+(Request|Response)\s*=\s*{/,
         `${file} must not define local Request/Response object type`,
+      );
+      assert.doesNotMatch(
+        content,
+        /\bOmit</,
+        `${file} must not patch generated response DTOs with local Omit wrappers`,
       );
     }
   });

@@ -125,14 +125,12 @@ export class AgentConfigDomainService {
 
     const configsToUpdate: AgentConfig[] = [];
 
-    // Mark current defaults as non-default
     for (const config of currentConfigs) {
       if (config.isDefault && config.id !== newDefaultId) {
         configsToUpdate.push(config.markAsNonDefault());
       }
     }
 
-    // Mark new config as default
     const updatedNewDefault = newDefault.markAsDefault();
     configsToUpdate.push(updatedNewDefault);
 

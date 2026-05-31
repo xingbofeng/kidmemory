@@ -5,7 +5,7 @@ import path from "node:path";
 import { test } from "node:test";
 
 import { AppConfigService, loadConfigFromEnv } from "../../../../src/infrastructure/config/app-config.service.ts";
-import { DatasetState } from "../../../../src/infrastructure/dataset-state/dataset-state.service.ts";
+import { DatasetState, type DatasetStateService } from "../../../../src/infrastructure/dataset-state/dataset-state.service.ts";
 import { MemoryDatasetDb, type SampleDb } from "../../../../src/infrastructure/dataset-state/memory-dataset-db.ts";
 import { DatasetService } from "../../../../src/modules/dataset/dataset.service.ts";
 
@@ -19,6 +19,26 @@ class StubDatasetState extends DatasetState<SampleDb> {
     const memoryDb = new MemoryDatasetDb();
     super(memoryDb, async () => memoryDb);
   }
+}
+
+function createDatasetState(db: SampleDb = new MemoryDatasetDb()): DatasetStateService {
+  return new DatasetState(db, async () => db) as unknown as DatasetStateService;
+}
+
+function createOpenAIResponse(content: string): Response {
+  return new Response(
+    JSON.stringify({
+      choices: [
+        {
+          message: { content },
+        },
+      ],
+    }),
+    {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    },
+  );
 }
 
 function buildSpyFactories() {
@@ -87,14 +107,13 @@ test("DatasetService composes a fresh storage provider for each new instance", a
 
 test("DatasetService uses configured OpenAI-compatible endpoint to infer imported asset metadata", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
   const config = new AppConfigService(loadConfigFromEnv({}));
   config.updateOpenAIConfig({
     baseUrl: "https://openai-compatible.example.test/v1",
     apiKey: "sk-test",
     model: "gpt-4.1-mini",
   });
-  const service = new DatasetService(datasetState as any, config);
+  const service = new DatasetService(createDatasetState(db), config);
   await db.upsertChild({ id: "child-1", name: "测试孩子" });
 
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-dataset-service-infer-"));
@@ -105,22 +124,11 @@ test("DatasetService uses configured OpenAI-compatible endpoint to infer importe
   let called = 0;
   globalThis.fetch = (async () => {
     called += 1;
-    return {
-      ok: true,
-      json: async () => ({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                title: "草地上的猫",
-                tags: ["猫", "宠物"],
-                description: "一只猫在草地上休息",
-              }),
-            },
-          },
-        ],
-      }),
-    } as any;
+    return createOpenAIResponse(JSON.stringify({
+      title: "草地上的猫",
+      tags: ["猫", "宠物"],
+      description: "一只猫在草地上休息",
+    }));
   }) as typeof fetch;
 
   try {
@@ -139,9 +147,8 @@ test("DatasetService uses configured OpenAI-compatible endpoint to infer importe
 
 test("DatasetService picks up OpenAI config updates after service construction", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
   const config = new AppConfigService(loadConfigFromEnv({}));
-  const service = new DatasetService(datasetState as any, config);
+  const service = new DatasetService(createDatasetState(db), config);
   await db.upsertChild({ id: "child-1", name: "测试孩子" });
   await service.listChildren();
 
@@ -159,22 +166,11 @@ test("DatasetService picks up OpenAI config updates after service construction",
   let called = 0;
   globalThis.fetch = (async () => {
     called += 1;
-    return {
-      ok: true,
-      json: async () => ({
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({
-                title: "晚配置也生效",
-                tags: ["动态配置"],
-                description: "服务启动后配置也应被读取",
-              }),
-            },
-          },
-        ],
-      }),
-    } as any;
+    return createOpenAIResponse(JSON.stringify({
+      title: "晚配置也生效",
+      tags: ["动态配置"],
+      description: "服务启动后配置也应被读取",
+    }));
   }) as typeof fetch;
 
   try {

@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { RunContext } from "@openai/agents";
 
 import {
   AgentRuntime,
@@ -166,6 +168,18 @@ test("AgentRuntime marks tools as requiring approval from runtime policy", async
 });
 
 test("toOpenAIAgentsTool adapts AgentTool execution with workspace context", async () => {
+  const toolSource = await fs.readFile(
+    path.join(process.cwd(), "src", "tools", "index.ts"),
+    "utf8",
+  );
+  const testSource = await fs.readFile(
+    path.join(process.cwd(), "tests", "tools", "tools-policy.test.ts"),
+    "utf8",
+  );
+  const forbidden = ["as", "never"].join(" ");
+  assert.equal(toolSource.includes(forbidden), false);
+  assert.equal(testSource.includes(forbidden), false);
+
   const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-openai-tool-"));
   const agentTool: AgentTool = {
     id: "write_summary",
@@ -189,7 +203,7 @@ test("toOpenAIAgentsTool adapts AgentTool execution with workspace context", asy
   };
 
   const openAITool = toOpenAIAgentsTool(agentTool, { workspaceDir, runId: "run_tool" });
-  const output = await openAITool.invoke({} as never, JSON.stringify({ text: "hello" }));
+  const output = await openAITool.invoke(new RunContext(), JSON.stringify({ text: "hello" }));
 
   assert.equal(openAITool.name, "write_summary");
   assert.deepEqual(output, { localPath: "output/summary.txt" });
@@ -258,4 +272,15 @@ test("createPollinationsStorybookImageTool blocks child photo payloads and outpu
     tool.execute({ prompt: "cover", path: "../cover.png" }, { workspaceDir }),
     /outside workspace|under output/i,
   );
+});
+
+test("createPollinationsStorybookImageTool reuses shared input readers", () => {
+  const source = fsSync.readFileSync("src/tools/generate-storybook-image.tool.ts", "utf8");
+
+  assert.equal(source.match(/typeof input !== "object"/g)?.length, 1);
+  assert.equal(source.includes("function readRequiredStringField"), false);
+  assert.equal(source.includes("function readOptionalStringField"), false);
+  assert.equal(source.includes("function readOptionalNumberField"), false);
+  assert.match(source, /core\/utils\.js/);
+  assert.equal(source.includes("function toPosixPath"), false);
 });

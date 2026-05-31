@@ -17,10 +17,10 @@ class WebCompanionApi {
   const WebCompanionApi(this._dio);
 
   /// webCompanionControllerAccessSharedContent
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
+  /// * [shareToken]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -30,7 +30,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerAccessSharedContent({ 
+  Future<Response<void>> webCompanionControllerAccessSharedContent({
     required String shareToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -64,10 +64,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerCloseSession
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -77,7 +77,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCloseSession({ 
+  Future<Response<void>> webCompanionControllerCloseSession({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -111,11 +111,11 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerCommitUploadItem
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [uploadItemId] 
+  /// * [sessionId]
+  /// * [uploadItemId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -125,7 +125,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCommitUploadItem({ 
+  Future<Response<void>> webCompanionControllerCommitUploadItem({
     required String sessionId,
     required String uploadItemId,
     CancelToken? cancelToken,
@@ -160,7 +160,7 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerCreateSession
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -172,7 +172,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCreateSession({ 
+  Future<Response<void>> webCompanionControllerCreateSession({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -205,10 +205,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerCreateShareToken
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -218,7 +218,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCreateShareToken({ 
+  Future<Response<void>> webCompanionControllerCreateShareToken({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -252,10 +252,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerCreateUploadItems
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -265,7 +265,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCreateUploadItems({ 
+  Future<Response<void>> webCompanionControllerCreateUploadItems({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -299,11 +299,11 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetAssetDetails
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [assetId] 
+  /// * [sessionId]
+  /// * [assetId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -313,7 +313,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetAssetDetails({ 
+  Future<Response<void>> webCompanionControllerGetAssetDetails({
     required String sessionId,
     required String assetId,
     CancelToken? cancelToken,
@@ -348,11 +348,11 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetBookDetails
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [bookId] 
+  /// * [sessionId]
+  /// * [bookId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -362,7 +362,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetBookDetails({ 
+  Future<Response<void>> webCompanionControllerGetBookDetails({
     required String sessionId,
     required String bookId,
     CancelToken? cancelToken,
@@ -397,10 +397,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetBooksList
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -410,7 +410,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetBooksList({ 
+  Future<Response<void>> webCompanionControllerGetBooksList({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -444,10 +444,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetRecentUploads
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -457,7 +457,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetRecentUploads({ 
+  Future<Response<void>> webCompanionControllerGetRecentUploads({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -491,10 +491,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetSessionDetail
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -504,7 +504,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSessionDetail({ 
+  Future<Response<void>> webCompanionControllerGetSessionDetail({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -538,10 +538,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetSessionSummary
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -551,7 +551,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSessionSummary({ 
+  Future<Response<void>> webCompanionControllerGetSessionSummary({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -585,10 +585,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetSharedAssets
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
+  /// * [shareToken]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -598,7 +598,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedAssets({ 
+  Future<Response<void>> webCompanionControllerGetSharedAssets({
     required String shareToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -632,10 +632,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerGetSharedBook
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [shareToken] 
+  /// * [shareToken]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -645,7 +645,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedBook({ 
+  Future<Response<void>> webCompanionControllerGetSharedBook({
     required String shareToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -679,11 +679,11 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerRetryUploadItem
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [uploadItemId] 
+  /// * [sessionId]
+  /// * [uploadItemId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -693,7 +693,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerRetryUploadItem({ 
+  Future<Response<void>> webCompanionControllerRetryUploadItem({
     required String sessionId,
     required String uploadItemId,
     CancelToken? cancelToken,
@@ -728,11 +728,11 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerRevokeShareToken
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
-  /// * [shareTokenId] 
+  /// * [sessionId]
+  /// * [shareTokenId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -742,7 +742,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerRevokeShareToken({ 
+  Future<Response<void>> webCompanionControllerRevokeShareToken({
     required String sessionId,
     required String shareTokenId,
     CancelToken? cancelToken,
@@ -777,10 +777,10 @@ class WebCompanionApi {
   }
 
   /// webCompanionControllerSubmitSession
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [sessionId] 
+  /// * [sessionId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -790,7 +790,7 @@ class WebCompanionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerSubmitSession({ 
+  Future<Response<void>> webCompanionControllerSubmitSession({
     required String sessionId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

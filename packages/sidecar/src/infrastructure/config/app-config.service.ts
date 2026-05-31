@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { Injectable } from "@nestjs/common";
 
+import { parseEnvBoolean } from "./env-parsing.ts";
+
 export type AppConfig = {
   postgres: {
     host: string;
@@ -146,7 +148,7 @@ export function loadConfigFromEnv(
       },
     },
     webCompanionDirectUpload: {
-      enabled: parseBoolean(env.WEB_COMPANION_DIRECT_UPLOAD_ENABLED, false),
+      enabled: parseEnvBoolean(env.WEB_COMPANION_DIRECT_UPLOAD_ENABLED, false),
       bucket: env.SUPABASE_DIRECT_UPLOAD_BUCKET || "",
       publicUrl: env.WEB_COMPANION_DIRECT_PUBLIC_URL || "",
       recommendedClientLimit: numberOrCurrent(
@@ -178,7 +180,7 @@ export function loadConfigFromEnv(
       webCompanionBaseUrl: env.WEB_COMPANION_BASE_URL || "http://localhost:3001",
     },
     mcp: {
-      enabled: parseBoolean(env.KIDMEMORY_MCP_ENABLED, false),
+      enabled: parseEnvBoolean(env.KIDMEMORY_MCP_ENABLED, false),
       path: env.KIDMEMORY_MCP_PATH?.trim() || "/mcp",
     },
   };
@@ -520,21 +522,6 @@ function textOrCurrent(value: string | undefined, current: string) {
   return value === undefined ? current : value.trim();
 }
 
-function defaultSupabaseS3Endpoint(url: string) {
-  const trimmed = url.trim().replace(/\/+$/, "");
-  if (!trimmed) return "";
-  try {
-    const parsed = new URL(trimmed);
-    parsed.hostname = parsed.hostname.replace(".supabase.co", ".storage.supabase.co");
-    parsed.pathname = "/storage/v1/s3";
-    parsed.search = "";
-    parsed.hash = "";
-    return parsed.toString().replace(/\/+$/, "");
-  } catch {
-    return "";
-  }
-}
-
 function numberOrCurrent(value: number | string | undefined, current: number) {
   if (typeof value === "number" && Number.isFinite(value) && value > 0) {
     return Math.trunc(value);
@@ -544,16 +531,6 @@ function numberOrCurrent(value: number | string | undefined, current: number) {
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
   }
   return current;
-}
-
-
-function parseBoolean(value: string | undefined, fallback: boolean): boolean {
-  if (value === undefined) return fallback;
-  const trimmed = value.trim().toLowerCase();
-  if (trimmed === "") return fallback;
-  if (["1", "true", "yes", "on"].includes(trimmed)) return true;
-  if (["0", "false", "no", "off"].includes(trimmed)) return false;
-  return fallback;
 }
 
 Injectable()(AppConfigService);

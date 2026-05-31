@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const SearchCandidatePoolItemsDtoSchema = z
   .object({
@@ -9,4 +8,4 @@ export const SearchCandidatePoolItemsDtoSchema = z
   })
   .strict();
 
-export type SearchCandidatePoolItemsDto = components["schemas"]["SearchCandidatePoolItemsRequestDto"];
+export type SearchCandidatePoolItemsDto = z.infer<typeof SearchCandidatePoolItemsDtoSchema>;

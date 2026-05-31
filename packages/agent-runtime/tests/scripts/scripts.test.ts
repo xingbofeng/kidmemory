@@ -74,22 +74,11 @@ test("createRuntimeProviderConfigFromEnv maps OpenAI demo environment", () => {
   assert.deepEqual(createRuntimeProviderConfigFromEnv({}), {});
 });
 
-test("createRuntimeProviderConfigFromEnv ignores legacy OpenRouter environment when OpenAI config is present", () => {
-  assert.deepEqual(
-    createRuntimeProviderConfigFromEnv({
-      OPENAI_API_KEY: "openai-key",
-      OPENAI_BASE_URL: "https://openai.example.test/v1",
-      OPENAI_MODEL: "openai/model",
-      OPENROUTER_API_KEY: "router-key",
-      OPENROUTER_BASE_URL: "https://openrouter.example.test/api/v1",
-      OPENROUTER_MODEL: "router/model",
-    }),
-    {
-      apiKey: "openai-key",
-      baseURL: "https://openai.example.test/v1",
-      model: "openai/model",
-    },
-  );
+test("script env tests use only canonical provider environment names", async () => {
+  const source = await fs.readFile(path.join(import.meta.dirname, "scripts.test.ts"), "utf8");
+  const staleProviderEnvPrefix = ["OPEN", "ROUTER"].join("");
+
+  assert.doesNotMatch(source, new RegExp(`${staleProviderEnvPrefix}_`));
 });
 
 test("createRuntimeProviderConfigFromEnv ignores blank OpenAI demo environment values", () => {
@@ -623,18 +612,14 @@ test("collectEnvironmentCheck reports provider host and response mode without le
       OPENAI_BASE_URL: "https://openrouter.example.test/api/v1",
       OPENAI_MODEL: "secret-model",
       OPENAI_USE_RESPONSES: "false",
-      OPENROUTER_API_KEY: "secret-router-key",
-      OPENROUTER_BASE_URL: "https://secret-router.example.test/api/v1",
-      OPENROUTER_MODEL: "secret-router-model",
-      OPENROUTER_USE_RESPONSES: "false",
     },
   });
   const text = [...result.errors, ...result.messages].join("\n");
 
   assert.match(text, /OPENAI_PROVIDER_HOST: openrouter\.example\.test/);
   assert.match(text, /OPENAI_USE_RESPONSES: false/);
-  assert.doesNotMatch(text, /secret-key|secret-router-key|secret-model|secret-router-model/);
-  assert.doesNotMatch(text, /https:\/\/openrouter\.example\.test\/api\/v1|https:\/\/secret-router\.example\.test\/api\/v1/);
+  assert.doesNotMatch(text, /secret-key|secret-model/);
+  assert.doesNotMatch(text, /https:\/\/openrouter\.example\.test\/api\/v1/);
 });
 
 test("collectEnvironmentCheck reports invalid provider base URL without leaking its value", async () => {

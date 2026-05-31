@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 
 import { DatasetService } from "../dataset.service.ts";
 
@@ -11,7 +11,7 @@ export class SearchIndexingWorkerService implements OnModuleInit, OnModuleDestro
   private timer: NodeJS.Timeout | null = null;
   private running = false;
 
-  constructor(private readonly datasetService: DatasetService) {}
+  constructor(@Inject(DatasetService) private readonly datasetService: DatasetService) {}
 
   onModuleInit() {
     if (this.isWorkerDisabled()) {

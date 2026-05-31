@@ -155,62 +155,6 @@ paths:
         required: true
         schema:
           type: string
-  /jobs/pending:
-    get:
-      operationId: JobsController_getPendingJobs
-      parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Maximum jobs to return
-          schema:
-            type: number
-        - name: deviceId
-          required: false
-          in: query
-          description: Filter by device ID (null = unassigned)
-          schema: {}
-      responses:
-        "200":
-          description: Pending jobs retrieved
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/JobResponseDto"
-      summary: Get pending jobs for device
-      tags: &a4
-        - jobs
-  /jobs/{id}/status:
-    put:
-      operationId: JobsController_updateStatus
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateJobStatusRequestDto"
-      responses:
-        "200":
-          description: Status updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JobResponseDto"
-        "400":
-          description: Invalid status transition
-        "404":
-          description: Job not found
-      summary: Update job status
-      tags: *a4
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
   /api/web-companion/direct-upload/sessions/{sessionId}/config:
     get:
       operationId: WebCompanionController_getDirectUploadConfig
@@ -223,7 +167,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DirectUploadConfigResponseDto"
       summary: Get direct upload config for trusted upload session
-      tags: &a5
+      tags: &a4
         - web-companion
     parameters:
       - name: sessionId
@@ -243,7 +187,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SessionSummaryResponseDto"
       summary: Get trusted upload session summary
-      tags: *a5
+      tags: *a4
     parameters:
       - name: sessionId
         in: path
@@ -268,7 +212,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CreateUploadItemsResponseDto"
       summary: Create upload items for trusted upload session
-      tags: *a5
+      tags: *a4
     parameters:
       - name: sessionId
         in: path
@@ -293,7 +237,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CommitUploadItemResponseDto"
       summary: Commit upload item
-      tags: *a5
+      tags: *a4
     parameters:
       - name: sessionId
         in: path
@@ -325,7 +269,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ShareTokenValidationResponseDto"
       summary: Validate public share token
-      tags: *a5
+      tags: *a4
     parameters:
       - name: shareToken
         in: path
@@ -351,7 +295,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/SharedAssetDto"
       summary: Get public shared assets
-      tags: *a5
+      tags: *a4
     parameters:
       - name: shareToken
         in: path
@@ -375,7 +319,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SharedBookDto"
       summary: Get public shared book metadata
-      tags: *a5
+      tags: *a4
     parameters:
       - name: shareToken
         in: path
@@ -392,8 +336,6 @@ tags:
     description: Health check endpoints
   - name: devices
     description: Device registration and sync
-  - name: jobs
-    description: Job lifecycle and sync
   - name: upload-items
     description: Upload item sync
 servers:
@@ -405,6 +347,8 @@ components:
   schemas:
     RegisterDeviceRequestDto:
       type: object
+      required:
+        - machineId
       properties:
         machineId:
           type: string
@@ -412,10 +356,14 @@ components:
           type: string
         platform:
           type: string
-      required:
-        - machineId
     DeviceResponseDto:
       type: object
+      required:
+        - id
+        - machineId
+        - lastHeartbeat
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
@@ -431,14 +379,16 @@ components:
           type: string
         updatedAt:
           type: string
-      required:
-        - id
-        - machineId
-        - lastHeartbeat
-        - createdAt
-        - updatedAt
     UploadItemResponseDto:
       type: object
+      required:
+        - id
+        - sessionId
+        - objectKey
+        - fileName
+        - status
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
@@ -473,16 +423,10 @@ components:
           type: string
         updatedAt:
           type: string
-      required:
-        - id
-        - sessionId
-        - objectKey
-        - fileName
-        - status
-        - createdAt
-        - updatedAt
     UpdateSyncStatusRequestDto:
       type: object
+      required:
+        - status
       properties:
         status:
           type: string
@@ -494,101 +438,42 @@ components:
           type: string
         errorMessage:
           type: string
-      required:
-        - status
-    JobResponseDto:
-      type: object
-      properties:
-        id:
-          type: string
-        deviceId:
-          type: string
-        type:
-          type: string
-          enum:
-            - book_generation
-            - asset_processing
-            - export_pdf
-            - export_long_image
-            - import
-            - sync
-            - export
-            - cleanup
-        payload:
-          type: object
-          nullable: true
-          additionalProperties: true
-        status:
-          type: string
-          enum:
-            - pending
-            - claimed
-            - processing
-            - completed
-            - failed
-        priority:
-          type: number
-        claimedAt:
-          type: string
-        completedAt:
-          type: string
-        errorMessage:
-          type: string
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
-      required:
-        - id
-        - type
-        - payload
-        - status
-        - priority
-        - createdAt
-        - updatedAt
-    UpdateJobStatusRequestDto:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - pending
-            - claimed
-            - processing
-            - completed
-            - failed
-        claimedAt:
-          type: string
-        completedAt:
-          type: string
-        errorMessage:
-          type: string
-      required:
-        - status
     DirectUploadConfigResponseDto:
       type: object
+      required:
+        - anonKey
       properties:
         anonKey:
           type: string
+    TrustedUploadSessionChildDto:
+      type: object
       required:
-        - anonKey
+        - id
+        - displayName
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+    ProviderAvailabilityDto:
+      type: object
+      required:
+        - available
+      properties:
+        available:
+          type: boolean
+    DirectUploadProvidersDto:
+      type: object
+      required:
+        - lan
+        - supabase
+      properties:
+        lan:
+          $ref: "#/components/schemas/ProviderAvailabilityDto"
+        supabase:
+          $ref: "#/components/schemas/ProviderAvailabilityDto"
     SessionSummaryResponseDto:
       type: object
-      properties:
-        sessionId:
-          type: string
-        status:
-          type: string
-        child:
-          type: object
-        expiresAt:
-          type: string
-        maxItems:
-          type: number
-        usedItems:
-          type: number
-        providers:
-          type: object
       required:
         - sessionId
         - status
@@ -597,8 +482,28 @@ components:
         - maxItems
         - usedItems
         - providers
+      properties:
+        sessionId:
+          type: string
+        status:
+          type: string
+        child:
+          $ref: "#/components/schemas/TrustedUploadSessionChildDto"
+        expiresAt:
+          type: string
+        maxItems:
+          type: number
+        usedItems:
+          type: number
+        providers:
+          $ref: "#/components/schemas/DirectUploadProvidersDto"
     CreateUploadFileDto:
       type: object
+      required:
+        - clientFileId
+        - filename
+        - contentType
+        - sizeBytes
       properties:
         clientFileId:
           type: string
@@ -608,13 +513,11 @@ components:
           type: string
         sizeBytes:
           type: number
-      required:
-        - clientFileId
-        - filename
-        - contentType
-        - sizeBytes
     CreateUploadItemsRequestDto:
       type: object
+      required:
+        - token
+        - files
       properties:
         token:
           type: string
@@ -627,11 +530,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CreateUploadFileDto"
-      required:
-        - token
-        - files
     SignedUploadTargetDto:
       type: object
+      required:
+        - method
+        - url
+        - headers
       properties:
         method:
           type: string
@@ -643,12 +547,14 @@ components:
             type: string
         expiresAt:
           type: string
-      required:
-        - method
-        - url
-        - headers
     CreatedUploadItemDto:
       type: object
+      required:
+        - clientFileId
+        - uploadItemId
+        - assetId
+        - objectKey
+        - status
       properties:
         clientFileId:
           type: string
@@ -662,23 +568,22 @@ components:
           type: string
         signedUpload:
           $ref: "#/components/schemas/SignedUploadTargetDto"
-      required:
-        - clientFileId
-        - uploadItemId
-        - assetId
-        - objectKey
-        - status
     CreateUploadItemsResponseDto:
       type: object
+      required:
+        - items
       properties:
         items:
           type: array
           items:
             $ref: "#/components/schemas/CreatedUploadItemDto"
-      required:
-        - items
     CommitUploadItemRequestDto:
       type: object
+      required:
+        - token
+        - objectKey
+        - contentType
+        - sizeBytes
       properties:
         token:
           type: string
@@ -695,34 +600,57 @@ components:
         metadata:
           type: object
           additionalProperties: true
-      required:
-        - token
-        - objectKey
-        - contentType
-        - sizeBytes
     CommitUploadItemResponseDto:
       type: object
+      required:
+        - uploadItemId
+        - status
       properties:
         uploadItemId:
           type: string
         status:
           type: string
+    ShareTokenAccessDto:
+      type: object
       required:
-        - uploadItemId
-        - status
+        - id
+        - childId
+        - resourceType
+        - accessType
+      properties:
+        id:
+          type: string
+        childId:
+          type: string
+        resourceType:
+          type: string
+          enum:
+            - specific_book
+            - child_assets
+        resourceId:
+          type: string
+        accessType:
+          type: string
+          enum:
+            - read
     ShareTokenValidationResponseDto:
       type: object
+      required:
+        - isValid
       properties:
         isValid:
           type: boolean
         error:
           type: string
         shareToken:
-          type: object
-      required:
-        - isValid
+          $ref: "#/components/schemas/ShareTokenAccessDto"
     SharedAssetDto:
       type: object
+      required:
+        - id
+        - title
+        - type
+        - createdAt
       properties:
         id:
           type: string
@@ -732,13 +660,14 @@ components:
           type: string
         createdAt:
           type: string
+    SharedBookDto:
+      type: object
       required:
         - id
         - title
-        - type
+        - childId
         - createdAt
-    SharedBookDto:
-      type: object
+        - status
       properties:
         id:
           type: string
@@ -750,9 +679,3 @@ components:
           type: string
         status:
           type: string
-      required:
-        - id
-        - title
-        - childId
-        - createdAt
-        - status

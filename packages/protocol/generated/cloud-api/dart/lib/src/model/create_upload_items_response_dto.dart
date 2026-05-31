@@ -25,7 +25,7 @@ class CreateUploadItemsResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'items',
     required: true,
     includeIfNull: false,
@@ -56,4 +56,3 @@ class CreateUploadItemsResponseDto {
   }
 
 }
-

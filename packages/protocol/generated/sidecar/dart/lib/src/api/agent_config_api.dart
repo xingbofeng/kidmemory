@@ -17,7 +17,7 @@ class AgentConfigApi {
   const AgentConfigApi(this._dio);
 
   /// agentConfigControllerCreateConfig
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerCreateConfig({ 
+  Future<Response<void>> agentConfigControllerCreateConfig({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,10 +62,10 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerDeleteConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -75,7 +75,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerDeleteConfig({ 
+  Future<Response<void>> agentConfigControllerDeleteConfig({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -109,10 +109,10 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerGetConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -122,7 +122,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerGetConfig({ 
+  Future<Response<void>> agentConfigControllerGetConfig({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -156,7 +156,7 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerGetDefaultConfig
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -168,7 +168,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerGetDefaultConfig({ 
+  Future<Response<void>> agentConfigControllerGetDefaultConfig({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -201,7 +201,7 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerListConfigs
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -213,7 +213,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerListConfigs({ 
+  Future<Response<void>> agentConfigControllerListConfigs({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -246,10 +246,10 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerSetDefaultConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -259,7 +259,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerSetDefaultConfig({ 
+  Future<Response<void>> agentConfigControllerSetDefaultConfig({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -293,10 +293,10 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerTestConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -306,7 +306,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerTestConfig({ 
+  Future<Response<void>> agentConfigControllerTestConfig({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -340,10 +340,10 @@ class AgentConfigApi {
   }
 
   /// agentConfigControllerUpdateConfig
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -353,7 +353,7 @@ class AgentConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> agentConfigControllerUpdateConfig({ 
+  Future<Response<void>> agentConfigControllerUpdateConfig({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

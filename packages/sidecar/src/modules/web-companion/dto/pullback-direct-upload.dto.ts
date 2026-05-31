@@ -2,13 +2,21 @@
  * Direct Upload pullback DTOs.
  */
 
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+import type { DirectUploadPullbackStatus } from "../direct-upload-pullback-state.ts";
 
-export type PullbackDirectUploadRequest =
-  components["schemas"]["PullbackDirectUploadRequestDto"];
+export interface PullbackDirectUploadRequest {
+  token: string;
+  objectKeys?: string[];
+}
 
-export type PullbackDirectUploadItemResult =
-  components["schemas"]["PullbackDirectUploadItemResultDto"];
+export interface PullbackDirectUploadItemResult {
+  objectKey: string;
+  status: Extract<DirectUploadPullbackStatus, "ready" | "failed">;
+  errorCode: string | null;
+  errorMessage: string | null;
+}
 
-export type PullbackDirectUploadResponse =
-  components["schemas"]["PullbackDirectUploadResponseDto"];
+export interface PullbackDirectUploadResponse {
+  sessionId: string;
+  results: PullbackDirectUploadItemResult[];
+}

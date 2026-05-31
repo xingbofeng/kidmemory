@@ -1,10 +1,23 @@
 import assert from "node:assert/strict";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 
 import { createWorkspaceAgentTools } from "../../src/index.ts";
+
+function useEnv(t: Pick<TestContext, "after">, key: string, value: string): void {
+  const previous = process.env[key];
+  process.env[key] = value;
+  t.after(() => {
+    if (previous === undefined) {
+      delete process.env[key];
+      return;
+    }
+    process.env[key] = previous;
+  });
+}
 
 test("createWorkspaceAgentTools exposes one tool per workspace behavior", async () => {
   const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-workspace-tools-"));
@@ -17,7 +30,7 @@ test("createWorkspaceAgentTools exposes one tool per workspace behavior", async 
   assert.deepEqual([...new Set(tools.map((tool) => tool.source))], ["workspace"]);
 });
 
-test("run_command rejects shell executables by default and does not inherit parent secrets", async () => {
+test("run_command rejects shell executables by default and does not inherit parent secrets", async (t) => {
   const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-workspace-command-"));
   const runCommand = createWorkspaceAgentTools({ workspaceDir, command: { enabled: true } })
     .find((tool) => tool.id === "run_command");
@@ -28,18 +41,14 @@ test("run_command rejects shell executables by default and does not inherit pare
     /Command is not allowed/,
   );
 
-  process.env.KIDMEMORY_SECRET_TEST_VALUE = "secret-from-parent-env";
-  try {
-    const output = await runCommand.execute({
-      command: "node",
-      args: ["-e", "console.log(process.env.KIDMEMORY_SECRET_TEST_VALUE || 'missing')"],
-    }, { workspaceDir });
+  useEnv(t, "KIDMEMORY_SECRET_TEST_VALUE", "secret-from-parent-env");
+  const output = await runCommand.execute({
+    command: "node",
+    args: ["-e", "console.log(process.env.KIDMEMORY_SECRET_TEST_VALUE || 'missing')"],
+  }, { workspaceDir });
 
-    assert.equal(typeof output, "object");
-    assert.equal((output as { stdout: string }).stdout.trim(), "missing");
-  } finally {
-    delete process.env.KIDMEMORY_SECRET_TEST_VALUE;
-  }
+  assert.equal(typeof output, "object");
+  assert.equal((output as { stdout: string }).stdout.trim(), "missing");
 });
 
 test("workspace tools write and read output files", async () => {
@@ -113,4 +122,21 @@ test("edit_file requires unique search text unless replaceAll is set", async () 
       replacements: 2,
     },
   );
+});
+
+test("workspace path policy reads object inputs through one helper", () => {
+  const source = fsSync.readFileSync("src/tools/path-policy.ts", "utf8");
+
+  assert.equal(source.match(/typeof input !== "object"/g)?.length, 1);
+});
+
+test("workspace tool implementations reuse path-policy input readers", () => {
+  const toolSources = [
+    "src/tools/edit-file.tool.ts",
+    "src/tools/run-command.tool.ts",
+    "src/tools/search-files.tool.ts",
+    "src/tools/write-file.tool.ts",
+  ].map((file) => fsSync.readFileSync(file, "utf8")).join("\n");
+
+  assert.equal(toolSources.includes('typeof input !== "object"'), false);
 });

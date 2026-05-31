@@ -30,7 +30,7 @@ class CreateUploadFileDto {
   });
 
   @JsonKey(
-    
+
     name: r'clientFileId',
     required: true,
     includeIfNull: false,
@@ -42,7 +42,7 @@ class CreateUploadFileDto {
 
 
   @JsonKey(
-    
+
     name: r'filename',
     required: true,
     includeIfNull: false,
@@ -54,7 +54,7 @@ class CreateUploadFileDto {
 
 
   @JsonKey(
-    
+
     name: r'contentType',
     required: true,
     includeIfNull: false,
@@ -66,7 +66,7 @@ class CreateUploadFileDto {
 
 
   @JsonKey(
-    
+
     name: r'sizeBytes',
     required: true,
     includeIfNull: false,
@@ -103,4 +103,3 @@ class CreateUploadFileDto {
   }
 
 }
-

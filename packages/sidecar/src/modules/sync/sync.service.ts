@@ -5,24 +5,12 @@ import * as os from 'node:os';
 import { Inject, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigService } from '../../infrastructure/config/app-config.service.ts';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
+import { delay } from '../../infrastructure/time/delay.ts';
 import { DatasetService } from '../dataset/dataset.service.ts';
 import { CloudApiClient } from './cloud-api.client.ts';
 import { MachineIdService } from './machine-id.service.ts';
-import type { UploadItemResponseDto, JobResponseDto } from './dto/cloud-api.dto.ts';
+import type { UploadItemResponseDto } from './dto/cloud-api.dto.ts';
 
-/**
- * SyncService 负责与 Cloud-API 同步。
- *
- * 功能：
- * - 设备注册和心跳
- * - 上传项目同步（稍后实现）
- * - 任务同步（稍后实现）
- *
- * 离线降级：
- * - Cloud-API 不可达时，记录日志但不阻塞
- * - 使用指数退避重试（最大 3 次）
- * - 本地功能继续正常工作
- */
 @Injectable()
 export class SyncService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SyncService.name);
@@ -30,9 +18,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
   private deviceId: string | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private syncInterval: NodeJS.Timeout | null = null;
-  private jobSyncInterval: NodeJS.Timeout | null = null;
 
-  // 心跳间隔（毫秒）
   private readonly heartbeatIntervalMs: number;
 
   constructor(
@@ -42,7 +28,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(DatasetService) private readonly datasetService: DatasetService
   ) {
-    // 从环境变量读取同步间隔，默认 30 秒
     this.heartbeatIntervalMs = Number(process.env.SYNC_INTERVAL_MS) || 30000;
   }
 
@@ -62,27 +47,18 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    // 启动时注册设备（失败不阻塞应用启动）
     await this.registerDevice();
 
-    // 注册成功后再启动同步循环
     if (this.deviceId) {
       this.startHeartbeat();
       this.startUploadSync();
-      this.startJobSync();
     }
   }
 
-  /**
-   * 获取当前设备 ID
-   */
   getDeviceId(): string | null {
     return this.deviceId;
   }
 
-  /**
-   * 注册设备
-   */
   private async registerDevice() {
     if (!this.machineIdService || typeof this.machineIdService.getMachineId !== 'function') {
       this.logger.warn('MachineIdService is unavailable, continuing in offline mode');
@@ -124,9 +100,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * 启动心跳循环
-   */
   private startHeartbeat() {
     if (this.heartbeatInterval) {
       return;
@@ -139,9 +112,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }, this.heartbeatIntervalMs);
   }
 
-  /**
-   * 发送心跳
-   */
   private async sendHeartbeat() {
     if (!this.deviceId) {
       this.logger.warn('Cannot send heartbeat: deviceId is null');
@@ -155,13 +125,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       this.logger.warn(
         `Heartbeat failed: ${error instanceof Error ? error.message : String(error)}`
       );
-      // 心跳失败不影响本地功能，只记录日志
     }
   }
 
-  /**
-   * 停止所有定时器
-   */
   private stopAllIntervals() {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
@@ -174,21 +140,8 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       this.syncInterval = null;
       this.logger.log('Sync interval stopped');
     }
-
-    if (this.jobSyncInterval) {
-      clearInterval(this.jobSyncInterval);
-      this.jobSyncInterval = null;
-      this.logger.log('Job sync interval stopped');
-    }
   }
 
-  /**
-   * 使用指数退避重试
-   *
-   * @param fn 要执行的函数
-   * @param maxRetries 最大重试次数
-   * @param baseDelayMs 基础延迟（毫秒）
-   */
   private async retryWithBackoff<T>(
     fn: () => Promise<T>,
     maxRetries: number,
@@ -207,7 +160,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
           this.logger.warn(
             `Attempt ${attempt + 1}/${maxRetries + 1} failed: ${lastError.message}. Retrying in ${delayMs}ms...`
           );
-          await this.sleep(delayMs);
+          await delay(delayMs);
         }
       }
     }
@@ -215,21 +168,11 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     throw lastError || new Error('Retry failed with unknown error');
   }
 
-  /**
-   * 睡眠指定毫秒数
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   private isCloudSyncDisabled(): boolean {
     const raw = process.env.KIDMEMORY_DISABLE_CLOUD_SYNC?.trim().toLowerCase();
     return raw === '1' || raw === 'true' || raw === 'yes' || raw === 'on';
   }
 
-  /**
-   * 启动上传同步循环
-   */
   private startUploadSync() {
     if (this.syncInterval) {
       return;
@@ -242,9 +185,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }, this.heartbeatIntervalMs);
   }
 
-  /**
-   * 同步上传项目
-   */
   private async syncUploadItems() {
     if (!this.deviceId) {
       this.logger.warn('Cannot sync upload items: deviceId is null');
@@ -252,7 +192,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      // 1. 获取待同步项（最多 10 个）
       const items = await this.cloudApiClient.getPendingUploadItems(this.deviceId, 10);
 
       if (items.length === 0) {
@@ -262,7 +201,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log(`Found ${items.length} pending upload items to sync`);
 
-      // 2. 处理每个项
       for (const item of items) {
         await this.syncUploadItem(item);
       }
@@ -273,18 +211,13 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * 同步单个上传项目
-   */
   private async syncUploadItem(item: UploadItemResponseDto) {
     try {
       this.logger.log(`Syncing upload item ${item.id}: ${item.fileName}`);
 
-      // 1. 检查是否已同步（通过 cloudUploadItemId 去重）
       const existing = await this.checkIfAlreadySynced(item.id);
       if (existing) {
         this.logger.log(`Upload item ${item.id} already synced, skipping`);
-        // 更新云端状态为 synced
         await this.cloudApiClient.updateUploadItemSyncStatus(item.id, {
           status: 'synced',
           syncedAt: new Date().toISOString(),
@@ -292,17 +225,13 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      // 2. 下载文件到临时目录
       const tempFilePath = await this.downloadFile(item);
 
       try {
-        // 3. 使用 DatasetService 导入文件（创建 asset）
         const assetId = await this.importAsset(item, tempFilePath);
 
-        // 4. 记录 cloudUploadItemId 到 asset metadata（用于去重）
         await this.linkCloudUploadItem(assetId, item.id);
 
-        // 5. 更新云端状态为 synced
         await this.cloudApiClient.updateUploadItemSyncStatus(item.id, {
           status: 'synced',
           syncedAt: new Date().toISOString(),
@@ -310,7 +239,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
 
         this.logger.log(`Successfully synced upload item ${item.id} to asset ${assetId}`);
       } finally {
-        // 清理临时文件
         await this.cleanupTempFile(tempFilePath);
       }
     } catch (error) {
@@ -318,7 +246,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
         `Failed to sync upload item ${item.id}: ${error instanceof Error ? error.message : String(error)}`
       );
 
-      // 更新云端状态为 failed
       await this.cloudApiClient
         .updateUploadItemSyncStatus(item.id, {
           status: 'failed',
@@ -330,11 +257,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * 检查上传项是否已同步
-   */
   private async checkIfAlreadySynced(cloudUploadItemId: string): Promise<boolean> {
-    // 查询 assets 表，检查 metadata 中是否有 cloudUploadItemId
     const result = await this.prisma.asset.findFirst({
       where: {
         metadata: {
@@ -346,9 +269,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     return result !== null;
   }
 
-  /**
-   * 从 Supabase 下载文件
-   */
   private async downloadFile(item: UploadItemResponseDto): Promise<string> {
     const supabaseUrl = this.configService.config.supabaseStorage.url;
     const bucket = this.configService.config.supabaseStorage.bucket;
@@ -382,7 +302,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
     }
 
-    // 保存到临时目录
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'kidmemory-sync-'));
     const tempFilePath = path.join(tempDir, item.fileName);
 
@@ -394,9 +313,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     return tempFilePath;
   }
 
-  /**
-   * 导入 asset
-   */
   private async importAsset(item: UploadItemResponseDto, tempFilePath: string): Promise<string> {
     const childId = (item as UploadItemResponseDto & { childId?: string }).childId;
     if (!childId || childId.trim().length === 0) {
@@ -420,11 +336,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     return assetId;
   }
 
-  /**
-   * 关联云端上传项 ID 到 asset
-   */
   private async linkCloudUploadItem(assetId: string, cloudUploadItemId: string) {
-    // 获取现有 metadata
     const asset = await this.prisma.asset.findUnique({
       where: { id: assetId },
       select: { metadata: true },
@@ -432,7 +344,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
 
     const existingMetadata = (asset?.metadata as Record<string, unknown>) || {};
 
-    // 更新 asset metadata，添加 cloudUploadItemId
     await this.prisma.asset.update({
       where: { id: assetId },
       data: {
@@ -444,9 +355,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  /**
-   * 清理临时文件
-   */
   private async cleanupTempFile(tempFilePath: string) {
     try {
       const tempDir = path.dirname(tempFilePath);
@@ -457,133 +365,6 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
         `Failed to clean up temp file: ${error instanceof Error ? error.message : String(error)}`
       );
     }
-  }
-
-  /**
-   * 启动任务同步循环
-   */
-  private startJobSync() {
-    if (this.jobSyncInterval) {
-      return;
-    }
-
-    this.logger.log(`Starting job sync with interval ${this.heartbeatIntervalMs}ms`);
-
-    this.jobSyncInterval = setInterval(() => {
-      this.syncJobs();
-    }, this.heartbeatIntervalMs);
-  }
-
-  /**
-   * 同步任务
-   */
-  private async syncJobs() {
-    if (!this.deviceId) {
-      this.logger.warn('Cannot sync jobs: deviceId is null');
-      return;
-    }
-
-    try {
-      // 1. 获取待处理任务（最多 5 个）
-      const jobs = await this.cloudApiClient.getPendingJobs(this.deviceId, 5);
-
-      if (jobs.length === 0) {
-        this.logger.debug('No pending jobs to sync');
-        return;
-      }
-
-      this.logger.log(`Found ${jobs.length} pending jobs to sync`);
-
-      // 2. 处理每个任务
-      for (const job of jobs) {
-        await this.syncJob(job);
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Job sync failed: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
-
-  /**
-   * 同步单个任务
-   */
-  private async syncJob(job: JobResponseDto) {
-    try {
-      this.logger.log(`Syncing job ${job.id}: ${job.type}`);
-
-      // 1. 更新云端状态为 processing
-      await this.cloudApiClient.updateJobStatus(job.id, {
-        status: 'processing',
-      });
-
-      // 2. 根据任务类型执行任务
-      await this.executeJob(job);
-
-      // 3. 更新云端状态为 completed
-      await this.cloudApiClient.updateJobStatus(job.id, {
-        status: 'completed',
-        completedAt: new Date().toISOString(),
-      });
-
-      this.logger.log(`Successfully completed job ${job.id}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to sync job ${job.id}: ${error instanceof Error ? error.message : String(error)}`
-      );
-
-      // 更新云端状态为 failed
-      await this.cloudApiClient
-        .updateJobStatus(job.id, {
-          status: 'failed',
-          errorMessage: error instanceof Error ? error.message : String(error),
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to update error status: ${err}`);
-        });
-    }
-  }
-
-  /**
-   * 执行任务
-   */
-  private async executeJob(job: JobResponseDto): Promise<Record<string, unknown>> {
-    // 根据任务类型执行不同的逻辑
-    switch (job.type) {
-      case 'book_generation':
-        throw new Error('Cloud book_generation jobs are no longer executed through the legacy book job API. Use creation tasks through agent-runtime.');
-      case 'asset_processing':
-        return await this.executeAssetProcessingJob(job);
-      case 'export_pdf':
-        throw new Error('Cloud export_pdf jobs are no longer executed through the legacy book job API. Use creation task export.');
-      case 'export_long_image':
-        throw new Error('Cloud export_long_image jobs are no longer executed through the legacy book job API. Use creation task export.');
-      default:
-        throw new Error(`Unknown job type: ${job.type}`);
-    }
-  }
-
-  /**
-   * 执行资产处理任务
-   */
-  private async executeAssetProcessingJob(job: JobResponseDto): Promise<Record<string, unknown>> {
-    // 资产处理任务（例如：向量生成）
-    const payload = job.payload;
-    if (!payload) {
-      throw new Error('Invalid asset processing job payload');
-    }
-
-    if (!payload.assetId) {
-      throw new Error('Invalid asset processing job payload');
-    }
-
-    // 调用 DatasetService.enqueueSearchIndexing
-    await this.datasetService.enqueueSearchIndexing(payload.assetId as string);
-
-    return {
-      assetId: payload.assetId,
-      status: 'queued',
-    };
   }
 
 }

@@ -3,6 +3,7 @@ import path from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 
 import { AppConfigService } from "../config/app-config.service.ts";
+import { isNotFoundError } from "../filesystem/errors.ts";
 
 export type GenerationJob = {
   id: string;
@@ -47,7 +48,7 @@ export class FileJobStoreService {
     try {
       return JSON.parse(await fs.readFile(this.pathFor(id), "utf8"));
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === "ENOENT") return null;
+      if (isNotFoundError(error)) return null;
       throw error;
     }
   }
@@ -55,7 +56,11 @@ export class FileJobStoreService {
   async list() {
     await fs.mkdir(this.jobsDir, { recursive: true });
     const files = await fs.readdir(this.jobsDir);
-    const jobs = await Promise.all(files.filter((file) => file.endsWith(".json")).map((file) => this.get(file.replace(/\.json$/, ""))));
+    const jobs = await Promise.all(
+      files
+        .filter((file) => file.endsWith(".json"))
+        .map((file) => this.get(file.replace(/\.json$/, ""))),
+    );
     return jobs.filter(Boolean) as GenerationJob[];
   }
 

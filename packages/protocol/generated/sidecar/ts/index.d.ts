@@ -1217,7 +1217,7 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: Record<string, any>;
+    schemas: Record<string, unknown>;
     responses: Record<string, unknown>;
     parameters: Record<string, unknown>;
     requestBodies: Record<string, unknown>;
@@ -2049,7 +2049,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

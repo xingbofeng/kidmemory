@@ -38,10 +38,12 @@ export function cleanDirectUploadFilename(filename: string): string {
   if (typeof filename !== 'string') return FALLBACK_FILENAME
 
   // 1. 剔除控制字符与路径分隔符
-  let stripped = filename
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001F\u007F]+/g, '')
-    .replace(/[\\/]+/g, '')
+  let stripped = ''
+  for (const char of filename) {
+    const code = char.charCodeAt(0)
+    if (code <= 0x1F || code === 0x7F || char === '/' || char === '\\') continue
+    stripped += char
+  }
 
   if (stripped.length === 0) return FALLBACK_FILENAME
 

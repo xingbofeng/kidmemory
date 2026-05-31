@@ -1,26 +1,47 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, test } from 'node:test';
+import { describe, test, type TestContext } from 'node:test';
 
 import { SyncService } from '../../../../src/modules/sync/sync.service.ts';
+import { useTestEnv } from '../../../test-env.ts';
+
+type SyncServiceArgs = ConstructorParameters<typeof SyncService>;
+type SyncServiceTestSurface = SyncService & {
+  initializeSync(): Promise<void>;
+};
+type DeviceRegistration = { id: string };
+
+function syncTestSurface(service: SyncService): SyncServiceTestSurface {
+  return service as unknown as SyncServiceTestSurface;
+}
+
+async function advanceRetryBackoff(t: Pick<TestContext, 'mock'>) {
+  for (const delayMs of [1000, 2000, 4000]) {
+    await flushPromises();
+    t.mock.timers.tick(delayMs);
+  }
+  await flushPromises();
+}
+
+async function flushPromises() {
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 function createService(options?: {
-  registerDevice?: () => Promise<{ id: string }>;
+  registerDevice?: () => Promise<DeviceRegistration>;
   machineIdService?: { getMachineId?: () => string };
   heartbeat?: (deviceId: string) => Promise<void>;
-  syncIntervalMs?: number;
 }) {
-  const cloudApiClient = {
+  const cloudApiClient: SyncServiceArgs[0] = {
     registerDevice: options?.registerDevice ?? (async () => ({ id: 'device-1' })),
     heartbeat: options?.heartbeat ?? (async () => undefined),
     getPendingUploadItems: async () => [],
-    updateUploadItemSyncStatus: async () => ({}),
-    getPendingJobs: async () => [],
-    updateJobStatus: async () => ({}),
-  };
+    updateUploadItemSyncStatus: async () => undefined,
+  } as unknown as SyncServiceArgs[0];
 
-  const machineIdService = options?.machineIdService ?? {
+  const machineIdService = (options?.machineIdService ?? {
     getMachineId: () => 'machine-123',
-  };
+  }) as unknown as SyncServiceArgs[1];
 
   const configService = {
     config: {
@@ -28,9 +49,10 @@ function createService(options?: {
         url: 'http://localhost',
         bucket: 'bucket',
         anonKey: 'anon',
+        serviceRoleKey: '',
       },
     },
-  };
+  } as unknown as SyncServiceArgs[2];
 
   const prisma = {
     asset: {
@@ -38,53 +60,31 @@ function createService(options?: {
       findUnique: async () => ({ metadata: {} }),
       update: async () => ({}),
     },
-  };
+  } as unknown as SyncServiceArgs[3];
 
   const datasetService = {
     importAssets: async () => ({ ok: true, imported: [{ id: 'asset-1' }] }),
-  };
-
-  const booksService = {};
-
-  if (options?.syncIntervalMs != null) {
-    process.env.SYNC_INTERVAL_MS = String(options.syncIntervalMs);
-  } else {
-    delete process.env.SYNC_INTERVAL_MS;
-  }
+  } as unknown as SyncServiceArgs[4];
 
   return new SyncService(
-    cloudApiClient as any,
-    machineIdService as any,
-    configService as any,
-    prisma as any,
-    datasetService as any,
-    booksService as any,
+    cloudApiClient,
+    machineIdService,
+    configService,
+    prisma,
+    datasetService,
   );
 }
 
 describe('SyncService', () => {
-  const originalSyncInterval = process.env.SYNC_INTERVAL_MS;
+  test('onModuleInit should not block startup while registration runs in background', async (t) => {
+    useTestEnv(t, { SYNC_INTERVAL_MS: '10' });
 
-  beforeEach(() => {
-    delete process.env.SYNC_INTERVAL_MS;
-  });
-
-  afterEach(() => {
-    if (originalSyncInterval == null) {
-      delete process.env.SYNC_INTERVAL_MS;
-    } else {
-      process.env.SYNC_INTERVAL_MS = originalSyncInterval;
-    }
-  });
-
-  test('onModuleInit should not block startup while registration runs in background', async () => {
     let resolveRegistration: ((value: { id: string }) => void) | null = null;
     const service = createService({
       registerDevice: () =>
         new Promise((resolve) => {
           resolveRegistration = resolve;
         }),
-      syncIntervalMs: 10,
     });
 
     const startedAt = Date.now();
@@ -101,64 +101,61 @@ describe('SyncService', () => {
     service.onModuleDestroy();
   });
 
-  test('registration failure should not crash service and should keep deviceId null', async () => {
+  test('registration failure should not crash service and should keep deviceId null', async (t) => {
+    useTestEnv(t, { SYNC_INTERVAL_MS: '10' });
+    t.mock.timers.enable({ apis: ['setTimeout'] });
+
     const service = createService({
       registerDevice: async () => {
         throw new Error('cloud unavailable');
       },
-      syncIntervalMs: 10,
     });
 
-    // Speed up retry loop for test determinism.
-    (service as any).sleep = async () => undefined;
-
-    await (service as any).initializeSync();
+    const init = syncTestSurface(service).initializeSync();
+    await advanceRetryBackoff(t);
+    await init;
 
     assert.equal(service.getDeviceId(), null);
     service.onModuleDestroy();
   });
 
-  test('missing machine id service should fall back to offline mode', async () => {
+  test('missing machine id service should fall back to offline mode', async (t) => {
+    useTestEnv(t, { SYNC_INTERVAL_MS: '10' });
+
     const service = createService({
       machineIdService: {},
-      syncIntervalMs: 10,
     });
 
-    await (service as any).initializeSync();
+    await syncTestSurface(service).initializeSync();
     assert.equal(service.getDeviceId(), null);
 
     service.onModuleDestroy();
   });
 
-  test('cloud sync disabled should skip registration entirely', async () => {
-    const original = process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
-    process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = '1';
+  test('cloud sync disabled should skip registration entirely', async (t) => {
+    useTestEnv(t, {
+      KIDMEMORY_DISABLE_CLOUD_SYNC: '1',
+      SYNC_INTERVAL_MS: '10',
+    });
 
-    try {
-      let registerCalls = 0;
-      const service = createService({
-        registerDevice: async () => {
-          registerCalls += 1;
-          return { id: 'device-disabled' };
-        },
-        syncIntervalMs: 10,
-      });
+    let registerCalls = 0;
+    const service = createService({
+      registerDevice: async () => {
+        registerCalls += 1;
+        return { id: 'device-disabled' };
+      },
+    });
 
-      await (service as any).initializeSync();
-      assert.equal(registerCalls, 0);
-      assert.equal(service.getDeviceId(), null);
+    await syncTestSurface(service).initializeSync();
+    assert.equal(registerCalls, 0);
+    assert.equal(service.getDeviceId(), null);
 
-      service.onModuleDestroy();
-    } finally {
-      if (original == null) {
-        delete process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
-      } else {
-        process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = original;
-      }
-    }
+    service.onModuleDestroy();
   });
 
-  test('successful registration should start heartbeat and stop it on destroy', async () => {
+  test('successful registration should start heartbeat and stop it on destroy', async (t) => {
+    useTestEnv(t, { SYNC_INTERVAL_MS: '15' });
+
     let heartbeatCalls = 0;
     const service = createService({
       registerDevice: async () => ({ id: 'device-heartbeat' }),
@@ -166,7 +163,6 @@ describe('SyncService', () => {
         heartbeatCalls += 1;
         assert.equal(deviceId, 'device-heartbeat');
       },
-      syncIntervalMs: 15,
     });
 
     service.onModuleInit();

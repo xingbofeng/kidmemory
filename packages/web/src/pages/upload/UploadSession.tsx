@@ -31,7 +31,7 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
         onSessionChange?.(sessionData)
       } catch {
         if (cancelled) return
-        setError(t('uploadLegacy.sessionInvalid'))
+        setError(t('upload.sessionInvalid'))
         onSessionChange?.(null)
       } finally {
         if (!cancelled) {
@@ -47,11 +47,11 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
   }, [onSessionChange, sessionId, t])
 
   if (loading) {
-    return <div className="session-card loading-card">{t('uploadLegacy.loading')}</div>
+    return <div className="session-card loading-card">{t('upload.loading')}</div>
   }
 
   if (error || !session) {
-    return <div className="session-card error-card">{error || t('uploadLegacy.sessionInvalid')}</div>
+    return <div className="session-card error-card">{error || t('upload.sessionInvalid')}</div>
   }
 
   const { childName, uploadCount = 0, maxUploads, maxItems, expiresAt } = session
@@ -73,7 +73,7 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
         <div className="session-valid">
           <span><Icon name="shield" /></span>
           <div>
-            <strong>{t('uploadLegacy.sessionValid')}</strong>
+            <strong>{t('upload.sessionValid')}</strong>
             <b>{remainingTime}</b>
           </div>
         </div>
@@ -81,21 +81,21 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
           <span className="child-avatar"><Icon name="child" /></span>
           <div>
             <h2>{childName}</h2>
-            <p>{t('uploadLegacy.currentChild')}</p>
+            <p>{t('upload.currentChild')}</p>
           </div>
         </div>
         <div className="progress-line">
           <span>{progress}</span>
-          <span>{t('uploadLegacy.unitCount')}</span>
+          <span>{t('upload.unitCount')}</span>
         </div>
-        <div className="remaining-time">{t('uploadLegacy.remainingTime')}: {remainingTime}</div>
+        <div className="remaining-time">{t('upload.remainingTime')}: {remainingTime}</div>
       </div>
 
-      {isAtLimit && <div className="inline-alert danger">{t('uploadLegacy.atLimit')}</div>}
-      {isNearLimit && <div className="inline-alert warning">{t('uploadLegacy.nearLimit')}</div>}
+      {isAtLimit && <div className="inline-alert danger">{t('upload.atLimit')}</div>}
+      {isNearLimit && <div className="inline-alert warning">{t('upload.nearLimit')}</div>}
 
-      <button className="sr-session-button" disabled={isAtLimit} role="button" aria-label={t('uploadLegacy.selectImage')}>
-        {t('uploadLegacy.selectImage')}
+      <button className="sr-session-button" disabled={isAtLimit} role="button" aria-label={t('upload.selectImage')}>
+        {t('upload.selectImage')}
       </button>
     </div>
   )

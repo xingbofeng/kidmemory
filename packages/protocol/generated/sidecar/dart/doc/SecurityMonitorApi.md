@@ -9,8 +9,8 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**securityMonitorControllerGetSecurityHealth**](SecurityMonitorApi.md#securitymonitorcontrollergetsecurityhealth) | **GET** /api/monitor/security/health | 
-[**securityMonitorControllerGetSecurityStats**](SecurityMonitorApi.md#securitymonitorcontrollergetsecuritystats) | **GET** /api/monitor/security/stats | 
+[**securityMonitorControllerGetSecurityHealth**](SecurityMonitorApi.md#securitymonitorcontrollergetsecurityhealth) | **GET** /api/monitor/security/health |
+[**securityMonitorControllerGetSecurityStats**](SecurityMonitorApi.md#securitymonitorcontrollergetsecuritystats) | **GET** /api/monitor/security/stats |
 
 
 # **securityMonitorControllerGetSecurityHealth**
@@ -84,4 +84,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -4,15 +4,26 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { DatasetState } from "../../../../src/infrastructure/dataset-state/dataset-state.service.ts";
+import { AppConfigService, loadConfigFromEnv } from "../../../../src/infrastructure/config/app-config.service.ts";
+import { DatasetState, type DatasetStateService } from "../../../../src/infrastructure/dataset-state/dataset-state.service.ts";
 import { MemoryDatasetDb } from "../../../../src/infrastructure/dataset-state/memory-dataset-db.ts";
 import { createDatasetService } from "../../../../src/modules/dataset/providers/dataset.domain.ts";
 import { importSampleDataset } from "../../../../src/modules/dataset/providers/sample-dataset.ts";
 
+function createDatasetState(
+  memoryDb: MemoryDatasetDb,
+  persistentDb: MemoryDatasetDb = memoryDb,
+): DatasetStateService {
+  return new DatasetState(memoryDb, async () => persistentDb) as unknown as DatasetStateService;
+}
+
+function createConfig(dataDir: string): AppConfigService {
+  return new AppConfigService(loadConfigFromEnv({ KIDMEMORY_DATA_DIR: dataDir }));
+}
+
 test("dataset domain lists assets with child filter", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
-  const service = createDatasetService({ datasetState: datasetState as any });
+  const service = createDatasetService({ datasetState: createDatasetState(db) });
   await db.upsertAsset({
     id: "a1",
     childId: "c1",
@@ -45,8 +56,7 @@ test("dataset domain lists assets with child filter", async () => {
 
 test("dataset domain updates and deletes assets", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
-  const service = createDatasetService({ datasetState: datasetState as any });
+  const service = createDatasetService({ datasetState: createDatasetState(db) });
   await db.upsertAsset({
     id: "a3",
     childId: "c3",
@@ -76,10 +86,9 @@ test("dataset domain persists the selected child before importing real assets", 
   const memoryDb = new MemoryDatasetDb();
   const persistentDb = new MemoryDatasetDb();
   await memoryDb.upsertChild({ id: "child-1", name: "澄澄" });
-  const datasetState = new DatasetState(memoryDb, async () => persistentDb);
   const service = createDatasetService({
-    datasetState: datasetState as any,
-    config: { config: { paths: { dataDir: path.join(root, "data") } } } as any,
+    datasetState: createDatasetState(memoryDb, persistentDb),
+    config: createConfig(path.join(root, "data")),
   });
 
   const result = await service.importAssets({
@@ -93,10 +102,9 @@ test("dataset domain persists the selected child before importing real assets", 
 
 test("dataset domain can create a default child for first asset import", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
   const service = createDatasetService({
-    datasetState: datasetState as any,
-    config: { config: { paths: { dataDir: "/tmp/kidmemory-test" } } } as any,
+    datasetState: createDatasetState(db),
+    config: createConfig("/tmp/kidmemory-test"),
   });
 
   const result = await service.createChild({ name: "孩子" });
@@ -107,9 +115,8 @@ test("dataset domain can create a default child for first asset import", async (
 
 test("dataset domain resets sample assets and related indexes", async () => {
   const db = new MemoryDatasetDb();
-  const datasetState = new DatasetState(db, async () => db);
   const service = createDatasetService({
-    datasetState: datasetState as any,
+    datasetState: createDatasetState(db),
   });
   await importSampleDataset(db);
   assert.equal((await db.getAssets({ childId: "sample-child-001" })).length > 0, true);
@@ -133,10 +140,9 @@ test("dataset domain enriches imported asset metadata with inferred tags and des
 
   const db = new MemoryDatasetDb();
   await db.upsertChild({ id: "child-1", name: "测试孩子" });
-  const datasetState = new DatasetState(db, async () => db);
   const service = createDatasetService({
-    datasetState: datasetState as any,
-    config: { config: { paths: { dataDir: path.join(root, "data") } } } as any,
+    datasetState: createDatasetState(db),
+    config: createConfig(path.join(root, "data")),
     inferAssetMetadata: async () => ({
       title: "猫咪在草地上",
       tags: ["猫", "宠物"],

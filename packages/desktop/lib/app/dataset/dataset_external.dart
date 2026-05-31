@@ -4,6 +4,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
   Future<void> _safeOpenExternalTarget(String target, String label) async {
     try {
       await openExternalTarget(target);
+      if (!mounted) return;
       _appendLog(
         AppLocalizations.of(
           context,
@@ -26,6 +27,9 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
       return;
     }
     final normalized = _normalizeDirectoryPath(trimmed);
+    final contentDirectoryLabel = AppLocalizations.of(
+      context,
+    )!.contentDirectoryLabel;
     try {
       final directory = Directory(normalized);
       if (!directory.existsSync()) {
@@ -34,10 +38,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
     } catch (_) {
       // Keep user-facing failure messages coming from the open attempt if needed.
     }
-    await _safeOpenExternalTarget(
-      normalized,
-      AppLocalizations.of(context)!.contentDirectoryLabel,
-    );
+    await _safeOpenExternalTarget(normalized, contentDirectoryLabel);
   }
 
   String _normalizeDirectoryPath(String input) {
@@ -76,6 +77,12 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
   }
 
   Future<void> _openExternalTargetDefault(String target) async {
+    final unsupportedPathMessage = AppLocalizations.of(
+      context,
+    )!.datasetExternalS478;
+    final unsupportedUriMessage = AppLocalizations.of(
+      context,
+    )!.datasetExternalS477;
     if (_looksLikeAbsolutePath(target)) {
       if (Platform.isMacOS) {
         await Process.run('open', [target]);
@@ -89,7 +96,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
         await Process.run('cmd', ['/c', 'start', '', target]);
         return;
       }
-      throw UnsupportedError(AppLocalizations.of(context)!.datasetExternalS478);
+      throw UnsupportedError(unsupportedPathMessage);
     }
 
     final parsed = Uri.tryParse(target);
@@ -108,7 +115,7 @@ extension _DesktopShellDatasetExternal on _DesktopShellState {
       await Process.run('cmd', ['/c', 'start', '', target]);
       return;
     }
-    throw UnsupportedError(AppLocalizations.of(context)!.datasetExternalS477);
+    throw UnsupportedError(unsupportedUriMessage);
   }
 
   Future<void> _copyTextToClipboardDefault(String text) async {

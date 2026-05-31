@@ -21,8 +21,43 @@ import type { DirectUploadPullbackStatus } from "./direct-upload-pullback-state.
 import type { DirectUploadRemoteObject } from "./dto/list-direct-upload-objects.dto.ts";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
-import type { PrismaService } from "../../infrastructure/database/prisma.service.ts";
-import { DatasetService } from "../dataset/dataset.service.ts";
+import { isPrismaNotFoundError } from "../../infrastructure/database/prisma-errors.ts";
+import { trimTrailingSlash } from "../../infrastructure/url/trailing-slash.ts";
+import type { DatasetService } from "../dataset/dataset.service.ts";
+
+type DatasetAssetImporter = Pick<DatasetService, "importAssets">;
+
+interface DirectUploadPrismaClient {
+  directUploadPullback: {
+    upsert(input: {
+      where: { sessionId_objectKey: { sessionId: string; objectKey: string } };
+      create: {
+        id: string;
+        sessionId: string;
+        childId: string;
+        objectKey: string;
+        status: DirectUploadPullbackStatus;
+      };
+      update: { updatedAt: Date };
+    }): Promise<PullbackRow>;
+    findMany(input: {
+      where: { sessionId: string };
+      orderBy?: { createdAt: "asc" | "desc" };
+    }): Promise<PullbackRow[]>;
+    update(input: {
+      where: { id: string };
+      data: {
+        status?: DirectUploadPullbackStatus;
+        assetId?: string | null;
+        localPath?: string | null;
+        errorCode?: string | null;
+        errorMessage?: string | null;
+        pulledAt?: Date;
+      };
+    }): Promise<PullbackRow>;
+    findUnique(input: { where: { id: string } }): Promise<PullbackRow | null>;
+  };
+}
 
 // ---- DirectUploadStorageGateway --------------------------------------------
 
@@ -138,9 +173,9 @@ export class SupabaseDirectUploadStorageGateway implements DirectUploadStorageGa
  * 通过 DatasetService 把回拉的二进制写入本地托管目录与 assets 表。
  */
 export class DatasetServiceDirectUploadAssetGateway implements DirectUploadAssetGateway {
-  private readonly dataset: DatasetService;
+  private readonly dataset: DatasetAssetImporter;
 
-  constructor(dataset: DatasetService) {
+  constructor(dataset: DatasetAssetImporter) {
     this.dataset = dataset;
   }
 
@@ -195,9 +230,9 @@ export class DatasetServiceDirectUploadAssetGateway implements DirectUploadAsset
  * 通过 Prisma ORM 读写 direct_upload_pullbacks 表。
  */
 export class PrismaDirectUploadPullbackStore implements DirectUploadPullbackStore {
-  private readonly prisma: PrismaService;
+  private readonly prisma: DirectUploadPrismaClient;
 
-  constructor(prisma: PrismaService) {
+  constructor(prisma: DirectUploadPrismaClient) {
     this.prisma = prisma;
   }
 
@@ -241,7 +276,7 @@ export class PrismaDirectUploadPullbackStore implements DirectUploadPullbackStor
     patch: Partial<DirectUploadPullbackRow>,
   ): Promise<DirectUploadPullbackRow | null> {
     const data: {
-      status?: string;
+      status?: DirectUploadPullbackStatus;
       assetId?: string | null;
       localPath?: string | null;
       errorCode?: string | null;
@@ -326,15 +361,7 @@ function rowToPullback(row: PullbackRow): DirectUploadPullbackRow {
   };
 }
 
-function isPrismaNotFoundError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "P2025";
-}
-
 function sanitizeFilename(filename: string): string {
   const base = path.basename(filename).replace(/[^a-zA-Z0-9._-]+/g, "_");
   return base || "upload.jpg";
-}
-
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
 }

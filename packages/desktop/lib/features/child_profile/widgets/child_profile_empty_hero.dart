@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
@@ -8,7 +6,11 @@ import 'child_profile_empty_artwork.dart';
 import 'child_profile_empty_features.dart';
 
 class EmptyHeroCard extends StatelessWidget {
-  const EmptyHeroCard({required this.onAddProfile, required this.onTrySample});
+  const EmptyHeroCard({
+    super.key,
+    required this.onAddProfile,
+    required this.onTrySample,
+  });
 
   final VoidCallback onAddProfile;
   final VoidCallback onTrySample;
@@ -155,7 +157,11 @@ class EmptyHeroCard extends StatelessWidget {
 }
 
 class EmptyHeroCopy extends StatelessWidget {
-  const EmptyHeroCopy({required this.onAddProfile, required this.onTrySample});
+  const EmptyHeroCopy({
+    super.key,
+    required this.onAddProfile,
+    required this.onTrySample,
+  });
 
   final VoidCallback onAddProfile;
   final VoidCallback onTrySample;

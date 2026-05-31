@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +14,7 @@ import 'asset_library_toolbar_controls.dart';
 
 class AssetLibraryMainView extends StatelessWidget {
   const AssetLibraryMainView({
+    super.key,
     required this.viewState,
     required this.searchController,
     required this.actions,

@@ -3,10 +3,11 @@ import { Icon } from '../ui/Icon'
 import { AssetBrowser } from '../../pages/browse/AssetBrowser'
 
 interface BrowseViewProps {
-  childId: string
+  sessionId: string
+  sessionToken: string
 }
 
-export function BrowseView({ childId }: BrowseViewProps) {
+export function BrowseView({ sessionId, sessionToken }: BrowseViewProps) {
   const { t } = useTranslation()
 
   return (
@@ -18,7 +19,7 @@ export function BrowseView({ childId }: BrowseViewProps) {
           <Icon name="info" label={t('webCompanion.help')} />
         </button>
       </div>
-      <AssetBrowser childId={childId} />
+      <AssetBrowser sessionId={sessionId} sessionToken={sessionToken} />
     </section>
   )
 }

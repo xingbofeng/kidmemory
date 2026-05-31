@@ -3,6 +3,8 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:kidmemory_protocol/src/model/direct_upload_providers_dto.dart';
+import 'package:kidmemory_protocol/src/model/trusted_upload_session_child_dto.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -36,7 +38,7 @@ class SessionSummaryResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'sessionId',
     required: true,
     includeIfNull: false,
@@ -48,7 +50,7 @@ class SessionSummaryResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
@@ -60,19 +62,19 @@ class SessionSummaryResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'child',
     required: true,
     includeIfNull: false,
   )
 
 
-  final Object child;
+  final TrustedUploadSessionChildDto child;
 
 
 
   @JsonKey(
-    
+
     name: r'expiresAt',
     required: true,
     includeIfNull: false,
@@ -84,7 +86,7 @@ class SessionSummaryResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'maxItems',
     required: true,
     includeIfNull: false,
@@ -96,7 +98,7 @@ class SessionSummaryResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'usedItems',
     required: true,
     includeIfNull: false,
@@ -108,14 +110,14 @@ class SessionSummaryResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'providers',
     required: true,
     includeIfNull: false,
   )
 
 
-  final Object providers;
+  final DirectUploadProvidersDto providers;
 
 
 
@@ -151,4 +153,3 @@ class SessionSummaryResponseDto {
   }
 
 }
-

@@ -1,12 +1,9 @@
-/**
- * Web Companion 服务层
- * 严格按照 PRD 规范实现会话管理和上传项管理
- */
-
 import crypto from "node:crypto";
-import { ServiceUnavailableException } from "@nestjs/common";
+import { Logger, ServiceUnavailableException } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
+import type { SessionQuotaMiddleware } from "../../infrastructure/security/session-quota.middleware.ts";
+import { delay } from "../../infrastructure/time/delay.ts";
 import { createSupabaseStorageProvider } from "../storage/providers/supabase-storage.ts";
 import { DatasetService } from "../dataset/dataset.service.ts";
 
@@ -98,64 +95,48 @@ export interface WebCompanionRepository {
   }): Promise<UploadItem | null>;
 }
 
-/**
- * Web Companion 核心服务
- *
- * 职责：
- * 1. 会话生命周期管理
- * 2. 上传项状态管理
- * 3. Token 验证和安全
- * 4. 存储提供商集成
- * 5. 业务规则验证
- */
+type WebCompanionAppConfig = {
+  config: Pick<AppConfigService["config"], "sidecar" | "supabaseStorage">;
+};
+
 export class WebCompanionService {
-  private readonly appConfigService: AppConfigService;
+  private readonly logger = new Logger(WebCompanionService.name);
+  private readonly appConfigService: WebCompanionAppConfig;
   private readonly repository: WebCompanionRepository;
   private readonly datasetService: DatasetService;
+  private readonly sessionQuotaMiddleware?: SessionQuotaMiddleware;
 
   constructor(
-    appConfigService: AppConfigService,
+    appConfigService: WebCompanionAppConfig,
     repository: WebCompanionRepository,
     datasetService: DatasetService,
+    sessionQuotaMiddleware?: SessionQuotaMiddleware,
   ) {
     this.appConfigService = appConfigService;
     this.repository = repository;
     this.datasetService = datasetService;
+    this.sessionQuotaMiddleware = sessionQuotaMiddleware;
   }
 
-  // ============================================================================
-  // 会话管理
-  // ============================================================================
-
-  /**
-   * 创建上传会话（带重试逻辑处理并发冲突）
-   */
   async createSession(request: CreateSessionRequest): Promise<CreateSessionResponse> {
     return this.createSessionWithRetry(request, 0);
   }
 
-  /**
-   * 创建会话的内部实现，支持重试
-   */
   private async createSessionWithRetry(
     request: CreateSessionRequest,
     retryCount: number
   ): Promise<CreateSessionResponse> {
     const MAX_RETRIES = 3;
 
-    // 验证子账户存在
     await this.validateChildExists(request.childId);
 
-    // 生成会话 ID 和 Token
     const sessionId = this.generateSessionId();
     const token = this.generateSecureToken();
     const tokenHash = this.hashToken(token);
 
-    // 计算过期时间
     const expiresInMinutes = request.expiresInMinutes ?? DEFAULT_CONFIG.SESSION_TTL_MINUTES;
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-    // 创建会话记录
     const session: Omit<UploadSession, "createdAt"> = {
       id: sessionId,
       childId: request.childId,
@@ -170,10 +151,7 @@ export class WebCompanionService {
     try {
       await this.insertSession(session);
 
-      // 生成 Web URL
       const webUrl = this.generateWebUrl(sessionId, token);
-
-      console.log(`[WebCompanionService] Session created: ${sessionId}`);
 
       return {
         sessionId,
@@ -183,9 +161,8 @@ export class WebCompanionService {
         maxItems: session.maxItems,
       };
     } catch (error) {
-      // 检查是否是唯一性冲突错误
       if (this.isUniqueViolationError(error) && retryCount < MAX_RETRIES) {
-        console.warn(
+        this.logger.warn(
           `[WebCompanionService] Session ID collision detected, retrying (${retryCount + 1}/${MAX_RETRIES})`
         );
         return this.createSessionWithRetry(request, retryCount + 1);
@@ -194,9 +171,6 @@ export class WebCompanionService {
     }
   }
 
-  /**
-   * 检查是否是数据库唯一性冲突错误
-   */
   private isUniqueViolationError(error: unknown): boolean {
     if (error && typeof error === 'object' && 'code' in error) {
       const code = (error as { code: string }).code;
@@ -205,18 +179,13 @@ export class WebCompanionService {
     return false;
   }
 
-  /**
-   * 获取会话摘要
-   */
   async getSessionSummary(sessionId: string, token?: string): Promise<SessionSummaryResponse> {
     const session = await this.getSessionById(sessionId);
 
-    // 检查会话是否过期
     if (session.status === UploadSessionStatus.EXPIRED || session.expiresAt < new Date()) {
       throw this.createError(WebCompanionErrorCode.SESSION_EXPIRED, "Session has expired");
     }
 
-    // 如果提供了 token，验证其有效性
     if (token) {
       const validation = await this.validateToken(token, sessionId);
       if (!validation.valid) {
@@ -224,13 +193,10 @@ export class WebCompanionService {
       }
     }
 
-    // 获取子账户信息
     const child = await this.getChildById(session.childId);
 
-    // 统计已使用的上传项数量
     const usedItems = await this.countUploadItemsBySession(sessionId);
 
-    // 检查存储提供商可用性
     const providers = await this.checkProviderAvailability();
 
     return {
@@ -247,13 +213,9 @@ export class WebCompanionService {
     };
   }
 
-  /**
-   * 获取会话详情
-   */
   async getSessionDetail(sessionId: string, token?: string): Promise<SessionDetailResponse> {
     const session = await this.getSessionById(sessionId);
 
-    // 验证 token
     if (token) {
       const validation = await this.validateToken(token, sessionId);
       if (!validation.valid) {
@@ -261,7 +223,6 @@ export class WebCompanionService {
       }
     }
 
-    // 获取所有上传项
     const items = await this.getUploadItemsBySession(sessionId);
 
     return {
@@ -280,13 +241,7 @@ export class WebCompanionService {
     };
   }
 
-  /**
-   * 关闭会话（幂等操作）
-   */
   async closeSession(sessionId: string, request: CloseSessionRequest): Promise<void> {
-    console.log(`[WebCompanionService] Closing session: ${sessionId}`);
-
-    // 验证 token
     const validation = await this.validateToken(request.token, sessionId);
     if (!validation.valid) {
       throw this.createError(validation.errorCode!, "Invalid token");
@@ -294,43 +249,25 @@ export class WebCompanionService {
 
     const session = validation.session!;
 
-    // 检查会话是否已经关闭（幂等性）
     if (session.status === UploadSessionStatus.CLOSED) {
-      console.log(`[WebCompanionService] Session ${sessionId} is already closed`);
       return; // 幂等返回，不抛出错误
     }
 
-    // 检查状态转换是否有效
     if (!isValidSessionStatusTransition(session.status, UploadSessionStatus.CLOSED)) {
       throw this.createError(WebCompanionErrorCode.SESSION_EXPIRED, "Cannot close expired session");
     }
 
-    // 更新会话状态
     await this.updateSessionStatus(sessionId, UploadSessionStatus.CLOSED, new Date());
 
-    // 通知 SessionQuotaMiddleware 释放配额
-    const sessionQuotaMiddleware = (global as any).sessionQuotaMiddleware;
-    if (sessionQuotaMiddleware && session.childId) {
-      sessionQuotaMiddleware.recordSessionClosure(session.childId, sessionId);
+    if (session.childId) {
+      this.sessionQuotaMiddleware?.recordSessionClosure(session.childId, sessionId);
     }
-
-    console.log(`[WebCompanionService] Session closed: ${sessionId}`);
   }
 
-  // ============================================================================
-  // 上传项管理
-  // ============================================================================
-
-  /**
-   * 创建上传项
-   */
   async createUploadItems(
     sessionId: string,
     request: CreateUploadItemsRequest,
   ): Promise<CreateUploadItemsResponse> {
-    console.log(`[WebCompanionService] Creating upload items for session ${sessionId}, count: ${request.files.length}`);
-
-    // 验证 token 和会话状态
     const validation = await this.validateToken(request.token, sessionId);
     if (!validation.valid) {
       throw this.createError(validation.errorCode!, "Invalid token");
@@ -338,21 +275,17 @@ export class WebCompanionService {
 
     const session = validation.session!;
 
-    // 检查会话是否可以创建新的上传项
     if (!canCreateUploadItems(session.status)) {
       throw this.createError(WebCompanionErrorCode.SESSION_CLOSED, "Session is closed");
     }
 
-    // 检查上传项数量限制
     const currentCount = await this.countUploadItemsBySession(sessionId);
     if (currentCount + request.files.length > session.maxItems) {
       throw this.createError(WebCompanionErrorCode.ITEM_LIMIT_EXCEEDED, "Item limit exceeded");
     }
 
-    // 验证文件
     this.validateFiles(request.files);
 
-    // 创建上传项
     const result = await this.createUploadItemsInternal({
       sessionId,
       session,
@@ -361,14 +294,9 @@ export class WebCompanionService {
     });
 
     if (!result.success) {
-      // 如果有错误，抛出第一个错误
       const firstError = result.errors[0];
       throw this.createError(firstError.errorCode, firstError.message);
     }
-
-    console.log(`[WebCompanionService] Created ${result.items.length} upload items for session ${sessionId}`);
-
-    // 生成签名上传目标（如果需要）
     const items = await Promise.all(
       result.items.map(async (item) => {
         const signedUpload = item.provider === StorageProvider.SUPABASE
@@ -406,23 +334,16 @@ export class WebCompanionService {
     }
   }
 
-  /**
-   * 提交上传项
-   */
   async commitUploadItem(
     sessionId: string,
     uploadItemId: string,
     request: CommitUploadItemRequest,
   ): Promise<CommitUploadItemResponse> {
-    console.log(`[WebCompanionService] Committing upload item ${uploadItemId} for session ${sessionId}`);
-
-    // 验证 token
     const validation = await this.validateToken(request.token, sessionId);
     if (!validation.valid) {
       throw this.createError(validation.errorCode!, "Invalid token");
     }
 
-    // 获取上传项
     const item = await this.getUploadItemById(uploadItemId);
     if (item.sessionId !== sessionId) {
       throw this.createError(WebCompanionErrorCode.UPLOAD_ITEM_NOT_FOUND, "Upload item not found in session");
@@ -430,7 +351,6 @@ export class WebCompanionService {
 
     // 幂等性检查：如果已经 committed，返回幂等结果
     if (item.committedAt) {
-      console.log(`[WebCompanionService] Upload item ${uploadItemId} already committed, returning idempotent result`);
       return {
         uploadItemId: item.id,
         status: UploadItemStatus.UPLOADED_REMOTE,
@@ -438,12 +358,10 @@ export class WebCompanionService {
       };
     }
 
-    // 验证 object key 匹配
     if (item.objectKey !== request.objectKey) {
       throw this.createError(WebCompanionErrorCode.OBJECT_KEY_MISMATCH, "Object key mismatch");
     }
 
-    // 检查状态转换
     if (!isValidUploadItemStatusTransition(item.status, UploadItemStatus.UPLOADED_REMOTE)) {
       throw this.createError(WebCompanionErrorCode.COMMIT_CONFLICT, "Invalid status transition");
     }
@@ -462,7 +380,6 @@ export class WebCompanionService {
     if (!updatedItem) {
       const latest = await this.getUploadItemById(uploadItemId);
       if (latest.committedAt) {
-        console.log(`[WebCompanionService] Upload item ${uploadItemId} concurrently committed, returning idempotent result`);
         return {
           uploadItemId: latest.id,
           status: UploadItemStatus.UPLOADED_REMOTE,
@@ -471,13 +388,13 @@ export class WebCompanionService {
       }
       throw this.createError(WebCompanionErrorCode.COMMIT_CONFLICT, "Invalid status transition");
     }
-
-    console.log(`[WebCompanionService] Upload item committed: ${uploadItemId}`);
-
     // 仅 Supabase 直传需要 sidecar 回拉入库；LAN 直传不进入 pullback 状态机。
     if (updatedItem.provider === StorageProvider.SUPABASE) {
       this.startPullbackProcess(updatedItem).catch(error => {
-        console.error(`[WebCompanionService] Pullback failed for item ${uploadItemId}:`, error);
+        this.logger.error(
+          `[WebCompanionService] Pullback failed for item ${uploadItemId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
       });
     }
 
@@ -488,34 +405,25 @@ export class WebCompanionService {
     };
   }
 
-  /**
-   * 重试上传项
-   */
   async retryUploadItem(
     sessionId: string,
     uploadItemId: string,
     request: RetryUploadItemRequest,
   ): Promise<CommitUploadItemResponse> {
-    console.log(`[WebCompanionService] Retrying upload item ${uploadItemId} for session ${sessionId}`);
-
-    // 验证 token
     const validation = await this.validateToken(request.token, sessionId);
     if (!validation.valid) {
       throw this.createError(validation.errorCode!, "Invalid token");
     }
 
-    // 获取上传项
     const item = await this.getUploadItemById(uploadItemId);
     if (item.sessionId !== sessionId) {
       throw this.createError(WebCompanionErrorCode.UPLOAD_ITEM_NOT_FOUND, "Upload item not found in session");
     }
 
-    // 检查是否可以重试
     if (item.status !== UploadItemStatus.FAILED) {
       throw this.createError(WebCompanionErrorCode.COMMIT_CONFLICT, "Can only retry failed items");
     }
 
-    // 重置状态到 PENDING
     const updatedItem = await this.updateUploadItemStatus(
       uploadItemId,
       UploadItemStatus.PENDING,
@@ -524,18 +432,11 @@ export class WebCompanionService {
         errorMessage: undefined,
       },
     );
-
-    console.log(`[WebCompanionService] Upload item reset to pending: ${uploadItemId}`);
-
     return {
       uploadItemId: updatedItem.id,
       status: updatedItem.status,
     };
   }
-
-  // ============================================================================
-  // 私有辅助方法
-  // ============================================================================
 
   private generateSessionId(): string {
     return `session_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
@@ -629,10 +530,6 @@ export class WebCompanionService {
     return maybeError.code as WebCompanionErrorCodeType;
   }
 
-  // ============================================================================
-  // 数据库操作方法（待实现）
-  // ============================================================================
-
   private async insertSession(session: Omit<UploadSession, "createdAt">): Promise<void> {
     await this.repository.insertSession(session);
   }
@@ -705,9 +602,11 @@ export class WebCompanionService {
         });
 
         items.push(item);
-        console.log(`[WebCompanionService] Upload item created: ${item.id} for file ${file.filename}`);
       } catch (error) {
-        console.error(`[WebCompanionService] Failed to create upload item for ${file.filename}:`, error);
+        this.logger.error(
+          `[WebCompanionService] Failed to create upload item for ${file.filename}`,
+          error instanceof Error ? error.stack : String(error),
+        );
         errors.push({
           clientFileId: file.clientFileId,
           errorCode: WebCompanionErrorCode.INTERNAL_ERROR,
@@ -789,7 +688,6 @@ export class WebCompanionService {
   private async checkProviderAvailability(): Promise<SessionSummaryResponse["providers"]> {
     const config = this.appConfigService.config.supabaseStorage;
 
-    // 实际检查 Supabase 配置
     const supabaseAvailable = !!(
       config.url &&
       config.serviceRoleKey &&
@@ -805,7 +703,6 @@ export class WebCompanionService {
   private async generateSignedUploadTarget(item: UploadItem): Promise<SignedUploadTarget> {
     const config = this.appConfigService.config.supabaseStorage;
 
-    // 验证 Supabase 配置
     if (!config.url || !config.serviceRoleKey || !config.bucket) {
       throw this.createError(
         WebCompanionErrorCode.PROVIDER_UNAVAILABLE,
@@ -833,7 +730,6 @@ export class WebCompanionService {
       };
     }
 
-    // 动态导入 Supabase SDK
     const { createClient } = await import("@supabase/supabase-js");
 
     const supabase = createClient(config.url, config.serviceRoleKey, {
@@ -842,7 +738,6 @@ export class WebCompanionService {
       },
     });
 
-    // 生成 signed upload URL
     const { data, error } = await supabase.storage
       .from(item.bucket)
       .createSignedUploadUrl(item.objectKey);
@@ -854,7 +749,6 @@ export class WebCompanionService {
       );
     }
 
-    // 计算过期时间
     const ttlSeconds = config.signedUrlTtlSeconds || 900; // 默认 15 分钟
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
 
@@ -871,25 +765,18 @@ export class WebCompanionService {
   private async startPullbackProcess(item: UploadItem, retryCount = 0): Promise<void> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_BASE = 1000; // 1 秒基础延迟
-
-    console.log(`[WebCompanionService] Starting pullback for item ${item.id}, attempt ${retryCount + 1}`);
-
     // 幂等性检查：如果已经在 pulling_local 或 ready 状态，直接返回
     if (item.status === UploadItemStatus.PULLING_LOCAL) {
-      console.log(`[WebCompanionService] Item ${item.id} is already pulling_local, skipping duplicate pullback`);
       return;
     }
 
     if (item.status === UploadItemStatus.READY) {
-      console.log(`[WebCompanionService] Item ${item.id} is already ready, skipping duplicate pullback`);
       return;
     }
 
     try {
-      // 更新状态为 pulling_local
       await this.updateUploadItemStatus(item.id, UploadItemStatus.PULLING_LOCAL, {});
 
-      // 获取会话信息以获取正确的childId
       const session = await this.getSessionById(item.sessionId);
 
       const config = this.appConfigService.config.supabaseStorage;
@@ -905,7 +792,6 @@ export class WebCompanionService {
       const arrayBuffer = await response.arrayBuffer();
       const body = Buffer.from(arrayBuffer);
 
-      // 计算 hash
       const crypto = await import("node:crypto");
       const hash = crypto.createHash("sha256").update(body).digest("hex");
 
@@ -914,12 +800,10 @@ export class WebCompanionService {
       const path = await import("node:path");
       const os = await import("node:os");
 
-      // 创建临时文件
       const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'web-companion-'));
       const tempFilePath = path.join(tempDir, item.safeFilename);
 
       try {
-        // 写入临时文件
         await fs.writeFile(tempFilePath, body);
 
         // 使用 importAssets 导入（注意：这是复数方法）
@@ -929,7 +813,6 @@ export class WebCompanionService {
           recursive: false,
         });
 
-        // 清理临时文件
         await fs.unlink(tempFilePath);
         await fs.rmdir(tempDir);
 
@@ -948,7 +831,6 @@ export class WebCompanionService {
           throw new Error('Asset import failed');
         }
 
-        // 更新状态为 ready，使用导入的资产信息
         await this.updateUploadItemStatus(item.id, UploadItemStatus.READY, {
           assetId,
           localPath,
@@ -956,7 +838,6 @@ export class WebCompanionService {
           readyAt: new Date(),
         });
       } catch (importError) {
-        // 清理临时文件（如果存在）
         try {
           await fs.unlink(tempFilePath);
           await fs.rmdir(tempDir);
@@ -965,34 +846,28 @@ export class WebCompanionService {
         }
         throw importError;
       }
-
-      console.log(`[WebCompanionService] Pullback completed for item ${item.id}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const isRetryable = this.isRetryableError(error);
 
-      console.error(
-        `[WebCompanionService] Pullback failed for item ${item.id}:`,
-        errorMessage,
-        `(retryable: ${isRetryable}, attempt: ${retryCount + 1}/${MAX_RETRIES})`
+      this.logger.error(
+        `[WebCompanionService] Pullback failed for item ${item.id}: ${errorMessage} (retryable: ${isRetryable}, attempt: ${retryCount + 1}/${MAX_RETRIES})`,
       );
 
       // 如果是可重试的错误且未达到最大重试次数，则重试
       if (isRetryable && retryCount < MAX_RETRIES) {
-        const delay = RETRY_DELAY_BASE * Math.pow(2, retryCount); // 指数退避
-        console.log(`[WebCompanionService] Retrying pullback for item ${item.id} after ${delay}ms`);
+        const delayMs = RETRY_DELAY_BASE * Math.pow(2, retryCount);
 
-        await this.sleep(delay);
+        await delay(delayMs);
         return this.startPullbackProcess(item, retryCount + 1);
       }
 
-      // 更新状态为 failed
       await this.updateUploadItemStatus(item.id, UploadItemStatus.FAILED, {
         errorCode: WebCompanionErrorCode.PULLBACK_FAILED,
         errorMessage,
       });
 
-      console.error(`[WebCompanionService] Pullback permanently failed for item ${item.id} after ${retryCount + 1} attempts`);
+      this.logger.error(`[WebCompanionService] Pullback permanently failed for item ${item.id} after ${retryCount + 1} attempts`);
     }
   }
 
@@ -1014,13 +889,6 @@ export class WebCompanionService {
       );
     }
     return false;
-  }
-
-  /**
-   * 延迟函数
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private getBucketForProvider(provider: StorageProviderType): string {

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const DeleteAssetsBatchDtoSchema = z
   .object({
@@ -7,4 +6,4 @@ export const DeleteAssetsBatchDtoSchema = z
   })
   .strict();
 
-export type DeleteAssetsBatchDto = components["schemas"]["DeleteAssetsBatchRequestDto"];
+export type DeleteAssetsBatchDto = z.infer<typeof DeleteAssetsBatchDtoSchema>;

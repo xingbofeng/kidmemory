@@ -125,7 +125,7 @@ describe("AgentConfig Domain Entity", () => {
     assert.throws(() => {
       AgentConfig.create({
         name: "Test",
-        provider: "invalid" as any,
+        provider: "invalid",
         model: "gpt-4",
         apiKey: "sk-test123"
       });

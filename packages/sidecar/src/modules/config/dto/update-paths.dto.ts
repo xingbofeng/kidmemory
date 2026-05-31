@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const UpdatePathsDtoSchema = z
   .object({
@@ -10,4 +9,4 @@ export const UpdatePathsDtoSchema = z
   })
   .strict();
 
-export type UpdatePathsDto = components["schemas"]["PathsConfigRequestDto"];
+export type UpdatePathsDto = z.infer<typeof UpdatePathsDtoSchema>;

@@ -32,7 +32,7 @@ class SharedBookDto {
   });
 
   @JsonKey(
-    
+
     name: r'id',
     required: true,
     includeIfNull: false,
@@ -44,7 +44,7 @@ class SharedBookDto {
 
 
   @JsonKey(
-    
+
     name: r'title',
     required: true,
     includeIfNull: false,
@@ -56,7 +56,7 @@ class SharedBookDto {
 
 
   @JsonKey(
-    
+
     name: r'childId',
     required: true,
     includeIfNull: false,
@@ -68,7 +68,7 @@ class SharedBookDto {
 
 
   @JsonKey(
-    
+
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -80,7 +80,7 @@ class SharedBookDto {
 
 
   @JsonKey(
-    
+
     name: r'status',
     required: true,
     includeIfNull: false,
@@ -119,4 +119,3 @@ class SharedBookDto {
   }
 
 }
-

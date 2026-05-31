@@ -3,6 +3,7 @@ import path from "node:path";
 import type {
   ExportArtifact,
   SampleDb,
+  SampleAsset,
   StorageSyncJob,
 } from "../../../infrastructure/dataset-state/memory-dataset-db.ts";
 
@@ -227,7 +228,7 @@ async function resolveSyncSource(db: SampleDb, job: StorageSyncJob) {
   return { localPath: artifact.localPath };
 }
 
-function assetObjectPath(asset: any) {
+function assetObjectPath(asset: SampleAsset) {
   const childId = sanitizePathPart(asset.childId || "unknown-child");
   const assetId = sanitizePathPart(asset.id);
   const ext = extensionForPath(asset.imagePath);

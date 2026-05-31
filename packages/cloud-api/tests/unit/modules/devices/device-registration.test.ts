@@ -1,119 +1,114 @@
-/**
- * Device Registration Tests
- * 
- * Tests device registration and sync functionality
- */
+import { describe, it, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import { NotFoundException } from '@nestjs/common';
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
+import {
+  DevicesService,
+  type DevicesPrismaClient,
+} from '../../../../src/modules/devices/devices.service.ts';
 
-describe('Device Registration', () => {
-  describe('POST /devices/register', () => {
-    it('should register a new device with machineId', () => {
-      const request = {
-        machineId: 'test-machine-123',
-        deviceName: 'Test MacBook',
-        platform: 'macos',
-      };
+function deviceRecord(overrides: Partial<{
+  id: string;
+  machineId: string;
+  deviceName: string | null;
+  platform: string | null;
+  lastHeartbeat: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}> = {}) {
+  const now = new Date('2026-05-31T00:00:00.000Z');
+  return {
+    id: 'device-1',
+    machineId: 'machine-1',
+    deviceName: 'MacBook',
+    platform: 'macos',
+    lastHeartbeat: now,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
 
-      // Test will verify idempotency
-      assert.ok(request.machineId, 'machineId is required');
-      assert.ok(request.deviceName, 'deviceName is provided');
-      assert.ok(request.platform, 'platform is provided');
+function makeDevicesPrisma(
+  overrides: Partial<DevicesPrismaClient['device']> = {},
+): DevicesPrismaClient {
+  return {
+    device: {
+      upsert: async () => deviceRecord(),
+      update: async () => deviceRecord(),
+      findUnique: async () => null,
+      ...overrides,
+    },
+  };
+}
+
+describe('DevicesService', () => {
+  it('registers devices idempotently by machine id through Prisma upsert', async () => {
+    const upsert = mock.fn(async () => deviceRecord({ deviceName: 'MacBook Pro' }));
+    const service = new DevicesService(makeDevicesPrisma({ upsert }));
+
+    const response = await service.register({
+      machineId: 'machine-1',
+      deviceName: 'MacBook Pro',
+      platform: 'macos',
     });
 
-    it('should be idempotent - return existing device for same machineId', () => {
-      const machineId = 'test-machine-123';
-      
-      // First registration
-      const firstRequest = {
-        machineId,
-        deviceName: 'Test MacBook',
-        platform: 'macos',
-      };
-
-      // Second registration with same machineId
-      const secondRequest = {
-        machineId,
-        deviceName: 'Test MacBook Pro', // Different name
-        platform: 'macos',
-      };
-
-      // Should return the same device ID
-      assert.strictEqual(firstRequest.machineId, secondRequest.machineId);
-    });
-
-    it('should validate required fields', () => {
-      // Test empty machineId
-      const emptyMachineId = '';
-      assert.strictEqual(
-        emptyMachineId.trim().length > 0,
-        false,
-        'Empty machineId should be invalid'
-      );
-
-      // Test whitespace machineId
-      const whitespaceMachineId = '   ';
-      assert.strictEqual(
-        whitespaceMachineId.trim().length > 0,
-        false,
-        'Whitespace machineId should be invalid'
-      );
-
-      // Test valid machineId
-      const validMachineId = 'test-machine-123';
-      assert.strictEqual(
-        validMachineId.trim().length > 0,
-        true,
-        'Valid machineId should be accepted'
-      );
-    });
-
-    it('should accept optional deviceName and platform', () => {
-      const minimalRequest = {
-        machineId: 'test-machine-123',
-      };
-
-      assert.ok(minimalRequest.machineId, 'Should accept minimal request');
-    });
+    assert.equal(response.id, 'device-1');
+    assert.equal(response.machineId, 'machine-1');
+    assert.equal(response.deviceName, 'MacBook Pro');
+    assert.equal(upsert.mock.calls[0].arguments[0].where.machineId, 'machine-1');
+    assert.equal(upsert.mock.calls[0].arguments[0].update.deviceName, 'MacBook Pro');
   });
 
-  describe('PUT /devices/:id/heartbeat', () => {
-    it('should update device lastHeartbeat timestamp', () => {
-      const _deviceId = 'device-123';
-      const beforeHeartbeat = new Date('2026-05-16T00:00:00Z');
-      const afterHeartbeat = new Date('2026-05-16T00:01:00Z');
+  it('rejects blank machine ids before writing to Prisma', async () => {
+    const upsert = mock.fn();
+    const service = new DevicesService(makeDevicesPrisma({ upsert }));
 
-      assert.ok(afterHeartbeat > beforeHeartbeat, 'Heartbeat should update timestamp');
-    });
-
-    it('should return 404 for non-existent device', () => {
-      const _nonExistentId = 'non-existent-device';
-      const expectedStatusCode = 404;
-
-      assert.strictEqual(expectedStatusCode, 404);
-    });
+    await assert.rejects(
+      service.register({ machineId: '   ' }),
+      /machineId is required/,
+    );
+    assert.equal(upsert.mock.callCount(), 0);
   });
 
-  describe('Device Sync Logic', () => {
-    it('should track device online status based on heartbeat', () => {
-      const lastHeartbeat = new Date();
-      const now = new Date();
-      const timeSinceHeartbeat = now.getTime() - lastHeartbeat.getTime();
-      const heartbeatTimeout = 60000; // 60 seconds
+  it('updates heartbeat and maps missing devices to NotFoundException', async () => {
+    const update = mock.fn(async () => deviceRecord({ id: 'device-2' }));
+    const service = new DevicesService(makeDevicesPrisma({ update }));
 
-      const isOnline = timeSinceHeartbeat < heartbeatTimeout;
-      assert.ok(isOnline, 'Device should be online if heartbeat is recent');
+    const response = await service.heartbeat('device-2');
+
+    assert.equal(response.id, 'device-2');
+    assert.equal(update.mock.calls[0].arguments[0].where.id, 'device-2');
+    assert.ok(update.mock.calls[0].arguments[0].data.lastHeartbeat instanceof Date);
+
+    const missing = new DevicesService({
+      device: {
+        upsert: async () => deviceRecord(),
+        update: mock.fn(async () => { throw new Error('missing'); }),
+        findUnique: async () => null,
+      },
     });
 
-    it('should consider device offline after timeout', () => {
-      const lastHeartbeat = new Date(Date.now() - 120000); // 2 minutes ago
-      const now = new Date();
-      const timeSinceHeartbeat = now.getTime() - lastHeartbeat.getTime();
-      const heartbeatTimeout = 60000; // 60 seconds
+    await assert.rejects(missing.heartbeat('missing'), NotFoundException);
+  });
 
-      const isOnline = timeSinceHeartbeat < heartbeatTimeout;
-      assert.strictEqual(isOnline, false, 'Device should be offline after timeout');
-    });
+  it('reports online status from the last heartbeat time', () => {
+    const service = new DevicesService(makeDevicesPrisma());
+
+    assert.equal(service.isDeviceOnline({
+      id: 'recent',
+      machineId: 'machine-1',
+      lastHeartbeat: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }), true);
+
+    assert.equal(service.isDeviceOnline({
+      id: 'stale',
+      machineId: 'machine-1',
+      lastHeartbeat: new Date(Date.now() - 120_000).toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }), false);
   });
 });

@@ -226,7 +226,7 @@
     "success": "已入库",
     "failed": "失败"
   },
-  "uploadLegacy": {
+  "upload": {
     "sessionInvalid": "会话已过期或无效",
     "sessionValid": "会话有效",
     "currentChild": "当前孩子",

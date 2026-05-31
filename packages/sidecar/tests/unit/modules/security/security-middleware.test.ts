@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import type { Request, Response } from "express";
 
 import { InputValidationMiddleware } from "../../../../src/infrastructure/security/input-validation.middleware.ts";
 import { RateLimitMiddleware } from "../../../../src/infrastructure/security/rate-limit.middleware.ts";
@@ -27,18 +29,30 @@ function createResponse(): MockResponse {
   };
 }
 
-function createRequest(input: { method?: string; path?: string; childId?: string; userAgent?: string; contentLength?: string }) {
+function createRequest(input: {
+  method?: string;
+  path?: string;
+  childId?: string;
+  userAgent?: string;
+  contentLength?: string;
+  ip?: string;
+}): Request {
   return {
     method: input.method ?? "POST",
     path: input.path ?? "/api/web-companion/sessions",
+    url: input.path ?? "/api/web-companion/sessions",
     body: input.childId === undefined ? {} : { childId: input.childId },
     headers: {
       "user-agent": input.userAgent ?? "curl/8.0",
       ...(input.contentLength ? { "content-length": input.contentLength } : {}),
     },
-    ip: "127.0.0.1",
-    socket: { remoteAddress: "127.0.0.1" },
-  };
+    ip: input.ip ?? "127.0.0.1",
+    socket: { remoteAddress: input.ip ?? "127.0.0.1" },
+  } as unknown as Request;
+}
+
+function asExpressResponse(response: MockResponse): Response {
+  return response as unknown as Response;
 }
 
 test("input validation accepts existing sanitized child ids used by the backend", () => {
@@ -46,7 +60,7 @@ test("input validation accepts existing sanitized child ids used by the backend"
   const response = createResponse();
   let nextCalled = false;
 
-  middleware.use(createRequest({ childId: "sample-child-001" }) as any, response as any, () => {
+  middleware.use(createRequest({ childId: "sample-child-001" }), asExpressResponse(response), () => {
     nextCalled = true;
   });
 
@@ -54,12 +68,19 @@ test("input validation accepts existing sanitized child ids used by the backend"
   assert.equal(response.statusCode, 200);
 });
 
+test("input validation names current safe child ids without legacy terminology", () => {
+  const source = readFileSync("src/infrastructure/security/input-validation.middleware.ts", "utf8");
+
+  assert.equal(source.includes("Legacy"), false);
+  assert.equal(source.includes("legacy"), false);
+});
+
 test("input validation rejects path traversal child ids", () => {
   const middleware = new InputValidationMiddleware();
   const response = createResponse();
   let nextCalled = false;
 
-  middleware.use(createRequest({ childId: "../secret" }) as any, response as any, () => {
+  middleware.use(createRequest({ childId: "../secret" }), asExpressResponse(response), () => {
     nextCalled = true;
   });
 
@@ -87,24 +108,19 @@ test("rate limit middleware cleans up expired timestamps to prevent memory leak"
   const middleware = new RateLimitMiddleware();
   const response = createResponse();
 
-  // 模拟大量请求（来自不同 IP）
   for (let i = 0; i < 100; i++) {
-    const req = { ...createRequest({}), ip: `10.0.0.${i % 256}` };
-    middleware.use(req as any, response as any, () => {});
+    middleware.use(createRequest({ ip: `10.0.0.${i % 256}` }), asExpressResponse(response), () => {});
   }
 
   const stats = middleware.getStats();
-  // 验证 ipRecords 数量合理（不会无限增长）
   assert.ok(stats.ipRecords <= 256, `ipRecords should be bounded, got ${stats.ipRecords}`);
   assert.ok(stats.globalTimestamps <= 10000, `globalTimestamps should be bounded, got ${stats.globalTimestamps}`);
 
-  // 清理定时器
   middleware.onModuleDestroy();
 });
 
 test("rate limit middleware onModuleDestroy clears the cleanup timer", () => {
   const middleware = new RateLimitMiddleware();
-  // 不应该抛出错误
   middleware.onModuleDestroy();
-  middleware.onModuleDestroy(); // 重复调用也安全
+  middleware.onModuleDestroy();
 });

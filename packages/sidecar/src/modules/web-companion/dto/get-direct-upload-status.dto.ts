@@ -2,7 +2,15 @@
  * Direct Upload status DTOs.
  */
 
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+import type { DirectUploadPullbackStatus } from "../direct-upload-pullback-state.ts";
 
-export type GetDirectUploadStatusResponse =
-  components["schemas"]["GetDirectUploadStatusResponseDto"];
+export interface GetDirectUploadStatusResponse {
+  sessionId: string;
+  items: Array<{
+    objectKey: string;
+    status: DirectUploadPullbackStatus;
+    errorCode: string | null;
+    errorMessage: string | null;
+  }>;
+  summary: Record<DirectUploadPullbackStatus, number>;
+}

@@ -208,7 +208,7 @@ log_category "文档完整性检查"
 
 REQUIRED_DOCS=(
     "README.md"
-    "CLAUDE.md"
+    "AGENTS.md"
     "docs/product/architecture.md"
     "docs/product/roadmap.md"
 )

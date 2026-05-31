@@ -7,6 +7,8 @@ import { NestFactory } from "@nestjs/core";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
+import { useMcpTestEnv } from "./mcp-test-helpers.ts";
+
 async function startApp() {
   const { AppModule } = await import(`../../src/app.module.ts?mcp=probe&ts=${Date.now()}`);
   const app = await NestFactory.create(AppModule, { logger: false });
@@ -22,24 +24,11 @@ async function startApp() {
 }
 
 test("mcp is reachable through @modelcontextprotocol/sdk client", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const client = new Client({ name: "kidmemory-mcp-test-client", version: "0.1.0" });

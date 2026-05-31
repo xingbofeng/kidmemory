@@ -159,26 +159,19 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
   }
 
   Future<bool> _ensureBundledPostgresReady(String title) async {
+    final l10n = AppLocalizations.of(context)!;
     final pgCtl = _bundledPostgresTool('pg_ctl');
     final initdb = _bundledPostgresTool('initdb');
     final createdb = _bundledPostgresTool('createdb');
     final psql = _bundledPostgresTool('psql');
     if (pgCtl == null || initdb == null || createdb == null || psql == null) {
-      _finishSetupProgress(
-        title,
-        AppLocalizations.of(context)!.setupNoPostgresRuntimeFound,
-        ok: false,
-      );
+      _finishSetupProgress(title, l10n.setupNoPostgresRuntimeFound, ok: false);
       return false;
     }
 
     _stopBundledPostgresIfRunning(force: true);
     _bundledPostgresPort = await _reserveLocalPostgresPort();
-    _appendLog(
-      AppLocalizations.of(
-        context,
-      )!.setupBundledPostgresPortLog(_bundledPostgresPort),
-    );
+    _appendLog(l10n.setupBundledPostgresPortLog(_bundledPostgresPort));
 
     final dataDir = Directory(_bundledPostgresDataDir());
     final logFile = File(_bundledPostgresLogPath());
@@ -210,8 +203,8 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
       _setSetupProgress(
         title,
         0.12,
-        AppLocalizations.of(context)!.setupInitBuiltinDataDir,
-        state: AppLocalizations.of(context)!.setupInitStarted,
+        l10n.setupInitBuiltinDataDir,
+        state: l10n.setupInitStarted,
       );
       await _runBundledPostgresCommand(
         initdb,
@@ -232,8 +225,8 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     _setSetupProgress(
       title,
       0.30,
-      AppLocalizations.of(context)!.setupStartBuiltinPostgres,
-      state: AppLocalizations.of(context)!.setupStatusStarting,
+      l10n.setupStartBuiltinPostgres,
+      state: l10n.setupStatusStarting,
     );
     await _runBundledPostgresCommand(
       pgCtl,
@@ -261,8 +254,8 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     _setSetupProgress(
       title,
       0.42,
-      AppLocalizations.of(context)!.setupCreateLocalDatabase,
-      state: AppLocalizations.of(context)!.setupInitStarted,
+      l10n.setupCreateLocalDatabase,
+      state: l10n.setupInitStarted,
     );
     await _runBundledPostgresCommand(
       createdb,
@@ -283,8 +276,8 @@ extension _DesktopShellSetupSystem on _DesktopShellState {
     _setSetupProgress(
       title,
       0.50,
-      AppLocalizations.of(context)!.setupEnableVectorExtension,
-      state: AppLocalizations.of(context)!.setupInitStarted,
+      l10n.setupEnableVectorExtension,
+      state: l10n.setupInitStarted,
     );
     await _runBundledPostgresCommand(
       psql,

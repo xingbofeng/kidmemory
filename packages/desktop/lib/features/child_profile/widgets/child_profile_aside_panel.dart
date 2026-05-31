@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/library_models.dart';
@@ -9,7 +7,11 @@ import '../../../../l10n/app_localizations.dart';
 import 'child_profile_shared_ui.dart';
 
 class ProfileAsidePanel extends StatelessWidget {
-  const ProfileAsidePanel({required this.child, required this.assets});
+  const ProfileAsidePanel({
+    super.key,
+    required this.child,
+    required this.assets,
+  });
 
   final ChildVm child;
   final List<AssetVm> assets;
@@ -89,6 +91,7 @@ class ProfileAsidePanel extends StatelessWidget {
 
 class ProfileArtworkRail extends StatelessWidget {
   const ProfileArtworkRail({
+    super.key,
     required this.title,
     required this.text,
     this.compact = false,

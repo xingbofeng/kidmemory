@@ -14,8 +14,8 @@ export function UploadSummary({ session }: UploadSummaryProps) {
 
   return (
     <div className="upload-summary">
-      <span><Icon name="image" /> <strong>{uploadCount}</strong> / {resolvedMaxUploads} {t('uploadLegacy.unitCount')}</span>
-      <span><Icon name="time" /> {t('uploadLegacy.remainingTime')} {formatCompactRemaining(session.expiresAt)}</span>
+      <span><Icon name="image" /> <strong>{uploadCount}</strong> / {resolvedMaxUploads} {t('upload.unitCount')}</span>
+      <span><Icon name="time" /> {t('upload.remainingTime')} {formatCompactRemaining(session.expiresAt)}</span>
     </div>
   )
 }

@@ -1,255 +1,211 @@
-import { describe, it, beforeEach } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, it, beforeEach } from "node:test";
+import assert from "node:assert/strict";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
-describe('Browse Controller', () => {
-  let mockBrowseService: any;
-  let mockRequest: any;
-  let mockResponse: any;
+import { WebCompanionController } from "../../../../src/modules/web-companion/web-companion.controller.ts";
+import {
+  createUnusedShareTokenService,
+  createUnusedWebCompanionService,
+} from "./controller-test-doubles.ts";
+
+type ControllerArgs = ConstructorParameters<typeof WebCompanionController>;
+type BrowseServicePort = ControllerArgs[1];
+type RecentUploadsInput = Parameters<BrowseServicePort["getRecentUploads"]>[0];
+type AssetDetailsInput = Parameters<BrowseServicePort["getAssetDetails"]>[0];
+type BooksListInput = Parameters<BrowseServicePort["getBooksList"]>[0];
+type BookDetailsInput = Parameters<BrowseServicePort["getBookDetails"]>[0];
+type RecentUpload = Awaited<ReturnType<BrowseServicePort["getRecentUploads"]>>[number];
+type AssetDetails = Awaited<ReturnType<BrowseServicePort["getAssetDetails"]>>;
+type BookSummary = Awaited<ReturnType<BrowseServicePort["getBooksList"]>>[number];
+type BookDetails = Awaited<ReturnType<BrowseServicePort["getBookDetails"]>>;
+type SharedAsset = Awaited<ReturnType<BrowseServicePort["getSharedAssets"]>>[number];
+type SharedBook = Awaited<ReturnType<BrowseServicePort["getSharedBook"]>>;
+
+type BrowseServiceDouble = BrowseServicePort & {
+  recentUploadsInputs: RecentUploadsInput[];
+  assetDetailsInputs: AssetDetailsInput[];
+  booksListInputs: BooksListInput[];
+  bookDetailsInputs: BookDetailsInput[];
+  recentUploadsError?: Error;
+  assetDetailsError?: Error;
+};
+
+function createBrowseServiceDouble(): BrowseServiceDouble {
+  const recentUpload: RecentUpload = {
+    id: "asset_1",
+    title: "Test Photo 1",
+    type: "image",
+    childId: "child_456",
+    createdAt: "2026-05-31T00:00:00.000Z",
+    previewUrl: "/assets/asset_1/preview",
+  };
+  const assetDetails: AssetDetails = {
+    ...recentUpload,
+    description: "A test photo",
+    tags: [],
+    metadata: {},
+  };
+  const bookSummary: BookSummary = {
+    id: "book_1",
+    title: "My Book",
+    childId: "child_456",
+    createdAt: "2026-05-31T00:00:00.000Z",
+    status: "completed",
+    previewUrl: "/api/books/book_1/preview",
+  };
+  const bookDetails: BookDetails = {
+    ...bookSummary,
+    description: "A test book",
+    pageCount: 12,
+  };
+  const sharedAsset: SharedAsset = {
+    id: "shared_asset_1",
+    title: "Shared Photo",
+    type: "image",
+    createdAt: "2026-05-31T00:00:00.000Z",
+    previewUrl: "/assets/shared_asset_1/preview",
+  };
+  const sharedBook: SharedBook = {
+    id: "shared_book_1",
+    title: "Shared Book",
+    createdAt: "2026-05-31T00:00:00.000Z",
+    status: "completed",
+    previewUrl: "/api/books/shared_book_1/preview",
+  };
+
+  return {
+    recentUploadsInputs: [],
+    assetDetailsInputs: [],
+    booksListInputs: [],
+    bookDetailsInputs: [],
+    async getRecentUploads(input) {
+      this.recentUploadsInputs.push(input);
+      if (this.recentUploadsError) throw this.recentUploadsError;
+      return [recentUpload];
+    },
+    async getAssetDetails(input) {
+      this.assetDetailsInputs.push(input);
+      if (this.assetDetailsError) throw this.assetDetailsError;
+      return assetDetails;
+    },
+    async getBooksList(input) {
+      this.booksListInputs.push(input);
+      return [bookSummary];
+    },
+    async getBookDetails(input) {
+      this.bookDetailsInputs.push(input);
+      return bookDetails;
+    },
+    async getSharedAssets() {
+      return [sharedAsset];
+    },
+    async getSharedBook() {
+      return sharedBook;
+    },
+  };
+}
+
+function assertHttpError(error: unknown, expectedStatus: number, expectedError: string) {
+  assert.ok(error instanceof HttpException);
+  assert.equal(error.getStatus(), expectedStatus);
+
+  const response = error.getResponse();
+  assert.equal(typeof response, "object");
+  assert.notEqual(response, null);
+  assert.equal((response as { error?: string }).error, expectedError);
+  return true;
+}
+
+describe("WebCompanionController browse endpoints", () => {
+  let controller: WebCompanionController;
+  let browseService: BrowseServiceDouble;
 
   beforeEach(() => {
-    mockBrowseService = {
-      getRecentUploads: async (input: any) => {
-        if (input.token === 'invalid_token') {
-          throw new Error('Session not found or token invalid');
-        }
-        return [
-          {
-            id: 'asset_1',
-            title: 'Test Photo 1',
-            type: 'image',
-            childId: 'child_456',
-            createdAt: new Date().toISOString()
-          }
-        ];
-      },
-      getAssetDetails: async (input: any) => {
-        if (input.assetId === 'not_found') {
-          throw new Error('Asset not found or access denied');
-        }
-        return {
-          id: input.assetId,
-          title: 'Test Asset',
-          type: 'image',
-          childId: 'child_456',
-          createdAt: new Date().toISOString()
-        };
-      },
-      getBooksList: async (input: any) => {
-        return [
-          {
-            id: 'book_1',
-            title: 'My Book',
-            childId: 'child_456',
-            createdAt: new Date().toISOString(),
-            status: 'completed'
-          }
-        ];
-      },
-      getBookDetails: async (input: any) => {
-        return {
-          id: input.bookId,
-          title: 'My Book',
-          childId: 'child_456',
-          createdAt: new Date().toISOString(),
-          status: 'completed'
-        };
-      }
-    };
-
-    mockRequest = {
-      params: {},
-      query: {},
-      headers: {}
-    };
-
-    mockResponse = {
-      status: function(code: number) {
-        this.statusCode = code;
-        return this;
-      },
-      json: function(data: any) {
-        this.data = data;
-        return this;
-      },
-      statusCode: 200,
-      data: null
-    };
+    browseService = createBrowseServiceDouble();
+    controller = new WebCompanionController(
+      createUnusedWebCompanionService(),
+      browseService,
+      createUnusedShareTokenService(),
+    );
   });
 
-  describe('GET /api/web-companion/sessions/:sessionId/recent', () => {
-    it('should return recent uploads with valid session token', async () => {
-      mockRequest.params = { sessionId: 'session_123' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
-      mockRequest.query = { limit: '10' };
+  describe("GET /api/web-companion/sessions/:sessionId/recent", () => {
+    it("returns recent uploads through the browse service", async () => {
+      const result = await controller.getRecentUploads("session_123", "valid_token", "10");
 
-      // Simulate controller logic
-      const sessionId = mockRequest.params.sessionId;
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-      const limit = parseInt(mockRequest.query.limit) || 20;
-
-      const result = await mockBrowseService.getRecentUploads({
-        sessionId,
-        token,
-        limit
-      });
-
-      mockResponse.json(result);
-
-      assert.equal(mockResponse.statusCode, 200);
-      assert.ok(Array.isArray(mockResponse.data));
-      assert.equal(mockResponse.data[0].id, 'asset_1');
+      assert.equal(result[0].id, "asset_1");
+      assert.deepEqual(browseService.recentUploadsInputs, [{
+        sessionId: "session_123",
+        token: "valid_token",
+        limit: 10,
+      }]);
     });
 
-    it('should return 401 for invalid session token', async () => {
-      mockRequest.params = { sessionId: 'session_123' };
-      mockRequest.headers = { authorization: 'Bearer invalid_token' };
+    it("maps invalid session tokens to unauthorized", async () => {
+      browseService.recentUploadsError = new Error("Session not found or token invalid");
 
-      try {
-        const sessionId = mockRequest.params.sessionId;
-        const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-        await mockBrowseService.getRecentUploads({
-          sessionId,
-          token,
-          limit: 20
-        });
-      } catch (error) {
-        mockResponse.status(401).json({
-          error: 'unauthorized',
-          message: 'Session not found or token invalid'
-        });
-      }
-
-      assert.equal(mockResponse.statusCode, 401);
-      assert.equal(mockResponse.data.error, 'unauthorized');
+      await assert.rejects(
+        () => controller.getRecentUploads("session_123", "invalid_token"),
+        (error: unknown) =>
+          assertHttpError(error, HttpStatus.UNAUTHORIZED, "unauthorized"),
+      );
     });
 
-    it('should return 400 for missing authorization header', async () => {
-      mockRequest.params = { sessionId: 'session_123' };
-      // No authorization header
-
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-      if (!token) {
-        mockResponse.status(400).json({
-          error: 'bad_request',
-          message: 'Authorization header required'
-        });
-      }
-
-      assert.equal(mockResponse.statusCode, 400);
-      assert.equal(mockResponse.data.error, 'bad_request');
+    it("requires an authorization token", async () => {
+      await assert.rejects(
+        () => controller.getRecentUploads("session_123"),
+        (error: unknown) =>
+          assertHttpError(error, HttpStatus.BAD_REQUEST, "bad_request"),
+      );
     });
   });
 
-  describe('GET /api/web-companion/sessions/:sessionId/assets/:assetId', () => {
-    it('should return asset details for valid session and asset', async () => {
-      mockRequest.params = { sessionId: 'session_123', assetId: 'asset_1' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
+  describe("GET /api/web-companion/sessions/:sessionId/assets/:assetId", () => {
+    it("returns asset details through the browse service", async () => {
+      const result = await controller.getAssetDetails("session_123", "asset_1", "valid_token");
 
-      const sessionId = mockRequest.params.sessionId;
-      const assetId = mockRequest.params.assetId;
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-      const result = await mockBrowseService.getAssetDetails({
-        sessionId,
-        token,
-        assetId
-      });
-
-      mockResponse.json(result);
-
-      assert.equal(mockResponse.statusCode, 200);
-      assert.equal(mockResponse.data.id, 'asset_1');
+      assert.equal(result.id, "asset_1");
+      assert.deepEqual(browseService.assetDetailsInputs, [{
+        sessionId: "session_123",
+        token: "valid_token",
+        assetId: "asset_1",
+      }]);
     });
 
-    it('should return 404 for asset not found or access denied', async () => {
-      mockRequest.params = { sessionId: 'session_123', assetId: 'not_found' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
+    it("maps denied asset lookups to forbidden", async () => {
+      browseService.assetDetailsError = new Error("Asset not found or access denied");
 
-      try {
-        const sessionId = mockRequest.params.sessionId;
-        const assetId = mockRequest.params.assetId;
-        const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-        await mockBrowseService.getAssetDetails({
-          sessionId,
-          token,
-          assetId
-        });
-      } catch (error) {
-        mockResponse.status(404).json({
-          error: 'not_found',
-          message: 'Asset not found or access denied'
-        });
-      }
-
-      assert.equal(mockResponse.statusCode, 404);
-      assert.equal(mockResponse.data.error, 'not_found');
+      await assert.rejects(
+        () => controller.getAssetDetails("session_123", "not_found", "valid_token"),
+        (error: unknown) =>
+          assertHttpError(error, HttpStatus.FORBIDDEN, "forbidden"),
+      );
     });
   });
 
-  describe('GET /api/web-companion/sessions/:sessionId/books', () => {
-    it('should return books list for valid session', async () => {
-      mockRequest.params = { sessionId: 'session_123' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
-      mockRequest.query = { childId: 'child_456' };
+  describe("GET /api/web-companion/sessions/:sessionId/books", () => {
+    it("returns books through the browse service", async () => {
+      const result = await controller.getBooksList("session_123", "valid_token", "child_456");
 
-      const sessionId = mockRequest.params.sessionId;
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-      const childId = mockRequest.query.childId;
-
-      const result = await mockBrowseService.getBooksList({
-        sessionId,
-        token,
-        childId
-      });
-
-      mockResponse.json(result);
-
-      assert.equal(mockResponse.statusCode, 200);
-      assert.ok(Array.isArray(mockResponse.data));
-      assert.equal(mockResponse.data[0].id, 'book_1');
+      assert.equal(result[0].id, "book_1");
+      assert.deepEqual(browseService.booksListInputs, [{
+        sessionId: "session_123",
+        token: "valid_token",
+        childId: "child_456",
+      }]);
     });
   });
 
-  describe('GET /api/web-companion/sessions/:sessionId/books/:bookId', () => {
-    it('should return book details for valid session and book', async () => {
-      mockRequest.params = { sessionId: 'session_123', bookId: 'book_1' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
+  describe("GET /api/web-companion/sessions/:sessionId/books/:bookId", () => {
+    it("returns book details through the browse service", async () => {
+      const result = await controller.getBookDetails("session_123", "book_1", "valid_token");
 
-      const sessionId = mockRequest.params.sessionId;
-      const bookId = mockRequest.params.bookId;
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-      const result = await mockBrowseService.getBookDetails({
-        sessionId,
-        token,
-        bookId
-      });
-
-      mockResponse.json(result);
-
-      assert.equal(mockResponse.statusCode, 200);
-      assert.equal(mockResponse.data.id, 'book_1');
-    });
-  });
-
-  describe('token validation', () => {
-    it('should require same session token validation as trusted upload', async () => {
-      // This test ensures browse endpoints use the same validation model
-      // as the existing trusted upload endpoints
-
-      mockRequest.params = { sessionId: 'session_123' };
-      mockRequest.headers = { authorization: 'Bearer valid_token' };
-
-      const sessionId = mockRequest.params.sessionId;
-      const token = mockRequest.headers.authorization?.replace('Bearer ', '');
-
-      // The validation should follow the same pattern as web-companion upload
-      assert.ok(sessionId);
-      assert.ok(token);
-      assert.equal(token, 'valid_token');
+      assert.equal(result.id, "book_1");
+      assert.deepEqual(browseService.bookDetailsInputs, [{
+        sessionId: "session_123",
+        token: "valid_token",
+        bookId: "book_1",
+      }]);
     });
   });
 });

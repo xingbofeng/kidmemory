@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const RunSearchIndexerDtoSchema = z
   .object({
@@ -8,4 +7,4 @@ export const RunSearchIndexerDtoSchema = z
   })
   .strict();
 
-export type RunSearchIndexerDto = components["schemas"]["RunSearchIndexerRequestDto"];
+export type RunSearchIndexerDto = z.infer<typeof RunSearchIndexerDtoSchema>;

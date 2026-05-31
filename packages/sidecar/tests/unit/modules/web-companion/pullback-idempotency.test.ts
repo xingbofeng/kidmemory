@@ -1,335 +1,228 @@
-/**
- * Pullback 防重复测试
- * 
- * 验证：
- * - 同一个 uploadItem 不会被重复 pullback
- * - 使用 pulling_local 状态作为处理中标记
- * - 已经在 pulling_local 状态的项目拒绝重复 pullback
- * - 已经 ready 的项目拒绝重复 pullback
- */
+import { describe, it, mock } from "node:test";
+import assert from "node:assert";
+import crypto from "node:crypto";
 
-import { describe, it, mock } from 'node:test';
-import assert from 'node:assert';
-import crypto from 'node:crypto';
-import { WebCompanionService } from '../../../../src/modules/web-companion/web-companion.service.ts';
-import { UploadItemStatus } from '../../../../src/modules/web-companion/constants.ts';
+import { WebCompanionService } from "../../../../src/modules/web-companion/web-companion.service.ts";
+import { UploadItemStatus } from "../../../../src/modules/web-companion/constants.ts";
+import type { WebCompanionRepository } from "../../../../src/modules/web-companion/web-companion.service.ts";
 import type {
+  CreateUploadItemWithAssetInput,
   UploadItem,
   UploadSession,
-} from '../../../../src/modules/web-companion/types.ts';
+} from "../../../../src/modules/web-companion/types.ts";
 
-// Helper to hash token (same as service)
+type WebCompanionServiceArgs = ConstructorParameters<typeof WebCompanionService>;
+type PullbackWorkerSurface = {
+  startPullbackProcess(item: UploadItem): Promise<void>;
+};
+
+const mockAppConfig: WebCompanionServiceArgs[0] = {
+  config: {
+    sidecar: {
+      port: 0,
+      host: "127.0.0.1",
+      webCompanionBaseUrl: "http://localhost:3000",
+    },
+    supabaseStorage: {
+      provider: "supabase",
+      url: "https://test.supabase.co",
+      bucket: "test-bucket",
+      serviceRoleKey: "test-service-role-key",
+      anonKey: "test-anon-key",
+      publicBaseUrl: "https://test.supabase.co/storage/v1/object/public/test-bucket",
+      signedUrlTtlSeconds: 900,
+      s3: {
+        endpoint: "https://test.supabase.co/storage/v1/s3",
+        region: "local",
+        accessKeyId: "test-access-key",
+        secretAccessKey: "test-secret-key",
+      },
+    },
+  },
+};
+
+const mockDatasetService = {} as unknown as WebCompanionServiceArgs[2];
+
 function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-describe('Pullback Idempotency', () => {
-  it('should prevent duplicate pullback when item is already pulling_local', async () => {
-    const mockSessionId = 'session_123';
-    const mockToken = 'token_abc';
-    const mockTokenHash = hashToken(mockToken);
-    const mockUploadItemId = 'item_456';
-    const mockObjectKey = 'uploads/test.jpg';
+function createSession(sessionId: string, token: string): UploadSession {
+  return {
+    id: sessionId,
+    sessionId,
+    childId: "child_1",
+    token,
+    tokenHash: hashToken(token),
+    status: "active",
+    maxItems: 10,
+    usedItems: 1,
+    expiresAt: new Date(Date.now() + 3600000),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
 
-    const mockSession: UploadSession = {
-      id: mockSessionId,
-      sessionId: mockSessionId,
-      childId: 'child_1',
-      token: mockToken,
-      tokenHash: mockTokenHash,
-      status: 'active',
-      maxItems: 10,
-      usedItems: 1,
-      expiresAt: new Date(Date.now() + 3600000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+function createUploadItem(input: {
+  uploadItemId: string;
+  sessionId: string;
+  objectKey: string;
+  status: UploadItem["status"];
+  committedAt: Date | null;
+  readyAt?: Date;
+}): UploadItem {
+  return {
+    id: input.uploadItemId,
+    uploadItemId: input.uploadItemId,
+    sessionId: input.sessionId,
+    objectKey: input.objectKey,
+    status: input.status,
+    sizeBytes: 1024,
+    contentType: "image/jpeg",
+    committedAt: input.committedAt,
+    readyAt: input.readyAt,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
 
-    // Mock upload item that is already in pulling_local state
-    const mockItem: UploadItem = {
-      id: mockUploadItemId,
-      uploadItemId: mockUploadItemId,
-      sessionId: mockSessionId,
-      objectKey: mockObjectKey,
-      status: UploadItemStatus.PULLING_LOCAL, // Already pulling
-      sizeBytes: 1024,
-      contentType: 'image/jpeg',
-      committedAt: new Date(Date.now() - 60000), // Committed 1 minute ago
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+function createRepositoryDouble(overrides: Partial<WebCompanionRepository>): WebCompanionRepository {
+  return {
+    insertSession: async () => undefined,
+    getSessionById: async () => null,
+    updateSessionStatus: async () => undefined,
+    countUploadItemsBySession: async () => 0,
+    getUploadItemsBySession: async () => [],
+    getUploadItemById: async () => null,
+    createUploadItemWithAsset: async (input: CreateUploadItemWithAssetInput) => {
+      throw new Error(`unused createUploadItemWithAsset for ${input.uploadItemId}`);
+    },
+    updateUploadItemStatus: async () => null,
+    commitUploadItemIfNotCommitted: async () => null,
+    ...overrides,
+  };
+}
 
-    const mockRepository = {
-      getSessionById: mock.fn(() => Promise.resolve(mockSession)),
-      getUploadItemById: mock.fn(() => Promise.resolve(mockItem)),
-      updateUploadItemStatus: mock.fn(() => Promise.resolve(mockItem)),
-    };
+function createService(repository: WebCompanionRepository): WebCompanionService {
+  return new WebCompanionService(mockAppConfig, repository, mockDatasetService);
+}
 
-    const mockAppConfig = {
-      config: {
-        supabaseStorage: {
-          url: 'https://test.supabase.co',
-          serviceRoleKey: 'test-key',
-          bucket: 'test-bucket',
-        },
-      },
-    } as any;
-    const mockDatasetService = {} as any;
+function pullbackWorker(service: WebCompanionService): PullbackWorkerSurface["startPullbackProcess"] {
+  return (service as unknown as PullbackWorkerSurface).startPullbackProcess.bind(service);
+}
 
-    const service = new WebCompanionService(mockAppConfig, mockRepository as any, mockDatasetService);
-
-    // Try to trigger pullback on an item that's already pulling
-    const startPullback = (service as any).startPullbackProcess.bind(service);
-    
-    // Should return early without updating status
-    await startPullback(mockItem);
-
-    // Verify updateUploadItemStatus was NOT called (idempotent path)
-    assert.strictEqual(
-      mockRepository.updateUploadItemStatus.mock.callCount(),
-      0,
-      'Should not update status when already pulling_local'
-    );
-  });
-
-  it('should prevent duplicate pullback when item is already ready', async () => {
-    const mockSessionId = 'session_123';
-    const mockToken = 'token_abc';
-    const mockTokenHash = hashToken(mockToken);
-    const mockUploadItemId = 'item_456';
-    const mockObjectKey = 'uploads/test.jpg';
-
-    const mockSession: UploadSession = {
-      id: mockSessionId,
-      sessionId: mockSessionId,
-      childId: 'child_1',
-      token: mockToken,
-      tokenHash: mockTokenHash,
-      status: 'active',
-      maxItems: 10,
-      usedItems: 1,
-      expiresAt: new Date(Date.now() + 3600000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Mock upload item that is already ready
-    const mockItem: UploadItem = {
-      id: mockUploadItemId,
-      uploadItemId: mockUploadItemId,
-      sessionId: mockSessionId,
-      objectKey: mockObjectKey,
-      status: UploadItemStatus.READY, // Already ready
-      sizeBytes: 1024,
-      contentType: 'image/jpeg',
-      committedAt: new Date(Date.now() - 120000), // Committed 2 minutes ago
-      readyAt: new Date(Date.now() - 60000), // Ready 1 minute ago
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const mockRepository = {
-      getSessionById: mock.fn(() => Promise.resolve(mockSession)),
-      getUploadItemById: mock.fn(() => Promise.resolve(mockItem)),
-      updateUploadItemStatus: mock.fn(() => Promise.resolve(mockItem)),
-    };
-
-    const mockAppConfig = {
-      config: {
-        supabaseStorage: {
-          url: 'https://test.supabase.co',
-          serviceRoleKey: 'test-key',
-          bucket: 'test-bucket',
-        },
-      },
-    } as any;
-    const mockDatasetService = {} as any;
-
-    const service = new WebCompanionService(mockAppConfig, mockRepository as any, mockDatasetService);
-
-    // Try to trigger pullback on an item that's already ready
-    const startPullback = (service as any).startPullbackProcess.bind(service);
-    
-    // Should return early without updating status
-    await startPullback(mockItem);
-
-    // Verify updateUploadItemStatus was NOT called (idempotent path)
-    assert.strictEqual(
-      mockRepository.updateUploadItemStatus.mock.callCount(),
-      0,
-      'Should not update status when already ready'
-    );
-  });
-
-  it('should allow pullback for uploaded_remote items', async () => {
-    const mockSessionId = 'session_123';
-    const mockToken = 'token_abc';
-    const mockTokenHash = hashToken(mockToken);
-    const mockUploadItemId = 'item_456';
-    const mockObjectKey = 'uploads/test.jpg';
-
-    const mockSession: UploadSession = {
-      id: mockSessionId,
-      sessionId: mockSessionId,
-      childId: 'child_1',
-      token: mockToken,
-      tokenHash: mockTokenHash,
-      status: 'active',
-      maxItems: 10,
-      usedItems: 1,
-      expiresAt: new Date(Date.now() + 3600000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Mock upload item that is uploaded_remote (ready for pullback)
-    const mockItem: UploadItem = {
-      id: mockUploadItemId,
-      uploadItemId: mockUploadItemId,
-      sessionId: mockSessionId,
-      objectKey: mockObjectKey,
-      status: UploadItemStatus.UPLOADED_REMOTE, // Ready for pullback
-      sizeBytes: 1024,
-      contentType: 'image/jpeg',
-      committedAt: new Date(Date.now() - 10000), // Committed 10 seconds ago
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const mockUpdatedItem: UploadItem = {
-      ...mockItem,
+describe("Pullback Idempotency", () => {
+  it("does not update status when item is already pulling_local", async () => {
+    const sessionId = "session_123";
+    const token = "token_abc";
+    const uploadItemId = "item_456";
+    const objectKey = "uploads/test.jpg";
+    const item = createUploadItem({
+      uploadItemId,
+      sessionId,
+      objectKey,
       status: UploadItemStatus.PULLING_LOCAL,
-    };
+      committedAt: new Date(Date.now() - 60000),
+    });
+    const updateUploadItemStatus = mock.fn(async () => item);
+    const repository = createRepositoryDouble({
+      getSessionById: mock.fn(async () => createSession(sessionId, token)),
+      getUploadItemById: mock.fn(async () => item),
+      updateUploadItemStatus,
+    });
 
-    const mockRepository = {
-      getSessionById: mock.fn(() => Promise.resolve(mockSession)),
-      getUploadItemById: mock.fn(() => Promise.resolve(mockItem)),
-      updateUploadItemStatus: mock.fn(() => Promise.resolve(mockUpdatedItem)),
-    };
+    await pullbackWorker(createService(repository))(item);
 
-    const mockAppConfig = {
-      config: {
-        supabaseStorage: {
-          url: 'https://test.supabase.co',
-          serviceRoleKey: 'test-key',
-          bucket: 'test-bucket',
-        },
-      },
-    } as any;
-    const mockDatasetService = {} as any;
-
-    const service = new WebCompanionService(mockAppConfig, mockRepository as any, mockDatasetService);
-
-    // Try to trigger pullback on an uploaded_remote item
-    const startPullback = (service as any).startPullbackProcess.bind(service);
-    
-    // Should proceed with pullback (will fail due to mock limitations, but should attempt)
-    try {
-      await startPullback(mockItem);
-    } catch (error) {
-      // Expected to fail due to incomplete mocks, but we verify it tried
-    }
-
-    // Verify updateUploadItemStatus WAS called (to set pulling_local)
-    assert.ok(
-      mockRepository.updateUploadItemStatus.mock.callCount() >= 1,
-      'Should update status to pulling_local for uploaded_remote items'
-    );
+    assert.strictEqual(updateUploadItemStatus.mock.callCount(), 0, "Should not update status when already pulling_local");
   });
 
-  it('should handle concurrent pullback attempts gracefully', async () => {
-    const mockSessionId = 'session_123';
-    const mockToken = 'token_abc';
-    const mockTokenHash = hashToken(mockToken);
-    const mockUploadItemId = 'item_456';
-    const mockObjectKey = 'uploads/test.jpg';
+  it("does not update status when item is already ready", async () => {
+    const sessionId = "session_123";
+    const token = "token_abc";
+    const uploadItemId = "item_456";
+    const objectKey = "uploads/test.jpg";
+    const item = createUploadItem({
+      uploadItemId,
+      sessionId,
+      objectKey,
+      status: UploadItemStatus.READY,
+      committedAt: new Date(Date.now() - 120000),
+      readyAt: new Date(Date.now() - 60000),
+    });
+    const updateUploadItemStatus = mock.fn(async () => item);
+    const repository = createRepositoryDouble({
+      getSessionById: mock.fn(async () => createSession(sessionId, token)),
+      getUploadItemById: mock.fn(async () => item),
+      updateUploadItemStatus,
+    });
 
-    const mockSession: UploadSession = {
-      id: mockSessionId,
-      sessionId: mockSessionId,
-      childId: 'child_1',
-      token: mockToken,
-      tokenHash: mockTokenHash,
-      status: 'active',
-      maxItems: 10,
-      usedItems: 1,
-      expiresAt: new Date(Date.now() + 3600000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    await pullbackWorker(createService(repository))(item);
 
-    // In a real scenario, the database would handle concurrency
-    // Here we simulate that the first call wins and subsequent calls see the updated state
+    assert.strictEqual(updateUploadItemStatus.mock.callCount(), 0, "Should not update status when already ready");
+  });
+
+  it("attempts pullback for uploaded_remote items", async () => {
+    const sessionId = "session_123";
+    const token = "token_abc";
+    const uploadItemId = "item_456";
+    const objectKey = "uploads/test.jpg";
+    const item = createUploadItem({
+      uploadItemId,
+      sessionId,
+      objectKey,
+      status: UploadItemStatus.UPLOADED_REMOTE,
+      committedAt: new Date(Date.now() - 10000),
+    });
+    const updateUploadItemStatus = mock.fn(async () => ({
+      ...item,
+      status: UploadItemStatus.PULLING_LOCAL,
+    }));
+    const repository = createRepositoryDouble({
+      getSessionById: mock.fn(async () => createSession(sessionId, token)),
+      getUploadItemById: mock.fn(async () => item),
+      updateUploadItemStatus,
+    });
+
+    await pullbackWorker(createService(repository))(item).catch(() => undefined);
+
+    assert.ok(updateUploadItemStatus.mock.callCount() >= 1, "Should update status to pulling_local for uploaded_remote items");
+  });
+
+  it("handles concurrent pullback attempts gracefully", async () => {
+    const sessionId = "session_123";
+    const token = "token_abc";
+    const uploadItemId = "item_456";
+    const objectKey = "uploads/test.jpg";
+    const item = createUploadItem({
+      uploadItemId,
+      sessionId,
+      objectKey,
+      status: UploadItemStatus.UPLOADED_REMOTE,
+      committedAt: new Date(Date.now() - 10000),
+    });
     let hasBeenUpdated = false;
-
-    const mockRepository = {
-      getSessionById: mock.fn(() => Promise.resolve(mockSession)),
-      getUploadItemById: mock.fn(() => Promise.resolve(mockSession)),
-      updateUploadItemStatus: mock.fn(() => {
+    const repository = createRepositoryDouble({
+      getSessionById: mock.fn(async () => createSession(sessionId, token)),
+      getUploadItemById: mock.fn(async () => item),
+      updateUploadItemStatus: mock.fn(async () => {
         if (hasBeenUpdated) {
-          // Simulate database constraint violation or optimistic locking
-          throw new Error('Item already being processed');
+          throw new Error("Item already being processed");
         }
         hasBeenUpdated = true;
-        return Promise.resolve({
-          id: mockUploadItemId,
-          uploadItemId: mockUploadItemId,
-          sessionId: mockSessionId,
-          objectKey: mockObjectKey,
+        return {
+          ...item,
           status: UploadItemStatus.PULLING_LOCAL,
-          sizeBytes: 1024,
-          contentType: 'image/jpeg',
-          committedAt: new Date(Date.now() - 10000),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
+        };
       }),
-    };
+    });
+    const startPullback = pullbackWorker(createService(repository));
 
-    const mockAppConfig = {
-      config: {
-        supabaseStorage: {
-          url: 'https://test.supabase.co',
-          serviceRoleKey: 'test-key',
-          bucket: 'test-bucket',
-        },
-      },
-    } as any;
-    const mockDatasetService = {} as any;
-
-    const service = new WebCompanionService(mockAppConfig, mockRepository as any, mockDatasetService);
-
-    const startPullback = (service as any).startPullbackProcess.bind(service);
-
-    // Create two items with the same ID
-    const item = {
-      id: mockUploadItemId,
-      uploadItemId: mockUploadItemId,
-      sessionId: mockSessionId,
-      objectKey: mockObjectKey,
-      status: UploadItemStatus.UPLOADED_REMOTE,
-      sizeBytes: 1024,
-      contentType: 'image/jpeg',
-      committedAt: new Date(Date.now() - 10000),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Simulate concurrent pullback attempts
-    // In reality, one would succeed and one would fail or be idempotent
     const results = await Promise.allSettled([
-      startPullback(item).catch((e) => e.message),
-      startPullback(item).catch((e) => e.message),
+      startPullback(item).catch((error: unknown) => error),
+      startPullback(item).catch((error: unknown) => error),
     ]);
 
-    // Both should complete (one succeeds, one fails or is idempotent)
-    assert.strictEqual(results.length, 2);
-
-    // At least one should complete successfully or be handled gracefully
-    const successCount = results.filter(r => r.status === 'fulfilled').length;
-    assert.ok(successCount >= 0, 'At least one call should be handled');
-
-    // The key point: hasBeenUpdated should be true, meaning at least one update happened
-    assert.strictEqual(hasBeenUpdated, true, 'At least one pullback should have updated the status');
+    assert.equal(results.length, 2);
+    assert.equal(hasBeenUpdated, true, "At least one pullback should have updated the status");
   });
 });

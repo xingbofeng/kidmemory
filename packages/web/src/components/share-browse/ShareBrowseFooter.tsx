@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedAsset } from '../../types/shareBrowse'
+import { shareCurrentPage } from '../../lib/share-current-page'
 
 interface ShareBrowseFooterProps {
   assets: SharedAsset[]
@@ -21,16 +22,12 @@ export function ShareBrowseFooter({ assets }: ShareBrowseFooterProps) {
   }
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: t('share.shareTitle'),
-        text: t('share.shareText', { count: assets.length }),
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert(t('share.shareCopied'))
-    }
+    shareCurrentPage({
+      title: t('share.shareTitle'),
+      text: t('share.shareText', { count: assets.length }),
+      url: window.location.href,
+      copiedMessage: t('share.shareCopied'),
+    })
   }
 
   return (

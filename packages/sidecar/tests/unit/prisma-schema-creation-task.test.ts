@@ -9,7 +9,19 @@ const __dirname = path.dirname(__filename);
 const schemaPath = path.resolve(__dirname, "..", "..", "prisma", "schema.prisma");
 const schema = readFileSync(schemaPath, "utf8");
 
-describe("Prisma schema creation task migration", () => {
+describe("Prisma schema creation task contract", () => {
+  it("uses current creation task schema wording", () => {
+    const source = readFileSync(__filename, "utf8");
+    const historicalPhrases = [
+      ["creation task", "migration"].join(" "),
+      ["legacy", "jobs"].join(" "),
+    ];
+
+    for (const phrase of historicalPhrases) {
+      assert.equal(source.includes(phrase), false);
+    }
+  });
+
   it("must have CreationTask model", () => {
     assert.match(schema, /model CreationTask/, "CreationTask model should exist");
   });
@@ -62,7 +74,7 @@ describe("Prisma schema creation task migration", () => {
     assert.match(body, /CreationArtifact\[\]/, "CreationTask should relate to CreationArtifact");
   });
 
-  it("ExportArtifact model must still exist for legacy jobs", () => {
-    assert.match(schema, /model ExportArtifact/, "ExportArtifact should still exist");
+  it("ExportArtifact model remains available for exported artifacts", () => {
+    assert.match(schema, /model ExportArtifact/, "ExportArtifact should exist");
   });
 });

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 
 import type { AgentTool } from "../index.js";
-import { readToolPath, resolveWritableWorkspacePath } from "./path-policy.js";
+import { readBoolean, readString, readToolPath, resolveWritableWorkspacePath } from "./path-policy.js";
 
 export function createEditFileTool(options: { workspaceDir: string }): AgentTool {
   return {
@@ -43,15 +43,4 @@ export function createEditFileTool(options: { workspaceDir: string }): AgentTool
       };
     },
   };
-}
-
-function readString(input: unknown, key: string): string {
-  if (!input || typeof input !== "object" || !(key in input)) return "";
-  const value = (input as Record<string, unknown>)[key];
-  return typeof value === "string" ? value : String(value ?? "");
-}
-
-function readBoolean(input: unknown, key: string): boolean {
-  if (!input || typeof input !== "object" || !(key in input)) return false;
-  return (input as Record<string, unknown>)[key] === true;
 }

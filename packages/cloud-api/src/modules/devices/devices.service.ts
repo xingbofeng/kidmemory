@@ -2,19 +2,47 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import { RegisterDeviceDto, DeviceResponseDto } from './devices.dto.ts';
 
+interface DeviceRecord {
+  id: string;
+  machineId: string;
+  deviceName: string | null;
+  platform: string | null;
+  lastHeartbeat: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DevicesPrismaClient {
+  device: {
+    upsert(input: {
+      where: { machineId: string };
+      update: {
+        deviceName?: string;
+        platform?: string;
+        lastHeartbeat: Date;
+      };
+      create: {
+        machineId: string;
+        deviceName?: string;
+        platform?: string;
+        lastHeartbeat: Date;
+      };
+    }): Promise<DeviceRecord>;
+    update(input: {
+      where: { id: string };
+      data: { lastHeartbeat: Date };
+    }): Promise<DeviceRecord>;
+    findUnique(input: {
+      where: { id?: string; machineId?: string };
+    }): Promise<DeviceRecord | null>;
+  };
+}
+
 @Injectable()
 export class DevicesService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: DevicesPrismaClient) {}
 
-  private toDeviceResponse(device: {
-    id: string;
-    machineId: string;
-    deviceName: string | null;
-    platform: string | null;
-    lastHeartbeat: Date;
-    createdAt: Date;
-    updatedAt: Date;
-  }): DeviceResponseDto {
+  private toDeviceResponse(device: DeviceRecord): DeviceResponseDto {
     return {
       id: device.id,
       machineId: device.machineId,
@@ -26,16 +54,11 @@ export class DevicesService {
     };
   }
 
-  /**
-   * Register a device (idempotent by machineId)
-   */
   async register(dto: RegisterDeviceDto): Promise<DeviceResponseDto> {
-    // Validate machineId
     if (!dto.machineId || dto.machineId.trim().length === 0) {
       throw new Error('machineId is required');
     }
 
-    // Upsert device (idempotent)
     const device = await this.prisma.device.upsert({
       where: { machineId: dto.machineId },
       update: {
@@ -54,9 +77,6 @@ export class DevicesService {
     return this.toDeviceResponse(device);
   }
 
-  /**
-   * Update device heartbeat
-   */
   async heartbeat(deviceId: string): Promise<DeviceResponseDto> {
     try {
       const device = await this.prisma.device.update({
@@ -72,9 +92,6 @@ export class DevicesService {
     }
   }
 
-  /**
-   * Get device by ID
-   */
   async findById(deviceId: string): Promise<DeviceResponseDto | null> {
     const device = await this.prisma.device.findUnique({
       where: { id: deviceId },
@@ -82,9 +99,6 @@ export class DevicesService {
     return device ? this.toDeviceResponse(device) : null;
   }
 
-  /**
-   * Get device by machineId
-   */
   async findByMachineId(machineId: string): Promise<DeviceResponseDto | null> {
     const device = await this.prisma.device.findUnique({
       where: { machineId },
@@ -92,9 +106,6 @@ export class DevicesService {
     return device ? this.toDeviceResponse(device) : null;
   }
 
-  /**
-   * Check if device is online (heartbeat within last 60 seconds)
-   */
   isDeviceOnline(device: DeviceResponseDto): boolean {
     const now = new Date();
     const timeSinceHeartbeat =

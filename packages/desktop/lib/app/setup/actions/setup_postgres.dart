@@ -2,24 +2,24 @@ part of '../../desktop_shell.dart';
 
 extension _DesktopShellSetupPostgres on _DesktopShellState {
   Future<bool> _preparePostgresOnMacOS({required String title}) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_bundledPostgresRuntimeAvailable()) {
       _finishSetupProgress(
         title,
-        AppLocalizations.of(context)!.setupPostgresRuntimeNotDetected,
+        l10n.setupPostgresRuntimeNotDetected,
         ok: false,
       );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupBundledPostgresRuntimeMissing,
-      );
+      _showSnackBar(l10n.setupBundledPostgresRuntimeMissing);
       return false;
     }
-    _appendLog(AppLocalizations.of(context)!.setupRuntimeFoundInitialize);
+    _appendLog(l10n.setupRuntimeFoundInitialize);
     return _ensureBundledPostgresReady(title);
   }
 
   Future<void> _runPostgresSetupWorkflow() async {
-    final title = AppLocalizations.of(context)!.setupPostgresTitle;
-    _appendLog(AppLocalizations.of(context)!.setupStartPostgresWorkflow);
+    final l10n = AppLocalizations.of(context)!;
+    final title = l10n.setupPostgresTitle;
+    _appendLog(l10n.setupStartPostgresWorkflow);
 
     try {
       if (Platform.isMacOS) {
@@ -37,10 +37,10 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
       _setSetupProgress(
         title,
         1,
-        AppLocalizations.of(context)!.setupPostgresConfigured,
-        state: AppLocalizations.of(context)!.setupConfigured,
+        l10n.setupPostgresConfigured,
+        state: l10n.setupConfigured,
       );
-      _showSnackBar(AppLocalizations.of(context)!.setupPostgresConfigured);
+      _showSnackBar(l10n.setupPostgresConfigured);
       await refreshReadiness();
     } catch (error) {
       final message = _friendlySetupError(
@@ -53,54 +53,44 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
   }
 
   Future<bool> _configureAndVerifyPostgres({required String title}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final sidecarSetupTitle = _sidecarSetupTitle(context);
     _setSetupProgress(
-      _sidecarSetupTitle(context),
+      sidecarSetupTitle,
       0.15,
-      AppLocalizations.of(context)!.setupSidecarStarting,
-      state: AppLocalizations.of(context)!.setupStatusStarting,
+      l10n.setupSidecarStarting,
+      state: l10n.setupStatusStarting,
     );
     final sidecarReady = await _ensureSidecarRunning();
     if (!sidecarReady) {
       _finishSetupProgress(
-        _sidecarSetupTitle(context),
-        AppLocalizations.of(context)!.setupSidecarStartFailedNodeOrBundled,
+        sidecarSetupTitle,
+        l10n.setupSidecarStartFailedNodeOrBundled,
         ok: false,
       );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupPostgresHandledButSidecarNotStarted,
-      );
+      _showSnackBar(l10n.setupPostgresHandledButSidecarNotStarted);
       return false;
     }
-    _finishSetupProgress(
-      _sidecarSetupTitle(context),
-      AppLocalizations.of(context)!.setupSidecarStarted,
-      ok: true,
-    );
+    _finishSetupProgress(sidecarSetupTitle, l10n.setupSidecarStarted, ok: true);
 
     _setSetupProgress(
       title,
       0.78,
-      AppLocalizations.of(context)!.setupCheckPostgresService,
-      state: AppLocalizations.of(context)!.setupChecking,
+      l10n.setupCheckPostgresService,
+      state: l10n.setupChecking,
     );
     final postgres = await gateway.checkPostgresDto();
     if (postgres.okOrNull != true) {
-      _finishSetupProgress(
-        title,
-        AppLocalizations.of(context)!.setupPostgresNotDetected,
-        ok: false,
-      );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupPostgresNotReadyStartLocalService,
-      );
+      _finishSetupProgress(title, l10n.setupPostgresNotDetected, ok: false);
+      _showSnackBar(l10n.setupPostgresNotReadyStartLocalService);
       return false;
     }
 
     _setSetupProgress(
       title,
       0.92,
-      AppLocalizations.of(context)!.setupInitDatabaseSchema,
-      state: AppLocalizations.of(context)!.setupInitStarted,
+      l10n.setupInitDatabaseSchema,
+      state: l10n.setupInitStarted,
     );
     final schema = await gateway.initSchemaDto();
     if (schema.okOrNull == false) {
@@ -109,12 +99,10 @@ extension _DesktopShellSetupPostgres on _DesktopShellState {
         title,
         schemaMessage.isNotEmpty
             ? schemaMessage
-            : AppLocalizations.of(context)!.setupInitDatabaseSchemaFailed,
+            : l10n.setupInitDatabaseSchemaFailed,
         ok: false,
       );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupInitDatabaseSchemaFailed,
-      );
+      _showSnackBar(l10n.setupInitDatabaseSchemaFailed);
       return false;
     }
     return true;

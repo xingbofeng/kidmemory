@@ -9,7 +9,6 @@ import type {
   StorageProviderType,
   WebCompanionErrorCodeType,
 } from "./constants.ts";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 // ============================================================================
 // 请求 DTO
@@ -18,27 +17,53 @@ import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 /**
  * 创建会话请求
  */
-export type CreateSessionRequest = components["schemas"]["CreateSessionRequestDto"];
+export interface CreateSessionRequest {
+  childId: string;
+  expiresInMinutes?: number;
+  maxItems?: number;
+  preferredProviders?: StorageProviderType[];
+}
 
 /**
  * 创建上传项请求
  */
-export type CreateUploadItemsRequest = components["schemas"]["CreateUploadItemsRequestDto"];
+export interface UploadItemFileRequest {
+  clientFileId: string;
+  filename: string;
+  contentType: string;
+  sizeBytes: number;
+}
+
+export interface CreateUploadItemsRequest {
+  token: string;
+  provider?: StorageProviderType;
+  files: UploadItemFileRequest[];
+}
 
 /**
  * Commit 上传项请求
  */
-export type CommitUploadItemRequest = components["schemas"]["CommitUploadItemRequestDto"];
+export interface CommitUploadItemRequest {
+  token: string;
+  objectKey: string;
+  sizeBytes?: number;
+  contentType?: string;
+  remoteEtag?: string;
+}
 
 /**
  * 重试上传项请求
  */
-export type RetryUploadItemRequest = components["schemas"]["RetryUploadItemRequestDto"];
+export interface RetryUploadItemRequest {
+  token: string;
+}
 
 /**
  * 关闭会话请求
  */
-export type CloseSessionRequest = components["schemas"]["CloseSessionRequestDto"];
+export interface CloseSessionRequest {
+  token: string;
+}
 
 // ============================================================================
 // 响应 DTO
@@ -47,12 +72,35 @@ export type CloseSessionRequest = components["schemas"]["CloseSessionRequestDto"
 /**
  * 创建会话响应
  */
-export type CreateSessionResponse = components["schemas"]["CreateSessionResponseDto"];
+export interface CreateSessionResponse {
+  sessionId: string;
+  token: string;
+  webUrl: string;
+  expiresAt: string;
+  maxItems: number;
+}
 
 /**
  * 会话摘要响应
  */
-export type SessionSummaryResponse = components["schemas"]["SessionSummaryResponseDto"];
+export interface StorageProviderAvailability {
+  available: boolean;
+  endpoint?: string;
+  reason?: string;
+}
+
+export interface SessionSummaryResponse {
+  sessionId: string;
+  status: UploadSessionStatusType;
+  child: {
+    id: string;
+    displayName: string;
+  };
+  expiresAt: string;
+  maxItems: number;
+  usedItems: number;
+  providers: Record<StorageProviderType, StorageProviderAvailability>;
+}
 
 /**
  * 签名上传目标
@@ -67,17 +115,30 @@ export interface SignedUploadTarget {
 /**
  * 上传项响应
  */
-export type UploadItemResponse = components["schemas"]["UploadItemResponseDto"];
+export interface UploadItemResponse {
+  clientFileId: string;
+  uploadItemId: string;
+  assetId: string;
+  objectKey: string;
+  status: UploadItemStatusType;
+  signedUpload?: SignedUploadTarget;
+}
 
 /**
  * 创建上传项响应
  */
-export type CreateUploadItemsResponse = components["schemas"]["CreateUploadItemsResponseDto"];
+export interface CreateUploadItemsResponse {
+  items: UploadItemResponse[];
+}
 
 /**
  * Commit 上传项响应
  */
-export type CommitUploadItemResponse = components["schemas"]["CommitUploadItemResponseDto"];
+export interface CommitUploadItemResponse {
+  uploadItemId: string;
+  status: UploadItemStatusType;
+  idempotent?: boolean;
+}
 
 /**
  * 上传项详情
@@ -97,7 +158,10 @@ export interface UploadItemDetail {
 /**
  * 会话详情响应
  */
-export type SessionDetailResponse = components["schemas"]["SessionDetailResponseDto"];
+export interface SessionDetailResponse {
+  sessionId: string;
+  items: UploadItemDetail[];
+}
 
 // ============================================================================
 // 错误响应 DTO

@@ -23,8 +23,9 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
     if (title == AppLocalizations.of(context)!.setupPostgresTitle) {
       return AppLocalizations.of(context)!.actionInstallAndConfigure;
     }
-    if (title == _sidecarSetupTitle(context))
+    if (title == _sidecarSetupTitle(context)) {
       return AppLocalizations.of(context)!.actionStartSidecar;
+    }
     if (title == AppLocalizations.of(context)!.setupPgvectorTitle) {
       return AppLocalizations.of(context)!.actionInstallAndConfigure;
     }
@@ -42,8 +43,9 @@ extension _DesktopShellReadinessRules on _DesktopShellState {
     for (final rawLine in lines) {
       final line = rawLine.trim();
       if (line.isEmpty) continue;
-      if (line == AppLocalizations.of(context)!.setupPurposeLabel)
+      if (line == AppLocalizations.of(context)!.setupPurposeLabel) {
         return AppLocalizations.of(context)!.setupSystemConfigItemSummary;
+      }
       if (line.startsWith(AppLocalizations.of(context)!.setupPurposePrefixCn)) {
         return line
             .replaceFirst(

@@ -18,6 +18,9 @@ String _sidecarSetupTitle(BuildContext context) =>
 
 const _setupCommandTimeout = Duration(minutes: 8);
 
+const String _setupCommandPath =
+    '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin';
+
 class _SetupCommandException implements Exception {
   const _SetupCommandException(this.command, this.exitCode, this.output);
 

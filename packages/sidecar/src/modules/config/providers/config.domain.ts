@@ -1,6 +1,5 @@
 import type { AppConfig } from "../../../infrastructure/config/app-config.service.ts";
 import type { PrismaMigrationService } from "../../../infrastructure/database/prisma-migration.service.ts";
-import type { PrismaService } from "../../../infrastructure/database/prisma.service.ts";
 import { redactConfig } from "../../../infrastructure/config/app-config.service.ts";
 import {
   checkClaudeReadiness,
@@ -10,7 +9,6 @@ import {
 
 type ConfigReadinessDependencies = {
   config: AppConfig;
-  prisma: PrismaService;
   migrations: PrismaMigrationService;
 };
 

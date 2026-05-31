@@ -37,7 +37,7 @@ const ALLOWED_IMAGE_MIMES = new Set<string>([
 export type DirectUploadCreateClient = (
   url: string,
   key: string,
-) => DirectUploadSupabaseClient
+) => DirectUploadSupabaseClient | Promise<DirectUploadSupabaseClient>
 
 export interface DirectUploadSupabaseClient {
   storage: {
@@ -106,7 +106,24 @@ async function defaultCreateClient(
   key: string,
 ): Promise<DirectUploadSupabaseClient> {
   const mod = await import('@supabase/supabase-js')
-  return mod.createClient(url, key) as unknown as DirectUploadSupabaseClient
+  const client = mod.createClient(url, key)
+
+  return {
+    storage: {
+      from(bucket) {
+        const storageBucket = client.storage.from(bucket)
+        return {
+          async upload(objectKey, file, options) {
+            const { data, error } = await storageBucket.upload(objectKey, file, options)
+            return {
+              data: data ? { path: data.path } : null,
+              error: error ? { message: error.message } : null,
+            }
+          },
+        }
+      },
+    },
+  }
 }
 
 export interface DirectUploadClient {
@@ -136,9 +153,7 @@ export function createDirectUploadClient(
 
     pending = (async () => {
       if (deps?.createClient) {
-        const c = deps.createClient(config.supabaseUrl, config.anonKey)
-        // deps.createClient may be sync (tests) or async (defensive)
-        const resolved = (await Promise.resolve(c)) as DirectUploadSupabaseClient
+        const resolved = await deps.createClient(config.supabaseUrl, config.anonKey)
         supabaseClient = resolved
         return resolved
       }

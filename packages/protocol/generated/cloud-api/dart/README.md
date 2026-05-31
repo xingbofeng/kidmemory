@@ -70,8 +70,6 @@ Class | Method | HTTP request | Description
 [*DevicesApi*](doc/DevicesApi.md) | [**devicesControllerRegister**](doc/DevicesApi.md#devicescontrollerregister) | **POST** /devices/register | Register a device (idempotent by machineId)
 [*HealthApi*](doc/HealthApi.md) | [**healthControllerGetHealth**](doc/HealthApi.md#healthcontrollergethealth) | **GET** /health | Health check endpoint
 [*HealthApi*](doc/HealthApi.md) | [**healthControllerGetReadiness**](doc/HealthApi.md#healthcontrollergetreadiness) | **GET** /health/ready | Readiness check endpoint
-[*JobsApi*](doc/JobsApi.md) | [**jobsControllerGetPendingJobs**](doc/JobsApi.md#jobscontrollergetpendingjobs) | **GET** /jobs/pending | Get pending jobs for device
-[*JobsApi*](doc/JobsApi.md) | [**jobsControllerUpdateStatus**](doc/JobsApi.md#jobscontrollerupdatestatus) | **PUT** /jobs/{id}/status | Update job status
 [*UploadItemsApi*](doc/UploadItemsApi.md) | [**uploadItemsControllerGetPendingSync**](doc/UploadItemsApi.md#uploaditemscontrollergetpendingsync) | **GET** /upload-items/pending-sync | Get pending sync upload items
 [*UploadItemsApi*](doc/UploadItemsApi.md) | [**uploadItemsControllerUpdateSyncStatus**](doc/UploadItemsApi.md#uploaditemscontrollerupdatesyncstatus) | **PUT** /upload-items/{id}/sync-status | Update upload item sync status
 [*WebCompanionApi*](doc/WebCompanionApi.md) | [**webCompanionControllerCommitUploadItem**](doc/WebCompanionApi.md#webcompanioncontrollercommituploaditem) | **PUT** /api/web-companion/sessions/{sessionId}/items/{uploadItemId}/commit | Commit upload item
@@ -93,14 +91,16 @@ Class | Method | HTTP request | Description
  - [CreatedUploadItemDto](doc/CreatedUploadItemDto.md)
  - [DeviceResponseDto](doc/DeviceResponseDto.md)
  - [DirectUploadConfigResponseDto](doc/DirectUploadConfigResponseDto.md)
- - [JobResponseDto](doc/JobResponseDto.md)
+ - [DirectUploadProvidersDto](doc/DirectUploadProvidersDto.md)
+ - [ProviderAvailabilityDto](doc/ProviderAvailabilityDto.md)
  - [RegisterDeviceRequestDto](doc/RegisterDeviceRequestDto.md)
  - [SessionSummaryResponseDto](doc/SessionSummaryResponseDto.md)
+ - [ShareTokenAccessDto](doc/ShareTokenAccessDto.md)
  - [ShareTokenValidationResponseDto](doc/ShareTokenValidationResponseDto.md)
  - [SharedAssetDto](doc/SharedAssetDto.md)
  - [SharedBookDto](doc/SharedBookDto.md)
  - [SignedUploadTargetDto](doc/SignedUploadTargetDto.md)
- - [UpdateJobStatusRequestDto](doc/UpdateJobStatusRequestDto.md)
+ - [TrustedUploadSessionChildDto](doc/TrustedUploadSessionChildDto.md)
  - [UpdateSyncStatusRequestDto](doc/UpdateSyncStatusRequestDto.md)
  - [UploadItemResponseDto](doc/UploadItemResponseDto.md)
 
@@ -111,6 +111,3 @@ Endpoints do not require authorization.
 
 
 ## Author
-
-
-

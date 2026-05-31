@@ -36,7 +36,7 @@ class DeviceResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'id',
     required: true,
     includeIfNull: false,
@@ -48,7 +48,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'machineId',
     required: true,
     includeIfNull: false,
@@ -60,7 +60,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'deviceName',
     required: false,
     includeIfNull: false,
@@ -72,7 +72,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'platform',
     required: false,
     includeIfNull: false,
@@ -84,7 +84,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'lastHeartbeat',
     required: true,
     includeIfNull: false,
@@ -96,7 +96,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'createdAt',
     required: true,
     includeIfNull: false,
@@ -108,7 +108,7 @@ class DeviceResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'updatedAt',
     required: true,
     includeIfNull: false,
@@ -151,4 +151,3 @@ class DeviceResponseDto {
   }
 
 }
-

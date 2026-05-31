@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:kidmemory_protocol/src/model/share_token_access_dto.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -28,7 +29,7 @@ class ShareTokenValidationResponseDto {
   });
 
   @JsonKey(
-    
+
     name: r'isValid',
     required: true,
     includeIfNull: false,
@@ -40,7 +41,7 @@ class ShareTokenValidationResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'error',
     required: false,
     includeIfNull: false,
@@ -52,14 +53,14 @@ class ShareTokenValidationResponseDto {
 
 
   @JsonKey(
-    
+
     name: r'shareToken',
     required: false,
     includeIfNull: false,
   )
 
 
-  final Object? shareToken;
+  final ShareTokenAccessDto? shareToken;
 
 
 
@@ -87,4 +88,3 @@ class ShareTokenValidationResponseDto {
   }
 
 }
-

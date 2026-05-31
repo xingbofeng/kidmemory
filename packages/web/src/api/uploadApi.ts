@@ -1,17 +1,8 @@
-/**
- * Upload API Module
- * 
- * Handles all upload-related API calls
- */
-
 import type { components } from '@kidmemory/protocol/cloud-api';
 import { httpClient } from '../lib/http-client';
 import type { SessionSummary } from '../types/trustedUpload';
 import type { UploadSession } from '../types/api';
 
-/**
- * Direct Upload API
- */
 export type DirectUploadConfigResponse = components['schemas']['DirectUploadConfigResponseDto'];
 
 export async function getDirectUploadConfig(sessionId: string): Promise<DirectUploadConfigResponse> {
@@ -20,9 +11,6 @@ export async function getDirectUploadConfig(sessionId: string): Promise<DirectUp
   );
 }
 
-/**
- * Trusted Upload API
- */
 export type CreateUploadItemsRequest = components['schemas']['CreateUploadItemsRequestDto'];
 
 export type CreateUploadItemsResponse = components['schemas']['CreateUploadItemsResponseDto'];

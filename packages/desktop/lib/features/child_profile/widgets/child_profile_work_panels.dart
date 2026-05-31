@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/library_models.dart';
@@ -11,7 +9,7 @@ import '../child_profile_utils.dart';
 import 'child_profile_shared_ui.dart';
 
 class RecentAssetsPanel extends StatelessWidget {
-  const RecentAssetsPanel({required this.assets});
+  const RecentAssetsPanel({super.key, required this.assets});
 
   final List<AssetVm> assets;
 
@@ -77,7 +75,7 @@ class RecentAssetsPanel extends StatelessWidget {
 }
 
 class CollectionRecordsPanel extends StatelessWidget {
-  const CollectionRecordsPanel();
+  const CollectionRecordsPanel({super.key});
 
   @override
   Widget build(BuildContext context) => SurfaceCard(

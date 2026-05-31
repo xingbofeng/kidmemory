@@ -1,5 +1,7 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { WebCompanionService } from "../../../../src/modules/web-companion/web-companion.service.ts";
 import { PrismaService } from "../../../../src/infrastructure/database/prisma.service.ts";
@@ -155,15 +157,25 @@ function createService() {
     },
   };
 
-  const service = new WebCompanionService(prisma as unknown as PrismaService);
+  const service = new WebCompanionService(prisma as PrismaService);
   return { service, items, shares, shareLogs };
 }
 
-describe("Web Companion migration service", () => {
+describe("Web Companion service contract", () => {
   let fixture: ReturnType<typeof createService>;
 
   beforeEach(() => {
     fixture = createService();
+  });
+
+  it("uses current Web Companion service wording", () => {
+    const currentFilePath = fileURLToPath(import.meta.url);
+    const source = fs.readFileSync(currentFilePath, "utf8");
+    const historicalFileSegment = ["migr", "ation"].join("");
+    const historicalSuiteName = ["Web Companion", "migration service"].join(" ");
+
+    assert.equal(currentFilePath.includes(historicalFileSegment), false);
+    assert.equal(source.includes(historicalSuiteName), false);
   });
 
   it("returns trusted upload session summary shape used by web", async () => {
@@ -229,6 +241,12 @@ describe("Web Companion migration service", () => {
     assert.equal(result.isValid, true);
     assert.equal(result.shareToken?.childId, "child-1");
     assert.equal(fixture.shareLogs.length, 1);
+  });
+
+  it("keeps invalid share token responses in one helper", () => {
+    const source = fs.readFileSync("src/modules/web-companion/web-companion.service.ts", "utf8");
+
+    assert.equal(source.match(/isValid: false/g)?.length, 1);
   });
 
   it("rejects trusted upload session summary without token", async () => {

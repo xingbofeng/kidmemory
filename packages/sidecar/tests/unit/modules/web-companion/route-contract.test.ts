@@ -15,6 +15,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { WebCompanionController } from "../../../../src/modules/web-companion/web-companion.controller.ts";
+import { StorageProvider } from "../../../../src/modules/web-companion/constants.ts";
+import type { BrowseService } from "../../../../src/modules/web-companion/browse.service.ts";
+import type { ShareTokenService } from "../../../../src/modules/web-companion/share-token.service.ts";
+import type { WebCompanionService } from "../../../../src/modules/web-companion/web-companion.service.ts";
 import type {
   CreateSessionRequest,
   CreateUploadItemsRequest,
@@ -62,7 +66,11 @@ describe("Web Companion Route Contract", () => {
   });
 
   test("should have consistent method signatures", () => {
-    const controller = new WebCompanionController({} as any, {} as any, {} as any);
+    const controller = new WebCompanionController(
+      {} as WebCompanionService,
+      {} as BrowseService,
+      {} as ShareTokenService,
+    );
 
     // createSession 应该接受 CreateSessionRequest
     assert.equal(controller.createSession.length, 1,
@@ -103,7 +111,7 @@ describe("Web Companion Route Contract", () => {
         contentType: "image/jpeg",
         sizeBytes: 1024
       }],
-      provider: "supabase" as any
+      provider: StorageProvider.SUPABASE
     };
 
     // 验证必需字段存在

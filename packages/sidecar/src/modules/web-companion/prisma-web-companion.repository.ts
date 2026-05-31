@@ -1,3 +1,4 @@
+import { isPrismaNotFoundError } from "../../infrastructure/database/prisma-errors.ts";
 import type { PrismaService } from "../../infrastructure/database/prisma.service.ts";
 import type {
   CreateUploadItemWithAssetInput,
@@ -269,8 +270,4 @@ function mapUploadItem(item: {
     committedAt: item.committedAt ?? undefined,
     readyAt: item.readyAt ?? undefined,
   };
-}
-
-function isPrismaNotFoundError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "P2025";
 }

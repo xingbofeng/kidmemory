@@ -41,7 +41,6 @@ export class ConfigService {
     if (!this.readinessDelegate) {
       this.readinessDelegate = createConfigReadinessService({
         config: this.config.config,
-        prisma: this.prisma,
         migrations: this.migrations,
       });
     }

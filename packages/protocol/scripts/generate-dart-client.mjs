@@ -117,12 +117,14 @@ for (const target of targets) {
     process.exit(result.status ?? 1)
   }
   rmSync(join(target.output, 'test'), { recursive: true, force: true })
-  removeDeprecatedSidecarBookArtifacts(target)
+  removeRemovedSidecarBookArtifacts(target)
   exportGeneratedModels(target.output)
+  normalizeGeneratedPubspec(target.output)
+  stripGeneratedTrailingWhitespace(target.output)
   console.log(`Generated Dart client: ${target.output}`)
 }
 
-function removeDeprecatedSidecarBookArtifacts(target) {
+function removeRemovedSidecarBookArtifacts(target) {
   if (!target.input.endsWith('sidecar.openapi.json')) return
 
   for (const relativePath of [
@@ -181,4 +183,36 @@ function exportGeneratedModels(outputDir) {
   if (!modelExports) return
 
   writeFileSync(libraryPath, `${withoutExistingModelExports.trimEnd()}\n\n${modelExports}\n`)
+}
+
+function normalizeGeneratedPubspec(outputDir) {
+  const pubspecPath = join(outputDir, 'pubspec.yaml')
+  const source = readFileSync(pubspecPath, 'utf8')
+  writeFileSync(
+    pubspecPath,
+    source.replace(/^  build_runner: any$/m, '  build_runner: ^2.4.15'),
+  )
+}
+
+function stripGeneratedTrailingWhitespace(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      stripGeneratedTrailingWhitespace(fullPath)
+      continue
+    }
+    if (!entry.isFile() || !isGeneratedTextFile(entry.name)) continue
+
+    const source = readFileSync(fullPath, 'utf8')
+    const normalized = source.replace(/[ \t]+$/gm, '').replace(/\n{2,}$/g, '\n')
+    if (normalized !== source) {
+      writeFileSync(fullPath, normalized)
+    }
+  }
+}
+
+function isGeneratedTextFile(fileName) {
+  return /\.(dart|md|yaml|yml|gitignore)$/.test(fileName)
+    || fileName === 'VERSION'
+    || fileName === 'FILES'
 }

@@ -29,7 +29,7 @@ class CreateUploadItemsRequestDto {
   });
 
   @JsonKey(
-    
+
     name: r'token',
     required: true,
     includeIfNull: false,
@@ -41,7 +41,7 @@ class CreateUploadItemsRequestDto {
 
 
   @JsonKey(
-    
+
     name: r'provider',
     required: false,
     includeIfNull: false,
@@ -53,7 +53,7 @@ class CreateUploadItemsRequestDto {
 
 
   @JsonKey(
-    
+
     name: r'files',
     required: true,
     includeIfNull: false,
@@ -103,5 +103,3 @@ final String value;
 @override
 String toString() => value;
 }
-
-

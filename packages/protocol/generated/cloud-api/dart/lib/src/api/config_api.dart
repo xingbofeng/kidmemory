@@ -17,7 +17,7 @@ class ConfigApi {
   const ConfigApi(this._dio);
 
   /// Get configuration status
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class ConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> configControllerGetStatus({ 
+  Future<Response<void>> configControllerGetStatus({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,

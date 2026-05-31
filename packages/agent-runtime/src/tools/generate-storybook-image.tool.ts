@@ -2,7 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URLSearchParams } from "node:url";
 
+import { toPosixPath } from "../core/utils.js";
 import type { AgentTool } from "./index.js";
+import { readOptionalNumber, readOptionalString, readRequiredString } from "./path-policy.js";
 
 export type PollinationsStorybookImageToolOptions = {
   apiKey?: string;
@@ -38,18 +40,18 @@ export function createPollinationsStorybookImageTool(options: PollinationsStoryb
     risk: "medium",
     execute: async (input, context) => {
       assertTextOnlyPollinationsInput(input);
-      const prompt = readRequiredStringField(input, "prompt");
+      const prompt = readRequiredString(input, "prompt", "Missing required prompt.");
       const relativePath = requireInputPath(input);
       const target = resolveWorkspacePath(context.workspaceDir, relativePath);
       if (!target.relativePath.startsWith("output/")) {
         throw new Error("Pollinations image output path must be under output/");
       }
 
-      const width = normalizeDimension(readOptionalNumberField(input, "width"), 1024);
-      const height = normalizeDimension(readOptionalNumberField(input, "height"), 1024);
-      const seed = readOptionalNumberField(input, "seed");
+      const width = normalizeDimension(readOptionalNumber(input, "width"), 1024);
+      const height = normalizeDimension(readOptionalNumber(input, "height"), 1024);
+      const seed = readOptionalNumber(input, "seed");
       const env = options.env ?? process.env;
-      const model = readOptionalStringField(input, "model")
+      const model = readOptionalString(input, "model")
         ?? readEnvValue(options.model)
         ?? readEnvValue(env.POLLINATIONS_IMAGE_MODEL)
         ?? "flux";
@@ -90,38 +92,7 @@ export function createPollinationsStorybookImageTool(options: PollinationsStoryb
 }
 
 function requireInputPath(input: unknown): string {
-  const value = readInputPath(input);
-  if (!value) throw new Error("Missing required path.");
-  return value;
-}
-
-function readInputPath(input: unknown): string | undefined {
-  if (!input || typeof input !== "object" || !("path" in input)) return undefined;
-  const value = input.path;
-  return typeof value === "string" && value.trim().length > 0 ? toPosixPath(value.trim()) : undefined;
-}
-
-function readRequiredStringField(input: unknown, field: string): string {
-  const value = readOptionalStringField(input, field);
-  if (!value) throw new Error(`Missing required ${field}.`);
-  return value;
-}
-
-function readOptionalStringField(input: unknown, field: string): string | undefined {
-  if (!input || typeof input !== "object" || !(field in input)) return undefined;
-  const value = (input as Record<string, unknown>)[field];
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function readOptionalNumberField(input: unknown, field: string): number | undefined {
-  if (!input || typeof input !== "object" || !(field in input)) return undefined;
-  const value = (input as Record<string, unknown>)[field];
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const parsed = Number.parseFloat(value);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-  return undefined;
+  return toPosixPath(readRequiredString(input, "path", "Missing required path."));
 }
 
 function resolveWorkspacePath(workspaceDir: string, relativePath: string): { absolutePath: string; relativePath: string } {
@@ -175,8 +146,4 @@ function normalizeDimension(value: number | undefined, fallback: number): number
 function readEnvValue(value: string | undefined): string | undefined {
   const normalized = value?.trim();
   return normalized && normalized.length > 0 ? normalized : undefined;
-}
-
-function toPosixPath(value: string): string {
-  return value.split(path.sep).join("/");
 }

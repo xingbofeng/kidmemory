@@ -22,6 +22,7 @@ describe('FileUpload', () => {
 
   class MockXHR {
     static statusCode = 200
+    static loadDelayMs = 10
     upload = {
       addEventListener: (name: string, cb: (event: { lengthComputable: boolean; loaded: number; total: number }) => void) => {
         if (name === 'progress') {
@@ -32,7 +33,7 @@ describe('FileUpload', () => {
     status = MockXHR.statusCode
     addEventListener(name: string, cb: () => void) {
       if (name === 'load') {
-        setTimeout(() => cb(), 10)
+        setTimeout(() => cb(), MockXHR.loadDelayMs)
       }
     }
     open() {}
@@ -43,7 +44,8 @@ describe('FileUpload', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     MockXHR.statusCode = 200
-    vi.stubGlobal('XMLHttpRequest', MockXHR as unknown as typeof XMLHttpRequest)
+    MockXHR.loadDelayMs = 10
+    vi.stubGlobal('XMLHttpRequest', MockXHR)
     vi.mocked(uploadApi.createUploadItems).mockResolvedValue({
       items: [{
         uploadItemId: 'item-1',
@@ -72,6 +74,7 @@ describe('FileUpload', () => {
   })
 
   it('shows upload progress for each file', async () => {
+    MockXHR.loadDelayMs = 100
     render(<FileUpload session={mockSession} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)

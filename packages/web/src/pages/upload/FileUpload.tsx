@@ -55,7 +55,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
     setSelectedFiles((prev) => [...prev, ...validFiles])
 
     if (rejectedFiles.length > 0) {
-      setFileError(t('uploadLegacy.unsupportedType', { files: rejectedFiles.join('、'), label: SUPPORTED_TYPE_LABEL }))
+      setFileError(t('upload.unsupportedType', { files: rejectedFiles.join('、'), label: SUPPORTED_TYPE_LABEL }))
     }
   }
 
@@ -96,7 +96,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
           setSelectedFiles((prev) =>
             prev.map((file) =>
               file.id === selectedFile.id
-                ? { ...file, status: 'error' as const, error: t('uploadLegacy.uploadFailed') }
+                ? { ...file, status: 'error' as const, error: t('upload.uploadFailed') }
                 : file,
             ),
           )
@@ -125,7 +125,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
         })
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('uploadLegacy.uploadFailed')
+      const message = error instanceof Error ? error.message : t('upload.uploadFailed')
       setFileError(message)
     }
 
@@ -135,8 +135,8 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
   if (isAtLimit) {
     return (
       <div className="upload-console">
-        <div className="inline-alert danger">{t('uploadLegacy.atLimit')}</div>
-        <input className="file-input" type="file" multiple accept="image/*" disabled aria-label={t('uploadLegacy.selectImage')} />
+        <div className="inline-alert danger">{t('upload.atLimit')}</div>
+        <input className="file-input" type="file" multiple accept="image/*" disabled aria-label={t('upload.selectImage')} />
       </div>
     )
   }
@@ -150,14 +150,14 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
       <RouteSelector />
       <FilePickerRow onFileSelect={handleFileSelect} canSelectMore={canSelectMore} isUploading={isUploading} />
 
-      {showLimitWarning && <div className="inline-alert warning">{t('uploadLegacy.canUploadOnly', { count: remainingSlots })}</div>}
+      {showLimitWarning && <div className="inline-alert warning">{t('upload.canUploadOnly', { count: remainingSlots })}</div>}
       {fileError && <div className="inline-alert danger">{fileError}</div>}
 
       <UploadList selectedFiles={selectedFiles} onRemoveFile={handleRemoveFile} onClearAll={handleClearAll} />
 
       <UploadProgress selectedFiles={selectedFiles} isUploading={isUploading} onUpload={handleUpload} />
 
-      {!fileError && <div className="sr-only">{t('uploadLegacy.unsupportedTypeSr')}</div>}
+      {!fileError && <div className="sr-only">{t('upload.unsupportedTypeSr')}</div>}
     </div>
   )
 }

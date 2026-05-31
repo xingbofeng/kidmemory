@@ -7,7 +7,7 @@ import type {
 } from "./browse.service.ts";
 import type { PrismaService } from "../../infrastructure/database/prisma.service.ts";
 
-type PrismaJsonObject = Record<string, any>;
+type PrismaJsonObject = Record<string, unknown>;
 
 export class PrismaBrowseRepository implements BrowseRepository {
   private readonly prisma: PrismaService;

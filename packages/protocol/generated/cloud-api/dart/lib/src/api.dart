@@ -10,7 +10,6 @@ import 'package:kidmemory_protocol/src/auth/oauth.dart';
 import 'package:kidmemory_protocol/src/api/config_api.dart';
 import 'package:kidmemory_protocol/src/api/devices_api.dart';
 import 'package:kidmemory_protocol/src/api/health_api.dart';
-import 'package:kidmemory_protocol/src/api/jobs_api.dart';
 import 'package:kidmemory_protocol/src/api/upload_items_api.dart';
 import 'package:kidmemory_protocol/src/api/web_companion_api.dart';
 
@@ -22,7 +21,7 @@ class KidmemoryProtocol {
     Dio? dio,
     String? basePathOverride,
     List<Interceptor>? interceptors,
-  })  : 
+  })  :
         this.dio = dio ??
             Dio(BaseOptions(
               baseUrl: basePathOverride ?? basePath,
@@ -121,12 +120,6 @@ class KidmemoryProtocol {
   /// by doing that all interceptors will not be executed
   HealthApi getHealthApi() {
     return HealthApi(dio);
-  }
-
-  /// Get JobsApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  JobsApi getJobsApi() {
-    return JobsApi(dio);
   }
 
   /// Get UploadItemsApi instance, base route and serializer can be overridden by a given but be careful,

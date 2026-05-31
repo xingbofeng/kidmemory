@@ -1,7 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Logger, Module } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { InfrastructureModule } from "../../infrastructure/infrastructure.module.ts";
+import { SessionQuotaMiddleware } from "../../infrastructure/security/session-quota.middleware.ts";
 import { DatasetModule } from "../dataset/dataset.module.ts";
 import { DatasetService } from "../dataset/dataset.service.ts";
 
@@ -25,6 +26,8 @@ import { LanReceiverService } from "./lan-receiver.service.ts";
 import { PrismaLanReceiverRepository } from "./prisma-lan-receiver.repository.ts";
 import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
 
+const logger = new Logger("WebCompanionModule");
+
 @Module({
   imports: [InfrastructureModule, DatasetModule],
   controllers: [WebCompanionController, DirectUploadController, LanReceiverController],
@@ -40,7 +43,12 @@ import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
     },
     {
       provide: WebCompanionService,
-      useFactory: async (appConfig: AppConfigService, prisma: PrismaService, dataset: DatasetService) => {
+      useFactory: async (
+        appConfig: AppConfigService,
+        prisma: PrismaService,
+        dataset: DatasetService,
+        sessionQuota: SessionQuotaMiddleware,
+      ) => {
         let repository: PrismaWebCompanionRepository | InMemoryWebCompanionRepository;
         if (process.env.KIDMEMORY_OPENAPI_GENERATION === "1") {
           repository = new InMemoryWebCompanionRepository();
@@ -48,15 +56,14 @@ import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
           await prisma.$queryRaw`SELECT 1`;
           repository = new PrismaWebCompanionRepository(prisma);
         } catch (error) {
-          console.warn(
-            "WebCompanionService falling back to in-memory repository:",
-            error instanceof Error ? error.message : error,
+          logger.warn(
+            `WebCompanionService falling back to in-memory repository: ${error instanceof Error ? error.message : String(error)}`,
           );
           repository = new InMemoryWebCompanionRepository();
         }
-        return new WebCompanionService(appConfig, repository, dataset);
+        return new WebCompanionService(appConfig, repository, dataset, sessionQuota);
       },
-      inject: [AppConfigService, PrismaService, DatasetService],
+      inject: [AppConfigService, PrismaService, DatasetService, SessionQuotaMiddleware],
     },
     {
       provide: BrowseService,

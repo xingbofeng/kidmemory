@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { NestFactory } from "@nestjs/core";
@@ -96,13 +97,13 @@ const ROUTES: RouteCheck[] = [
     },
   },
   {
-    name: "GET /books/jobs stays removed after creation task migration",
+    name: "GET /books/jobs returns 404 because the route is removed",
     method: "GET",
     path: "/books/jobs",
     expectStatuses: [404],
   },
   {
-    name: "POST /books/jobs stays removed after creation task migration",
+    name: "POST /books/jobs returns 404 because the route is removed",
     method: "POST",
     path: "/books/jobs",
     body: { assetIds: [] },
@@ -139,6 +140,18 @@ async function startApp() {
   const baseUrl = `http://127.0.0.1:${address.port}`;
   return { app, baseUrl, server };
 }
+
+test("router smoke names describe current removed-route contracts", () => {
+  const source = readFileSync(new URL(import.meta.url), "utf8");
+  const historicalPhrases = [
+    ["after creation task", "migration"].join(" "),
+    ["legacy", "OpenAI config routes"].join(" "),
+  ];
+
+  for (const phrase of historicalPhrases) {
+    assert.equal(source.includes(phrase), false);
+  }
+});
 
 test("sidecar HTTP routes boot under NestFactory and answer expected status codes", async (t) => {
   const { app, baseUrl, server } = await startApp();
@@ -189,7 +202,7 @@ test("sidecar returns 404 for unknown routes without crashing the app", async (t
   assert.equal(response.status, 404);
 });
 
-test("legacy OpenAI config routes stay removed", async (t) => {
+test("removed OpenAI setup config routes return 404", async (t) => {
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();

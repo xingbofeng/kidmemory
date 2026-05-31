@@ -9,11 +9,11 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**lanReceiverControllerDiscover**](LanReceiverApi.md#lanreceivercontrollerdiscover) | **GET** /api/web-companion/lan/discover | 
-[**lanReceiverControllerDiscoverDevices**](LanReceiverApi.md#lanreceivercontrollerdiscoverdevices) | **GET** /api/web-companion/lan/devices | 
-[**lanReceiverControllerGetSessionStatus**](LanReceiverApi.md#lanreceivercontrollergetsessionstatus) | **GET** /api/web-companion/lan/sessions/{sessionId}/status | 
-[**lanReceiverControllerPair**](LanReceiverApi.md#lanreceivercontrollerpair) | **POST** /api/web-companion/lan/pair | 
-[**lanReceiverControllerUpload**](LanReceiverApi.md#lanreceivercontrollerupload) | **POST** /api/web-companion/lan/sessions/{sessionId}/upload | 
+[**lanReceiverControllerDiscover**](LanReceiverApi.md#lanreceivercontrollerdiscover) | **GET** /api/web-companion/lan/discover |
+[**lanReceiverControllerDiscoverDevices**](LanReceiverApi.md#lanreceivercontrollerdiscoverdevices) | **GET** /api/web-companion/lan/devices |
+[**lanReceiverControllerGetSessionStatus**](LanReceiverApi.md#lanreceivercontrollergetsessionstatus) | **GET** /api/web-companion/lan/sessions/{sessionId}/status |
+[**lanReceiverControllerPair**](LanReceiverApi.md#lanreceivercontrollerpair) | **POST** /api/web-companion/lan/pair |
+[**lanReceiverControllerUpload**](LanReceiverApi.md#lanreceivercontrollerupload) | **POST** /api/web-companion/lan/sessions/{sessionId}/upload |
 
 
 # **lanReceiverControllerDiscover**
@@ -98,7 +98,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getLanReceiverApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.lanReceiverControllerGetSessionStatus(sessionId);
@@ -111,7 +111,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -174,7 +174,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getLanReceiverApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.lanReceiverControllerUpload(sessionId);
@@ -187,7 +187,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -203,4 +203,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

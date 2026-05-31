@@ -1,8 +1,18 @@
 import crypto from "node:crypto";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+import { Logger } from "@nestjs/common";
 import { ShareIpLimiterService } from "./share-ip-limiter.service.ts";
 
-export type ShareTokenDto = components["schemas"]["ShareTokenDto"];
+export interface ShareTokenDto {
+  id: string;
+  token: string;
+  childId: string;
+  expiresAt: string;
+  accessType: "read_only" | "time_limited";
+  resourceType: "child_assets" | "specific_book" | "asset_collection";
+  resourceId?: string;
+  maxAccessCount?: number;
+  shareUrl: string;
+}
 
 export interface CreateShareTokenInput {
   sessionId: string;
@@ -21,7 +31,17 @@ export interface ValidateShareTokenInput {
   userAgent?: string;
 }
 
-export type ShareTokenValidation = components["schemas"]["ShareTokenValidationResponseDto"];
+export interface ShareTokenValidation {
+  isValid: boolean;
+  error?: string;
+  shareToken?: {
+    id: string;
+    childId: string;
+    resourceType: "child_assets" | "specific_book" | "asset_collection";
+    resourceId?: string;
+    accessType: "read_only" | "time_limited";
+  };
+}
 
 export interface ShareSessionRecord {
   sessionId: string;
@@ -78,6 +98,7 @@ export interface ShareTokenRepository {
 }
 
 export class ShareTokenService {
+  private readonly logger = new Logger(ShareTokenService.name);
   private readonly repository: ShareTokenRepository;
   private readonly baseUrl: string;
   private readonly ipLimiter: ShareIpLimiterService;
@@ -149,7 +170,6 @@ export class ShareTokenService {
         return { isValid: false, error: "Share token not found" };
       }
 
-      // Check IP rate limit first
       if (clientIp && !this.ipLimiter.checkLimit(clientIp)) {
         const blockedTime = this.ipLimiter.getBlockedTimeRemaining(clientIp);
         return { 
@@ -199,7 +219,10 @@ export class ShareTokenService {
         },
       };
     } catch (error) {
-      console.error("Share token validation error:", error);
+      this.logger.error(
+        "Share token validation error",
+        error instanceof Error ? error.stack : String(error),
+      );
       return { isValid: false, error: "Token validation failed" };
     }
   }

@@ -24,21 +24,26 @@ export type McpServerTransport =
     };
 
 export function toOpenAIAgentsMcpTools(servers: McpServerDefinition[]): Tool[] {
-  return servers
-	    .filter((server) => server.enabled !== false)
-	    .flatMap((server) => {
-	      if (server.transport.type !== "http") {
-	        throw new Error(`stdio MCP servers are not supported by the OpenAI hosted MCP adapter: ${server.id}`);
-	      }
-	      return [
-        hostedMcpTool({
-          serverLabel: server.id,
-          serverUrl: server.transport.url,
-          headers: server.transport.headers,
-          serverDescription: server.name,
-          allowedTools: server.toolAllowlist,
-          requireApproval: "never",
-        }),
-      ];
-    });
+  const tools: Tool[] = [];
+
+  for (const server of servers) {
+    if (server.enabled === false) {
+      continue;
+    }
+    if (server.transport.type !== "http") {
+      throw new Error(`stdio MCP servers are not supported by the OpenAI hosted MCP adapter: ${server.id}`);
+    }
+    tools.push(
+      hostedMcpTool({
+        serverLabel: server.id,
+        serverUrl: server.transport.url,
+        headers: server.transport.headers,
+        serverDescription: server.name,
+        allowedTools: server.toolAllowlist,
+        requireApproval: "never",
+      }),
+    );
+  }
+
+  return tools;
 }

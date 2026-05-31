@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+import type { CreateUploadItemsRequest } from "../types.ts";
 
 const CreateUploadItemsFileSchema = z.object({
   clientFileId: z.string().min(1),
@@ -22,4 +22,4 @@ export const CreateUploadItemsDtoSchema = z.object({
   }
 });
 
-export type CreateUploadItemsDto = components["schemas"]["CreateUploadItemsRequestDto"];
+export type CreateUploadItemsDto = CreateUploadItemsRequest;

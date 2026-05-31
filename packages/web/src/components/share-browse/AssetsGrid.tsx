@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedAsset } from '../../types/shareBrowse'
+import { formatShareDate } from '../../utils/shareDate'
 
 interface AssetsGridProps {
   assets: SharedAsset[]
@@ -8,16 +9,7 @@ interface AssetsGridProps {
 
 export function AssetsGrid({ assets }: AssetsGridProps) {
   const { t, i18n } = useTranslation()
-  const locale = (i18n.resolvedLanguage ?? i18n.language ?? 'zh-CN').startsWith('en') ? 'en-US' : 'zh-CN'
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString(locale, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
+  const language = i18n.resolvedLanguage ?? i18n.language
 
   if (assets.length === 0) {
     return (
@@ -40,7 +32,7 @@ export function AssetsGrid({ assets }: AssetsGridProps) {
             <h3>{asset.title}</h3>
             <p className="asset-date">
               <Icon name="time" />
-              {formatDate(asset.createdAt)}
+              {formatShareDate(asset.createdAt, language)}
             </p>
           </div>
           <button

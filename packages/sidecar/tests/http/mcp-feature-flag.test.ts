@@ -5,9 +5,9 @@ import test from "node:test";
 
 import { NestFactory } from "@nestjs/core";
 
-async function startAppWithFlag(enabled: boolean) {
-  process.env.KIDMEMORY_MCP_ENABLED = enabled ? "true" : "false";
+import { useMcpTestEnv } from "./mcp-test-helpers.ts";
 
+async function startAppWithFlag(enabled: boolean) {
   const { AppModule } = await import(`../../src/app.module.ts?flag=${enabled ? "on" : "off"}&ts=${Date.now()}`);
   const app = await NestFactory.create(AppModule, { logger: false });
   await app.listen(0, "127.0.0.1");
@@ -23,6 +23,8 @@ async function startAppWithFlag(enabled: boolean) {
 }
 
 test("mcp endpoint is disabled when KIDMEMORY_MCP_ENABLED=false", async (t) => {
+  useMcpTestEnv(t, { enabled: false });
+
   const { app, baseUrl } = await startAppWithFlag(false);
   t.after(async () => {
     await app.close();
@@ -41,6 +43,8 @@ test("mcp endpoint is disabled when KIDMEMORY_MCP_ENABLED=false", async (t) => {
 });
 
 test("mcp endpoint is enabled when KIDMEMORY_MCP_ENABLED=true", async (t) => {
+  useMcpTestEnv(t);
+
   const { app, baseUrl } = await startAppWithFlag(true);
   t.after(async () => {
     await app.close();

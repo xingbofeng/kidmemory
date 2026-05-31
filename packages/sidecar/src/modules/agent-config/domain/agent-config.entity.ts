@@ -20,7 +20,7 @@ export interface AgentConfigProps {
   maxTokens: number;
   systemPrompt?: string;
   toolsEnabled: string[];
-  workspaceConfig: Record<string, any>;
+  workspaceConfig: Record<string, unknown>;
   isDefault: boolean;
   isActive: boolean;
   lastTestedAt?: Date;
@@ -32,7 +32,7 @@ export interface AgentConfigProps {
 export interface CreateAgentConfigProps {
   name: string;
   description?: string;
-  provider: AgentProvider;
+  provider: string;
   model: string;
   baseUrl?: string;
   apiKey: string;
@@ -40,14 +40,14 @@ export interface CreateAgentConfigProps {
   maxTokens?: number;
   systemPrompt?: string;
   toolsEnabled?: string[];
-  workspaceConfig?: Record<string, any>;
+  workspaceConfig?: Record<string, unknown>;
   isDefault?: boolean;
 }
 
 export interface UpdateAgentConfigProps {
   name?: string;
   description?: string;
-  provider?: AgentProvider;
+  provider?: string;
   model?: string;
   baseUrl?: string;
   apiKey?: string;
@@ -55,7 +55,7 @@ export interface UpdateAgentConfigProps {
   maxTokens?: number;
   systemPrompt?: string;
   toolsEnabled?: string[];
-  workspaceConfig?: Record<string, any>;
+  workspaceConfig?: Record<string, unknown>;
   isActive?: boolean;
 }
 
@@ -74,10 +74,10 @@ export class AgentConfig {
       id: id || this.generateId(),
       name: props.name,
       description: props.description,
-      provider: props.provider,
+      provider: this.parseProvider(props.provider),
       model: props.model,
       baseUrl: props.baseUrl,
-      apiKeyConfigured: true, // We have an API key
+      apiKeyConfigured: true,
       temperature: props.temperature ?? 0.7,
       maxTokens: props.maxTokens ?? 4000,
       systemPrompt: props.systemPrompt,
@@ -95,11 +95,15 @@ export class AgentConfig {
   }
 
   update(props: UpdateAgentConfigProps): AgentConfig {
+    const definedUpdates = Object.fromEntries(
+      Object.entries(props).filter(([_, value]) => value !== undefined)
+    ) as Omit<Partial<AgentConfigProps>, "provider"> & { provider?: string };
     const updatedProps: AgentConfigProps = {
       ...this.props,
-      ...Object.fromEntries(
-        Object.entries(props).filter(([_, value]) => value !== undefined)
-      ),
+      ...definedUpdates,
+      provider: definedUpdates.provider === undefined
+        ? this.props.provider
+        : AgentConfig.parseProvider(definedUpdates.provider),
       updatedAt: this.nextUpdatedAt(),
     };
 
@@ -159,7 +163,6 @@ export class AgentConfig {
     return this.props.provider === 'custom';
   }
 
-  // Getters
   get id(): string { return this.props.id; }
   get name(): string { return this.props.name; }
   get description(): string | undefined { return this.props.description; }
@@ -171,7 +174,7 @@ export class AgentConfig {
   get maxTokens(): number { return this.props.maxTokens; }
   get systemPrompt(): string | undefined { return this.props.systemPrompt; }
   get toolsEnabled(): string[] { return [...this.props.toolsEnabled]; }
-  get workspaceConfig(): Record<string, any> { return { ...this.props.workspaceConfig }; }
+  get workspaceConfig(): Record<string, unknown> { return { ...this.props.workspaceConfig }; }
   get isDefault(): boolean { return this.props.isDefault; }
   get isActive(): boolean { return this.props.isActive; }
   get lastTestedAt(): Date | undefined { return this.props.lastTestedAt; }
@@ -223,5 +226,12 @@ export class AgentConfig {
 
   private static generateId(): string {
     return `config_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  private static parseProvider(provider: string): AgentProvider {
+    if (provider === "openai" || provider === "anthropic" || provider === "custom") {
+      return provider;
+    }
+    throw new Error('Agent config provider must be one of: openai, anthropic, custom');
   }
 }

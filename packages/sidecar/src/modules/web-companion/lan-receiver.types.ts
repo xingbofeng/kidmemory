@@ -3,7 +3,6 @@
  *
  * 支持局域网设备发现、配对和直传文件接收
  */
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 // ============================================================================
 // LAN 发现和配对
@@ -12,17 +11,44 @@ import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 /**
  * LAN 设备发现响应
  */
-export type LanDiscoveryResponse = components["schemas"]["LanDiscoveryResponseDto"];
+export interface LanDiscoveryResponse {
+  deviceId: string;
+  deviceName: string;
+  version: string;
+  capabilities: string[];
+  networkInfo: {
+    ip: string;
+    port: number;
+    protocol: string;
+  };
+  security: {
+    requiresAuth: boolean;
+    supportedMethods: string[];
+  };
+}
 
 /**
  * LAN 设备配对请求
  */
-export type LanPairRequest = components["schemas"]["LanPairRequestDto"];
+export interface LanPairRequest {
+  deviceId: string;
+  childId: string;
+  pairingCode?: string;
+}
 
 /**
  * LAN 设备配对响应
  */
-export type LanPairResponse = components["schemas"]["LanPairResponseDto"];
+export interface LanPairResponse {
+  success: boolean;
+  sessionId: string;
+  token: string;
+  expiresAt: string;
+  endpoints: {
+    upload: string;
+    status: string;
+  };
+}
 
 // ============================================================================
 // LAN 会话管理
@@ -75,12 +101,32 @@ export interface LanUploadInput {
 /**
  * LAN 文件上传响应
  */
-export type LanUploadResponse = components["schemas"]["LanUploadResponseDto"];
+export interface LanUploadResponse {
+  success: boolean;
+  uploadedFiles: Array<{
+    filename: string;
+    assetId: string;
+    status: "ready";
+    localPath: string;
+  }>;
+  errors: Array<{
+    filename: string;
+    errorCode: LanReceiverErrorCodeType;
+    message: string;
+  }>;
+}
 
 /**
  * LAN 会话状态响应
  */
-export type LanSessionStatusResponse = components["schemas"]["LanSessionStatusResponseDto"];
+export interface LanSessionStatusResponse {
+  sessionId: string;
+  status: "active" | "expired";
+  expiresAt: string;
+  currentUploads: number;
+  maxConcurrentUploads: number;
+  totalUploaded: number;
+}
 
 // ============================================================================
 // 网络发现

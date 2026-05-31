@@ -11,9 +11,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 import { AppModule } from "../../src/app.module.ts";
+import { parseToolJson, useMcpTestEnv } from "./mcp-test-helpers.ts";
 
 async function startApp() {
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
   const app = await NestFactory.create(AppModule, { logger: false });
   await app.listen(0, "127.0.0.1");
   const address = app.getHttpServer().address();
@@ -33,19 +33,6 @@ async function connectClient(baseUrl: string) {
   return client;
 }
 
-function parseToolJson(result: Awaited<ReturnType<Client["callTool"]>>) {
-  const first = result.content?.[0];
-  if (!first || !("text" in first) || typeof first.text !== "string") {
-    return {};
-  }
-
-  const decoded = decodeNestedJson(first.text);
-  if (decoded && typeof decoded === "object" && !Array.isArray(decoded)) {
-    return decoded as Record<string, unknown>;
-  }
-  return {};
-}
-
 const REQUIRED_ASSET_TOOLS = [
   "list_children",
   "get_child_profile",
@@ -58,6 +45,8 @@ const REQUIRED_ASSET_TOOLS = [
 ];
 
 test("asset MCP tools are discoverable via tools/list", async (t) => {
+  useMcpTestEnv(t);
+
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
@@ -77,6 +66,8 @@ test("asset MCP tools are discoverable via tools/list", async (t) => {
 });
 
 test("list_children and get_child_profile are callable", async (t) => {
+  useMcpTestEnv(t);
+
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
@@ -113,6 +104,8 @@ test("list_children and get_child_profile are callable", async (t) => {
 });
 
 test("all asset MCP tools are callable with valid payloads", async (t) => {
+  useMcpTestEnv(t);
+
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
@@ -194,21 +187,4 @@ function extractId(record: Record<string, unknown>, keys: string[]) {
     }
   }
   return undefined;
-}
-
-function decodeNestedJson(value: string): unknown {
-  let current: unknown = value;
-
-  for (let i = 0; i < 3; i += 1) {
-    if (typeof current !== "string") {
-      break;
-    }
-    try {
-      current = JSON.parse(current);
-    } catch {
-      break;
-    }
-  }
-
-  return current;
 }

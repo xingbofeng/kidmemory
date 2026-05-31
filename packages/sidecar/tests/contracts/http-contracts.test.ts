@@ -1,25 +1,33 @@
 import "reflect-metadata";
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { NestFactory } from "@nestjs/core";
 import type { INestApplication } from "@nestjs/common";
+import type { TestContext } from "node:test";
 
 import { AppModule } from "../../src/app.module.ts";
 import { assertObject, assertString, requestJson } from "./backend-contract-client.ts";
 import { GlobalExceptionFilter } from "../../src/infrastructure/http/global-exception.filter.ts";
 import { ApiResponseInterceptor } from "../../src/infrastructure/http/api-response.interceptor.ts";
+import { useTestEnv } from "../test-env.ts";
 
 type TestServer = {
   app: INestApplication;
   baseUrl: string;
-  restoreEnv: () => void;
 };
 
-async function startContractServer(): Promise<TestServer> {
-  const oldDisableCloudSync = process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
-  process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = "true";
+test("sidecar HTTP contract names use current removed-route wording", () => {
+  const source = readFileSync(new URL(import.meta.url), "utf8");
+  const historicalPhrase = ["legacy", "book job endpoint"].join(" ");
+
+  assert.equal(source.includes(historicalPhrase), false);
+});
+
+async function startContractServer(t: Pick<TestContext, "after">): Promise<TestServer> {
+  useTestEnv(t, { KIDMEMORY_DISABLE_CLOUD_SYNC: "true" });
 
   const app = await NestFactory.create(AppModule, { logger: false });
   app.useGlobalFilters(new GlobalExceptionFilter());
@@ -32,26 +40,15 @@ async function startContractServer(): Promise<TestServer> {
   return {
     app,
     baseUrl: `http://127.0.0.1:${address.port}`,
-    restoreEnv: () => {
-      if (oldDisableCloudSync === undefined) {
-        delete process.env.KIDMEMORY_DISABLE_CLOUD_SYNC;
-      } else {
-        process.env.KIDMEMORY_DISABLE_CLOUD_SYNC = oldDisableCloudSync;
-      }
-    },
   };
 }
 
 async function stopContractServer(server: TestServer) {
-  try {
-    await server.app.close();
-  } finally {
-    server.restoreEnv();
-  }
+  await server.app.close();
 }
 
 test("sidecar contract: health endpoint returns stable service metadata", async (t) => {
-  const server = await startContractServer();
+  const server = await startContractServer(t);
   const { baseUrl } = server;
   t.after(async () => {
     await stopContractServer(server);
@@ -69,7 +66,7 @@ test("sidecar contract: health endpoint returns stable service metadata", async 
 });
 
 test("sidecar contract: invalid public share assets token returns an auth-style error", async (t) => {
-  const server = await startContractServer();
+  const server = await startContractServer(t);
   const { baseUrl } = server;
   t.after(async () => {
     await stopContractServer(server);
@@ -83,7 +80,7 @@ test("sidecar contract: invalid public share assets token returns an auth-style 
 });
 
 test("sidecar contract: invalid public share book token returns an auth-style error", async (t) => {
-  const server = await startContractServer();
+  const server = await startContractServer(t);
   const { baseUrl } = server;
   t.after(async () => {
     await stopContractServer(server);
@@ -96,8 +93,8 @@ test("sidecar contract: invalid public share book token returns an auth-style er
   assert.ok("error" in response.body || "code" in response.body || "message" in response.body);
 });
 
-test("sidecar contract: legacy book job endpoint is not exposed", async (t) => {
-  const server = await startContractServer();
+test("sidecar contract: removed book job endpoint returns 404", async (t) => {
+  const server = await startContractServer(t);
   const { baseUrl } = server;
   t.after(async () => {
     await stopContractServer(server);

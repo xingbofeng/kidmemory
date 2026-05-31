@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import {
+import { schemaRef } from '../../infrastructure/http/swagger-schema.ts';
+import type {
   CommitUploadItemRequestDto,
   CommitUploadItemResponseDto,
   CreateUploadItemsRequestDto,
@@ -21,14 +22,14 @@ export class WebCompanionController {
 
   @Get('/direct-upload/sessions/:sessionId/config')
   @ApiOperation({ summary: 'Get direct upload config for trusted upload session' })
-  @ApiResponse({ status: 200, type: DirectUploadConfigResponseDto })
+  @ApiResponse({ status: 200, schema: schemaRef('DirectUploadConfigResponseDto') })
   async getDirectUploadConfig(@Param('sessionId') sessionId: string): Promise<DirectUploadConfigResponseDto> {
     return this.service.getDirectUploadConfig(sessionId);
   }
 
   @Get('/sessions/:sessionId')
   @ApiOperation({ summary: 'Get trusted upload session summary' })
-  @ApiResponse({ status: 200, type: SessionSummaryResponseDto })
+  @ApiResponse({ status: 200, schema: schemaRef('SessionSummaryResponseDto') })
   async getSessionSummary(
     @Param('sessionId') sessionId: string,
     @Query('token') token?: string,
@@ -38,8 +39,8 @@ export class WebCompanionController {
 
   @Post('/sessions/:sessionId/items')
   @ApiOperation({ summary: 'Create upload items for trusted upload session' })
-  @ApiBody({ type: CreateUploadItemsRequestDto })
-  @ApiResponse({ status: 200, type: CreateUploadItemsResponseDto })
+  @ApiBody({ schema: schemaRef('CreateUploadItemsRequestDto') })
+  @ApiResponse({ status: 200, schema: schemaRef('CreateUploadItemsResponseDto') })
   async createUploadItems(
     @Param('sessionId') sessionId: string,
     @Body() body: CreateUploadItemsRequestDto,
@@ -49,8 +50,8 @@ export class WebCompanionController {
 
   @Put('/sessions/:sessionId/items/:uploadItemId/commit')
   @ApiOperation({ summary: 'Commit upload item' })
-  @ApiBody({ type: CommitUploadItemRequestDto })
-  @ApiResponse({ status: 200, type: CommitUploadItemResponseDto })
+  @ApiBody({ schema: schemaRef('CommitUploadItemRequestDto') })
+  @ApiResponse({ status: 200, schema: schemaRef('CommitUploadItemResponseDto') })
   async commitUploadItem(
     @Param('sessionId') sessionId: string,
     @Param('uploadItemId') uploadItemId: string,
@@ -63,7 +64,7 @@ export class WebCompanionController {
   @ApiOperation({ summary: 'Validate public share token' })
   @ApiQuery({ name: 'clientIp', required: false })
   @ApiQuery({ name: 'userAgent', required: false })
-  @ApiResponse({ status: 200, type: ShareTokenValidationResponseDto })
+  @ApiResponse({ status: 200, schema: schemaRef('ShareTokenValidationResponseDto') })
   async validateShareToken(
     @Param('shareToken') shareToken: string,
     @Query('clientIp') clientIp?: string,
@@ -75,7 +76,7 @@ export class WebCompanionController {
   @Get('/share/:shareToken/assets')
   @ApiOperation({ summary: 'Get public shared assets' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, type: SharedAssetDto, isArray: true })
+  @ApiResponse({ status: 200, schema: { type: 'array', items: schemaRef('SharedAssetDto') } })
   async getSharedAssets(
     @Param('shareToken') shareToken: string,
     @Query('limit') limit?: string,
@@ -87,7 +88,7 @@ export class WebCompanionController {
   @Get('/share/:shareToken/book')
   @ApiOperation({ summary: 'Get public shared book metadata' })
   @ApiQuery({ name: 'bookId', required: false, type: String })
-  @ApiResponse({ status: 200, type: SharedBookDto })
+  @ApiResponse({ status: 200, schema: schemaRef('SharedBookDto') })
   async getSharedBook(
     @Param('shareToken') shareToken: string,
     @Query('bookId') bookId?: string,

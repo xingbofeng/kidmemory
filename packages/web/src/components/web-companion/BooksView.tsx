@@ -78,7 +78,7 @@ export function BooksView({ recentBooks }: BooksViewProps) {
       <section className="recent-books" aria-labelledby="recent-books-title">
         <div className="section-heading">
           <h2 id="recent-books-title">{t('webCompanion.recentBooks')}</h2>
-          <button>{t('uploadLegacy.viewAll')}</button>
+          <button>{t('upload.viewAll')}</button>
         </div>
         {recentBooks.map((book) => (
           <article className="book-row" key={book.title}>

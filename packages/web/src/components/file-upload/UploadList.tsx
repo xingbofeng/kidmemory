@@ -14,9 +14,9 @@ export function UploadList({ selectedFiles, onRemoveFile, onClearAll }: UploadLi
   return (
     <>
       <div className="queue-heading">
-        <h2>{t('uploadLegacy.queueTitle', { count: selectedFiles.length })}</h2>
+        <h2>{t('upload.queueTitle', { count: selectedFiles.length })}</h2>
         <button type="button" onClick={onClearAll} disabled={selectedFiles.length === 0}>
-          {t('uploadLegacy.clearQueue')}
+          {t('upload.clearQueue')}
         </button>
       </div>
 
@@ -30,20 +30,20 @@ export function UploadList({ selectedFiles, onRemoveFile, onClearAll }: UploadLi
             </div>
 
             {selectedFile.status === 'pending' && (
-              <button className="remove-file" onClick={() => onRemoveFile(selectedFile.id)} aria-label={t('uploadLegacy.delete')}>
-                <Icon name="delete" label={t('uploadLegacy.delete')} />
+              <button className="remove-file" onClick={() => onRemoveFile(selectedFile.id)} aria-label={t('upload.delete')}>
+                <Icon name="delete" label={t('upload.delete')} />
               </button>
             )}
 
-            {selectedFile.status === 'uploading' && <span className="item-status uploading">{t('uploadLegacy.uploading')}</span>}
-            {selectedFile.status === 'success' && <span className="item-status success">{t('uploadLegacy.uploadSuccess')}</span>}
+            {selectedFile.status === 'uploading' && <span className="item-status uploading">{t('upload.uploading')}</span>}
+            {selectedFile.status === 'success' && <span className="item-status success">{t('upload.uploadSuccess')}</span>}
             {selectedFile.status === 'error' && (
-              <span className="item-status danger">{selectedFile.error || t('uploadLegacy.uploadFailed')}</span>
+              <span className="item-status danger">{selectedFile.error || t('upload.uploadFailed')}</span>
             )}
           </div>
         ))}
 
-        {selectedFiles.length === 0 && <div className="empty-upload-list">{t('uploadLegacy.emptyUploadList')}</div>}
+        {selectedFiles.length === 0 && <div className="empty-upload-list">{t('upload.emptyUploadList')}</div>}
       </div>
     </>
   )

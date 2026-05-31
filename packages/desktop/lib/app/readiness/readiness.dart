@@ -4,6 +4,7 @@ extension _DesktopShellReadiness on _DesktopShellState {
   Future<void> refreshReadiness() async {
     try {
       final snapshot = await controllers.readiness.load();
+      if (!mounted) return;
       final loadedUiConfig = _parseUiConfig(snapshot.uiConfig);
       _applyReadinessUiConfig(loadedUiConfig);
 
@@ -15,7 +16,6 @@ extension _DesktopShellReadiness on _DesktopShellState {
       }
       _applyReadinessStorageAndPaths(snapshot.config);
 
-      if (!mounted) return;
       final checks = [snapshot.openai];
       final readyCount = checks.where((check) => check.isOk).length;
       final schemaReady = snapshot.schema.isOk;
@@ -41,6 +41,7 @@ extension _DesktopShellReadiness on _DesktopShellState {
       }
     } catch (error) {
       debugPrint('KidMemory readiness refresh failed: $error');
+      if (!mounted) return;
       _markSidecarUnavailable(
         AppLocalizations.of(context)!.setupInitializationFailed(error),
       );

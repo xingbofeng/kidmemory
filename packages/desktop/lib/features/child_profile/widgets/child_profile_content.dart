@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/library_models.dart';
@@ -13,6 +11,7 @@ import 'child_profile_header.dart';
 
 class ChildProfileContent extends StatelessWidget {
   const ChildProfileContent({
+    super.key,
     required this.child,
     required this.assets,
     required this.onAddProfile,

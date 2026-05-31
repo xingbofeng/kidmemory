@@ -4,6 +4,7 @@ import path from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 
 import { AppConfigService } from "../config/app-config.service.ts";
+import { isNotFoundError } from "../filesystem/errors.ts";
 import { redactSensitive } from "./redaction.ts";
 
 export type FileLogLevel = "debug" | "info" | "warn" | "error";
@@ -76,13 +77,4 @@ function parseLogLine(line: string) {
   } catch {
     return null;
   }
-}
-
-function isNotFoundError(error: unknown) {
-  return Boolean(
-    error
-      && typeof error === "object"
-      && "code" in error
-      && (error as { code?: string }).code === "ENOENT",
-  );
 }

@@ -37,53 +37,34 @@ export class HttpClient {
     this.retries = retries;
     this.retryDelay = retryDelay;
     this.axios = axios.create(axiosConfig);
-
-    // Response interceptor to unwrap API format
-    this.axios.interceptors.response.use(
-      this.handleResponse.bind(this) as unknown as (value: AxiosResponse) => AxiosResponse,
-      this.handleError.bind(this)
-    );
   }
 
-  /**
-   * Handle successful response
-   */
-  private handleResponse(response: AxiosResponse): unknown {
+  private handleResponse<T>(response: AxiosResponse): T {
     const data = response.data;
 
-    // Check if response is in API format
     if (this.isApiFormat(data)) {
-      // Check for error code
       if (data.code !== ApiCode.SUCCESS) {
         throw new ApiError(data.code, data.msg, data.data);
       }
 
-      // Return unwrapped data
-      return data.data;
+      return data.data as T;
     }
 
-    // Return as-is for non-API responses (e.g., file downloads)
-    return data;
+    return data as T;
   }
 
-  /**
-   * Handle error response
-   */
-  private handleError(error: unknown): Promise<never> {
+  private handleError(error: unknown): never {
     if (axios.isAxiosError(error) && error.response) {
       const data = error.response.data;
 
-      // Check if error response is in API format
       if (this.isApiFormat(data)) {
         throw new ApiError(data.code, data.msg, data.data);
       }
 
-      // Fallback for non-standard errors
       const message = data?.message || data?.error || 'Request failed';
       throw new ApiError(ApiCode.UNKNOWN_ERROR, message, data);
     }
 
-    // Network error or other error
     throw new ApiError(
       ApiCode.UNKNOWN_ERROR,
       error instanceof Error ? error.message : 'Network error',
@@ -91,9 +72,6 @@ export class HttpClient {
     );
   }
 
-  /**
-   * Check if response is in API format
-   */
   private isApiFormat(data: unknown): data is ApiResponse<unknown> {
     return Boolean(
       data &&
@@ -104,103 +82,73 @@ export class HttpClient {
     );
   }
 
-  /**
-   * Check if error is retryable
-   */
   private isRetryableError(error: unknown): boolean {
-    // Network errors are retryable
     if (!axios.isAxiosError(error) || !error.response) {
       return true;
     }
 
-    // 5xx errors are retryable
     const status = error.response.status;
     return status >= 500 && status < 600;
   }
 
-  /**
-   * Execute request with retry logic
-   */
-  private async executeWithRetry<T>(
-    fn: () => Promise<T>,
-    retriesLeft: number = this.retries
-  ): Promise<T> {
-    try {
-      return await fn();
-    } catch (error) {
-      if (retriesLeft > 0 && this.isRetryableError(error)) {
-        // Wait before retry
+  private async executeWithRetry<T>(fn: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; attempt <= this.retries; attempt += 1) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt >= this.retries || !this.isRetryableError(error)) {
+          throw error;
+        }
+
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-        return this.executeWithRetry(fn, retriesLeft - 1);
       }
-      throw error;
+    }
+
+    throw new Error('Retry loop exhausted');
+  }
+
+  private async request<T>(fn: () => Promise<AxiosResponse<unknown>>): Promise<T> {
+    try {
+      const response = await this.executeWithRetry(fn);
+      return this.handleResponse<T>(response);
+    } catch (error) {
+      this.handleError(error);
     }
   }
 
-  /**
-   * GET request
-   */
   async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return this.executeWithRetry(() => this.axios.get<T>(url, config) as unknown as Promise<T>);
+    return this.request<T>(() => this.axios.get<unknown, AxiosResponse<unknown>>(url, config));
   }
 
-  /**
-   * POST request
-   */
   async post<T = unknown>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.post<T>(url, data, config) as unknown as Promise<T>);
+    return this.request<T>(() => this.axios.post<unknown, AxiosResponse<unknown>>(url, data, config));
   }
 
-  /**
-   * PUT request
-   */
   async put<T = unknown>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.put<T>(url, data, config) as unknown as Promise<T>);
+    return this.request<T>(() => this.axios.put<unknown, AxiosResponse<unknown>>(url, data, config));
   }
 
-  /**
-   * DELETE request
-   */
   async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return this.executeWithRetry(() => this.axios.delete<T>(url, config) as unknown as Promise<T>);
+    return this.request<T>(() => this.axios.delete<unknown, AxiosResponse<unknown>>(url, config));
   }
 
-  /**
-   * PATCH request
-   */
   async patch<T = unknown>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    return this.executeWithRetry(() => this.axios.patch<T>(url, data, config) as unknown as Promise<T>);
+    return this.request<T>(() => this.axios.patch<unknown, AxiosResponse<unknown>>(url, data, config));
   }
 }
 
-// Default client instance (lazy initialization to support testing)
-let _httpClient: HttpClient | null = null;
+export const httpClient = new HttpClient();
 
-export function getHttpClient(): HttpClient {
-  if (!_httpClient) {
-    _httpClient = new HttpClient();
-  }
-  return _httpClient;
-}
-
-// For backward compatibility
-export const httpClient = new Proxy({} as HttpClient, {
-  get(_target, prop) {
-    return Reflect.get(getHttpClient(), prop);
-  }
-});
-
-// Re-export for convenience
 export { ApiCode, type ApiResponse };

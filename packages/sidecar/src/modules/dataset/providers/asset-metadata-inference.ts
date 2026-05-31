@@ -1,7 +1,18 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Logger } from "@nestjs/common";
 
 import type { AppConfigService } from "../../../infrastructure/config/app-config.service.ts";
+
+type ChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: unknown;
+    };
+  }>;
+};
+
+const logger = new Logger("AssetMetadataInference");
 
 export type InferAssetMetadata = (input: {
   assetId: string;
@@ -32,13 +43,13 @@ export function createOpenAIAssetMetadataInferer(
           : "image/jpeg";
       dataUrl = `data:${mime};base64,${image.toString("base64")}`;
     } catch (error) {
-      console.warn(
+      logger.warn(
         `[asset-metadata] skip asset=${assetId}: failed to read image (${error instanceof Error ? error.message : String(error)})`,
       );
       return null;
     }
 
-    console.info(`[asset-metadata] start asset=${assetId}`);
+    logger.log(`[asset-metadata] start asset=${assetId}`);
     try {
       const response = await fetcher(`${config.baseUrl.replace(/\/$/, "")}/chat/completions`, {
         method: "POST",
@@ -65,18 +76,18 @@ export function createOpenAIAssetMetadataInferer(
         }),
       });
       if (!response.ok) {
-        console.warn(`[asset-metadata] fail asset=${assetId}: http status ${response.status}`);
+        logger.warn(`[asset-metadata] fail asset=${assetId}: http status ${response.status}`);
         return null;
       }
-      const payload = await response.json() as any;
+      const payload = await response.json() as ChatCompletionResponse;
       const raw = payload?.choices?.[0]?.message?.content;
       if (typeof raw !== "string" || !raw.trim()) {
-        console.warn(`[asset-metadata] fail asset=${assetId}: empty model content`);
+        logger.warn(`[asset-metadata] fail asset=${assetId}: empty model content`);
         return null;
       }
       const parsed = parseMetadataContent(raw);
       if (!parsed) {
-        console.warn(`[asset-metadata] fail asset=${assetId}: model content is not valid metadata json`);
+        logger.warn(`[asset-metadata] fail asset=${assetId}: model content is not valid metadata json`);
         return null;
       }
       const normalized = {
@@ -86,12 +97,12 @@ export function createOpenAIAssetMetadataInferer(
           ? parsed.tags.map((tag) => String(tag).trim()).filter(Boolean).slice(0, 8)
           : undefined,
       };
-      console.info(
+      logger.log(
         `[asset-metadata] success asset=${assetId}: title=${Boolean(normalized.title)} tags=${normalized.tags?.length || 0} description=${Boolean(normalized.description)}`,
       );
       return normalized;
     } catch (error) {
-      console.warn(
+      logger.warn(
         `[asset-metadata] fail asset=${assetId}: ${error instanceof Error ? error.message : String(error)}`,
       );
       return null;

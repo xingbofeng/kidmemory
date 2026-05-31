@@ -5,7 +5,7 @@
  * Follows Clean Architecture principles with proper dependency injection.
  */
 
-import { Module } from "@nestjs/common";
+import { Logger, Module } from "@nestjs/common";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
@@ -40,6 +40,8 @@ import { InMemoryAuditLogger } from './adapters/in-memory-audit-logger.ts';
 
 // Presentation
 import { AgentConfigController } from './presentation/agent-config.http-controller.ts';
+
+const logger = new Logger("AgentConfigModule");
 
 export class AgentConfigModule {}
 
@@ -123,7 +125,7 @@ function createEncryptionService(): EncryptionService {
   const devKeyFile = resolveDevEncryptionKeyFile();
   const persistedKey = readPersistedDevEncryptionKey(devKeyFile);
   if (persistedKey) {
-    console.warn(
+    logger.warn(
       `AGENT_CONFIG_ENCRYPTION_KEY not set. Loaded persistent development key from ${devKeyFile}.`,
     );
     return new EncryptionService(persistedKey);
@@ -132,7 +134,7 @@ function createEncryptionService(): EncryptionService {
   const service = new EncryptionService();
   const generatedKey = service.generateKey();
   persistDevEncryptionKey(devKeyFile, generatedKey);
-  console.warn(
+  logger.warn(
     `AGENT_CONFIG_ENCRYPTION_KEY not set. Generated persistent development key at ${devKeyFile}.`,
   );
   return new EncryptionService(generatedKey);

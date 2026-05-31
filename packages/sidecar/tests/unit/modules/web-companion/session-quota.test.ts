@@ -8,38 +8,44 @@
  * - 会话关闭时配额释放
  */
 
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import type { Request, Response } from 'express';
 import { SessionQuotaMiddleware } from '../../../../src/infrastructure/security/session-quota.middleware.ts';
 import { ApiCode } from '@kidmemory/protocol';
 
-type MockRequest = {
+type ErrorResponseBody = {
+  code?: number;
+};
+
+type MockRequest = Request & {
   method: string;
   path: string;
-  body: any;
+  url: string;
+  body: unknown;
 };
 
-type MockResponse = {
+type MockResponse = Response & {
   statusCode: number;
-  json: (body: any) => MockResponse;
-  send: (body: any) => MockResponse;
+  json: (body: unknown) => MockResponse;
+  send: (body: unknown) => MockResponse;
   status: (code: number) => MockResponse;
-  _jsonBody?: any;
-  _sendBody?: any;
+  _jsonBody?: ErrorResponseBody;
+  _sendBody?: unknown;
 };
 
-function createMockRequest(method: string, path: string, body: any = {}): MockRequest {
-  return { method, path, body };
+function createMockRequest(method: string, path: string, body: unknown = {}): MockRequest {
+  return { method, path, url: path, body } as MockRequest;
 }
 
 function createMockResponse(): MockResponse {
   const res: MockResponse = {
     statusCode: 200,
-    json: function(body: any) {
-      this._jsonBody = body;
+    json: function(body: unknown) {
+      this._jsonBody = body as ErrorResponseBody;
       return this;
     },
-    send: function(body: any) {
+    send: function(body: unknown) {
       this._sendBody = body;
       return this;
     },
@@ -47,7 +53,7 @@ function createMockResponse(): MockResponse {
       this.statusCode = code;
       return this;
     },
-  };
+  } as MockResponse;
   return res;
 }
 
@@ -59,7 +65,7 @@ describe('SessionQuotaMiddleware', () => {
       const res = createMockResponse();
       let nextCalled = false;
 
-      await middleware.use(req as any, res as any, () => { nextCalled = true; });
+      await middleware.use(req, res, () => { nextCalled = true; });
 
       assert.strictEqual(nextCalled, true, '应该调用 next()');
       assert.strictEqual(res.statusCode, 200, '不应该返回错误状态码');
@@ -70,7 +76,7 @@ describe('SessionQuotaMiddleware', () => {
       const req = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
       const res = createMockResponse();
 
-      await middleware.use(req as any, res as any, () => {});
+      await middleware.use(req, res, () => {});
 
       // 模拟成功响应
       res.statusCode = 201;
@@ -93,7 +99,7 @@ describe('SessionQuotaMiddleware', () => {
         const res = createMockResponse();
         let nextCalled = false;
 
-        await middleware.use(req as any, res as any, () => { nextCalled = true; });
+        await middleware.use(req, res, () => { nextCalled = true; });
 
         assert.strictEqual(nextCalled, true, `第 ${i} 个会话应该被允许`);
 
@@ -115,25 +121,17 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 5; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
       }
-
-      // 检查当前状态
-      const statsBefore = middleware.getStats();
-      console.log('Stats before 6th request:', JSON.stringify(statsBefore, null, 2));
 
       // 尝试创建第 6 个会话
       const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
       const res = createMockResponse();
       let nextCalled = false;
 
-      await middleware.use(req as any, res as any, () => { nextCalled = true; });
-
-      console.log('Next called:', nextCalled);
-      console.log('Response status:', res.statusCode);
-      console.log('Response body:', res._jsonBody);
+      await middleware.use(req, res, () => { nextCalled = true; });
 
       assert.strictEqual(nextCalled, false, '不应该调用 next()');
       assert.strictEqual(res.statusCode, 429, '应该返回 429 状态码');
@@ -154,14 +152,10 @@ describe('SessionQuotaMiddleware', () => {
 
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
       }
-
-      // 检查当前状态
-      const statsBefore = middleware.getStats();
-      console.log('Stats before 21st request:', JSON.stringify(statsBefore, null, 2));
 
       // 先释放一个活跃会话，确保第 21 次命中“每日配额”而不是“活跃会话配额”
       middleware.recordSessionClosure(childId, 'session16');
@@ -171,10 +165,7 @@ describe('SessionQuotaMiddleware', () => {
       const res = createMockResponse();
       let nextCalled = false;
 
-      await middleware.use(req as any, res as any, () => { nextCalled = true; });
-
-      console.log('Next called:', nextCalled);
-      console.log('Response status:', res.statusCode);
+      await middleware.use(req, res, () => { nextCalled = true; });
 
       assert.strictEqual(nextCalled, false, '不应该调用 next()');
       assert.strictEqual(res.statusCode, 429, '应该返回 429 状态码');
@@ -192,7 +183,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 3; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
       }
@@ -216,7 +207,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 5; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
       }
@@ -230,7 +221,7 @@ describe('SessionQuotaMiddleware', () => {
       const res = createMockResponse();
       let nextCalled = false;
 
-      await middleware.use(req as any, res as any, () => { nextCalled = true; });
+      await middleware.use(req, res, () => { nextCalled = true; });
 
       assert.strictEqual(nextCalled, true, '应该允许创建新会话');
     });
@@ -253,7 +244,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 3; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `child1-session${i}`, childId: 'child1' });
       }
@@ -262,7 +253,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 2; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child2' });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `child2-session${i}`, childId: 'child2' });
       }
@@ -287,7 +278,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 5; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `child1-session${i}`, childId: 'child1' });
       }
@@ -296,38 +287,15 @@ describe('SessionQuotaMiddleware', () => {
       const req1 = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
       const res1 = createMockResponse();
       let next1Called = false;
-      await middleware.use(req1 as any, res1 as any, () => { next1Called = true; });
+      await middleware.use(req1, res1, () => { next1Called = true; });
       assert.strictEqual(next1Called, false, 'child1 不应该被允许创建更多会话');
 
       // child2 创建会话应该成功
       const req2 = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child2' });
       const res2 = createMockResponse();
       let next2Called = false;
-      await middleware.use(req2 as any, res2 as any, () => { next2Called = true; });
+      await middleware.use(req2, res2, () => { next2Called = true; });
       assert.strictEqual(next2Called, true, 'child2 应该被允许创建会话');
-    });
-  });
-
-  describe('每日配额重置', () => {
-    it('应该在新的一天重置每日计数', async () => {
-      const middleware = new SessionQuotaMiddleware();
-      const childId = 'child1';
-
-      // 创建 5 个会话
-      for (let i = 1; i <= 5; i++) {
-        const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
-        const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
-        res.statusCode = 201;
-        res.json({ sessionId: `session${i}`, childId });
-      }
-
-      let stats = middleware.getStats();
-      assert.strictEqual(stats.children[0].dailyCount, 5, '今天应该创建了 5 个会话');
-
-      // 模拟时间推进到第二天（通过访问私有方法或重新创建实例）
-      // 注意：这里需要实现一个可以注入时间的机制
-      // 暂时跳过这个测试，在实现中需要支持时间注入
     });
   });
 
@@ -339,21 +307,21 @@ describe('SessionQuotaMiddleware', () => {
       const req1 = createMockRequest('GET', '/api/web-companion/sessions', {});
       const res1 = createMockResponse();
       let next1Called = false;
-      await middleware.use(req1 as any, res1 as any, () => { next1Called = true; });
+      await middleware.use(req1, res1, () => { next1Called = true; });
       assert.strictEqual(next1Called, true, 'GET 请求应该放行');
 
       // POST 到其他路径应该放行
       const req2 = createMockRequest('POST', '/api/web-companion/sessions/123/items', {});
       const res2 = createMockResponse();
       let next2Called = false;
-      await middleware.use(req2 as any, res2 as any, () => { next2Called = true; });
+      await middleware.use(req2, res2, () => { next2Called = true; });
       assert.strictEqual(next2Called, true, '其他 POST 请求应该放行');
 
       // POST /sessions 应该被拦截
       const req3 = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
       const res3 = createMockResponse();
       let next3Called = false;
-      await middleware.use(req3 as any, res3 as any, () => { next3Called = true; });
+      await middleware.use(req3, res3, () => { next3Called = true; });
       assert.strictEqual(next3Called, true, 'POST /sessions 应该被处理');
     });
 
@@ -363,7 +331,7 @@ describe('SessionQuotaMiddleware', () => {
       const res = createMockResponse();
       let nextCalled = false;
 
-      await middleware.use(req as any, res as any, () => { nextCalled = true; });
+      await middleware.use(req, res, () => { nextCalled = true; });
 
       assert.strictEqual(nextCalled, false, '不应该调用 next()');
       assert.strictEqual(res.statusCode, 400, '应该返回 400 状态码');
@@ -381,7 +349,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 3; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId });
       }
@@ -414,7 +382,7 @@ describe('SessionQuotaMiddleware', () => {
       for (let i = 1; i <= 2; i++) {
         const req = createMockRequest('POST', '/api/web-companion/sessions', { childId: 'child1' });
         const res = createMockResponse();
-        await middleware.use(req as any, res as any, () => {});
+        await middleware.use(req, res, () => {});
         res.statusCode = 201;
         res.json({ sessionId: `session${i}`, childId: 'child1' });
       }

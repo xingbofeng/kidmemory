@@ -19,12 +19,11 @@ interface Book {
 interface WebCompanionAppProps {
   sessionId: string
   sessionToken: string
-  defaultChildId: string
   recentBooks: Book[]
   onResetSession: () => void
 }
 
-export function WebCompanionApp({ sessionId, sessionToken, defaultChildId, recentBooks, onResetSession }: WebCompanionAppProps) {
+export function WebCompanionApp({ sessionId, sessionToken, recentBooks, onResetSession }: WebCompanionAppProps) {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabType>('connect')
   const [activeSession, setActiveSession] = useState<UploadSessionType | null>(null)
@@ -55,7 +54,7 @@ export function WebCompanionApp({ sessionId, sessionToken, defaultChildId, recen
       case 'upload':
         return <UploadView activeSession={activeSession} sessionToken={sessionToken} onBack={handleBackToConnect} />
       case 'browse':
-        return <BrowseView childId={defaultChildId} />
+        return <BrowseView sessionId={sessionId} sessionToken={sessionToken} />
       case 'books':
         return <BooksView recentBooks={recentBooks} />
       default:

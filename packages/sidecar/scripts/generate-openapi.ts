@@ -15,17 +15,23 @@ const outputDir = path.resolve(__dirname, "../../protocol/openapi");
 const jsonPath = path.join(outputDir, "sidecar.openapi.json");
 const yamlPath = path.join(outputDir, "sidecar.openapi.yaml");
 
-function normalizePathParameters(document: Record<string, unknown>): void {
-  const paths = document.paths as Record<string, Record<string, unknown>> | undefined;
+type OpenApiParameter = {
+  $ref?: string;
+  in?: string;
+  name?: string;
+  required?: boolean;
+  schema?: { $ref?: string; type?: string };
+};
+
+function normalizePathParameters(document: { paths?: Record<string, { parameters?: OpenApiParameter[] }> }): void {
+  const paths = document.paths;
   if (!paths) return;
 
   for (const [routePath, pathItem] of Object.entries(paths)) {
     const placeholders = [...routePath.matchAll(/\{([^}]+)\}/g)].map((match) => match[1]);
     if (placeholders.length === 0) continue;
 
-    const existingParameters = Array.isArray(pathItem.parameters)
-      ? (pathItem.parameters as Array<{ in?: string; name?: string }>)
-      : [];
+    const existingParameters = Array.isArray(pathItem.parameters) ? pathItem.parameters : [];
 
     for (const placeholder of placeholders) {
       const exists = existingParameters.some((parameter) => parameter.in === "path" && parameter.name === placeholder);
@@ -59,23 +65,20 @@ async function generateOpenApi(): Promise<void> {
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
-    normalizePathParameters(document as unknown as Record<string, unknown>);
+    normalizePathParameters(document);
 
     await mkdir(outputDir, { recursive: true });
     await writeFile(jsonPath, `${JSON.stringify(document, null, 2)}\n`, "utf8");
     await writeFile(yamlPath, YAML.stringify(document), "utf8");
 
-    // eslint-disable-next-line no-console
-    console.log(`Generated ${jsonPath}`);
-    // eslint-disable-next-line no-console
-    console.log(`Generated ${yamlPath}`);
+    process.stdout.write(`Generated ${jsonPath}\n`);
+    process.stdout.write(`Generated ${yamlPath}\n`);
   } finally {
     await app.close();
   }
 }
 
 void generateOpenApi().catch((error) => {
-  // eslint-disable-next-line no-console
-  console.error("Failed to generate sidecar OpenAPI:", error);
+  process.stderr.write(`Failed to generate sidecar OpenAPI: ${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
   process.exitCode = 1;
 });

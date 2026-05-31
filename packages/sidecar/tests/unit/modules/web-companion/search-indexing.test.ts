@@ -8,12 +8,18 @@ import { DatasetState } from "../../../../src/infrastructure/dataset-state/datas
 import { MemoryDatasetDb } from "../../../../src/infrastructure/dataset-state/memory-dataset-db.ts";
 import { createDatasetService } from "../../../../src/modules/dataset/providers/dataset.domain.ts";
 
+type DatasetServiceDependencies = Parameters<typeof createDatasetService>[0];
+
+function makeDatasetConfig(dataDir: string): NonNullable<DatasetServiceDependencies["config"]> {
+  return { config: { paths: { dataDir } } };
+}
+
 function buildService(options: { dataDir: string; embedText?: (text: string) => Promise<number[]> }) {
   const db = new MemoryDatasetDb();
   const datasetState = new DatasetState(db, async () => db);
   const service = createDatasetService({
-    datasetState: datasetState as any,
-    config: { config: { paths: { dataDir: options.dataDir } } } as any,
+    datasetState,
+    config: makeDatasetConfig(options.dataDir),
     embedText: options.embedText,
   });
   return { service, db };
@@ -130,7 +136,7 @@ test("search caps vector recall size for deep pages", async () => {
   };
   const datasetState = new DatasetState(db, async () => db);
   const service = createDatasetService({
-    datasetState: datasetState as any,
+    datasetState,
     embedText: async () => new Array(1536).fill(0),
   });
 
@@ -218,8 +224,7 @@ test("indexer retries retryable errors with capped backoff in dev mode", async (
     embedText: async () => {
       attempts += 1;
       if (attempts <= 2) {
-        const error = new Error("timeout");
-        (error as any).code = "ETIMEDOUT";
+        const error = Object.assign(new Error("timeout"), { code: "ETIMEDOUT" });
         throw error;
       }
       return new Array(1536).fill(0).map((_, index) => (index === 0 ? 1 : 0));
@@ -306,12 +311,12 @@ test("sidecar restart can recover unfinished indexing jobs", async () => {
   const stateA = new DatasetState(db, async () => db);
   const stateB = new DatasetState(db, async () => db);
   const serviceA = createDatasetService({
-    datasetState: stateA as any,
-    config: { config: { paths: { dataDir: "/tmp/kidmemory-test" } } } as any,
+    datasetState: stateA,
+    config: makeDatasetConfig("/tmp/kidmemory-test"),
   });
   const serviceB = createDatasetService({
-    datasetState: stateB as any,
-    config: { config: { paths: { dataDir: "/tmp/kidmemory-test" } } } as any,
+    datasetState: stateB,
+    config: makeDatasetConfig("/tmp/kidmemory-test"),
   });
 
   await serviceA.enqueueSearchIndexing("asset-1");

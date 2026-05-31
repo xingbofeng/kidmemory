@@ -147,9 +147,8 @@ describe('TrustedUploadPage', () => {
     render(<TrustedUploadPage sessionId="test-session" token="test-token" />)
 
     expect(screen.getByText('当前网络不可用')).toBeInTheDocument()
-    const lanButton = screen.getByText('📶 局域网直传')
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(lanButton.parentElement).toHaveAttribute('disabled')
+    const lanButton = screen.getByRole('button', { name: /局域网直传/ })
+    expect(lanButton).toBeDisabled()
   })
 
   it('allows continuing upload via footer button', () => {

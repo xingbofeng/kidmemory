@@ -250,96 +250,6 @@
         }
       ]
     },
-    "/jobs/pending": {
-      "get": {
-        "operationId": "JobsController_getPendingJobs",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Maximum jobs to return",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "deviceId",
-            "required": false,
-            "in": "query",
-            "description": "Filter by device ID (null = unassigned)",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Pending jobs retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/JobResponseDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get pending jobs for device",
-        "tags": [
-          "jobs"
-        ]
-      }
-    },
-    "/jobs/{id}/status": {
-      "put": {
-        "operationId": "JobsController_updateStatus",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateJobStatusRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Status updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid status transition"
-          },
-          "404": {
-            "description": "Job not found"
-          }
-        },
-        "summary": "Update job status",
-        "tags": [
-          "jobs"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ]
-    },
     "/api/web-companion/direct-upload/sessions/{sessionId}/config": {
       "get": {
         "operationId": "WebCompanionController_getDirectUploadConfig",
@@ -643,10 +553,6 @@
       "description": "Device registration and sync"
     },
     {
-      "name": "jobs",
-      "description": "Job lifecycle and sync"
-    },
-    {
       "name": "upload-items",
       "description": "Upload item sync"
     }
@@ -665,6 +571,9 @@
     "schemas": {
       "RegisterDeviceRequestDto": {
         "type": "object",
+        "required": [
+          "machineId"
+        ],
         "properties": {
           "machineId": {
             "type": "string"
@@ -675,13 +584,17 @@
           "platform": {
             "type": "string"
           }
-        },
-        "required": [
-          "machineId"
-        ]
+        }
       },
       "DeviceResponseDto": {
         "type": "object",
+        "required": [
+          "id",
+          "machineId",
+          "lastHeartbeat",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -704,17 +617,19 @@
           "updatedAt": {
             "type": "string"
           }
-        },
-        "required": [
-          "id",
-          "machineId",
-          "lastHeartbeat",
-          "createdAt",
-          "updatedAt"
-        ]
+        }
       },
       "UploadItemResponseDto": {
         "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "objectKey",
+          "fileName",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -764,19 +679,13 @@
           "updatedAt": {
             "type": "string"
           }
-        },
-        "required": [
-          "id",
-          "sessionId",
-          "objectKey",
-          "fileName",
-          "status",
-          "createdAt",
-          "updatedAt"
-        ]
+        }
       },
       "UpdateSyncStatusRequestDto": {
         "type": "object",
+        "required": [
+          "status"
+        ],
         "properties": {
           "status": {
             "type": "string",
@@ -792,117 +701,71 @@
           "errorMessage": {
             "type": "string"
           }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "JobResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "deviceId": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "book_generation",
-              "asset_processing",
-              "export_pdf",
-              "export_long_image",
-              "import",
-              "sync",
-              "export",
-              "cleanup"
-            ]
-          },
-          "payload": {
-            "type": "object",
-            "nullable": true,
-            "additionalProperties": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pending",
-              "claimed",
-              "processing",
-              "completed",
-              "failed"
-            ]
-          },
-          "priority": {
-            "type": "number"
-          },
-          "claimedAt": {
-            "type": "string"
-          },
-          "completedAt": {
-            "type": "string"
-          },
-          "errorMessage": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "payload",
-          "status",
-          "priority",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "UpdateJobStatusRequestDto": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "pending",
-              "claimed",
-              "processing",
-              "completed",
-              "failed"
-            ]
-          },
-          "claimedAt": {
-            "type": "string"
-          },
-          "completedAt": {
-            "type": "string"
-          },
-          "errorMessage": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
-        ]
+        }
       },
       "DirectUploadConfigResponseDto": {
         "type": "object",
+        "required": [
+          "anonKey"
+        ],
         "properties": {
           "anonKey": {
             "type": "string"
           }
-        },
+        }
+      },
+      "TrustedUploadSessionChildDto": {
+        "type": "object",
         "required": [
-          "anonKey"
-        ]
+          "id",
+          "displayName"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderAvailabilityDto": {
+        "type": "object",
+        "required": [
+          "available"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DirectUploadProvidersDto": {
+        "type": "object",
+        "required": [
+          "lan",
+          "supabase"
+        ],
+        "properties": {
+          "lan": {
+            "$ref": "#/components/schemas/ProviderAvailabilityDto"
+          },
+          "supabase": {
+            "$ref": "#/components/schemas/ProviderAvailabilityDto"
+          }
+        }
       },
       "SessionSummaryResponseDto": {
         "type": "object",
+        "required": [
+          "sessionId",
+          "status",
+          "child",
+          "expiresAt",
+          "maxItems",
+          "usedItems",
+          "providers"
+        ],
         "properties": {
           "sessionId": {
             "type": "string"
@@ -911,7 +774,7 @@
             "type": "string"
           },
           "child": {
-            "type": "object"
+            "$ref": "#/components/schemas/TrustedUploadSessionChildDto"
           },
           "expiresAt": {
             "type": "string"
@@ -923,21 +786,18 @@
             "type": "number"
           },
           "providers": {
-            "type": "object"
+            "$ref": "#/components/schemas/DirectUploadProvidersDto"
           }
-        },
-        "required": [
-          "sessionId",
-          "status",
-          "child",
-          "expiresAt",
-          "maxItems",
-          "usedItems",
-          "providers"
-        ]
+        }
       },
       "CreateUploadFileDto": {
         "type": "object",
+        "required": [
+          "clientFileId",
+          "filename",
+          "contentType",
+          "sizeBytes"
+        ],
         "properties": {
           "clientFileId": {
             "type": "string"
@@ -951,16 +811,14 @@
           "sizeBytes": {
             "type": "number"
           }
-        },
-        "required": [
-          "clientFileId",
-          "filename",
-          "contentType",
-          "sizeBytes"
-        ]
+        }
       },
       "CreateUploadItemsRequestDto": {
         "type": "object",
+        "required": [
+          "token",
+          "files"
+        ],
         "properties": {
           "token": {
             "type": "string"
@@ -978,14 +836,15 @@
               "$ref": "#/components/schemas/CreateUploadFileDto"
             }
           }
-        },
-        "required": [
-          "token",
-          "files"
-        ]
+        }
       },
       "SignedUploadTargetDto": {
         "type": "object",
+        "required": [
+          "method",
+          "url",
+          "headers"
+        ],
         "properties": {
           "method": {
             "type": "string"
@@ -1002,15 +861,17 @@
           "expiresAt": {
             "type": "string"
           }
-        },
-        "required": [
-          "method",
-          "url",
-          "headers"
-        ]
+        }
       },
       "CreatedUploadItemDto": {
         "type": "object",
+        "required": [
+          "clientFileId",
+          "uploadItemId",
+          "assetId",
+          "objectKey",
+          "status"
+        ],
         "properties": {
           "clientFileId": {
             "type": "string"
@@ -1030,17 +891,13 @@
           "signedUpload": {
             "$ref": "#/components/schemas/SignedUploadTargetDto"
           }
-        },
-        "required": [
-          "clientFileId",
-          "uploadItemId",
-          "assetId",
-          "objectKey",
-          "status"
-        ]
+        }
       },
       "CreateUploadItemsResponseDto": {
         "type": "object",
+        "required": [
+          "items"
+        ],
         "properties": {
           "items": {
             "type": "array",
@@ -1048,13 +905,16 @@
               "$ref": "#/components/schemas/CreatedUploadItemDto"
             }
           }
-        },
-        "required": [
-          "items"
-        ]
+        }
       },
       "CommitUploadItemRequestDto": {
         "type": "object",
+        "required": [
+          "token",
+          "objectKey",
+          "contentType",
+          "sizeBytes"
+        ],
         "properties": {
           "token": {
             "type": "string"
@@ -1078,16 +938,14 @@
             "type": "object",
             "additionalProperties": true
           }
-        },
-        "required": [
-          "token",
-          "objectKey",
-          "contentType",
-          "sizeBytes"
-        ]
+        }
       },
       "CommitUploadItemResponseDto": {
         "type": "object",
+        "required": [
+          "uploadItemId",
+          "status"
+        ],
         "properties": {
           "uploadItemId": {
             "type": "string"
@@ -1095,14 +953,46 @@
           "status": {
             "type": "string"
           }
-        },
+        }
+      },
+      "ShareTokenAccessDto": {
+        "type": "object",
         "required": [
-          "uploadItemId",
-          "status"
-        ]
+          "id",
+          "childId",
+          "resourceType",
+          "accessType"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "childId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "specific_book",
+              "child_assets"
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "accessType": {
+            "type": "string",
+            "enum": [
+              "read"
+            ]
+          }
+        }
       },
       "ShareTokenValidationResponseDto": {
         "type": "object",
+        "required": [
+          "isValid"
+        ],
         "properties": {
           "isValid": {
             "type": "boolean"
@@ -1111,15 +1001,18 @@
             "type": "string"
           },
           "shareToken": {
-            "type": "object"
+            "$ref": "#/components/schemas/ShareTokenAccessDto"
           }
-        },
-        "required": [
-          "isValid"
-        ]
+        }
       },
       "SharedAssetDto": {
         "type": "object",
+        "required": [
+          "id",
+          "title",
+          "type",
+          "createdAt"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -1133,16 +1026,17 @@
           "createdAt": {
             "type": "string"
           }
-        },
-        "required": [
-          "id",
-          "title",
-          "type",
-          "createdAt"
-        ]
+        }
       },
       "SharedBookDto": {
         "type": "object",
+        "required": [
+          "id",
+          "title",
+          "childId",
+          "createdAt",
+          "status"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -1159,14 +1053,7 @@
           "status": {
             "type": "string"
           }
-        },
-        "required": [
-          "id",
-          "title",
-          "childId",
-          "createdAt",
-          "status"
-        ]
+        }
       }
     }
   }

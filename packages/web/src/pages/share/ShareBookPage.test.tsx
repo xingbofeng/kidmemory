@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { render, screen, waitFor } from '@testing-library/react'
 import { ShareBookPage } from './ShareBookPage'
 import { getSharedBook, validateShareToken } from '../../api/shareApi'
@@ -38,6 +39,12 @@ function mockBook() {
 }
 
 describe('ShareBookPage', () => {
+  it('does not suppress hook dependency checks', () => {
+    const source = readFileSync('src/pages/share/ShareBookPage.tsx', 'utf8')
+
+    expect(source).not.toContain('react-hooks/exhaustive-deps')
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

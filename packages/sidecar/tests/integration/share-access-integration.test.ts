@@ -18,6 +18,8 @@ import { AppConfigService } from "../../src/infrastructure/config/app-config.ser
 import { PrismaMigrationService } from "../../src/infrastructure/database/prisma-migration.service.ts";
 import { PrismaService } from "../../src/infrastructure/database/prisma.service.ts";
 
+type ShareTokenValidationResult = Awaited<ReturnType<ShareTokenService["validateShareToken"]>>;
+
 describe("Share Access Integration", { skip: process.env.DATABASE_URL ? false : "DATABASE_URL is not configured" }, () => {
   let service: ShareTokenService;
   let ipLimiter: ShareIpLimiterService;
@@ -29,55 +31,46 @@ describe("Share Access Integration", { skip: process.env.DATABASE_URL ? false : 
   let createdTokenIds: string[] = [];
 
   beforeEach(async () => {
-    try {
-      appConfig = new AppConfigService();
-      await new PrismaMigrationService(appConfig).deploy();
-      prisma = new PrismaService();
-      await prisma.$connect();
+    appConfig = new AppConfigService();
+    await new PrismaMigrationService(appConfig).deploy();
+    prisma = new PrismaService();
+    await prisma.$connect();
 
-      // Create IP limiter with test-friendly config
-      ipLimiter = new ShareIpLimiterService({
-        maxRequestsPerWindow: 10,
-        windowMs: 1000,
-        blockDurationMs: 2000,
-      });
+    ipLimiter = new ShareIpLimiterService({
+      maxRequestsPerWindow: 10,
+      windowMs: 1000,
+      blockDurationMs: 2000,
+    });
 
-      const repository = new PrismaShareTokenRepository(prisma);
-      service = new ShareTokenService(repository, "http://localhost:5173", ipLimiter);
+    const repository = new PrismaShareTokenRepository(prisma);
+    service = new ShareTokenService(repository, "http://localhost:5173", ipLimiter);
 
-      // Create test child
-      await prisma.child.upsert({
-        where: { id: testChildId },
-        create: { id: testChildId, name: "Test Child Share" },
-        update: { name: "Test Child Share" },
-      });
+    await prisma.child.upsert({
+      where: { id: testChildId },
+      create: { id: testChildId, name: "Test Child Share" },
+      update: { name: "Test Child Share" },
+    });
 
-      // Create test session
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      const tokenHash = crypto.createHash("sha256").update(sessionToken).digest("hex");
-      await prisma.uploadSession.upsert({
-        where: { id: testSessionId },
-        create: {
-          id: testSessionId,
-          childId: testChildId,
-          tokenHash,
-          status: "active",
-          expiresAt: new Date(Date.now() + 3600000),
-          maxItems: 10,
-        },
-        update: {
-          status: "active",
-          expiresAt: new Date(Date.now() + 3600000),
-        },
-      });
-    } catch (error) {
-      console.log("Skipping integration tests: database not available");
-      throw error;
-    }
+    const sessionToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(sessionToken).digest("hex");
+    await prisma.uploadSession.upsert({
+      where: { id: testSessionId },
+      create: {
+        id: testSessionId,
+        childId: testChildId,
+        tokenHash,
+        status: "active",
+        expiresAt: new Date(Date.now() + 3600000),
+        maxItems: 10,
+      },
+      update: {
+        status: "active",
+        expiresAt: new Date(Date.now() + 3600000),
+      },
+    });
   });
 
   afterEach(async () => {
-    // Cleanup
     if (prisma && createdTokenIds.length > 0) {
       await prisma.shareAccessLog.deleteMany({
         where: { shareTokenId: { in: createdTokenIds } },
@@ -96,7 +89,6 @@ describe("Share Access Integration", { skip: process.env.DATABASE_URL ? false : 
   });
 
   test("Task 2.32: concurrent IP rate limiting", async () => {
-    // Create a share token
     const sessionToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto.createHash("sha256").update(sessionToken).digest("hex");
     await prisma.uploadSession.update({
@@ -117,7 +109,6 @@ describe("Share Access Integration", { skip: process.env.DATABASE_URL ? false : 
     const testIp = "192.168.1.100";
     const concurrentRequests = 15;
 
-    // Make concurrent validation requests from same IP
     const results = await Promise.all(
       Array.from({ length: concurrentRequests }, () =>
         service.validateShareToken({
@@ -179,11 +170,11 @@ describe("Share Access Integration", { skip: process.env.DATABASE_URL ? false : 
     const results = await Promise.all(allRequests);
 
     // Group results by IP
-    const resultsByIp = results.reduce((acc, { ip, result }) => {
+    const resultsByIp = results.reduce<Record<string, ShareTokenValidationResult[]>>((acc, { ip, result }) => {
       if (!acc[ip]) acc[ip] = [];
       acc[ip].push(result);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {});
 
     // Each IP should have all requests succeed (5 < 10 limit)
     for (const ip of ips) {

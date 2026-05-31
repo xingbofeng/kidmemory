@@ -6,14 +6,16 @@ import 'package:kidmemory_protocol/src/model/create_upload_items_response_dto.da
 import 'package:kidmemory_protocol/src/model/created_upload_item_dto.dart';
 import 'package:kidmemory_protocol/src/model/device_response_dto.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_config_response_dto.dart';
-import 'package:kidmemory_protocol/src/model/job_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/direct_upload_providers_dto.dart';
+import 'package:kidmemory_protocol/src/model/provider_availability_dto.dart';
 import 'package:kidmemory_protocol/src/model/register_device_request_dto.dart';
 import 'package:kidmemory_protocol/src/model/session_summary_response_dto.dart';
+import 'package:kidmemory_protocol/src/model/share_token_access_dto.dart';
 import 'package:kidmemory_protocol/src/model/share_token_validation_response_dto.dart';
 import 'package:kidmemory_protocol/src/model/shared_asset_dto.dart';
 import 'package:kidmemory_protocol/src/model/shared_book_dto.dart';
 import 'package:kidmemory_protocol/src/model/signed_upload_target_dto.dart';
-import 'package:kidmemory_protocol/src/model/update_job_status_request_dto.dart';
+import 'package:kidmemory_protocol/src/model/trusted_upload_session_child_dto.dart';
 import 'package:kidmemory_protocol/src/model/update_sync_status_request_dto.dart';
 import 'package:kidmemory_protocol/src/model/upload_item_response_dto.dart';
 
@@ -51,12 +53,16 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DeviceResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadConfigResponseDto':
           return DirectUploadConfigResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'JobResponseDto':
-          return JobResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DirectUploadProvidersDto':
+          return DirectUploadProvidersDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ProviderAvailabilityDto':
+          return ProviderAvailabilityDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RegisterDeviceRequestDto':
           return RegisterDeviceRequestDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SessionSummaryResponseDto':
           return SessionSummaryResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ShareTokenAccessDto':
+          return ShareTokenAccessDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ShareTokenValidationResponseDto':
           return ShareTokenValidationResponseDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SharedAssetDto':
@@ -65,8 +71,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return SharedBookDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SignedUploadTargetDto':
           return SignedUploadTargetDto.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'UpdateJobStatusRequestDto':
-          return UpdateJobStatusRequestDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TrustedUploadSessionChildDto':
+          return TrustedUploadSessionChildDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateSyncStatusRequestDto':
           return UpdateSyncStatusRequestDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UploadItemResponseDto':

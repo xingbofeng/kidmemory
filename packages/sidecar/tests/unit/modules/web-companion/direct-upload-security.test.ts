@@ -1,9 +1,13 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { DirectUploadService } from '../../../../src/modules/web-companion/direct-upload.service.ts';
+import {
+  DirectUploadService,
+  type DirectUploadServiceDeps,
+} from '../../../../src/modules/web-companion/direct-upload.service.ts';
 
-// 最小化 mock 依赖
-function makeMinimalDeps(overrides: Record<string, unknown> = {}) {
+function makeMinimalDeps(
+  overrides: Partial<DirectUploadServiceDeps> = {},
+): DirectUploadServiceDeps {
   return {
     appConfig: {
       config: {
@@ -48,9 +52,9 @@ function makeMinimalDeps(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe('Direct Upload Security (任务 0.1-0.4)', () => {
-  it('0.1: rejects empty childId', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+describe('Direct Upload security', () => {
+  it('rejects empty childId', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     await assert.rejects(
       () => service.createSession({ childId: '' }),
       (err: Error & { code?: string }) => {
@@ -61,8 +65,8 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.1: rejects whitespace-only childId', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('rejects whitespace-only childId', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     await assert.rejects(
       () => service.createSession({ childId: '   ' }),
       (err: Error & { code?: string }) => {
@@ -73,11 +77,11 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.1: rejects non-existent childId when childExists is provided', async () => {
+  it('rejects non-existent childId when childExists is provided', async () => {
     const service = new DirectUploadService({
       ...makeMinimalDeps(),
       childExists: async () => false,
-    } as any);
+    });
     await assert.rejects(
       () => service.createSession({ childId: 'non-existent-child' }),
       (err: Error & { code?: string }) => {
@@ -88,27 +92,26 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.1: accepts valid childId when childExists returns true', async () => {
+  it('accepts valid childId when childExists returns true', async () => {
     const service = new DirectUploadService({
       ...makeMinimalDeps(),
       childExists: async () => true,
-    } as any);
+    });
     const result = await service.createSession({ childId: 'valid-child' });
     assert.equal(result.childId, 'valid-child');
     assert.ok(result.sessionId);
     service.destroy();
   });
 
-  it('0.1: skips childExists check when not provided', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
-    // 没有 childExists，任何非空 childId 都应该通过
+  it('skips childExists check when not provided', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     const result = await service.createSession({ childId: 'any-child' });
     assert.equal(result.childId, 'any-child');
     service.destroy();
   });
 
-  it('0.2: createSession returns a token', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('createSession returns a token', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     const result = await service.createSession({ childId: 'child-1' });
     assert.ok(result.token, 'session should include a token');
     assert.equal(typeof result.token, 'string');
@@ -116,20 +119,20 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.2: each session gets a unique token', async () => {
+  it('each session gets a unique token', async () => {
     const counter = { n: 0 };
     const service = new DirectUploadService({
       ...makeMinimalDeps(),
       idFactory: { nextSessionId: () => `session-${++counter.n}` },
-    } as any);
+    });
     const r1 = await service.createSession({ childId: 'child-1' });
     const r2 = await service.createSession({ childId: 'child-1' });
     assert.notEqual(r1.token, r2.token, 'tokens should be unique per session');
     service.destroy();
   });
 
-  it('0.2: pullback rejects invalid token', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('pullback rejects invalid token', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     await service.createSession({ childId: 'child-1' });
     await assert.rejects(
       () => service.pullback('test-session-id', { token: 'wrong-token' }),
@@ -141,20 +144,19 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.2: pullback accepts correct token', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('pullback accepts correct token', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     const session = await service.createSession({ childId: 'child-1' });
-    // 正确 token 不应该抛出
     const result = await service.pullback('test-session-id', { token: session.token });
     assert.equal(result.sessionId, 'test-session-id');
     service.destroy();
   });
 
-  it('0.2: pullback without token is rejected', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('pullback without token is rejected', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     await service.createSession({ childId: 'child-1' });
     await assert.rejects(
-      () => service.pullback('test-session-id', {} as any),
+      () => service.pullback('test-session-id', {}),
       (err: Error & { code?: string }) => {
         assert.equal(err.code, 'token_required');
         return true;
@@ -163,11 +165,11 @@ describe('Direct Upload Security (任务 0.1-0.4)', () => {
     service.destroy();
   });
 
-  it('0.2: pullback without request object is rejected', async () => {
-    const service = new DirectUploadService(makeMinimalDeps() as any);
+  it('pullback without request object is rejected', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
     await service.createSession({ childId: 'child-1' });
     await assert.rejects(
-      () => service.pullback('test-session-id', undefined as any),
+      () => service.pullback('test-session-id', undefined),
       (err: Error & { code?: string }) => {
         assert.equal(err.code, 'token_required');
         return true;

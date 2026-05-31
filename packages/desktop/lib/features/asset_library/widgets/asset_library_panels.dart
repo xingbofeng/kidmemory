@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/models/library_models.dart';
@@ -12,9 +10,9 @@ import 'asset_library_toolbar_controls.dart';
 
 class EmptyAssetLibrary extends StatelessWidget {
   const EmptyAssetLibrary({
+    super.key,
     required this.onImportFiles,
     required this.onImportFolder,
-    super.key,
   });
 
   final Future<void> Function() onImportFiles;
@@ -87,6 +85,7 @@ class EmptyAssetLibrary extends StatelessWidget {
 
 class EmptyAssetSearchResults extends StatelessWidget {
   const EmptyAssetSearchResults({
+    super.key,
     required this.onClearSearch,
     required this.onSmartPick,
   });
@@ -150,6 +149,7 @@ class EmptyAssetSearchResults extends StatelessWidget {
 
 class AssetLibraryGridArea extends StatelessWidget {
   const AssetLibraryGridArea({
+    super.key,
     required this.visibleAssets,
     required this.pageAssets,
     required this.searchText,

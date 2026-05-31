@@ -1,6 +1,4 @@
 import '../../shared/models/library_models.dart';
-// ignore: unused_import
-import 'package:kidmemory_protocol/kidmemory_protocol.dart' as protocol;
 import 'agent_config_api.dart';
 import 'sidecar_api.dart';
 import 'sidecar_dtos.dart';

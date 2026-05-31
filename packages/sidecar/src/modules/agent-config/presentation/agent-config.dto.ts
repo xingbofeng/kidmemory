@@ -6,9 +6,7 @@
  */
 
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
-// Zod schemas for validation
 export const CreateAgentConfigDtoSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
@@ -20,7 +18,7 @@ export const CreateAgentConfigDtoSchema = z.object({
   maxTokens: z.number().int().positive().optional(),
   systemPrompt: z.string().optional(),
   toolsEnabled: z.array(z.string()).optional(),
-  workspaceConfig: z.record(z.string(), z.any()).optional(),
+  workspaceConfig: z.record(z.string(), z.unknown()).optional(),
   isDefault: z.boolean().optional(),
 }).strict();
 
@@ -35,7 +33,7 @@ export const UpdateAgentConfigDtoSchema = z.object({
   maxTokens: z.number().int().positive().optional(),
   systemPrompt: z.string().optional(),
   toolsEnabled: z.array(z.string()).optional(),
-  workspaceConfig: z.record(z.string(), z.any()).optional(),
+  workspaceConfig: z.record(z.string(), z.unknown()).optional(),
   isActive: z.boolean().optional(),
 }).strict();
 
@@ -43,15 +41,39 @@ export const TestAgentConfigDtoSchema = z.object({
   testPrompt: z.string().optional(),
 }).strict();
 
-// Response DTOs
-export type AgentConfigDto = components["schemas"]["AgentConfigResponseDto"];
-export type TestAgentConfigResultDto =
-  components["schemas"]["TestAgentConfigResultResponseDto"];
+export interface AgentConfigDto {
+  id: string;
+  name: string;
+  description?: string;
+  provider: "openai" | "anthropic" | "custom";
+  model: string;
+  baseUrl?: string;
+  apiKeyConfigured: boolean;
+  temperature: number;
+  maxTokens: number;
+  systemPrompt?: string;
+  toolsEnabled: string[];
+  workspaceConfig: Record<string, unknown>;
+  isDefault: boolean;
+  isActive: boolean;
+  lastTestedAt?: string;
+  testResult?: "success" | "failed" | "pending";
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Type definitions inferred from schemas
-export type CreateAgentConfigDto = components["schemas"]["CreateAgentConfigRequestDto"];
-export type UpdateAgentConfigDto = components["schemas"]["UpdateAgentConfigRequestDto"];
-export type TestAgentConfigDto = components["schemas"]["TestAgentConfigRequestDto"];
+export interface TestAgentConfigResultDto {
+  success: boolean;
+  responseTime?: number;
+  errorMessage?: string;
+  modelUsed?: string;
+  tokensUsed?: number;
+}
 
-// Success response DTOs
-export type SuccessResponseDto = components["schemas"]["SuccessResponseDto"];
+export type CreateAgentConfigDto = z.infer<typeof CreateAgentConfigDtoSchema>;
+export type UpdateAgentConfigDto = z.infer<typeof UpdateAgentConfigDtoSchema>;
+export type TestAgentConfigDto = z.infer<typeof TestAgentConfigDtoSchema>;
+
+export interface SuccessResponseDto {
+  success: boolean;
+}

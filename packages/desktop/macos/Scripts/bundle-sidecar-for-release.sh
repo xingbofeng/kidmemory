@@ -167,10 +167,6 @@ fi
 if [ -f "$SIDECAR_SRC/prisma.config.ts" ]; then
   cp "$SIDECAR_SRC/prisma.config.ts" "$SIDECAR_BUNDLE_DIR/prisma.config.ts"
 fi
-# Keep backward compatibility with older sidecar layouts that still use sql/.
-if [ -d "$SIDECAR_SRC/sql" ]; then
-  cp -R "$SIDECAR_SRC/sql" "$SIDECAR_BUNDLE_DIR/sql"
-fi
 cp -R "$BUILD_TEMP_DIR/sidecar/node_modules" "$SIDECAR_BUNDLE_DIR/node_modules"
 cp "$BUILD_TEMP_DIR/sidecar/package.json" "$SIDECAR_BUNDLE_DIR/package.json"
 mkdir -p "$SIDECAR_BUNDLE_DIR/node_modules/@kidmemory"

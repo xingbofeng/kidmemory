@@ -24,7 +24,7 @@ for (const target of targets) {
   const schema = JSON.parse(readFileSync(target.input, 'utf8'))
   const ast = await openapiTS(schema)
   const output = astToString(ast)
-    .replace(/schemas:\s*never;/g, 'schemas: Record<string, any>;')
+    .replace(/schemas:\s*never;/g, 'schemas: Record<string, unknown>;')
     .replace(/responses:\s*never;/g, 'responses: Record<string, unknown>;')
     .replace(/parameters:\s*never;/g, 'parameters: Record<string, unknown>;')
     .replace(/requestBodies:\s*never;/g, 'requestBodies: Record<string, unknown>;')

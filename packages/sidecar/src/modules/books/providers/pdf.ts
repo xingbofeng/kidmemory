@@ -1,6 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { isPlaywrightUnavailable } from "../../../infrastructure/browser/playwright-errors.ts";
+import { hasErrorCode } from "../../../infrastructure/errors/error-code.ts";
+
 type HtmlRenderer = {
   render(html: string, targetPath: string): Promise<void>;
 };
@@ -61,7 +64,7 @@ async function renderWithPlaywright(html: string, targetPath: string) {
     } finally {
       await browser.close();
     }
-  } catch (error: any) {
+  } catch (error) {
     if (!isPlaywrightUnavailable(error)) throw error;
     await renderBasicPdf(html, targetPath);
   }
@@ -74,8 +77,8 @@ async function loadWithPdfJs(pdfPath: string) {
     const document = await pdfjs.getDocument({ data }).promise;
     await document.getPage(1);
     return { numPages: document.numPages, firstPageRendered: true };
-  } catch (error: any) {
-    if (error?.code !== "ERR_MODULE_NOT_FOUND") throw error;
+  } catch (error) {
+    if (!hasErrorCode(error, "ERR_MODULE_NOT_FOUND")) throw error;
     return inspectBasicPdf(pdfPath);
   }
 }
@@ -141,19 +144,4 @@ function stripHtml(html: string) {
 
 function escapePdfText(value: string) {
   return value.replace(/[^\x20-\x7E]/g, "?").replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-}
-
-function isPlaywrightUnavailable(error: any) {
-  if (error?.code === "ERR_MODULE_NOT_FOUND") return true;
-  if (!(error instanceof Error)) return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("chromium") &&
-    (
-      message.includes("executable") ||
-      message.includes("install") ||
-      message.includes("not found") ||
-      message.includes("failed to launch")
-    )
-  );
 }

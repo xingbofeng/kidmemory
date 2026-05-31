@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const UpdateChildDtoSchema = z
   .object({
@@ -13,4 +12,4 @@ export const UpdateChildDtoSchema = z
     message: "At least one field must be provided",
   });
 
-export type UpdateChildDto = components["schemas"]["UpdateChildRequestDto"];
+export type UpdateChildDto = z.infer<typeof UpdateChildDtoSchema>;

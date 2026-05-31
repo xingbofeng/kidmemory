@@ -74,23 +74,6 @@ CREATE TABLE "share_access_logs" (
     CONSTRAINT "share_access_logs_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "jobs" (
-    "id" TEXT NOT NULL,
-    "deviceId" TEXT,
-    "type" TEXT NOT NULL,
-    "payload" JSONB NOT NULL,
-    "status" TEXT NOT NULL,
-    "priority" INTEGER NOT NULL DEFAULT 0,
-    "claimedAt" TIMESTAMP(3),
-    "completedAt" TIMESTAMP(3),
-    "errorMessage" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "jobs_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "devices_machineId_key" ON "devices"("machineId");
 
@@ -139,18 +122,6 @@ CREATE INDEX "share_access_logs_tokenId_idx" ON "share_access_logs"("tokenId");
 -- CreateIndex
 CREATE INDEX "share_access_logs_accessedAt_idx" ON "share_access_logs"("accessedAt");
 
--- CreateIndex
-CREATE INDEX "jobs_deviceId_idx" ON "jobs"("deviceId");
-
--- CreateIndex
-CREATE INDEX "jobs_status_idx" ON "jobs"("status");
-
--- CreateIndex
-CREATE INDEX "jobs_priority_idx" ON "jobs"("priority");
-
--- CreateIndex
-CREATE INDEX "jobs_createdAt_idx" ON "jobs"("createdAt");
-
 -- AddForeignKey
 ALTER TABLE "upload_items" ADD CONSTRAINT "upload_items_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "upload_sessions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -159,7 +130,3 @@ ALTER TABLE "upload_items" ADD CONSTRAINT "upload_items_deviceId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "share_access_logs" ADD CONSTRAINT "share_access_logs_tokenId_fkey" FOREIGN KEY ("tokenId") REFERENCES "share_tokens"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "jobs" ADD CONSTRAINT "jobs_deviceId_fkey" FOREIGN KEY ("deviceId") REFERENCES "devices"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-

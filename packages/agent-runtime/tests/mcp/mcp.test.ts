@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 
 import { toOpenAIAgentsMcpTools } from "../../src/index.ts";
@@ -49,4 +50,11 @@ test("toOpenAIAgentsMcpTools rejects stdio MCP servers instead of silently dropp
     ]),
     /stdio MCP servers are not supported/i,
   );
+});
+
+test("toOpenAIAgentsMcpTools keeps server mapping as one explicit pass", () => {
+  const source = fs.readFileSync("src/mcp/index.ts", "utf8");
+
+  assert.equal(source.includes(".filter("), false);
+  assert.equal(source.includes(".flatMap("), false);
 });

@@ -17,7 +17,7 @@ class DatasetApi {
   const DatasetApi(this._dio);
 
   /// datasetControllerAddSearchCandidatePoolItems
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerAddSearchCandidatePoolItems({ 
+  Future<Response<void>> datasetControllerAddSearchCandidatePoolItems({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,7 +62,7 @@ class DatasetApi {
   }
 
   /// datasetControllerCreateChild
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -74,7 +74,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerCreateChild({ 
+  Future<Response<void>> datasetControllerCreateChild({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -107,10 +107,10 @@ class DatasetApi {
   }
 
   /// datasetControllerDeleteAsset
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -120,7 +120,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerDeleteAsset({ 
+  Future<Response<void>> datasetControllerDeleteAsset({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -154,7 +154,7 @@ class DatasetApi {
   }
 
   /// datasetControllerDeleteAssetsBatch
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -166,7 +166,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerDeleteAssetsBatch({ 
+  Future<Response<void>> datasetControllerDeleteAssetsBatch({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -199,10 +199,10 @@ class DatasetApi {
   }
 
   /// datasetControllerDeleteChild
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -212,7 +212,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerDeleteChild({ 
+  Future<Response<void>> datasetControllerDeleteChild({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -246,10 +246,10 @@ class DatasetApi {
   }
 
   /// datasetControllerGetAsset
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -259,7 +259,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerGetAsset({ 
+  Future<Response<void>> datasetControllerGetAsset({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -293,10 +293,10 @@ class DatasetApi {
   }
 
   /// datasetControllerGetAssetPreview
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -306,7 +306,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerGetAssetPreview({ 
+  Future<Response<void>> datasetControllerGetAssetPreview({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -340,10 +340,10 @@ class DatasetApi {
   }
 
   /// datasetControllerGetChild
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -353,7 +353,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerGetChild({ 
+  Future<Response<void>> datasetControllerGetChild({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -387,10 +387,10 @@ class DatasetApi {
   }
 
   /// datasetControllerGetExportArtifactShareMetadata
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -400,7 +400,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerGetExportArtifactShareMetadata({ 
+  Future<Response<void>> datasetControllerGetExportArtifactShareMetadata({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -434,7 +434,7 @@ class DatasetApi {
   }
 
   /// datasetControllerGetSearchIndexingStatus
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -446,7 +446,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerGetSearchIndexingStatus({ 
+  Future<Response<void>> datasetControllerGetSearchIndexingStatus({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -479,7 +479,7 @@ class DatasetApi {
   }
 
   /// datasetControllerImportAssets
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -491,7 +491,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerImportAssets({ 
+  Future<Response<void>> datasetControllerImportAssets({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -524,7 +524,7 @@ class DatasetApi {
   }
 
   /// datasetControllerImportSample
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -536,7 +536,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerImportSample({ 
+  Future<Response<void>> datasetControllerImportSample({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -569,7 +569,7 @@ class DatasetApi {
   }
 
   /// datasetControllerListAssets
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -581,7 +581,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerListAssets({ 
+  Future<Response<void>> datasetControllerListAssets({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -614,7 +614,7 @@ class DatasetApi {
   }
 
   /// datasetControllerListChildren
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -626,7 +626,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerListChildren({ 
+  Future<Response<void>> datasetControllerListChildren({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -659,7 +659,7 @@ class DatasetApi {
   }
 
   /// datasetControllerListSearchCandidatePool
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -671,7 +671,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerListSearchCandidatePool({ 
+  Future<Response<void>> datasetControllerListSearchCandidatePool({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -704,7 +704,7 @@ class DatasetApi {
   }
 
   /// datasetControllerRemoveSearchCandidatePoolItems
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -716,7 +716,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerRemoveSearchCandidatePoolItems({ 
+  Future<Response<void>> datasetControllerRemoveSearchCandidatePoolItems({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -749,7 +749,7 @@ class DatasetApi {
   }
 
   /// datasetControllerResetSample
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -761,7 +761,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerResetSample({ 
+  Future<Response<void>> datasetControllerResetSample({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -794,7 +794,7 @@ class DatasetApi {
   }
 
   /// datasetControllerRunSearchIndexer
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -806,7 +806,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerRunSearchIndexer({ 
+  Future<Response<void>> datasetControllerRunSearchIndexer({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -839,7 +839,7 @@ class DatasetApi {
   }
 
   /// datasetControllerRunStorageSync
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -851,7 +851,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerRunStorageSync({ 
+  Future<Response<void>> datasetControllerRunStorageSync({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -884,7 +884,7 @@ class DatasetApi {
   }
 
   /// datasetControllerSearchAssets
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -896,7 +896,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerSearchAssets({ 
+  Future<Response<void>> datasetControllerSearchAssets({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -929,10 +929,10 @@ class DatasetApi {
   }
 
   /// datasetControllerSyncAssetToStorage
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -942,7 +942,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerSyncAssetToStorage({ 
+  Future<Response<void>> datasetControllerSyncAssetToStorage({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -976,10 +976,10 @@ class DatasetApi {
   }
 
   /// datasetControllerSyncExportArtifactToStorage
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -989,7 +989,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerSyncExportArtifactToStorage({ 
+  Future<Response<void>> datasetControllerSyncExportArtifactToStorage({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1023,10 +1023,10 @@ class DatasetApi {
   }
 
   /// datasetControllerUpdateAssetPatch
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1036,7 +1036,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerUpdateAssetPatch({ 
+  Future<Response<void>> datasetControllerUpdateAssetPatch({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1070,10 +1070,10 @@ class DatasetApi {
   }
 
   /// datasetControllerUpdateChild
-  /// 
+  ///
   ///
   /// Parameters:
-  /// * [id] 
+  /// * [id]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -1083,7 +1083,7 @@ class DatasetApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> datasetControllerUpdateChild({ 
+  Future<Response<void>> datasetControllerUpdateChild({
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

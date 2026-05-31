@@ -6,6 +6,7 @@ import os from "node:os";
 import AdmZip from "adm-zip";
 
 import type { SampleAsset, SampleDb } from "../../../infrastructure/dataset-state/memory-dataset-db.ts";
+import { hasErrorCode } from "../../../infrastructure/errors/error-code.ts";
 
 const SUPPORTED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
@@ -31,8 +32,8 @@ export async function sha256File(filePath: string) {
 export async function collectImportFiles(pathsInput: string[], recursive = true, report?: ImportReport) {
   const files: string[] = [];
   for (const inputPath of pathsInput) {
-    const stat = await fs.stat(inputPath).catch((error: any) => {
-      report?.failed.push({ path: inputPath, reason: error?.code === "ENOENT" ? "path_not_found" : error?.message || "path_unreadable" });
+    const stat = await fs.stat(inputPath).catch((error: unknown) => {
+      report?.failed.push({ path: inputPath, reason: hasErrorCode(error, "ENOENT") ? "path_not_found" : errorMessage(error, "path_unreadable") });
       return null;
     });
     if (!stat) {
@@ -115,8 +116,8 @@ export async function importLocalAssets(db: SampleDb, input: ImportAssetsInput):
       };
       await db.upsertAsset(asset);
       report.imported.push({ id, path: managedPath });
-    } catch (error: any) {
-      report.failed.push({ path: filePath, reason: error?.message || "import_failed" });
+    } catch (error) {
+      report.failed.push({ path: filePath, reason: errorMessage(error, "import_failed") });
     }
   }
   return report;
@@ -145,11 +146,15 @@ async function expandZipPaths(pathsInput: string[], report: ImportReport) {
         await fs.writeFile(target, entry.getData());
       }
       expanded.push(zipOut);
-    } catch (error: any) {
-      report.failed.push({ path: inputPath, reason: error?.message || "invalid_zip" });
+    } catch (error) {
+      report.failed.push({ path: inputPath, reason: errorMessage(error, "invalid_zip") });
     }
   }
   return expanded;
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
 function resolveZipEntryTarget(root: string, entryName: string) {

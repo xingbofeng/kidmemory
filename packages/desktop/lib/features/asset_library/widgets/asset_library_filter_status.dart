@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import 'asset_library_palette.dart';
@@ -7,6 +5,7 @@ import 'asset_library_toolbar_controls.dart';
 
 class AssetLibraryStatusBar extends StatelessWidget {
   const AssetLibraryStatusBar({
+    super.key,
     required this.typeOptions,
     required this.selectedType,
     required this.counts,
@@ -70,6 +69,7 @@ class AssetLibraryStatusBar extends StatelessWidget {
 
 class AssetLibrarySegmentOption extends StatelessWidget {
   const AssetLibrarySegmentOption({
+    super.key,
     required this.label,
     required this.count,
     required this.selected,

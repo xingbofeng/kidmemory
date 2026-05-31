@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
@@ -7,6 +5,7 @@ import '../child_profile_utils.dart';
 
 class ChildProfileSectionHeader extends StatelessWidget {
   const ChildProfileSectionHeader({
+    super.key,
     required this.iconAsset,
     required this.title,
   });
@@ -42,7 +41,11 @@ class ChildProfileSectionHeader extends StatelessWidget {
 }
 
 class ChildProfileMetricTile extends StatelessWidget {
-  const ChildProfileMetricTile({required this.label, required this.value});
+  const ChildProfileMetricTile({
+    super.key,
+    required this.label,
+    required this.value,
+  });
 
   final String label;
   final String value;
@@ -64,6 +67,7 @@ class ChildProfileMetricTile extends StatelessWidget {
 
 class ChildProfileLegendRow extends StatelessWidget {
   const ChildProfileLegendRow({
+    super.key,
     required this.iconAsset,
     required this.label,
     required this.value,
@@ -88,7 +92,7 @@ class ChildProfileLegendRow extends StatelessWidget {
 }
 
 class ChildProfileLegendDot extends StatelessWidget {
-  const ChildProfileLegendDot({required this.color});
+  const ChildProfileLegendDot({super.key, required this.color});
 
   final Color color;
 
@@ -102,6 +106,7 @@ class ChildProfileLegendDot extends StatelessWidget {
 
 class ChildProfileEmptyPanelHint extends StatelessWidget {
   const ChildProfileEmptyPanelHint({
+    super.key,
     required this.iconAsset,
     required this.text,
   });
@@ -141,6 +146,7 @@ class ChildProfileEmptyPanelHint extends StatelessWidget {
 
 class ChildProfileInfoRow extends StatelessWidget {
   const ChildProfileInfoRow({
+    super.key,
     required this.iconAsset,
     required this.label,
     required this.value,
@@ -205,7 +211,7 @@ class ChildProfileInfoRow extends StatelessWidget {
 }
 
 class ChildProfileMilestoneRow extends StatelessWidget {
-  const ChildProfileMilestoneRow({required this.text});
+  const ChildProfileMilestoneRow({super.key, required this.text});
 
   final String text;
 

@@ -2,11 +2,12 @@ part of '../../desktop_shell.dart';
 
 extension _DesktopShellSetupPgvector on _DesktopShellState {
   Future<bool> _ensurePostgresReadyForPgvector(String title) async {
+    final l10n = AppLocalizations.of(context)!;
     _setSetupProgress(
       title,
       0.10,
-      AppLocalizations.of(context)!.setupCheckPostgresConnection,
-      state: AppLocalizations.of(context)!.setupChecking,
+      l10n.setupCheckPostgresConnection,
+      state: l10n.setupChecking,
     );
     var postgres = await gateway.checkPostgresDto();
     if (postgres.okOrNull == true) return true;
@@ -14,51 +15,46 @@ extension _DesktopShellSetupPgvector on _DesktopShellState {
     _setSetupProgress(
       title,
       0.18,
-      AppLocalizations.of(context)!.setupPostgresNotReadyAutoInstall,
-      state: AppLocalizations.of(context)!.setupInstalling,
+      l10n.setupPostgresNotReadyAutoInstall,
+      state: l10n.setupInstalling,
     );
-    _appendLog(AppLocalizations.of(context)!.setupPgvectorWaitForPostgres);
+    _appendLog(l10n.setupPgvectorWaitForPostgres);
     await _runPostgresSetupWorkflow();
 
     _setSetupProgress(
       title,
       0.50,
-      AppLocalizations.of(context)!.setupRecheckPostgresConnection,
-      state: AppLocalizations.of(context)!.setupChecking,
+      l10n.setupRecheckPostgresConnection,
+      state: l10n.setupChecking,
     );
     postgres = await gateway.checkPostgresDto();
     if (postgres.okOrNull == true) return true;
 
     _finishSetupProgress(
       title,
-      AppLocalizations.of(context)!.setupPostgresNotReadyNeedConfig,
+      l10n.setupPostgresNotReadyNeedConfig,
       ok: false,
     );
-    _showSnackBar(
-      AppLocalizations.of(context)!.setupPostgresNotReadyCheckConfigRetry,
-    );
+    _showSnackBar(l10n.setupPostgresNotReadyCheckConfigRetry);
     return false;
   }
 
   Future<bool> _installPgvectorOnMacOSIfNeeded({required String title}) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!Platform.isMacOS) return true;
     _setSetupProgress(
       title,
       0.72,
-      AppLocalizations.of(context)!.setupVerifyBuiltinPgvectorExtension,
-      state: AppLocalizations.of(context)!.setupInstalling,
+      l10n.setupVerifyBuiltinPgvectorExtension,
+      state: l10n.setupInstalling,
     );
     if (!_bundledPostgresRuntimeAvailable()) {
       _finishSetupProgress(
         title,
-        AppLocalizations.of(
-          context,
-        )!.setupBundledPostgresRuntimeReleaseRequired,
+        l10n.setupBundledPostgresRuntimeReleaseRequired,
         ok: false,
       );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupBundledPostgresRuntimeMissing,
-      );
+      _showSnackBar(l10n.setupBundledPostgresRuntimeMissing);
       return false;
     }
     if (_pgvectorInstalledForPostgres16()) {
@@ -66,38 +62,33 @@ extension _DesktopShellSetupPgvector on _DesktopShellState {
     }
     _finishSetupProgress(
       title,
-      AppLocalizations.of(context)!.setupBuiltinPostgresNoPgvectorInstruction,
+      l10n.setupBuiltinPostgresNoPgvectorInstruction,
       ok: false,
     );
-    _showSnackBar(AppLocalizations.of(context)!.setupBuiltinPostgresNoPgvector);
+    _showSnackBar(l10n.setupBuiltinPostgresNoPgvector);
     return false;
   }
 
   Future<bool> _verifyPgvectorReadiness(String title) async {
+    final l10n = AppLocalizations.of(context)!;
     _setSetupProgress(
       title,
       0.85,
-      AppLocalizations.of(context)!.setupEnableVectorExtensionAndInit,
-      state: AppLocalizations.of(context)!.setupInstalling,
+      l10n.setupEnableVectorExtensionAndInit,
+      state: l10n.setupInstalling,
     );
     final schemaCheck = await gateway.initSchemaDto();
     if (schemaCheck.okOrNull == false) {
-      _finishSetupProgress(
-        title,
-        AppLocalizations.of(context)!.setupPgvectorInitFailed,
-        ok: false,
-      );
-      _showSnackBar(
-        AppLocalizations.of(context)!.setupPgvectorInitFailedExtMissing,
-      );
+      _finishSetupProgress(title, l10n.setupPgvectorInitFailed, ok: false);
+      _showSnackBar(l10n.setupPgvectorInitFailedExtMissing);
       return false;
     }
 
     _setSetupProgress(
       title,
       0.95,
-      AppLocalizations.of(context)!.setupRecheckPgvectorExtension,
-      state: AppLocalizations.of(context)!.setupChecking,
+      l10n.setupRecheckPgvectorExtension,
+      state: l10n.setupChecking,
     );
     final pgvectorCheck = await gateway.checkPgvectorDto();
     if (pgvectorCheck.okOrNull == true) return true;
@@ -105,23 +96,18 @@ extension _DesktopShellSetupPgvector on _DesktopShellState {
       title,
       (pgvectorCheck.message ?? '').isNotEmpty
           ? (pgvectorCheck.message ?? '')
-          : AppLocalizations.of(context)!.setupPgvectorNotReady,
+          : l10n.setupPgvectorNotReady,
       ok: false,
     );
-    _showSnackBar(
-      AppLocalizations.of(context)!.setupPgvectorNotReadyInstallExtRetry,
-    );
+    _showSnackBar(l10n.setupPgvectorNotReadyInstallExtRetry);
     return false;
   }
 
   Future<void> _runPgvectorSetupWorkflow() async {
-    final title = AppLocalizations.of(context)!.setupPgvectorTitle;
+    final l10n = AppLocalizations.of(context)!;
+    final title = l10n.setupPgvectorTitle;
     final localPgv = _detectPgvectorLocal();
-    _appendLog(
-      AppLocalizations.of(
-        context,
-      )!.setupPgvectorWorkflowStartedLog('$localPgv'),
-    );
+    _appendLog(l10n.setupPgvectorWorkflowStartedLog('$localPgv'));
 
     try {
       if (!await _ensurePostgresReadyForPgvector(title)) {
@@ -137,10 +123,10 @@ extension _DesktopShellSetupPgvector on _DesktopShellState {
       _setSetupProgress(
         title,
         1,
-        AppLocalizations.of(context)!.setupPgvectorReady,
-        state: AppLocalizations.of(context)!.setupConfigured,
+        l10n.setupPgvectorReady,
+        state: l10n.setupConfigured,
       );
-      _showSnackBar(AppLocalizations.of(context)!.setupPgvectorReady);
+      _showSnackBar(l10n.setupPgvectorReady);
       await refreshReadiness();
     } catch (error) {
       final message = _friendlySetupError(

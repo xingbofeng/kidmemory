@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { render, screen, waitFor } from '@testing-library/react'
 import { ShareBrowsePage } from './ShareBrowsePage'
 import { getSharedAssets, validateShareToken } from '../../api/shareApi'
@@ -12,6 +13,12 @@ const mockValidateShareToken = vi.mocked(validateShareToken)
 const mockGetSharedAssets = vi.mocked(getSharedAssets)
 
 describe('ShareBrowsePage', () => {
+  it('does not suppress hook dependency checks', () => {
+    const source = readFileSync('src/pages/share/ShareBrowsePage.tsx', 'utf8')
+
+    expect(source).not.toContain('react-hooks/exhaustive-deps')
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, it, expect } from 'vitest'
 import {
   buildDirectUploadObjectKey,
@@ -16,6 +17,13 @@ import {
  */
 
 describe('cleanDirectUploadFilename', () => {
+  it('does not need lint suppression to remove control characters', () => {
+    const source = readFileSync('src/lib/direct-upload-naming.ts', 'utf8')
+    const lintDisable = ['eslint', 'disable'].join('-')
+
+    expect(source).not.toContain(lintDisable)
+  })
+
   it('保留可见 ASCII 字母数字与扩展名，剔除其他可见字符', () => {
     expect(cleanDirectUploadFilename('drawing.jpg')).toBe('drawing.jpg')
     // 括号被替换为 _ 后再剥离尾部的连续 _ → my_photo_2024.png

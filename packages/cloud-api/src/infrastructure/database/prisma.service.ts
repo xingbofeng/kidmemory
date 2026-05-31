@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -16,6 +16,8 @@ function fallbackConnectionString(): string {
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(PrismaService.name);
+
   constructor() {
     super({
       adapter: new PrismaPg({
@@ -25,23 +27,22 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    // Only connect if DATABASE_URL is provided
     if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
-      console.warn('DATABASE_URL not set, skipping database connection');
+      this.logger.warn('DATABASE_URL not set, skipping database connection');
       return;
     }
-    
+
     try {
       await this.$connect();
-      console.warn('Database connected');
+      this.logger.log('Database connected');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.warn('Database connection failed:', message);
+      this.logger.warn(`Database connection failed: ${message}`);
     }
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
-    console.warn('Database disconnected');
+    this.logger.log('Database disconnected');
   }
 }

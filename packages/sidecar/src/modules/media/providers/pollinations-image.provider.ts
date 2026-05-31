@@ -1,5 +1,6 @@
 import { Inject, Injectable, Optional } from "@nestjs/common";
 
+import { parseEnvBoolean } from "../../../infrastructure/config/env-parsing.ts";
 import type { GenerateImageInput, GenerateImageResult, ImageProvider } from "./image-provider.ts";
 
 const DEFAULT_BASE_URL = "https://image.pollinations.ai/prompt";
@@ -28,7 +29,7 @@ export class PollinationsImageProvider implements ImageProvider {
     options: PollinationsImageProviderOptions = {},
   ) {
     this.fetchImpl = options.fetchImpl ?? fetch;
-    this.probeEnabled = options.probeEnabled ?? parseBoolean(process.env.POLLINATIONS_PROBE_ENABLED, false);
+    this.probeEnabled = options.probeEnabled ?? parseEnvBoolean(process.env.POLLINATIONS_PROBE_ENABLED, false);
     this.timeoutMs = normalizePositiveNumber(
       options.timeoutMs,
       normalizePositiveNumber(
@@ -203,20 +204,6 @@ function normalizePositiveNumber(value: number | undefined, fallback: number) {
   }
   const normalized = Math.floor(value);
   return normalized >= 0 ? normalized : fallback;
-}
-
-function parseBoolean(value: string | undefined, fallback: boolean) {
-  if (typeof value !== "string") {
-    return fallback;
-  }
-  const normalized = value.trim().toLowerCase();
-  if (["1", "true", "yes", "on"].includes(normalized)) {
-    return true;
-  }
-  if (["0", "false", "no", "off"].includes(normalized)) {
-    return false;
-  }
-  return fallback;
 }
 
 function hasDisallowedPhotoPayload(input: Record<string, unknown>) {

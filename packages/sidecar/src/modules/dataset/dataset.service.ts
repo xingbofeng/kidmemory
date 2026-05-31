@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
@@ -27,6 +27,7 @@ export const DATASET_SERVICE_FACTORIES = Symbol("DATASET_SERVICE_FACTORIES");
 
 @Injectable()
 export class DatasetService {
+  private readonly logger = new Logger(DatasetService.name);
   private readonly datasetState: DatasetStateService;
   private readonly config: AppConfigService;
   private readonly factories: Required<DatasetServiceFactories>;
@@ -69,9 +70,8 @@ export class DatasetService {
     try {
       return await this.datasetState.activatePersistent();
     } catch (error) {
-      console.warn(
-        "Falling back to in-memory dataset after persistent dataset activation failed:",
-        error instanceof Error ? error.message : error,
+      this.logger.warn(
+        `Falling back to in-memory dataset after persistent dataset activation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
       return this.datasetState.current();
     }

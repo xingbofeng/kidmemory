@@ -226,7 +226,7 @@
     "success": "Imported",
     "failed": "Failed"
   },
-  "uploadLegacy": {
+  "upload": {
     "sessionInvalid": "Session is expired or invalid",
     "sessionValid": "Session active",
     "currentChild": "Current child",

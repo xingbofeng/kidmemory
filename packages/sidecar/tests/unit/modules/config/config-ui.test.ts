@@ -1,15 +1,23 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { loadConfigFromEnv } from "../../../../src/infrastructure/config/app-config.service.ts";
+import { loadConfigFromEnv, type AppConfig } from "../../../../src/infrastructure/config/app-config.service.ts";
+import type { PrismaMigrationService } from "../../../../src/infrastructure/database/prisma-migration.service.ts";
 import { createConfigReadinessService } from "../../../../src/modules/config/providers/config.domain.ts";
 
-test("ui config endpoint exposes defaults for frontend option lists", () => {
-  const service = createConfigReadinessService({
-    config: loadConfigFromEnv({}),
-    prisma: {} as any,
-    migrations: {} as any,
+function createReadinessService(config: AppConfig) {
+  return createConfigReadinessService({
+    config,
+    migrations: {
+      async deployWithRepair() {
+        return { ok: true };
+      },
+    } as unknown as PrismaMigrationService,
   });
+}
+
+test("ui config endpoint exposes defaults for frontend option lists", () => {
+  const service = createReadinessService(loadConfigFromEnv({}));
 
   const uiConfig = service.uiConfig();
 
@@ -32,14 +40,12 @@ test("ui config endpoint exposes defaults for frontend option lists", () => {
 });
 
 test("ui config includes generate defaults and directory selectors", () => {
-  const service = createConfigReadinessService({
-    config: loadConfigFromEnv({
+  const service = createReadinessService(
+    loadConfigFromEnv({
       KIDMEMORY_DATA_DIR: "/tmp/kidmemory/data",
       KIDMEMORY_WORKSPACE_DIR: "/tmp/kidmemory/workspace",
     }),
-    prisma: {} as any,
-    migrations: {} as any,
-  });
+  );
 
   const uiConfig = service.uiConfig();
 

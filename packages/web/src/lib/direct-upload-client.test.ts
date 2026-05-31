@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs'
 import { describe, it, expect, vi } from 'vitest'
 import {
   startDirectUpload,
   validateAddFiles,
   createDirectUploadClient,
+  type DirectUploadCreateClient,
+  type DirectUploadStorageBucket,
+  type DirectUploadSupabaseClient,
 } from './direct-upload-client'
 import type { DirectUploadConfig } from './direct-upload-types'
 
@@ -26,14 +30,10 @@ function makeFile(name: string, type = 'image/jpeg', size = 16): File {
 }
 
 interface FakeSupabase {
-  client: {
-    storage: {
-      from: ReturnType<typeof vi.fn>
-    }
-  }
-  createClient: ReturnType<typeof vi.fn>
+  client: DirectUploadSupabaseClient
+  createClient: ReturnType<typeof vi.fn<DirectUploadCreateClient>>
   from: ReturnType<typeof vi.fn>
-  upload: ReturnType<typeof vi.fn>
+  upload: ReturnType<typeof vi.fn<DirectUploadStorageBucket['upload']>>
 }
 
 function makeFakeSupabase(
@@ -47,10 +47,10 @@ function makeFakeSupabase(
     data: { path: objectKey },
     error: null,
   })
-  const upload = vi.fn(uploadImpl ?? defaultImpl) as ReturnType<typeof vi.fn>
-  const from = vi.fn(() => ({ upload })) as ReturnType<typeof vi.fn>
+  const upload = vi.fn<DirectUploadStorageBucket['upload']>(uploadImpl ?? defaultImpl)
+  const from = vi.fn((() => ({ upload })) as DirectUploadSupabaseClient['storage']['from'])
   const client = { storage: { from } }
-  const createClient = vi.fn(() => client) as ReturnType<typeof vi.fn>
+  const createClient = vi.fn<DirectUploadCreateClient>(() => client)
   return { client, createClient, from, upload }
 }
 
@@ -65,6 +65,17 @@ const baseConfig: DirectUploadConfig = {
   expiresAtHintSeconds: 3 * 60 * 60,
   childId: 'child-123',
 }
+
+describe('direct upload type boundaries', () => {
+  it('does not use double unknown casts to satisfy local client types', () => {
+    const source = readFileSync('src/lib/direct-upload-client.ts', 'utf8')
+    const testSource = readFileSync('src/lib/direct-upload-client.test.ts', 'utf8')
+    const doubleCast = ['as unknown', 'as'].join(' ')
+
+    expect(source).not.toContain(doubleCast)
+    expect(testSource).not.toContain(doubleCast)
+  })
+})
 
 describe('validateAddFiles', () => {
   it('returns ok with the cleaned file list when within limit and all images', () => {
@@ -126,7 +137,7 @@ describe('createDirectUploadClient', () => {
   it('uploadFile delegates to storage.from(bucket).upload(objectKey, file, { contentType })', async () => {
     const { createClient, from, upload } = makeFakeSupabase()
     const client = createDirectUploadClient(baseConfig, {
-      createClient: createClient as unknown as DirectUploadClientFactory,
+      createClient,
     })
     const file = makeFile('hello.jpg', 'image/jpeg')
     const result = await client.uploadFile(file, {})
@@ -157,7 +168,7 @@ describe('startDirectUpload', () => {
     const results = await startDirectUpload({
       files,
       config: baseConfig,
-      deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+      deps: { createClient },
     })
 
     expect(from).toHaveBeenCalledWith(baseConfig.bucket)
@@ -209,7 +220,7 @@ describe('startDirectUpload', () => {
     const results = await startDirectUpload({
       files,
       config: baseConfig,
-      deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+      deps: { createClient },
     })
 
     expect(upload).toHaveBeenCalledTimes(2)
@@ -233,7 +244,7 @@ describe('startDirectUpload', () => {
       startDirectUpload({
         files,
         config: { ...baseConfig, recommendedClientLimit: 2 },
-        deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+        deps: { createClient },
       }),
     ).rejects.toMatchObject({ code: 'limit_exceeded', limit: 2 })
 
@@ -247,7 +258,7 @@ describe('startDirectUpload', () => {
       startDirectUpload({
         files: [makeFile('doc.pdf', 'application/pdf')],
         config: baseConfig,
-        deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+        deps: { createClient },
       }),
     ).rejects.toMatchObject({ code: 'unsupported_mime' })
 
@@ -257,7 +268,7 @@ describe('startDirectUpload', () => {
       startDirectUpload({
         files: [makeFile('note.txt', 'text/plain')],
         config: baseConfig,
-        deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+        deps: { createClient },
       }),
     ).rejects.toMatchObject({ code: 'unsupported_mime' })
   })
@@ -271,7 +282,7 @@ describe('startDirectUpload', () => {
       files,
       config: baseConfig,
       onProgress,
-      deps: { createClient: createClient as unknown as DirectUploadClientFactory },
+      deps: { createClient },
     })
 
     expect(onProgress).toHaveBeenCalled()
@@ -282,20 +293,3 @@ describe('startDirectUpload', () => {
     expect(filesCalledFor.has(files[1])).toBe(true)
   })
 })
-
-// Local type alias matching the deps factory signature without pulling in @supabase/supabase-js
-// types directly (the tests should not depend on the SDK at runtime).
-type DirectUploadClientFactory = (
-  url: string,
-  key: string,
-) => {
-  storage: {
-    from: (bucket: string) => {
-      upload: (
-        objectKey: string,
-        file: File,
-        options: { contentType: string; upsert?: boolean },
-      ) => Promise<{ data: { path: string } | null; error: { message: string } | null }>
-    }
-  }
-}

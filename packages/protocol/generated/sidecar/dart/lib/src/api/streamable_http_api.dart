@@ -17,7 +17,7 @@ class StreamableHttpApi {
   const StreamableHttpApi(this._dio);
 
   /// streamableHttpControllerHandleDeleteRequest
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class StreamableHttpApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> streamableHttpControllerHandleDeleteRequest({ 
+  Future<Response<void>> streamableHttpControllerHandleDeleteRequest({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,7 +62,7 @@ class StreamableHttpApi {
   }
 
   /// streamableHttpControllerHandleGetRequest
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -74,7 +74,7 @@ class StreamableHttpApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> streamableHttpControllerHandleGetRequest({ 
+  Future<Response<void>> streamableHttpControllerHandleGetRequest({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -107,7 +107,7 @@ class StreamableHttpApi {
   }
 
   /// streamableHttpControllerHandlePostRequest
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -119,7 +119,7 @@ class StreamableHttpApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> streamableHttpControllerHandlePostRequest({ 
+  Future<Response<void>> streamableHttpControllerHandlePostRequest({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,

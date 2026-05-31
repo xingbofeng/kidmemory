@@ -1,67 +1,36 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { AppConfigService } from '../../infrastructure/config/app-config.service.ts';
+import { Injectable, Logger } from '@nestjs/common';
 import type {
   RegisterDeviceDto,
   DeviceResponseDto,
   UploadItemResponseDto,
   UpdateSyncStatusDto,
-  JobResponseDto,
-  UpdateJobStatusDto,
 } from './dto/cloud-api.dto.ts';
 
-/**
- * CloudApiClient 负责与 Cloud-API 进行 HTTP 通信。
- *
- * 功能：
- * - 设备注册和心跳
- * - 获取待上传项目
- * - 更新上传项目同步状态
- * - 获取待处理任务
- * - 更新任务状态
- *
- * 错误处理：
- * - 网络错误
- * - 超时
- * - 非 2xx 响应
- */
 @Injectable()
 export class CloudApiClient {
   private readonly logger = new Logger(CloudApiClient.name);
   private readonly baseUrl: string;
   private readonly timeout: number;
 
-  constructor(@Inject(AppConfigService) private readonly configService: AppConfigService) {
-    // 从环境变量读取配置
+  constructor() {
     this.baseUrl = process.env.CLOUD_API_URL || 'http://localhost:3002';
     this.timeout = Number(process.env.CLOUD_API_TIMEOUT) || 10000;
   }
 
-  /**
-   * 注册设备
-   */
   async registerDevice(dto: RegisterDeviceDto): Promise<DeviceResponseDto> {
     return this.request<DeviceResponseDto>('POST', '/devices/register', dto);
   }
 
-  /**
-   * 发送心跳
-   */
   async heartbeat(deviceId: string): Promise<DeviceResponseDto> {
     return this.request<DeviceResponseDto>('PUT', `/devices/${deviceId}/heartbeat`);
   }
 
-  /**
-   * 获取待上传项目
-   */
   async getPendingUploadItems(deviceId: string, limit = 10): Promise<UploadItemResponseDto[]> {
     const encodedDeviceId = encodeURIComponent(deviceId);
     const url = `/upload-items/pending-sync?deviceId=${encodedDeviceId}&limit=${limit}&offset=0`;
     return this.request<UploadItemResponseDto[]>('GET', url);
   }
 
-  /**
-   * 更新上传项目同步状态
-   */
   async updateUploadItemSyncStatus(
     itemId: string,
     dto: UpdateSyncStatusDto
@@ -73,25 +42,6 @@ export class CloudApiClient {
     );
   }
 
-  /**
-   * 获取待处理任务
-   */
-  async getPendingJobs(deviceId: string, limit = 10): Promise<JobResponseDto[]> {
-    const encodedDeviceId = encodeURIComponent(deviceId);
-    const url = `/jobs/pending?deviceId=${encodedDeviceId}&limit=${limit}`;
-    return this.request<JobResponseDto[]>('GET', url);
-  }
-
-  /**
-   * 更新任务状态
-   */
-  async updateJobStatus(jobId: string, dto: UpdateJobStatusDto): Promise<JobResponseDto> {
-    return this.request<JobResponseDto>('PUT', `/jobs/${jobId}/status`, dto);
-  }
-
-  /**
-   * 通用 HTTP 请求方法
-   */
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const controller = new AbortController();

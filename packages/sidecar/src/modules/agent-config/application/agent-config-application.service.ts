@@ -37,75 +37,51 @@ export class AgentConfigApplicationService {
     this.domainService = domainService;
   }
 
-  /**
-   * List all active agent configurations
-   */
   async listConfigs(): Promise<AgentConfig[]> {
     return await this.repository.findAll();
   }
 
-  /**
-   * Get a specific agent configuration by ID
-   */
   async getConfig(id: string): Promise<AgentConfig | null> {
     return await this.repository.findById(id);
   }
 
-  /**
-   * Get the current default agent configuration
-   */
   async getDefaultConfig(): Promise<AgentConfig | null> {
     return await this.repository.findDefault();
   }
 
-  /**
-   * Get the encrypted API key for a given configuration
-   */
   async getEncryptedApiKey(configId: string): Promise<string | null> {
     return await this.repository.getEncryptedApiKey(configId);
   }
 
-  /**
-   * Create a new agent configuration
-   */
   async createConfig(input: CreateAgentConfigProps): Promise<AgentConfig> {
-    // Validate business rules
     this.domainService.validateCreateRequest(input);
 
-    // Check encryption availability
     if (!this.encryption.isEncryptionAvailable()) {
       throw new Error('Encryption not available. Cannot create agent configuration.');
     }
 
-    // Check for duplicate names
     const nameExists = await this.repository.existsByName(input.name);
     if (nameExists) {
       throw new Error('A configuration with this name already exists');
     }
 
-    // Create domain entity
     const config = AgentConfig.create(input);
 
-    // Encrypt API key
     const encryptedApiKey = this.encryption.encryptForStorage(input.apiKey);
 
-    // Handle default configuration logic
     if (input.isDefault) {
       const currentConfigs = await this.repository.findAll();
       const configsToUpdate = currentConfigs
         .filter((currentConfig) => currentConfig.isDefault)
         .map((currentConfig) => currentConfig.markAsNonDefault());
 
-      // Clear existing defaults
       if (configsToUpdate.length > 0) {
         await this.repository.saveMany(configsToUpdate);
       }
     }
 
-    // Save the new configuration
     const savedConfig = await this.repository.save(config, encryptedApiKey);
 
-    // Log audit event
     await this.auditLogger.logConfigChange(
       savedConfig.id,
       'CREATE',
@@ -116,20 +92,14 @@ export class AgentConfigApplicationService {
     return savedConfig;
   }
 
-  /**
-   * Update an existing agent configuration
-   */
   async updateConfig(id: string, input: UpdateAgentConfigProps): Promise<AgentConfig> {
-    // Validate business rules
     this.domainService.validateUpdateRequest(input);
 
-    // Get current configuration
     const currentConfig = await this.repository.findById(id);
     if (!currentConfig) {
       throw new Error('Agent configuration not found');
     }
 
-    // Check for duplicate names (excluding current config)
     if (input.name && input.name !== currentConfig.name) {
       const nameExists = await this.repository.existsByName(input.name, id);
       if (nameExists) {
@@ -137,7 +107,6 @@ export class AgentConfigApplicationService {
       }
     }
 
-    // Handle API key encryption if provided
     let encryptedApiKey: string | undefined;
     if (input.apiKey) {
       if (!this.encryption.isEncryptionAvailable()) {
@@ -146,13 +115,10 @@ export class AgentConfigApplicationService {
       encryptedApiKey = this.encryption.encryptForStorage(input.apiKey);
     }
 
-    // Update domain entity
     const updatedConfig = currentConfig.update(input);
 
-    // Save updated configuration
     const savedConfig = await this.repository.update(updatedConfig, encryptedApiKey);
 
-    // Log audit event
     await this.auditLogger.logConfigChange(
       savedConfig.id,
       'UPDATE',
@@ -163,26 +129,20 @@ export class AgentConfigApplicationService {
     return savedConfig;
   }
 
-  /**
-   * Delete an agent configuration
-   */
   async deleteConfig(id: string): Promise<void> {
     const config = await this.repository.findById(id);
     if (!config) {
       throw new Error('Agent configuration not found');
     }
 
-    // Check if config can be deleted
     const { canDelete, reason } = this.domainService.canDeleteConfig(config);
     if (!canDelete) {
       throw new Error(reason!);
     }
 
-    // Soft delete by deactivating
     const deactivatedConfig = config.deactivate();
     await this.repository.update(deactivatedConfig);
 
-    // Log audit event
     await this.auditLogger.logConfigChange(
       config.id,
       'DELETE',
@@ -191,9 +151,6 @@ export class AgentConfigApplicationService {
     );
   }
 
-  /**
-   * Set a configuration as the default
-   */
   async setDefaultConfig(id: string): Promise<void> {
     const currentConfigs = await this.repository.findAll();
     const { configsToUpdate, newDefault } = this.domainService.prepareDefaultConfigChange(
@@ -202,13 +159,11 @@ export class AgentConfigApplicationService {
     );
 
     if (configsToUpdate.length === 0) {
-      return; // Already default
+      return;
     }
 
-    // Save all updated configurations
     await this.repository.saveMany(configsToUpdate);
 
-    // Log audit event
     await this.auditLogger.logConfigChange(
       newDefault.id,
       'SET_DEFAULT',
@@ -217,20 +172,14 @@ export class AgentConfigApplicationService {
     );
   }
 
-  /**
-   * Test an agent configuration
-   */
   async testConfig(request: TestConfigInput): Promise<TestConfigResult> {
-    // Validate request
     this.domainService.validateTestRequest(request);
 
-    // Get configuration
     const config = await this.repository.findById(request.configId);
     if (!config) {
       throw new Error('Agent configuration not found');
     }
 
-    // Get decrypted API key
     const encryptedApiKey = await this.repository.getEncryptedApiKey(request.configId);
     if (!encryptedApiKey) {
       throw new Error('API key not available for testing');
@@ -247,10 +196,8 @@ export class AgentConfigApplicationService {
       throw new Error(`Failed to decrypt API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
-    // Prepare test prompt
     const testPrompt = this.domainService.getTestPrompt(request.testPrompt);
 
-    // Perform the test
     const startTime = Date.now();
     let testResult: TestConfigResult;
 
@@ -265,7 +212,6 @@ export class AgentConfigApplicationService {
         errorMessage: result.errorMessage
       };
 
-      // Update config with test result
       const updatedConfig = config.updateTestResult('success');
       await this.repository.update(updatedConfig);
 
@@ -279,12 +225,10 @@ export class AgentConfigApplicationService {
         errorMessage
       };
 
-      // Update config with failed test result
       const updatedConfig = config.updateTestResult('failed');
       await this.repository.update(updatedConfig);
     }
 
-    // Log audit event
     await this.auditLogger.logConfigChange(
       request.configId,
       'TEST',
@@ -295,9 +239,6 @@ export class AgentConfigApplicationService {
     return testResult;
   }
 
-  /**
-   * Get decrypted API key for authorized operations
-   */
   async getDecryptedApiKey(configId: string): Promise<string | null> {
     if (!this.encryption.isEncryptionAvailable()) {
       throw new Error('Encryption not available. Cannot decrypt API key.');

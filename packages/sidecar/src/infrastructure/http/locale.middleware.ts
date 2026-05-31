@@ -24,8 +24,6 @@ export class LocaleMiddleware implements NestMiddleware {
       return DEFAULT_LOCALE;
     }
 
-    // 解析 Accept-Language header
-    // 格式: "zh-CN,zh;q=0.9,en;q=0.8"
     const languages = acceptLanguage
       .split(',')
       .map((lang) => {
@@ -35,13 +33,10 @@ export class LocaleMiddleware implements NestMiddleware {
       })
       .sort((a, b) => b.quality - a.quality);
 
-    // 查找第一个支持的语言
     for (const { locale } of languages) {
-      // 精确匹配
       if (SUPPORTED_LOCALE_SET.has(locale as Locale)) {
         return locale as Locale;
       }
-      // 语言前缀匹配 (zh -> zh-CN)
       const prefix = locale.split('-')[0];
       const matched = SUPPORTED_LOCALES.find((supported) =>
         supported.startsWith(prefix),
@@ -55,7 +50,6 @@ export class LocaleMiddleware implements NestMiddleware {
   }
 }
 
-// 导出工厂函数供 NestJS 使用
 export function createLocaleMiddleware() {
   return new LocaleMiddleware();
 }

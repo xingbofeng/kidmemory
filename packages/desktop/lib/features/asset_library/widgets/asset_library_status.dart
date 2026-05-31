@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
@@ -8,6 +6,7 @@ import 'asset_library_palette.dart';
 
 class AssetLibraryHeaderStatus extends StatelessWidget {
   const AssetLibraryHeaderStatus({
+    super.key,
     required this.childName,
     required this.assetCount,
     required this.indexingMessage,
@@ -47,6 +46,7 @@ class AssetLibraryHeaderStatus extends StatelessWidget {
 
 class AssetLibrarySoftStatusChip extends StatelessWidget {
   const AssetLibrarySoftStatusChip({
+    super.key,
     required this.iconAsset,
     required this.text,
   });

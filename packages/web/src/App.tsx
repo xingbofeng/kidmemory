@@ -88,7 +88,6 @@ function WebCompanionRoute() {
     <WebCompanionApp
       sessionId={sessionId}
       sessionToken={sessionToken}
-      defaultChildId={DEFAULT_CHILD_ID}
       recentBooks={recentBooks}
       onResetSession={createSession}
     />

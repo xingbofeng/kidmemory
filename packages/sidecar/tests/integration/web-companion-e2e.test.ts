@@ -23,6 +23,12 @@ import {
   type UploadItemStatusType,
 } from "../../src/modules/web-companion/constants.ts";
 
+function assertErrorMessageIncludes(error: unknown, expected: string) {
+  assert.ok(error instanceof Error, "expected rejection to be an Error");
+  assert.ok(error.message.includes(expected), `expected "${error.message}" to include "${expected}"`);
+  return true;
+}
+
 describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABASE_URL is not configured" }, () => {
   let service: WebCompanionService;
   let prisma: PrismaService;
@@ -33,30 +39,21 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
   let createdSessionIds: string[] = [];
 
   beforeEach(async () => {
-    // 使用真实的服务实例（需要数据库连接）
-    // 如果没有数据库，这些测试会被跳过
-    try {
-      appConfig = new AppConfigService();
-      await new PrismaMigrationService(appConfig).deploy();
-      prisma = new PrismaService();
-      await prisma.$connect();
-      dataset = new DatasetService(new DatasetStateService(new PrismaDatasetDbService(prisma)), appConfig);
-      service = new WebCompanionService(appConfig, new PrismaWebCompanionRepository(prisma), dataset);
+    appConfig = new AppConfigService();
+    await new PrismaMigrationService(appConfig).deploy();
+    prisma = new PrismaService();
+    await prisma.$connect();
+    dataset = new DatasetService(new DatasetStateService(new PrismaDatasetDbService(prisma)), appConfig);
+    service = new WebCompanionService(appConfig, new PrismaWebCompanionRepository(prisma), dataset);
 
-      // 创建测试用的 child
-      await prisma.child.upsert({
-        where: { id: testChildId },
-        create: { id: testChildId, name: "Test Child" },
-        update: { name: "Test Child" },
-      });
-    } catch (error) {
-      console.log("Skipping E2E tests: database not available");
-      throw error;
-    }
+    await prisma.child.upsert({
+      where: { id: testChildId },
+      create: { id: testChildId, name: "Test Child" },
+      update: { name: "Test Child" },
+    });
   });
 
   afterEach(async () => {
-    // 清理测试数据
     if (prisma && createdSessionIds.length > 0) {
       for (const sessionId of createdSessionIds) {
         await prisma.uploadSession.deleteMany({ where: { id: sessionId } });
@@ -69,7 +66,6 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
   });
 
   test("complete upload flow: create session → create items → commit → close", async () => {
-    // 1. 创建会话
     const sessionResponse = await service.createSession({
       childId: testChildId,
       expiresInMinutes: 60,
@@ -83,13 +79,11 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
     assert.equal(sessionResponse.token.length, 64);
     assert.ok(sessionResponse.webUrl.includes(sessionResponse.sessionId));
 
-    // 2. 获取会话摘要
     const summary = await service.getSessionSummary(sessionResponse.sessionId);
     assert.equal(summary.status, UploadSessionStatus.ACTIVE);
     assert.equal(summary.child.id, testChildId);
     assert.equal(summary.usedItems, 0);
 
-    // 3. 创建上传项
     const itemsResponse = await service.createUploadItems(sessionResponse.sessionId, {
       token: sessionResponse.token,
       files: [
@@ -180,10 +174,7 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
         ],
         provider: StorageProvider.LAN,
       }),
-      (err: any) => {
-        assert.ok(err.message.includes("limit"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "limit")
     );
   });
 
@@ -208,10 +199,7 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
         ],
         provider: StorageProvider.LAN,
       }),
-      (err: any) => {
-        assert.ok(err.message.includes("closed"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "closed")
     );
   });
 
@@ -231,10 +219,7 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
         ],
         provider: StorageProvider.LAN,
       }),
-      (err: any) => {
-        assert.ok(err.message.includes("Invalid token"));
-        return true;
-      }
+      (error: unknown) => assertErrorMessageIncludes(error, "Invalid token")
     );
   });
 });

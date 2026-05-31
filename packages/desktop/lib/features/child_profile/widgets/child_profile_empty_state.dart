@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import 'child_profile_empty_hero.dart';
@@ -9,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 
 class EmptyChildProfilePage extends StatelessWidget {
   const EmptyChildProfilePage({
+    super.key,
     required this.onAddProfile,
     required this.onTrySample,
   });
@@ -83,7 +82,7 @@ class EmptyChildProfilePage extends StatelessWidget {
 }
 
 class EmptyProfileTitleBlock extends StatelessWidget {
-  const EmptyProfileTitleBlock();
+  const EmptyProfileTitleBlock({super.key});
 
   @override
   Widget build(BuildContext context) => Column(

@@ -5,6 +5,8 @@ import test from "node:test";
 
 import { NestFactory } from "@nestjs/core";
 
+import { useMcpTestEnv } from "./mcp-test-helpers.ts";
+
 async function startApp() {
   const { AppModule } = await import(`../../src/app.module.ts?mcp=baseline&ts=${Date.now()}`);
   const app = await NestFactory.create(AppModule, { logger: false });
@@ -20,24 +22,11 @@ async function startApp() {
 }
 
 test("mcp endpoint exposes tools/list and includes get_sidecar_health", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const listResponse = await fetch(`${baseUrl}/mcp`, {
@@ -64,24 +53,11 @@ test("mcp endpoint exposes tools/list and includes get_sidecar_health", async (t
 });
 
 test("mcp tool get_sidecar_health is callable", async (t) => {
-  const oldEnabled = process.env.KIDMEMORY_MCP_ENABLED;
-  const oldPath = process.env.KIDMEMORY_MCP_PATH;
-  process.env.KIDMEMORY_MCP_ENABLED = "true";
-  process.env.KIDMEMORY_MCP_PATH = "/mcp";
+  useMcpTestEnv(t);
 
   const { app, baseUrl } = await startApp();
   t.after(async () => {
     await app.close();
-    if (oldEnabled === undefined) {
-      delete process.env.KIDMEMORY_MCP_ENABLED;
-    } else {
-      process.env.KIDMEMORY_MCP_ENABLED = oldEnabled;
-    }
-    if (oldPath === undefined) {
-      delete process.env.KIDMEMORY_MCP_PATH;
-    } else {
-      process.env.KIDMEMORY_MCP_PATH = oldPath;
-    }
   });
 
   const callResponse = await fetch(`${baseUrl}/mcp`, {

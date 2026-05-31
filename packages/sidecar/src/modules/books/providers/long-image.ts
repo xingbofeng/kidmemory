@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { isPlaywrightUnavailable } from "../../../infrastructure/browser/playwright-errors.ts";
+
 type LongImageFormat = "png" | "jpg";
 
 type LongImageRenderer = {
@@ -54,7 +56,7 @@ async function renderWithPlaywright(input: { html: string; targetPath: string; f
     } finally {
       await browser.close();
     }
-  } catch (error: any) {
+  } catch (error) {
     if (!isPlaywrightUnavailable(error)) throw error;
     await writeMinimalImage(input.targetPath, input.format);
   }
@@ -73,19 +75,4 @@ function minimalPng() {
 
 function minimalJpeg() {
   return Buffer.from("ffd8ffe000104a46494600010101006000600000ffdb004300080606070605080707070909080a0c140d0c0b0b0c1912130f141d1a1f1e1d1a1c1c20242e2720222c231c1c2837292c30313434341f27393d38323c2e333432ffc0000b080001000101011100ffc4001400010000000000000000000000000000000000000008ffda0008010100003f00d2cf20ffd9", "hex");
-}
-
-function isPlaywrightUnavailable(error: any) {
-  if (error?.code === "ERR_MODULE_NOT_FOUND") return true;
-  if (!(error instanceof Error)) return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("chromium") &&
-    (
-      message.includes("executable") ||
-      message.includes("install") ||
-      message.includes("not found") ||
-      message.includes("failed to launch")
-    )
-  );
 }

@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 
 import type { AppConfig } from "../../../infrastructure/config/app-config.service.ts";
+import { trimTrailingSlash } from "../../../infrastructure/url/trailing-slash.ts";
 
 export type SupabaseStorageConfig = AppConfig["supabaseStorage"];
 
@@ -27,7 +28,7 @@ export function createSupabaseStorageProvider(dependencies: ProviderDependencies
   const publicUrlForObject = (objectPath: string) => {
     const normalizedPath = normalizeObjectPath(objectPath);
     const base = config.publicBaseUrl.trim()
-      || `${trimTrailingSlash(config.url)}/storage/v1/object/public/${encodeURIComponent(config.bucket)}`;
+      || `${trimTrailingSlash(config.url.trim())}/storage/v1/object/public/${encodeURIComponent(config.bucket)}`;
     return `${trimTrailingSlash(base)}/${normalizedPath}`;
   };
 
@@ -138,7 +139,7 @@ export function createSupabaseStorageProvider(dependencies: ProviderDependencies
 
       const normalizedPath = normalizeObjectPath(objectPath);
       const response = await fetchImpl(
-        `${trimTrailingSlash(config.url)}/storage/v1/object/sign/${encodeURIComponent(config.bucket)}/${normalizedPath}`,
+        `${trimTrailingSlash(config.url.trim())}/storage/v1/object/sign/${encodeURIComponent(config.bucket)}/${normalizedPath}`,
         {
           method: "POST",
           headers: authHeaders(config, "application/json"),
@@ -158,7 +159,7 @@ export function createSupabaseStorageProvider(dependencies: ProviderDependencies
         ok: true,
         url: signedPath.startsWith("http")
           ? signedPath
-          : `${trimTrailingSlash(config.url)}${signedPath.startsWith("/") ? "" : "/"}${signedPath}`,
+          : `${trimTrailingSlash(config.url.trim())}${signedPath.startsWith("/") ? "" : "/"}${signedPath}`,
         expiresInSeconds: config.signedUrlTtlSeconds,
       };
     },
@@ -222,7 +223,7 @@ async function requestSupabaseRest(input: {
   contentType?: string;
 }): Promise<StorageActionResult> {
   const response = await input.fetchImpl(
-    `${trimTrailingSlash(input.config.url)}/storage/v1/object/${encodeURIComponent(input.config.bucket)}/${normalizeObjectPath(input.objectPath)}`,
+    `${trimTrailingSlash(input.config.url.trim())}/storage/v1/object/${encodeURIComponent(input.config.bucket)}/${normalizeObjectPath(input.objectPath)}`,
     {
       method: input.method === "PUT" ? "POST" : input.method,
       headers: authHeaders(input.config, input.contentType),
@@ -346,7 +347,7 @@ function authHeaders(config: SupabaseStorageConfig, contentType?: string) {
 }
 
 function s3ObjectUrl(config: SupabaseStorageConfig, objectPath: string) {
-  return `${trimTrailingSlash(config.s3.endpoint)}/${encodeURIComponent(config.bucket)}/${normalizeObjectPath(objectPath)}`;
+  return `${trimTrailingSlash(config.s3.endpoint.trim())}/${encodeURIComponent(config.bucket)}/${normalizeObjectPath(objectPath)}`;
 }
 
 function signedS3Headers(input: {
@@ -511,10 +512,6 @@ function normalizeObjectPath(value: string) {
     .split("/")
     .map((part) => encodeURIComponent(part))
     .join("/");
-}
-
-function trimTrailingSlash(value: string) {
-  return value.trim().replace(/\/+$/, "");
 }
 
 async function safeText(response: Response) {

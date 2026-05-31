@@ -27,4 +27,11 @@ describe('i18n message bundles', () => {
 
     expect(zhKeys).toEqual(enKeys);
   });
+
+  it('uses current upload namespace names', () => {
+    const staleNamespace = ['upload', 'Legacy'].join('');
+
+    expect(Object.prototype.hasOwnProperty.call(zhCN, staleNamespace)).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(enUS, staleNamespace)).toBe(false);
+  });
 });

@@ -2,10 +2,15 @@
  * Direct Upload list objects DTOs.
  */
 
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
+export interface DirectUploadRemoteObject {
+  objectKey: string;
+  size?: number;
+  updatedAt?: string;
+  contentType?: string;
+}
 
-export type DirectUploadRemoteObject =
-  components["schemas"]["DirectUploadRemoteObjectDto"];
-
-export type ListDirectUploadObjectsResponse =
-  components["schemas"]["ListDirectUploadObjectsResponseDto"];
+export interface ListDirectUploadObjectsResponse {
+  sessionId: string;
+  bucket: string;
+  objects: DirectUploadRemoteObject[];
+}

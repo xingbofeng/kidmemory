@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
@@ -8,6 +6,7 @@ import 'asset_library_palette.dart';
 
 class AssetLibraryBatchActionBar extends StatelessWidget {
   const AssetLibraryBatchActionBar({
+    super.key,
     required this.selectedCount,
     required this.onDeleteSelected,
     required this.onClearSelection,
@@ -90,7 +89,11 @@ class AssetLibraryBatchActionBar extends StatelessWidget {
 }
 
 class AssetLibraryBatchTextButton extends StatelessWidget {
-  const AssetLibraryBatchTextButton({required this.label, this.onPressed});
+  const AssetLibraryBatchTextButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+  });
 
   final String label;
   final VoidCallback? onPressed;

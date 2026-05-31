@@ -7,6 +7,7 @@
 import {
   HttpException,
   HttpStatus,
+  Logger,
 } from "@nestjs/common";
 import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
 import type { Response, Request } from 'express';
@@ -24,7 +25,40 @@ export interface ErrorDetails {
   path: string;
 }
 
+type HttpExceptionResponseObject = {
+  message?: string | string[];
+  apiCode?: number;
+  issues?: ErrorDetails["issues"];
+  data?: unknown;
+};
+
+type ValidationIssue = {
+  path?: (string | number)[];
+  message?: string;
+  code?: string;
+};
+
+type ValidationErrorLike = {
+  errors?: ValidationIssue[];
+};
+
+function isHttpExceptionResponseObject(value: unknown): value is HttpExceptionResponseObject {
+  return typeof value === "object" && value !== null;
+}
+
+function getResponseMessage(value: HttpExceptionResponseObject["message"], fallback: string): string {
+  if (typeof value === "string" && value) return value;
+  if (Array.isArray(value) && value.length > 0) return value.join(", ");
+  return fallback;
+}
+
+function isValidationErrorLike(value: unknown): value is ValidationErrorLike {
+  return typeof value === "object" && value !== null && "errors" in value;
+}
+
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -43,27 +77,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
         apiCode = this.getApiCodeFromStatus(status);
-      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        const responseObj = exceptionResponse as any;
-        message = responseObj.message || message;
-        apiCode = responseObj.apiCode || this.getApiCodeFromStatus(status);
+      } else if (isHttpExceptionResponseObject(exceptionResponse)) {
+        message = getResponseMessage(exceptionResponse.message, message);
+        apiCode = exceptionResponse.apiCode || this.getApiCodeFromStatus(status);
 
         // Preserve Zod validation issues
-        if (responseObj.issues) {
-          issues = responseObj.issues;
+        if (exceptionResponse.issues) {
+          issues = exceptionResponse.issues;
         }
-        if ('data' in responseObj) {
-          detail = responseObj.data;
+        if ('data' in exceptionResponse) {
+          detail = exceptionResponse.data;
         }
       }
-    } else if (exception && typeof exception === 'object' && 'errors' in exception) {
-      // Handle Zod-like validation errors
+    } else if (isValidationErrorLike(exception)) {
       status = HttpStatus.BAD_REQUEST;
       apiCode = ApiCode.INVALID_PARAMS;
       message = 'Request validation failed';
-      const zodError = exception as any;
-      if (Array.isArray(zodError.errors)) {
-        issues = zodError.errors.map((error: any) => ({
+      if (Array.isArray(exception.errors)) {
+        issues = exception.errors.map((error) => ({
           path: error.path || [],
           message: error.message || 'Validation error',
           code: error.code || 'invalid',
@@ -72,7 +103,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof Error) {
       message = exception.message;
 
-      // Handle specific error types
       if (exception.message.includes('request entity too large')) {
         status = HttpStatus.PAYLOAD_TOO_LARGE;
         apiCode = ApiCode.INVALID_PARAMS;
@@ -108,13 +138,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       data: errorDetails,
     };
 
-    // Log error for debugging
-    console.error(`HTTP ${status} ${apiCode}:`, {
-      path: request.url,
-      method: request.method,
-      message,
-      ...(issues && { issueCount: issues.length }),
-    });
+    this.logger.error(
+      `HTTP ${status} ${apiCode}: method=${request.method} path=${request.url} message=${message}${issues ? ` issueCount=${issues.length}` : ""}`,
+    );
 
     response.status(status).json(errorResponse);
   }

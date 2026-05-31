@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -11,6 +9,7 @@ import 'child_profile_shared_ui.dart';
 
 class GrowthStatsPanel extends StatelessWidget {
   const GrowthStatsPanel({
+    super.key,
     required this.assetCount,
     required this.artworkCount,
     required this.photoCount,
@@ -77,6 +76,7 @@ class GrowthStatsPanel extends StatelessWidget {
 
 class ChildProfileDistributionPanel extends StatelessWidget {
   const ChildProfileDistributionPanel({
+    super.key,
     required this.artworkCount,
     required this.photoCount,
     required this.craftCount,
@@ -142,6 +142,7 @@ class ChildProfileDistributionPanel extends StatelessWidget {
 
 class ChildProfileDistributionChart extends StatelessWidget {
   const ChildProfileDistributionChart({
+    super.key,
     required this.artworkCount,
     required this.photoCount,
     required this.craftCount,

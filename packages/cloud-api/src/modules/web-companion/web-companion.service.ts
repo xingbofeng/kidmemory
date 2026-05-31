@@ -141,19 +141,19 @@ export class WebCompanionService {
       where: { token: input.token },
     });
     if (!shareToken) {
-      return { isValid: false, error: 'Share token not found' };
+      return invalidShareToken('Share token not found');
     }
 
     if (shareToken.revokedAt) {
-      return { isValid: false, error: 'Share token revoked' };
+      return invalidShareToken('Share token revoked');
     }
 
     if (shareToken.expiresAt && shareToken.expiresAt.getTime() <= Date.now()) {
-      return { isValid: false, error: 'Share token expired' };
+      return invalidShareToken('Share token expired');
     }
 
     if (shareToken.accessLimit !== null && shareToken.accessCount >= shareToken.accessLimit) {
-      return { isValid: false, error: 'Share token access limit exceeded' };
+      return invalidShareToken('Share token access limit exceeded');
     }
 
     await this.prisma.shareToken.update({
@@ -249,4 +249,8 @@ export class WebCompanionService {
 
 function sanitizeFileName(filename: string): string {
   return filename.replace(/[^a-zA-Z0-9._-]+/g, '_');
+}
+
+function invalidShareToken(error: string): ShareTokenValidationResponseDto {
+  return { isValid: false, error };
 }

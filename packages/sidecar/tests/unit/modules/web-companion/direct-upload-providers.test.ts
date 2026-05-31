@@ -5,10 +5,19 @@ import {
   DatasetServiceDirectUploadAssetGateway,
   PrismaDirectUploadPullbackStore,
 } from "../../../../src/modules/web-companion/direct-upload.providers.ts";
+import type {
+  DirectUploadPullbackRow,
+} from "../../../../src/modules/web-companion/direct-upload.service.ts";
+
+type TestPullbackRow = DirectUploadPullbackRow & {
+  createdAt: Date;
+  updatedAt: Date;
+  pulledAt: Date | null;
+};
 
 test("DatasetServiceDirectUploadAssetGateway maps DatasetService import report id/path to pullback result", async () => {
   const gateway = new DatasetServiceDirectUploadAssetGateway({
-    async importAssets(input: { paths: string[] }) {
+    async importAssets(input) {
       return {
         ok: true,
         imported: [{ id: "asset_from_dataset", path: input.paths[0] }],
@@ -17,7 +26,7 @@ test("DatasetServiceDirectUploadAssetGateway maps DatasetService import report i
         skipped: [],
       };
     },
-  } as never);
+  });
 
   const result = await gateway.importPullback({
     objectKey: "wcs_direct_test/photo.png",
@@ -32,20 +41,31 @@ test("DatasetServiceDirectUploadAssetGateway maps DatasetService import report i
 });
 
 test("PrismaDirectUploadPullbackStore persists pullback rows through Prisma", async () => {
-  const rows = new Map<string, any>();
+  const rows = new Map<string, TestPullbackRow>();
   const prisma = {
     directUploadPullback: {
-      async upsert({ where, create, update }: any) {
+      async upsert({ where, create, update }) {
         const key = `${where.sessionId_objectKey.sessionId}:${where.sessionId_objectKey.objectKey}`;
         const existing = rows.get(key);
-        const row = existing ? { ...existing, ...update } : { ...create, createdAt: new Date(), updatedAt: new Date() };
+        const row = existing
+          ? { ...existing, ...update }
+          : {
+              ...create,
+              assetId: null,
+              localPath: null,
+              errorCode: null,
+              errorMessage: null,
+              pulledAt: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
         rows.set(key, row);
         return row;
       },
-      async findMany({ where }: any) {
+      async findMany({ where }) {
         return [...rows.values()].filter((row) => row.sessionId === where.sessionId);
       },
-      async update({ where, data }: any) {
+      async update({ where, data }) {
         const row = [...rows.values()].find((candidate) => candidate.id === where.id);
         if (!row) {
           const error = new Error("not found") as Error & { code?: string };
@@ -55,12 +75,12 @@ test("PrismaDirectUploadPullbackStore persists pullback rows through Prisma", as
         Object.assign(row, data);
         return row;
       },
-      async findUnique({ where }: any) {
+      async findUnique({ where }) {
         return [...rows.values()].find((row) => row.id === where.id) || null;
       },
     },
-  };
-  const store = new PrismaDirectUploadPullbackStore(prisma as never);
+  } satisfies ConstructorParameters<typeof PrismaDirectUploadPullbackStore>[0];
+  const store = new PrismaDirectUploadPullbackStore(prisma);
 
   const pending = await store.upsertPending({
     sessionId: "session_1",

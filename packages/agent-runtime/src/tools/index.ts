@@ -26,6 +26,12 @@ export type ToolExecutionContext = {
   traceId?: string;
 };
 
+type NonStrictOpenAIToolOptions = Extract<
+  Parameters<typeof openAIAgentsTool>[0],
+  { strict: false }
+>;
+type OpenAIToolParameters = NonStrictOpenAIToolOptions["parameters"];
+
 export type RuntimePolicy = {
   tools?: ToolPolicy;
 };
@@ -70,7 +76,7 @@ export function toOpenAIAgentsTool(agentTool: AgentTool, context: ToolExecutionC
   return openAIAgentsTool({
     name: agentTool.id,
     description: agentTool.description,
-    parameters: agentTool.inputSchema as never,
+    parameters: agentTool.inputSchema as OpenAIToolParameters,
     strict: false,
     needsApproval: agentTool.requiresApproval ?? false,
     execute: async (input) => agentTool.execute(input, context),

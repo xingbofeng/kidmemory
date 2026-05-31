@@ -2,6 +2,7 @@ import { Injectable, Inject } from "@nestjs/common";
 import { AgentRuntime, OpenAICompatibleChatExecutor } from "@kidmemory/agent-runtime";
 import type { ExecutorKind, AgentRunRequest, AgentRunResult } from "@kidmemory/agent-runtime";
 
+import { delay } from "../../infrastructure/time/delay.ts";
 import { AgentConfigApplicationService } from "../agent-config/application/agent-config-application.service.ts";
 import { ENCRYPTION_PORT } from "../agent-config/ports/agent-config.ports.ts";
 import type { EncryptionPort } from "../agent-config/ports/agent-config.ports.ts";
@@ -142,7 +143,7 @@ export class AgentRuntimeService {
   }
 
   private async timeoutFailure(ms: number, stage: RuntimeStage, sessionId: string): Promise<RunCreationStageResult> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
+    await delay(ms);
     return {
       ok: false,
       sessionId,

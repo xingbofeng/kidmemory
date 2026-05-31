@@ -9,9 +9,9 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**streamableHttpControllerHandleDeleteRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandledeleterequest) | **DELETE** /mcp | 
-[**streamableHttpControllerHandleGetRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandlegetrequest) | **GET** /mcp | 
-[**streamableHttpControllerHandlePostRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandlepostrequest) | **POST** /mcp | 
+[**streamableHttpControllerHandleDeleteRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandledeleterequest) | **DELETE** /mcp |
+[**streamableHttpControllerHandleGetRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandlegetrequest) | **GET** /mcp |
+[**streamableHttpControllerHandlePostRequest**](StreamableHttpApi.md#streamablehttpcontrollerhandlepostrequest) | **POST** /mcp |
 
 
 # **streamableHttpControllerHandleDeleteRequest**
@@ -121,4 +121,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

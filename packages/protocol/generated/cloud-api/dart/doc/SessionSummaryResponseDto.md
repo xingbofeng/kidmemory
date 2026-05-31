@@ -10,10 +10,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **sessionId** | **String** |  |
 **status** | **String** |  |
-**child** | **Object** |  |
+**child** | [**TrustedUploadSessionChildDto**](TrustedUploadSessionChildDto.md) |  |
 **expiresAt** | **String** |  |
 **maxItems** | **num** |  |
 **usedItems** | **num** |  |
-**providers** | **Object** |  |
+**providers** | [**DirectUploadProvidersDto**](DirectUploadProvidersDto.md) |  |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

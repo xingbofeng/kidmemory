@@ -53,7 +53,7 @@ Set<String> _findHardcodedStrings(Directory dir) {
     for (var i = 0; i < lines.length; i++) {
       if (_isHardcodedChineseUiString(lines[i])) {
         results.add(
-          '  ${path.replaceAll(dir.path + '/', '')}:${i + 1}: ${lines[i].trim()}',
+          '  ${path.replaceAll('${dir.path}/', '')}:${i + 1}: ${lines[i].trim()}',
         );
       }
     }
@@ -68,13 +68,13 @@ void main() {
 
     final violations = _findHardcodedStrings(libDir);
     if (violations.isNotEmpty) {
-      print('\nFound ${violations.length} hardcoded Chinese strings:');
+      stdout.writeln('\nFound ${violations.length} hardcoded Chinese strings:');
       final sorted = violations.toList()..sort();
       for (final v in sorted.take(30)) {
-        print(v);
+        stdout.writeln(v);
       }
       if (sorted.length > 30) {
-        print('  ... and ${sorted.length - 30} more');
+        stdout.writeln('  ... and ${sorted.length - 30} more');
       }
     }
 

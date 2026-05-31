@@ -87,7 +87,6 @@ part 'setup/actions/setup_pgvector.dart';
 part 'setup/actions/setup_system.dart';
 // Setup - Commands
 part 'setup/commands/command_runner.dart';
-part 'setup/commands/command_streaming.dart';
 // Setup - Dialogs
 part 'setup/dialogs/dialog_openai.dart';
 part 'setup/dialogs/dialog_storage.dart';
@@ -101,7 +100,6 @@ part 'setup/probes/probe_pgvector.dart';
 part 'setup/state/setup_state.dart';
 part 'setup/state/setup_config.dart';
 part 'setup/state/setup_paths_state.dart';
-part 'setup/state/progress_tracker.dart';
 part 'setup/state/progress_updates.dart';
 // Setup - Flows
 part 'setup/flows/setup_flow.dart';
@@ -274,30 +272,6 @@ class _DesktopShellState extends State<DesktopShell> {
     if (step != AppStep.generate) {
       _stopCreationTaskPolling();
     }
-  }
-
-  // Keep a local lifecycle fallback, but respect PG owner lock to avoid
-  // stale DesktopShell instances stopping the new session database.
-  void _stopBundledPostgresIfRunning() {
-    final pgCtl = _bundledPostgresTool('pg_ctl');
-    if (pgCtl == null) return;
-    final dataDir = Directory(_bundledPostgresDataDir());
-    if (!dataDir.existsSync()) return;
-    final ownerFile = File(_bundledPostgresOwnerPath());
-    final ownerPid = ownerFile.existsSync()
-        ? ownerFile.readAsStringSync().trim()
-        : '';
-    if (ownerPid != '$pid') return;
-    try {
-      Process.runSync(
-        pgCtl,
-        ['-D', dataDir.path, 'stop', '-m', 'fast'],
-        environment: {...Platform.environment, 'PATH': _setupCommandPath},
-      );
-      if (ownerFile.existsSync()) {
-        ownerFile.deleteSync();
-      }
-    } catch (_) {}
   }
 
   @override

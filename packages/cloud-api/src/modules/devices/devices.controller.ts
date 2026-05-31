@@ -1,8 +1,8 @@
 import { Controller, Post, Put, Get, Body, Param, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 import { ApiBody, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { schemaRef } from '../../infrastructure/http/swagger-schema.ts';
 import { DevicesService } from './devices.service.ts';
-import { DeviceResponseDto, RegisterDeviceRequestDto } from './devices.dto.ts';
-import type { RegisterDeviceDto } from './devices.dto.ts';
+import type { DeviceResponseDto, RegisterDeviceDto } from './devices.dto.ts';
 
 @ApiTags('devices')
 @Controller('/devices')
@@ -12,8 +12,8 @@ export class DevicesController {
   @Post('/register')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Register a device (idempotent by machineId)' })
-  @ApiBody({ type: RegisterDeviceRequestDto })
-  @ApiResponse({ status: 200, description: 'Device registered successfully', type: DeviceResponseDto })
+  @ApiBody({ schema: schemaRef('RegisterDeviceRequestDto') })
+  @ApiResponse({ status: 200, description: 'Device registered successfully', schema: schemaRef('DeviceResponseDto') })
   @ApiResponse({ status: 400, description: 'Invalid request' })
   async register(@Body() dto: RegisterDeviceDto): Promise<DeviceResponseDto> {
     return this.devicesService.register(dto);
@@ -22,7 +22,7 @@ export class DevicesController {
   @Put('/:id/heartbeat')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update device heartbeat' })
-  @ApiResponse({ status: 200, description: 'Heartbeat updated', type: DeviceResponseDto })
+  @ApiResponse({ status: 200, description: 'Heartbeat updated', schema: schemaRef('DeviceResponseDto') })
   @ApiResponse({ status: 404, description: 'Device not found' })
   async heartbeat(@Param('id') id: string): Promise<DeviceResponseDto> {
     return this.devicesService.heartbeat(id);
@@ -30,7 +30,7 @@ export class DevicesController {
 
   @Get('/:id')
   @ApiOperation({ summary: 'Get device by ID' })
-  @ApiResponse({ status: 200, description: 'Device found', type: DeviceResponseDto })
+  @ApiResponse({ status: 200, description: 'Device found', schema: schemaRef('DeviceResponseDto') })
   @ApiResponse({ status: 404, description: 'Device not found' })
   async getDevice(@Param('id') id: string): Promise<DeviceResponseDto | null> {
     return this.devicesService.findById(id);

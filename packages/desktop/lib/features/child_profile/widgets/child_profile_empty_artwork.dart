@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,7 +5,11 @@ import 'package:flutter/material.dart';
 import '../../../shared/widgets/chrome.dart';
 
 class ShieldHomeIllustration extends StatelessWidget {
-  const ShieldHomeIllustration({required this.width, required this.height});
+  const ShieldHomeIllustration({
+    super.key,
+    required this.width,
+    required this.height,
+  });
 
   final double width;
   final double height;
@@ -61,7 +63,11 @@ class ShieldHomeIllustration extends StatelessWidget {
 }
 
 class EmptyDesignCard extends StatelessWidget {
-  const EmptyDesignCard({required this.child, required this.padding});
+  const EmptyDesignCard({
+    super.key,
+    required this.child,
+    required this.padding,
+  });
 
   final Widget child;
   final EdgeInsets padding;
@@ -86,7 +92,7 @@ class EmptyDesignCard extends StatelessWidget {
 }
 
 class MemoryBookIllustration extends StatelessWidget {
-  const MemoryBookIllustration({required this.size});
+  const MemoryBookIllustration({super.key, required this.size});
 
   final double size;
 
@@ -294,7 +300,7 @@ class MemoryBookPainter extends CustomPainter {
 }
 
 class WhiteCircleIcon extends StatelessWidget {
-  const WhiteCircleIcon({required this.icon});
+  const WhiteCircleIcon({super.key, required this.icon});
 
   final IconData icon;
 
@@ -311,7 +317,7 @@ class WhiteCircleIcon extends StatelessWidget {
 }
 
 class DecorDot extends StatelessWidget {
-  const DecorDot({required this.size, required this.color});
+  const DecorDot({super.key, required this.size, required this.color});
 
   final double size;
   final Color color;
@@ -325,7 +331,7 @@ class DecorDot extends StatelessWidget {
 }
 
 class Sparkle extends StatelessWidget {
-  const Sparkle({required this.size, required this.color});
+  const Sparkle({super.key, required this.size, required this.color});
 
   final double size;
   final Color color;

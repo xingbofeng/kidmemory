@@ -15,7 +15,7 @@ export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: File
   return (
     <div className="picker-row">
       <label className="picker-tile">
-        <Icon name="camera" /> {t('uploadLegacy.photo')}
+        <Icon name="camera" /> {t('upload.photo')}
         <input
           ref={fileInputRef}
           className="file-input"
@@ -24,11 +24,11 @@ export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: File
           accept="image/*"
           onChange={onFileSelect}
           disabled={!canSelectMore || isUploading}
-          aria-label={t('uploadLegacy.chooseImageAria')}
+          aria-label={t('upload.chooseImageAria')}
         />
       </label>
       <label className="picker-tile">
-        <Icon name="image" /> {t('uploadLegacy.chooseFromAlbum')}
+        <Icon name="image" /> {t('upload.chooseFromAlbum')}
         <input
           className="file-input"
           type="file"
@@ -36,7 +36,7 @@ export function FilePickerRow({ onFileSelect, canSelectMore, isUploading }: File
           accept="image/*"
           onChange={onFileSelect}
           disabled={!canSelectMore || isUploading}
-          aria-label={t('uploadLegacy.importFromAlbumAria')}
+          aria-label={t('upload.importFromAlbumAria')}
         />
       </label>
     </div>

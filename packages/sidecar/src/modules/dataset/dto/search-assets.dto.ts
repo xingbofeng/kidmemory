@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 const SearchTagSchema = z.string().trim().min(1).max(64);
 
@@ -21,4 +20,4 @@ export const SearchAssetsDtoSchema = z
   })
   .strict();
 
-export type SearchAssetsDto = components["schemas"]["AssetSearchRequestDto"];
+export type SearchAssetsDto = z.infer<typeof SearchAssetsDtoSchema>;

@@ -1,5 +1,6 @@
 import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { parseEnvInteger } from '../config/env-parsing.ts';
 
 interface RateLimitEntry {
   count: number;
@@ -14,10 +15,9 @@ export class RateLimitMiddleware implements NestMiddleware {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    this.windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000', 10);
-    this.maxRequests = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10);
-    
-    // Cleanup old entries every minute
+    this.windowMs = parseEnvInteger(process.env.RATE_LIMIT_WINDOW_MS, 60000);
+    this.maxRequests = parseEnvInteger(process.env.RATE_LIMIT_MAX_REQUESTS, 100);
+
     this.cleanupInterval = setInterval(() => {
       this.cleanup();
     }, 60000);
@@ -26,9 +26,9 @@ export class RateLimitMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const ip = this.getClientIp(req);
     const now = Date.now();
-    
+
     let entry = this.limits.get(ip);
-    
+
     if (!entry || now > entry.resetAt) {
       entry = {
         count: 1,
@@ -37,9 +37,9 @@ export class RateLimitMiddleware implements NestMiddleware {
       this.limits.set(ip, entry);
       return next();
     }
-    
+
     entry.count++;
-    
+
     if (entry.count > this.maxRequests) {
       throw new HttpException(
         {
@@ -54,7 +54,7 @@ export class RateLimitMiddleware implements NestMiddleware {
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
-    
+
     next();
   }
 

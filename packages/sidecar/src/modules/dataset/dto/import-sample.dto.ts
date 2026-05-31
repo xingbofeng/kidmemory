@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const ImportSampleDtoSchema = z
   .object({
@@ -7,4 +6,4 @@ export const ImportSampleDtoSchema = z
   })
   .strict();
 
-export type ImportSampleDto = components["schemas"]["ImportSampleRequestDto"];
+export type ImportSampleDto = z.infer<typeof ImportSampleDtoSchema>;

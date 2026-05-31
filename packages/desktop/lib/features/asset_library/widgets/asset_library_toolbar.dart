@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../core/sidecar/sidecar_api.dart';
@@ -16,6 +14,7 @@ import 'asset_library_toolbar_controls.dart';
 
 class AssetLibraryToolbar extends StatelessWidget {
   const AssetLibraryToolbar({
+    super.key,
     required this.isDemoMode,
     required this.showImportActions,
     required this.children,

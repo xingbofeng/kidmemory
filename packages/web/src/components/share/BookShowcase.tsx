@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedBook } from '../../types/shareBook'
+import { formatShareDate } from '../../utils/shareDate'
 
 interface BookShowcaseProps {
   book: SharedBook
@@ -9,16 +10,7 @@ interface BookShowcaseProps {
 
 export function BookShowcase({ book, onViewBook }: BookShowcaseProps) {
   const { t, i18n } = useTranslation()
-  const locale = (i18n.resolvedLanguage ?? i18n.language ?? 'zh-CN').startsWith('en') ? 'en-US' : 'zh-CN'
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString(locale, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
+  const language = i18n.resolvedLanguage ?? i18n.language
 
   return (
     <article className="book-showcase">
@@ -50,7 +42,7 @@ export function BookShowcase({ book, onViewBook }: BookShowcaseProps) {
           </div>
           <div>
             <dt><Icon name="time" />{t('share.metaCreatedAt')}</dt>
-            <dd>{formatDate(book.createdAt)}</dd>
+            <dd>{formatShareDate(book.createdAt, language)}</dd>
           </div>
           <div>
             <dt><Icon name="folder" />{t('share.metaType')}</dt>

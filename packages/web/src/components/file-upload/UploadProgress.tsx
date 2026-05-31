@@ -16,7 +16,7 @@ export function UploadProgress({ selectedFiles, isUploading, onUpload }: UploadP
     <>
       {isUploading && (
         <div className="batch-progress">
-          <span><Icon name="cloud-upload" /> {t('uploadLegacy.uploadingFiles', { count: uploadingCount })}</span>
+          <span><Icon name="cloud-upload" /> {t('upload.uploadingFiles', { count: uploadingCount })}</span>
           <div><i /></div>
         </div>
       )}
@@ -24,10 +24,10 @@ export function UploadProgress({ selectedFiles, isUploading, onUpload }: UploadP
       <button
         className="primary-action"
         onClick={onUpload}
-        aria-label={t('uploadLegacy.startUploadAria')}
+        aria-label={t('upload.startUploadAria')}
         disabled={selectedFiles.length === 0 || isUploading}
       >
-        <Icon name="upload" /> {selectedFiles.length > 0 ? t('uploadLegacy.startUpload') : t('uploadLegacy.continueUpload')}
+        <Icon name="upload" /> {selectedFiles.length > 0 ? t('upload.startUpload') : t('upload.continueUpload')}
       </button>
     </>
   )

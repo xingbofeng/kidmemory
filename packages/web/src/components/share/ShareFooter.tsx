@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
 import type { SharedBook } from '../../types/shareBook'
+import { shareCurrentPage } from '../../lib/share-current-page'
 
 interface ShareFooterProps {
   book: SharedBook
@@ -13,16 +14,12 @@ export function ShareFooter({ book, onViewBook, onDownloadBook, onSaveToPhotos }
   const { t } = useTranslation()
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: t('share.shareBookTitle', { title: book.title }),
-        text: t('share.shareBookText', { title: book.title }),
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert(t('share.shareCopied'))
-    }
+    shareCurrentPage({
+      title: t('share.shareBookTitle', { title: book.title }),
+      text: t('share.shareBookText', { title: book.title }),
+      url: window.location.href,
+      copiedMessage: t('share.shareCopied'),
+    })
   }
 
   return (

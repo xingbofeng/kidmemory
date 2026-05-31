@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -8,7 +8,31 @@ function read(relPath: string): string {
   return readFileSync(path.join(SRC_DIR, relPath), 'utf8');
 }
 
-describe('web api type migration', () => {
+function listProductionFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const fullPath = path.join(dir, entry);
+    const stats = statSync(fullPath);
+
+    if (stats.isDirectory()) {
+      return listProductionFiles(fullPath);
+    }
+
+    if (entry.endsWith('.test.ts') || entry.endsWith('.test.tsx')) {
+      return [];
+    }
+
+    return /\.(ts|tsx)$/.test(entry) ? [fullPath] : [];
+  });
+}
+
+describe('web generated api type architecture', () => {
+  it('api generated type architecture guard uses current-state wording', () => {
+    const source = readFileSync(__filename, 'utf8');
+    const historicalSuiteName = ['web api type', 'migration'].join(' ');
+
+    expect(source).not.toContain(historicalSuiteName);
+  });
+
   it('domain type files use generated cloud-api protocol types', () => {
     const trustedUploadTypes = read('types/trustedUpload.ts');
     const shareBrowseTypes = read('types/shareBrowse.ts');
@@ -35,5 +59,25 @@ describe('web api type migration', () => {
     expect(apiTypes).not.toMatch(/export interface\s+\w+Response\b/);
     expect(sidecarApi).not.toMatch(/export interface\s+\w+Request\b/);
     expect(sidecarApi).not.toMatch(/export interface\s+\w+Response\b/);
+  });
+
+  it('pages surface load failures through UI state instead of console logging', () => {
+    const offenders = listProductionFiles(path.join(SRC_DIR, 'pages'))
+      .filter((filePath) => readFileSync(filePath, 'utf8').includes('console.error'))
+      .map((filePath) => path.relative(SRC_DIR, filePath));
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('api modules avoid boilerplate module and future-use comments', () => {
+    const offenders = [
+      'api/index.ts',
+      'api/uploadApi.ts',
+      'api/shareApi.ts',
+      'api/sidecarApi.ts',
+      'api/errors.ts',
+    ].filter((relPath) => /Module|Handles all|future use|Additional .* as needed|for convenience/.test(read(relPath)));
+
+    expect(offenders).toEqual([]);
   });
 });

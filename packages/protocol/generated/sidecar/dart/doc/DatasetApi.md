@@ -9,30 +9,30 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**datasetControllerAddSearchCandidatePoolItems**](DatasetApi.md#datasetcontrolleraddsearchcandidatepoolitems) | **POST** /search/candidate-pool/items | 
-[**datasetControllerCreateChild**](DatasetApi.md#datasetcontrollercreatechild) | **POST** /children | 
-[**datasetControllerDeleteAsset**](DatasetApi.md#datasetcontrollerdeleteasset) | **DELETE** /assets/{id} | 
-[**datasetControllerDeleteAssetsBatch**](DatasetApi.md#datasetcontrollerdeleteassetsbatch) | **DELETE** /assets/batch | 
-[**datasetControllerDeleteChild**](DatasetApi.md#datasetcontrollerdeletechild) | **DELETE** /children/{id} | 
-[**datasetControllerGetAsset**](DatasetApi.md#datasetcontrollergetasset) | **GET** /assets/{id} | 
-[**datasetControllerGetAssetPreview**](DatasetApi.md#datasetcontrollergetassetpreview) | **GET** /assets/{id}/preview | 
-[**datasetControllerGetChild**](DatasetApi.md#datasetcontrollergetchild) | **GET** /children/{id} | 
-[**datasetControllerGetExportArtifactShareMetadata**](DatasetApi.md#datasetcontrollergetexportartifactsharemetadata) | **GET** /storage/export-artifacts/{id}/share | 
-[**datasetControllerGetSearchIndexingStatus**](DatasetApi.md#datasetcontrollergetsearchindexingstatus) | **GET** /search/indexing-status | 
-[**datasetControllerImportAssets**](DatasetApi.md#datasetcontrollerimportassets) | **POST** /assets/import | 
-[**datasetControllerImportSample**](DatasetApi.md#datasetcontrollerimportsample) | **POST** /sample/import | 
-[**datasetControllerListAssets**](DatasetApi.md#datasetcontrollerlistassets) | **GET** /assets | 
-[**datasetControllerListChildren**](DatasetApi.md#datasetcontrollerlistchildren) | **GET** /children | 
-[**datasetControllerListSearchCandidatePool**](DatasetApi.md#datasetcontrollerlistsearchcandidatepool) | **GET** /search/candidate-pool | 
-[**datasetControllerRemoveSearchCandidatePoolItems**](DatasetApi.md#datasetcontrollerremovesearchcandidatepoolitems) | **DELETE** /search/candidate-pool/items | 
-[**datasetControllerResetSample**](DatasetApi.md#datasetcontrollerresetsample) | **POST** /sample/reset | 
-[**datasetControllerRunSearchIndexer**](DatasetApi.md#datasetcontrollerrunsearchindexer) | **POST** /search/indexing/run | 
-[**datasetControllerRunStorageSync**](DatasetApi.md#datasetcontrollerrunstoragesync) | **POST** /storage/sync/run | 
-[**datasetControllerSearchAssets**](DatasetApi.md#datasetcontrollersearchassets) | **POST** /search/query | 
-[**datasetControllerSyncAssetToStorage**](DatasetApi.md#datasetcontrollersyncassettostorage) | **POST** /storage/assets/{id}/sync | 
-[**datasetControllerSyncExportArtifactToStorage**](DatasetApi.md#datasetcontrollersyncexportartifacttostorage) | **POST** /storage/export-artifacts/{id}/sync | 
-[**datasetControllerUpdateAssetPatch**](DatasetApi.md#datasetcontrollerupdateassetpatch) | **PATCH** /assets/{id} | 
-[**datasetControllerUpdateChild**](DatasetApi.md#datasetcontrollerupdatechild) | **PATCH** /children/{id} | 
+[**datasetControllerAddSearchCandidatePoolItems**](DatasetApi.md#datasetcontrolleraddsearchcandidatepoolitems) | **POST** /search/candidate-pool/items |
+[**datasetControllerCreateChild**](DatasetApi.md#datasetcontrollercreatechild) | **POST** /children |
+[**datasetControllerDeleteAsset**](DatasetApi.md#datasetcontrollerdeleteasset) | **DELETE** /assets/{id} |
+[**datasetControllerDeleteAssetsBatch**](DatasetApi.md#datasetcontrollerdeleteassetsbatch) | **DELETE** /assets/batch |
+[**datasetControllerDeleteChild**](DatasetApi.md#datasetcontrollerdeletechild) | **DELETE** /children/{id} |
+[**datasetControllerGetAsset**](DatasetApi.md#datasetcontrollergetasset) | **GET** /assets/{id} |
+[**datasetControllerGetAssetPreview**](DatasetApi.md#datasetcontrollergetassetpreview) | **GET** /assets/{id}/preview |
+[**datasetControllerGetChild**](DatasetApi.md#datasetcontrollergetchild) | **GET** /children/{id} |
+[**datasetControllerGetExportArtifactShareMetadata**](DatasetApi.md#datasetcontrollergetexportartifactsharemetadata) | **GET** /storage/export-artifacts/{id}/share |
+[**datasetControllerGetSearchIndexingStatus**](DatasetApi.md#datasetcontrollergetsearchindexingstatus) | **GET** /search/indexing-status |
+[**datasetControllerImportAssets**](DatasetApi.md#datasetcontrollerimportassets) | **POST** /assets/import |
+[**datasetControllerImportSample**](DatasetApi.md#datasetcontrollerimportsample) | **POST** /sample/import |
+[**datasetControllerListAssets**](DatasetApi.md#datasetcontrollerlistassets) | **GET** /assets |
+[**datasetControllerListChildren**](DatasetApi.md#datasetcontrollerlistchildren) | **GET** /children |
+[**datasetControllerListSearchCandidatePool**](DatasetApi.md#datasetcontrollerlistsearchcandidatepool) | **GET** /search/candidate-pool |
+[**datasetControllerRemoveSearchCandidatePoolItems**](DatasetApi.md#datasetcontrollerremovesearchcandidatepoolitems) | **DELETE** /search/candidate-pool/items |
+[**datasetControllerResetSample**](DatasetApi.md#datasetcontrollerresetsample) | **POST** /sample/reset |
+[**datasetControllerRunSearchIndexer**](DatasetApi.md#datasetcontrollerrunsearchindexer) | **POST** /search/indexing/run |
+[**datasetControllerRunStorageSync**](DatasetApi.md#datasetcontrollerrunstoragesync) | **POST** /storage/sync/run |
+[**datasetControllerSearchAssets**](DatasetApi.md#datasetcontrollersearchassets) | **POST** /search/query |
+[**datasetControllerSyncAssetToStorage**](DatasetApi.md#datasetcontrollersyncassettostorage) | **POST** /storage/assets/{id}/sync |
+[**datasetControllerSyncExportArtifactToStorage**](DatasetApi.md#datasetcontrollersyncexportartifacttostorage) | **POST** /storage/export-artifacts/{id}/sync |
+[**datasetControllerUpdateAssetPatch**](DatasetApi.md#datasetcontrollerupdateassetpatch) | **PATCH** /assets/{id} |
+[**datasetControllerUpdateChild**](DatasetApi.md#datasetcontrollerupdatechild) | **PATCH** /children/{id} |
 
 
 # **datasetControllerAddSearchCandidatePoolItems**
@@ -117,7 +117,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerDeleteAsset(id);
@@ -130,7 +130,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -193,7 +193,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerDeleteChild(id);
@@ -206,7 +206,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -233,7 +233,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerGetAsset(id);
@@ -246,7 +246,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -273,7 +273,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerGetAssetPreview(id);
@@ -286,7 +286,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -313,7 +313,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerGetChild(id);
@@ -326,7 +326,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -353,7 +353,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerGetExportArtifactShareMetadata(id);
@@ -366,7 +366,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -789,7 +789,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerSyncAssetToStorage(id);
@@ -802,7 +802,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -829,7 +829,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerSyncExportArtifactToStorage(id);
@@ -842,7 +842,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -869,7 +869,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerUpdateAssetPatch(id);
@@ -882,7 +882,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -909,7 +909,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDatasetApi();
-final String id = id_example; // String | 
+final String id = id_example; // String |
 
 try {
     api.datasetControllerUpdateChild(id);
@@ -922,7 +922,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **String**|  | 
+ **id** | **String**|  |
 
 ### Return type
 
@@ -938,4 +938,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

@@ -7,10 +7,10 @@ void main() {
   final root = Directory.current.path;
 
   test(
-    'setup command runner has timeout and process cancellation guardrails',
+    'setup system command runner has timeout and process cancellation guardrails',
     () {
       final source = File(
-        '$root/lib/app/setup/commands/command_runner.dart',
+        '$root/lib/app/setup/actions/setup_system.dart',
       ).readAsStringSync();
 
       expect(source, contains('timeout = _setupCommandTimeout'));
@@ -18,6 +18,147 @@ void main() {
       expect(source, contains('ProcessSignal.sigterm'));
     },
   );
+
+  test('desktop setup parts do not suppress unused private elements', () {
+    final setupParts = Directory('$root/lib/app/setup')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'));
+
+    for (final file in setupParts) {
+      final source = file.readAsStringSync();
+      expect(
+        source,
+        isNot(contains('ignore_for_file: unused_element')),
+        reason: '${file.path} should delete dead private helpers instead',
+      );
+    }
+  });
+
+  test('desktop sidecar gateway has no unused import suppression', () {
+    final gatewaySource = File(
+      '$root/lib/core/sidecar/desktop_sidecar_gateway.dart',
+    ).readAsStringSync();
+
+    expect(gatewaySource, isNot(contains('ignore: unused_import')));
+  });
+
+  test('desktop sidecar API avoids comments that restate response branches', () {
+    final source = File(
+      '$root/lib/core/sidecar/sidecar_api.dart',
+    ).readAsStringSync();
+
+    for (final pattern in const [
+      'If the unwrapped data is a list',
+      'Otherwise return empty list',
+      'Throw the last error instead of returning empty object',
+      'Throw the last error instead of returning empty list',
+      'Check if response is in unified API format',
+      'Return unwrapped data',
+      'For null or other types, return empty map',
+      'Fallback for non-API format responses',
+      'Try to parse error response in unified format',
+      'If parsing fails, fall through to generic error',
+    ]) {
+      expect(source, isNot(contains(pattern)));
+    }
+  });
+
+  test('desktop app fake APIs do not suppress unused private elements', () {
+    final source = File(
+      '$root/test/features/app/app_fake_sidecar_apis.dart',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      isNot(contains('ignore: unused_element')),
+      reason: 'unused fake APIs should be deleted instead of suppressed',
+    );
+  });
+
+  test(
+    'child profile widgets keep key constructors instead of suppressions',
+    () {
+      final widgetSources =
+          Directory('$root/lib/features/child_profile/widgets')
+              .listSync()
+              .whereType<File>()
+              .where((file) => file.path.endsWith('.dart'));
+
+      for (final file in widgetSources) {
+        final source = file.readAsStringSync();
+        expect(
+          source,
+          isNot(contains('ignore_for_file: use_key_in_widget_constructors')),
+          reason: '${file.path} should pass keys through widget constructors',
+        );
+      }
+    },
+  );
+
+  test(
+    'asset library widgets keep key constructors instead of suppressions',
+    () {
+      final widgetSources =
+          Directory('$root/lib/features/asset_library/widgets')
+              .listSync()
+              .whereType<File>()
+              .where((file) => file.path.endsWith('.dart'));
+
+      for (final file in widgetSources) {
+        final source = file.readAsStringSync();
+        expect(
+          source,
+          isNot(contains('ignore_for_file: use_key_in_widget_constructors')),
+          reason: '${file.path} should pass keys through widget constructors',
+        );
+      }
+    },
+  );
+
+  test('desktop analyzer excludes generated build outputs', () {
+    final options = File('$root/analysis_options.yaml').readAsStringSync();
+
+    for (final generatedPath in const ['build/**', 'macos/build/**']) {
+      expect(
+        options,
+        contains(generatedPath),
+        reason: 'flutter analyze should not scan generated app bundles',
+      );
+    }
+  });
+
+  test('desktop pubspec avoids broad dependency constraints', () {
+    final pubspec = File('$root/pubspec.yaml').readAsStringSync();
+
+    expect(pubspec, isNot(contains(RegExp(r'^\s+\w+:\s+any$', multiLine: true))));
+  });
+
+  test('desktop shell has one bundled Postgres stop implementation', () {
+    final targets = [
+      '$root/lib/app/desktop_shell.dart',
+      '$root/lib/app/setup/actions/setup_system.dart',
+    ];
+
+    final definitions = targets
+        .map((target) => File(target).readAsStringSync())
+        .expand(
+          (source) => RegExp(
+            r'void\s+_stopBundledPostgresIfRunning\s*\(',
+          ).allMatches(source),
+        );
+
+    expect(definitions.length, 1);
+  });
+
+  test('release sidecar bundle copies only canonical Prisma db assets', () {
+    final script = File(
+      '$root/macos/Scripts/bundle-sidecar-for-release.sh',
+    ).readAsStringSync();
+
+    expect(script, contains('\$SIDECAR_SRC/prisma'));
+    expect(script, isNot(contains('\$SIDECAR_SRC/sql')));
+  });
 
   test('shared library view models are not owned by asset library page', () {
     final assetLibrarySource = File(
@@ -46,13 +187,13 @@ void main() {
   });
 
   test('desktop OpenAI setup uses persisted agent config APIs only', () {
-    final legacyOpenAiConfigPath =
+    final removedOpenAiConfigPath =
         '/config'
         '/openai';
-    final legacyOpenAiCheckPath =
+    final removedOpenAiCheckPath =
         '/config/check'
         '/openai';
-    final legacyAgentTestPath =
+    final removedAgentTestPath =
         '/books/agent'
         '/test';
     final targets = <String>[
@@ -66,17 +207,17 @@ void main() {
       final source = File(target).readAsStringSync();
       expect(
         source,
-        isNot(contains(legacyOpenAiConfigPath)),
-        reason: '$target should not write legacy setup OpenAI config',
+        isNot(contains(removedOpenAiConfigPath)),
+        reason: '$target should not write removed setup OpenAI config',
       );
       expect(
         source,
-        isNot(contains(legacyOpenAiCheckPath)),
+        isNot(contains(removedOpenAiCheckPath)),
         reason: '$target should test the default persisted agent config',
       );
       expect(
         source,
-        isNot(contains(legacyAgentTestPath)),
+        isNot(contains(removedAgentTestPath)),
         reason: '$target should test persisted agent configs',
       );
     }
@@ -112,38 +253,31 @@ void main() {
     },
   );
 
-  test(
-    'desktop sidecar gateway inputs should be protocol-generated aliases',
-    () {
-      final gatewaySource = File(
-        '$root/lib/core/sidecar/desktop_sidecar_gateway.dart',
-      ).readAsStringSync();
+  test('desktop sidecar gateway input aliases stay stable', () {
+    final gatewaySource = File(
+      '$root/lib/core/sidecar/desktop_sidecar_gateway.dart',
+    ).readAsStringSync();
 
-      expect(
-        gatewaySource,
-        contains("import 'package:kidmemory_protocol/kidmemory_protocol.dart'"),
-      );
-      for (final alias in const [
-        'typedef PostgresConfigInput = PostgresConfigRequestDto;',
-        'typedef PathsConfigInput = PathsConfigRequestDto;',
-        'typedef SupabaseStorageConfigInput = SupabaseStorageConfigRequestDto;',
-        'typedef UpdateAssetInput = UpdateAssetRequestDto;',
-        'typedef ImportAssetsInput = ImportAssetsRequestDto;',
-      ]) {
-        expect(gatewaySource, contains(alias));
-      }
-      expect(
-        gatewaySource,
-        contains("'/creation/tasks'"),
-        reason: 'creation should use task-first sidecar routes',
-      );
-      expect(
-        gatewaySource,
-        isNot(contains('/books/jobs')),
-        reason: 'desktop should not call the removed legacy book job API',
-      );
-    },
-  );
+    for (final alias in const [
+      'typedef PostgresConfigInput = PostgresConfigRequestDto;',
+      'typedef PathsConfigInput = PathsConfigRequestDto;',
+      'typedef SupabaseStorageConfigInput = SupabaseStorageConfigRequestDto;',
+      'typedef UpdateAssetInput = UpdateAssetRequestDto;',
+      'typedef ImportAssetsInput = ImportAssetsRequestDto;',
+    ]) {
+      expect(gatewaySource, contains(alias));
+    }
+    expect(
+      gatewaySource,
+      contains("'/creation/tasks'"),
+      reason: 'creation should use task-first sidecar routes',
+    );
+    expect(
+      gatewaySource,
+      isNot(contains('/books/jobs')),
+      reason: 'desktop should not call removed book job routes',
+    );
+  });
 
   test('desktop sidecar gateway avoids local API result dto classes', () {
     final gatewaySource = File(
@@ -513,7 +647,7 @@ void main() {
     expect(
       File('${featureRoot.path}/asset_library_state.dart').existsSync(),
       isFalse,
-      reason: 'legacy part file should be removed after import migration',
+      reason: 'asset library state should use focused importable modules',
     );
     expect(
       stateSource,
@@ -1452,7 +1586,36 @@ void main() {
     }
   });
 
-  test('setup migration keeps common Dart and Flutter identifiers intact', () {
+  test('setup identifier guard uses current-state wording', () {
+    final source = File('$root/test/architecture_static_test.dart')
+        .readAsStringSync();
+    final historicalTestName = [
+      'setup',
+      'migration',
+      'keeps common Dart and Flutter identifiers intact',
+    ].join(' ');
+
+    expect(source, isNot(contains(historicalTestName)));
+  });
+
+  test('desktop architecture reasons use current-state wording', () {
+    final source = File('$root/test/architecture_static_test.dart')
+        .readAsStringSync();
+    final historicalPhrases = [
+      ['legacy', 'OpenAi'].join(''),
+      ['legacy', 'Agent'].join(''),
+      ['removed', 'legacy', 'book job API'].join(' '),
+      ['legacy', 'part file should be removed after import', 'migration'].join(
+        ' ',
+      ),
+    ];
+
+    for (final phrase in historicalPhrases) {
+      expect(source, isNot(contains(phrase)));
+    }
+  });
+
+  test('setup command identifiers remain valid after extraction', () {
     final setupSources = Directory('$root/lib/app/setup')
         .listSync(recursive: true)
         .whereType<File>()

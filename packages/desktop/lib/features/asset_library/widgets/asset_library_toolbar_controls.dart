@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -7,7 +5,11 @@ import '../../../shared/widgets/chrome.dart';
 import 'asset_library_palette.dart';
 
 class ReadonlyToolbarField extends StatelessWidget {
-  const ReadonlyToolbarField({required this.iconAsset, required this.label});
+  const ReadonlyToolbarField({
+    super.key,
+    required this.iconAsset,
+    required this.label,
+  });
 
   final String iconAsset;
   final String label;
@@ -44,6 +46,7 @@ class ReadonlyToolbarField extends StatelessWidget {
 
 class ToolbarLabeledField extends StatelessWidget {
   const ToolbarLabeledField({
+    super.key,
     required this.label,
     required this.child,
     required this.width,
@@ -77,6 +80,7 @@ class ToolbarLabeledField extends StatelessWidget {
 
 class InlineStatusChip extends StatelessWidget {
   const InlineStatusChip({
+    super.key,
     required this.iconAsset,
     required this.label,
     this.onPressed,
@@ -110,6 +114,7 @@ class InlineStatusChip extends StatelessWidget {
 
 class AssetLibraryToolbarButton extends StatelessWidget {
   const AssetLibraryToolbarButton({
+    super.key,
     required this.iconAsset,
     required this.label,
     required this.onPressed,
@@ -144,7 +149,7 @@ class AssetLibraryToolbarButton extends StatelessWidget {
 }
 
 class IndexingStatusPill extends StatelessWidget {
-  const IndexingStatusPill({required this.text});
+  const IndexingStatusPill({super.key, required this.text});
 
   final String text;
 
@@ -179,6 +184,7 @@ class IndexingStatusPill extends StatelessWidget {
 
 class AssetLibrarySearchStatusStrip extends StatelessWidget {
   const AssetLibrarySearchStatusStrip({
+    super.key,
     required this.text,
     required this.active,
     this.onClear,

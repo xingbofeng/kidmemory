@@ -17,7 +17,7 @@ class HealthApi {
   const HealthApi(this._dio);
 
   /// Health check endpoint
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -29,7 +29,7 @@ class HealthApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> healthControllerGetHealth({ 
+  Future<Response<void>> healthControllerGetHealth({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -62,7 +62,7 @@ class HealthApi {
   }
 
   /// Readiness check endpoint
-  /// 
+  ///
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -74,7 +74,7 @@ class HealthApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> healthControllerGetReadiness({ 
+  Future<Response<void>> healthControllerGetReadiness({
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,

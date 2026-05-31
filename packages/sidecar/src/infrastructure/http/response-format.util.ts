@@ -18,14 +18,14 @@ export function sendErrorResponse(
     statusCode: number;
     apiCode: number;
     message?: string;
-    data?: any;
+    data?: unknown;
   }
 ) {
   const { statusCode, apiCode, message, data } = options;
   const locale = (req as Request & { locale?: Locale }).locale ?? 'zh-CN';
   const localizedMessage = messageService.getMessage(apiCode, locale);
 
-  const response: ApiResponse<any> = {
+  const response: ApiResponse = {
     code: apiCode,
     msg: localizedMessage,
     data: data || {

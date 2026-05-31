@@ -8,9 +8,72 @@ import test from "node:test";
 
 import { CreationService } from "../../../../src/modules/creation/creation.service.ts";
 
-type TaskRecord = Record<string, any>;
-type ArtifactRecord = Record<string, any>;
-type EventRecord = Record<string, any>;
+type JsonObject = Record<string, unknown>;
+
+type TaskInput = JsonObject & {
+  id: string;
+  creationType?: string;
+  goal?: string;
+  assetIds?: string[];
+  status?: string;
+  workspacePath?: string;
+  steps?: string;
+  requirementItems?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  currentStepId?: string | null;
+  summary?: string;
+  skillName?: string;
+  error?: unknown;
+};
+
+type TaskRecord = TaskInput & {
+  assetIds: string[];
+  requirementItems: string[];
+  steps: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type ArtifactInput = JsonObject & {
+  id: string;
+  taskId: string;
+  kind: string;
+  localPath?: string | null;
+  shareId?: string | null;
+  shareUrl?: string | null;
+  createdAt?: Date;
+};
+
+type ArtifactRecord = ArtifactInput & {
+  createdAt: Date;
+};
+
+type EventInput = JsonObject & {
+  id: string;
+  taskId: string;
+  type: string;
+  message: string;
+  stepId?: string | null;
+  createdAt?: Date;
+};
+
+type EventRecord = EventInput & {
+  createdAt: Date;
+};
+
+type CreationServiceArgs = ConstructorParameters<typeof CreationService>;
+
+type AgentRuntimeDouble = {
+  runCreationStage(input: { stage: string; workspacePath: string }): Promise<{
+    ok: boolean;
+    error?: {
+      category: string;
+      message: string;
+      code?: string;
+    };
+  }>;
+};
 
 function createPrismaStub(initialTasks: TaskRecord[] = []) {
   const tasks = new Map<string, TaskRecord>();
@@ -32,11 +95,13 @@ function createPrismaStub(initialTasks: TaskRecord[] = []) {
     stores: { tasks, artifacts, events },
     prisma: {
       creationTask: {
-        async create(options: { data: TaskRecord }) {
+        async create(options: { data: TaskInput }) {
           const record = {
             ...options.data,
             createdAt: new Date("2026-05-23T00:00:00.000Z"),
             updatedAt: new Date("2026-05-23T00:00:00.000Z"),
+            assetIds: options.data.assetIds ?? [],
+            steps: options.data.steps ?? "[]",
             requirementItems: options.data.requirementItems ?? [],
           };
           tasks.set(record.id, record);
@@ -55,7 +120,7 @@ function createPrismaStub(initialTasks: TaskRecord[] = []) {
               : undefined,
           };
         },
-        async update(options: { where: { id: string }; data: TaskRecord }) {
+        async update(options: { where: { id: string }; data: Partial<TaskInput> }) {
           const existing = tasks.get(options.where.id);
           assert.ok(existing, `missing task ${options.where.id}`);
           const updated = {
@@ -68,7 +133,7 @@ function createPrismaStub(initialTasks: TaskRecord[] = []) {
         },
       },
       creationEvent: {
-        async create(options: { data: EventRecord }) {
+        async create(options: { data: EventInput }) {
           const record = { ...options.data, createdAt: new Date("2026-05-23T00:00:00.000Z") };
           events.push(record);
           return record;
@@ -78,7 +143,7 @@ function createPrismaStub(initialTasks: TaskRecord[] = []) {
         },
       },
       creationArtifact: {
-        async create(options: { data: ArtifactRecord }) {
+        async create(options: { data: ArtifactInput }) {
           const record = { ...options.data, createdAt: new Date("2026-05-23T00:00:00.000Z") };
           artifacts.push(record);
           return record;
@@ -91,20 +156,22 @@ function createPrismaStub(initialTasks: TaskRecord[] = []) {
 function createService(input: {
   workspaceDir: string;
   exportDir: string;
-  prisma: unknown;
-  agentRuntime?: unknown;
+  prisma: ReturnType<typeof createPrismaStub>["prisma"];
+  agentRuntime?: AgentRuntimeDouble;
 }) {
-  return new CreationService(
-    input.prisma as any,
-    (input.agentRuntime ?? { async runCreationStage() { return { ok: true }; } }) as any,
-    {
-      config: {
-        paths: {
-          workspaceDir: input.workspaceDir,
-          exportDir: input.exportDir,
-        },
+  const agentRuntime = input.agentRuntime ?? { async runCreationStage() { return { ok: true }; } };
+  const config = {
+    config: {
+      paths: {
+        workspaceDir: input.workspaceDir,
+        exportDir: input.exportDir,
       },
-    } as any,
+    },
+  };
+  return new CreationService(
+    input.prisma as unknown as CreationServiceArgs[0],
+    agentRuntime as unknown as CreationServiceArgs[1],
+    config as unknown as CreationServiceArgs[2],
   );
 }
 

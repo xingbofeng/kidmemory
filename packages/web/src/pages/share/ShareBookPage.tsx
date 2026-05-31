@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/errors'
 import { validateShareToken, getSharedBook } from '../../api/shareApi'
-import type { SharedBook, ShareTokenValidation } from '../../types/shareBook'
+import type { SharedBook } from '../../types/shareBook'
 import { ShareLoading } from '../../components/share/ShareLoading'
 import { ShareError } from '../../components/share/ShareError'
 import { ShareHeader } from '../../components/share/ShareHeader'
@@ -17,12 +17,11 @@ interface ShareBookPageProps {
 
 export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
   const { t } = useTranslation()
-  const [, setValidation] = useState<ShareTokenValidation | null>(null)
   const [book, setBook] = useState<SharedBook | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const validateAndLoadContent = async () => {
+  const validateAndLoadContent = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -33,8 +32,6 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
         setError(validationData.error || t('share.invalidOrExpired'))
         return
       }
-
-      setValidation(validationData)
 
       if (validationData.shareToken?.resourceType === 'specific_book') {
         const tokenBookId = validationData.shareToken.resourceId
@@ -57,18 +54,16 @@ export function ShareBookPage({ shareToken, bookId }: ShareBookPageProps) {
       const bookData = await getSharedBook(shareToken, targetBookId)
       setBook(bookData)
     } catch (err) {
-      console.error('Failed to load shared book:', err)
       const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : t('share.loadBookFailed')
       setError(message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [bookId, shareToken, t])
 
   useEffect(() => {
     validateAndLoadContent()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shareToken, bookId])
+  }, [validateAndLoadContent])
 
   const handleViewBook = () => {
     if (book) {

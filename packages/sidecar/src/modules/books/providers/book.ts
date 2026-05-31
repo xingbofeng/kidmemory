@@ -15,22 +15,30 @@ export type BookOutput = {
 
 const allowedPageKinds = new Set(["cover", "artwork", "photo", "craft", "closing"]);
 
-export function validateBookOutput(book: any, selectedAssetIds: Set<string>) {
+export function validateBookOutput(book: unknown, selectedAssetIds: Set<string>) {
   const errors: string[] = [];
-  if (!book || typeof book !== "object") errors.push("Book output must be an object.");
-  if (!book?.metadata?.title) errors.push("Book metadata.title is required.");
-  if (!book?.metadata?.childName) errors.push("Book metadata.childName is required.");
-  if (!Array.isArray(book?.pages) || book.pages.length < 3) errors.push("Book pages must include cover, content and closing pages.");
-  const pages = Array.isArray(book?.pages) ? book.pages : [];
-  if (!pages.some((page: any) => page.kind === "cover")) errors.push("Book must include a cover page.");
-  if (!pages.some((page: any) => page.kind === "closing")) errors.push("Book must include a closing page.");
-  if (!pages.some((page: any) => page.kind !== "cover" && page.kind !== "closing")) errors.push("Book must include at least one content page.");
+  const record = isRecord(book) ? book : undefined;
+  const metadata = isRecord(record?.metadata) ? record.metadata : undefined;
+  const pages = Array.isArray(record?.pages) ? record.pages : [];
+
+  if (!record) errors.push("Book output must be an object.");
+  if (!metadata?.title) errors.push("Book metadata.title is required.");
+  if (!metadata?.childName) errors.push("Book metadata.childName is required.");
+  if (pages.length < 3) errors.push("Book pages must include cover, content and closing pages.");
+  if (!pages.some((page) => isRecord(page) && page.kind === "cover")) errors.push("Book must include a cover page.");
+  if (!pages.some((page) => isRecord(page) && page.kind === "closing")) errors.push("Book must include a closing page.");
+  if (!pages.some((page) => isRecord(page) && page.kind !== "cover" && page.kind !== "closing")) errors.push("Book must include at least one content page.");
   for (const [index, page] of pages.entries()) {
-    if (!page.title || !page.text || !page.kind) errors.push(`Page ${index + 1} is missing kind, title or text.`);
-    if (page.kind && !allowedPageKinds.has(page.kind)) errors.push(`Page ${index + 1} has unsupported page kind ${page.kind}.`);
-    if (page.assetId && !selectedAssetIds.has(page.assetId)) errors.push(`Page ${index + 1} references unselected asset ${page.assetId}.`);
+    const pageRecord = isRecord(page) ? page : {};
+    if (!pageRecord.title || !pageRecord.text || !pageRecord.kind) errors.push(`Page ${index + 1} is missing kind, title or text.`);
+    if (typeof pageRecord.kind === "string" && !allowedPageKinds.has(pageRecord.kind)) errors.push(`Page ${index + 1} has unsupported page kind ${pageRecord.kind}.`);
+    if (typeof pageRecord.assetId === "string" && !selectedAssetIds.has(pageRecord.assetId)) errors.push(`Page ${index + 1} references unselected asset ${pageRecord.assetId}.`);
   }
   return errors.length ? { ok: false, errors } : { ok: true, errors: [] };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function renderBookHtml(book: BookOutput, assets: Array<{ id: string; title: string; thumbnailPath?: string; imagePath?: string }>) {

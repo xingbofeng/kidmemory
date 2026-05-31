@@ -11,8 +11,8 @@ export interface AuditLogEntry {
   id: string;
   configId: string;
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'SET_DEFAULT' | 'TEST';
-  oldValues: any;
-  newValues: any;
+  oldValues: unknown;
+  newValues: unknown;
   userId?: string;
   timestamp: Date;
 }
@@ -24,8 +24,8 @@ export class InMemoryAuditLogger implements AuditLoggerPort {
   async logConfigChange(
     configId: string,
     action: 'CREATE' | 'UPDATE' | 'DELETE' | 'SET_DEFAULT' | 'TEST',
-    oldValues: any,
-    newValues: any,
+    oldValues: unknown,
+    newValues: unknown,
     userId?: string
   ): Promise<void> {
     const entry: AuditLogEntry = {
@@ -59,7 +59,7 @@ export class InMemoryAuditLogger implements AuditLoggerPort {
     this.nextId = 1;
   }
 
-  private deepClone(obj: any): any {
+  private deepClone(obj: unknown): unknown {
     if (obj === null || typeof obj !== 'object') {
       return obj;
     }
@@ -72,11 +72,9 @@ export class InMemoryAuditLogger implements AuditLoggerPort {
       return obj.map(item => this.deepClone(item));
     }
 
-    const cloned: any = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        cloned[key] = this.deepClone(obj[key]);
-      }
+    const cloned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      cloned[key] = this.deepClone(value);
     }
 
     return cloned;

@@ -1,12 +1,10 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/chrome.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class EmptyFeatureStrip extends StatelessWidget {
-  const EmptyFeatureStrip();
+  const EmptyFeatureStrip({super.key});
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -63,6 +61,7 @@ class EmptyFeatureStrip extends StatelessWidget {
 
 class EmptyFeaturePill extends StatelessWidget {
   const EmptyFeaturePill({
+    super.key,
     required this.iconAsset,
     required this.title,
     required this.text,
@@ -115,7 +114,7 @@ class EmptyFeaturePill extends StatelessWidget {
 }
 
 class EmptyFeatureDivider extends StatelessWidget {
-  const EmptyFeatureDivider();
+  const EmptyFeatureDivider({super.key});
 
   @override
   Widget build(BuildContext context) => Container(

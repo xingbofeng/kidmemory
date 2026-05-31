@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { components } from "@kidmemory/protocol/generated/sidecar/ts";
 
 export const UpdatePostgresDtoSchema = z
   .object({
@@ -12,4 +11,4 @@ export const UpdatePostgresDtoSchema = z
   })
   .strict();
 
-export type UpdatePostgresDto = components["schemas"]["PostgresConfigRequestDto"];
+export type UpdatePostgresDto = z.infer<typeof UpdatePostgresDtoSchema>;

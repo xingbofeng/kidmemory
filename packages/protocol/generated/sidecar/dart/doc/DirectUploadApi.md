@@ -9,11 +9,11 @@ All URIs are relative to *http://127.0.0.1:4317*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**directUploadControllerCreateSession**](DirectUploadApi.md#directuploadcontrollercreatesession) | **POST** /api/web-companion/direct-upload/sessions | 
-[**directUploadControllerGetSessionConfig**](DirectUploadApi.md#directuploadcontrollergetsessionconfig) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/config | 
-[**directUploadControllerGetStatus**](DirectUploadApi.md#directuploadcontrollergetstatus) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/status | 
-[**directUploadControllerListObjects**](DirectUploadApi.md#directuploadcontrollerlistobjects) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/objects | 
-[**directUploadControllerPullback**](DirectUploadApi.md#directuploadcontrollerpullback) | **POST** /api/web-companion/direct-upload/sessions/{sessionId}/pullback | 
+[**directUploadControllerCreateSession**](DirectUploadApi.md#directuploadcontrollercreatesession) | **POST** /api/web-companion/direct-upload/sessions |
+[**directUploadControllerGetSessionConfig**](DirectUploadApi.md#directuploadcontrollergetsessionconfig) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/config |
+[**directUploadControllerGetStatus**](DirectUploadApi.md#directuploadcontrollergetstatus) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/status |
+[**directUploadControllerListObjects**](DirectUploadApi.md#directuploadcontrollerlistobjects) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/objects |
+[**directUploadControllerPullback**](DirectUploadApi.md#directuploadcontrollerpullback) | **POST** /api/web-companion/direct-upload/sessions/{sessionId}/pullback |
 
 
 # **directUploadControllerCreateSession**
@@ -62,7 +62,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDirectUploadApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.directUploadControllerGetSessionConfig(sessionId);
@@ -75,7 +75,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -102,7 +102,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDirectUploadApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.directUploadControllerGetStatus(sessionId);
@@ -115,7 +115,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -142,7 +142,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDirectUploadApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.directUploadControllerListObjects(sessionId);
@@ -155,7 +155,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -182,7 +182,7 @@ No authorization required
 import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getDirectUploadApi();
-final String sessionId = sessionId_example; // String | 
+final String sessionId = sessionId_example; // String |
 
 try {
     api.directUploadControllerPullback(sessionId);
@@ -195,7 +195,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **sessionId** | **String**|  | 
+ **sessionId** | **String**|  |
 
 ### Return type
 
@@ -211,4 +211,3 @@ No authorization required
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
