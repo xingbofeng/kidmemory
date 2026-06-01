@@ -6,7 +6,7 @@ import { Icon } from '../../components/ui/Icon'
 
 interface UploadSessionProps {
   sessionId: string
-  sessionToken?: string
+  sessionToken: string
   onSessionChange?: (session: UploadSessionType | null) => void
 }
 

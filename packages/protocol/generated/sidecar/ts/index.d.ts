@@ -2159,20 +2159,37 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    childId: string;
+                    expiresInMinutes?: number;
+                    maxItems?: number;
+                    preferredProviders?: string[];
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        token: string;
+                        webUrl: string;
+                        expiresAt: string;
+                        maxItems: number;
+                    };
+                };
             };
         };
     };
     WebCompanionController_getSessionSummary: {
         parameters: {
-            query?: {
-                token?: string;
+            query: {
+                token: string;
             };
             header?: never;
             path: {
@@ -2207,7 +2224,9 @@ export interface operations {
     };
     WebCompanionController_getSessionDetail: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2220,7 +2239,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        items: {
+                            uploadItemId: string;
+                            assetId: string;
+                            filename: string;
+                            status: string;
+                            provider: string;
+                            objectKey: string;
+                            errorCode?: string;
+                            createdAt: string;
+                            updatedAt: string;
+                        }[];
+                    };
+                };
             };
         };
     };
@@ -2233,13 +2267,45 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    provider?: string;
+                    files: {
+                        clientFileId: string;
+                        filename: string;
+                        contentType: string;
+                        sizeBytes: number;
+                    }[];
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        items: {
+                            clientFileId: string;
+                            uploadItemId: string;
+                            assetId: string;
+                            objectKey: string;
+                            status: string;
+                            signedUpload?: {
+                                /** @enum {string} */
+                                method: "PUT";
+                                url: string;
+                                expiresAt: string;
+                                headers: {
+                                    [key: string]: string;
+                                };
+                            };
+                        }[];
+                    };
+                };
             };
         };
     };
@@ -2253,13 +2319,29 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    objectKey: string;
+                    sizeBytes?: number;
+                    contentType?: string;
+                    remoteEtag?: string;
+                };
+            };
+        };
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        uploadItemId: string;
+                        status: string;
+                        idempotent?: boolean;
+                    };
+                };
             };
         };
     };
@@ -2273,13 +2355,25 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        uploadItemId: string;
+                        status: string;
+                        idempotent?: boolean;
+                    };
+                };
             };
         };
     };
@@ -2292,13 +2386,23 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -2311,13 +2415,23 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -2356,7 +2470,9 @@ export interface operations {
     };
     WebCompanionController_getAssetDetails: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2370,13 +2486,27 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        type: string;
+                        childId: string;
+                        createdAt: string;
+                        previewUrl: string;
+                        description?: string;
+                        tags: string[];
+                    };
+                };
             };
         };
     };
     WebCompanionController_getBooksList: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+                childId?: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2395,7 +2525,9 @@ export interface operations {
     };
     WebCompanionController_getBookDetails: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2415,7 +2547,9 @@ export interface operations {
     };
     WebCompanionController_createShareToken: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2434,7 +2568,9 @@ export interface operations {
     };
     WebCompanionController_revokeShareToken: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2448,7 +2584,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -2516,19 +2656,40 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    childId: string;
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        childId: string;
+                        bucket: string;
+                        sessionPath: string;
+                        supabaseUrl: string;
+                        anonKey: string;
+                        publicUrl: string;
+                        recommendedClientLimit: number;
+                        expiresAtHintSeconds: number;
+                        token: string;
+                    };
+                };
             };
         };
     };
     DirectUploadController_listObjects: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2541,7 +2702,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        bucket: string;
+                        objects: {
+                            objectKey: string;
+                            size: number;
+                            contentType: string;
+                            lastModified: string;
+                        }[];
+                    };
+                };
             };
         };
     };
@@ -2554,19 +2726,39 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    objectKeys?: string[];
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        results: {
+                            objectKey: string;
+                            /** @enum {string} */
+                            status: "ready" | "failed";
+                            errorCode?: string | null;
+                            errorMessage?: string | null;
+                        }[];
+                    };
+                };
             };
         };
     };
     DirectUploadController_getStatus: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2579,13 +2771,31 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        items: {
+                            objectKey: string;
+                            status: string;
+                            errorCode?: string | null;
+                            errorMessage?: string | null;
+                        }[];
+                        summary: {
+                            pending_remote: number;
+                            downloading: number;
+                            ready: number;
+                            failed: number;
+                        };
+                    };
+                };
             };
         };
     };
     DirectUploadController_getSessionConfig: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2598,7 +2808,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        supabaseUrl: string;
+                        anonKey: string;
+                        bucket: string;
+                        recommendedClientLimit: number;
+                    };
+                };
             };
         };
     };

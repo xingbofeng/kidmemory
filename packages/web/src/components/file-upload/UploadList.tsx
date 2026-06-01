@@ -37,7 +37,7 @@ export function UploadList({ selectedFiles, onRemoveFile, onClearAll }: UploadLi
 
             {selectedFile.status === 'uploading' && <span className="item-status uploading">{t('upload.uploading')}</span>}
             {selectedFile.status === 'committing' && <span className="item-status uploading">{t('upload.committing')}</span>}
-            {selectedFile.status === 'success' && <span className="item-status success">{t('upload.uploadSuccess')}</span>}
+            {selectedFile.status === 'success' && <span className="item-status success">{t('upload.uploadAccepted')}</span>}
             {selectedFile.status === 'error' && (
               <span className="item-status danger">{selectedFile.error || t('upload.uploadFailed')}</span>
             )}

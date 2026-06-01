@@ -5,9 +5,9 @@ import type { UploadSession } from '../types/api';
 
 export type DirectUploadConfigResponse = components['schemas']['DirectUploadConfigResponseDto'];
 
-export async function getDirectUploadConfig(sessionId: string): Promise<DirectUploadConfigResponse> {
+export async function getDirectUploadConfig(sessionId: string, token: string): Promise<DirectUploadConfigResponse> {
   return httpClient.get<DirectUploadConfigResponse>(
-    `/api/web-companion/direct-upload/sessions/${encodeURIComponent(sessionId)}/config`
+    `/api/web-companion/direct-upload/sessions/${encodeURIComponent(sessionId)}/config?token=${encodeURIComponent(token)}`
   );
 }
 

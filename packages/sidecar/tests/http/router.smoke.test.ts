@@ -121,11 +121,11 @@ const ROUTES: RouteCheck[] = [
     },
   },
   {
-    name: "GET /api/web-companion/sessions/:sessionId returns upload session metadata",
+    name: "GET /api/web-companion/sessions/:sessionId without token is unauthorized",
     method: "GET",
     path: "/api/web-companion/sessions/session-smoke",
-    expectStatuses: [404], // 期望404因为session-smoke不存在
-    expectJson: false, // 不检查JSON格式，因为会返回错误
+    expectStatuses: [401],
+    expectJson: false,
   },
 ];
 

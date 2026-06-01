@@ -95,8 +95,8 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
   useEffect(() => {
     if (!parsed.ok) return
     let cancelled = false
-    const { sessionId } = parsed.partial
-    getDirectUploadConfig(sessionId)
+    const { sessionId, token } = parsed.partial
+    getDirectUploadConfig(sessionId, token)
       .then((data) => {
         if (!cancelled) setAnonKey(data.anonKey)
       })

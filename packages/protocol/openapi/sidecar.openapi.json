@@ -865,9 +865,70 @@
       "post": {
         "operationId": "WebCompanionController_createSession",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "childId"
+                ],
+                "properties": {
+                  "childId": {
+                    "type": "string"
+                  },
+                  "expiresInMinutes": {
+                    "type": "number"
+                  },
+                  "maxItems": {
+                    "type": "number"
+                  },
+                  "preferredProviders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "token",
+                    "webUrl",
+                    "expiresAt",
+                    "maxItems"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "webUrl": {
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "maxItems": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -881,7 +942,7 @@
         "parameters": [
           {
             "name": "token",
-            "required": false,
+            "required": true,
             "in": "query",
             "schema": {
               "type": "string"
@@ -963,10 +1024,80 @@
     "/api/web-companion/sessions/{sessionId}/detail": {
       "get": {
         "operationId": "WebCompanionController_getSessionDetail",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "items"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "uploadItemId",
+                          "assetId",
+                          "filename",
+                          "status",
+                          "provider",
+                          "objectKey",
+                          "createdAt",
+                          "updatedAt"
+                        ],
+                        "properties": {
+                          "uploadItemId": {
+                            "type": "string"
+                          },
+                          "assetId": {
+                            "type": "string"
+                          },
+                          "filename": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "provider": {
+                            "type": "string"
+                          },
+                          "objectKey": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -988,9 +1119,128 @@
       "post": {
         "operationId": "WebCompanionController_createUploadItems",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "files"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "provider": {
+                    "type": "string"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "clientFileId",
+                        "filename",
+                        "contentType",
+                        "sizeBytes"
+                      ],
+                      "properties": {
+                        "clientFileId": {
+                          "type": "string"
+                        },
+                        "filename": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "sizeBytes": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "items"
+                  ],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "clientFileId",
+                          "uploadItemId",
+                          "assetId",
+                          "objectKey",
+                          "status"
+                        ],
+                        "properties": {
+                          "clientFileId": {
+                            "type": "string"
+                          },
+                          "uploadItemId": {
+                            "type": "string"
+                          },
+                          "assetId": {
+                            "type": "string"
+                          },
+                          "objectKey": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "signedUpload": {
+                            "type": "object",
+                            "required": [
+                              "method",
+                              "url",
+                              "expiresAt",
+                              "headers"
+                            ],
+                            "properties": {
+                              "method": {
+                                "type": "string",
+                                "enum": [
+                                  "PUT"
+                                ]
+                              },
+                              "url": {
+                                "type": "string"
+                              },
+                              "expiresAt": {
+                                "type": "string"
+                              },
+                              "headers": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1012,9 +1262,62 @@
       "put": {
         "operationId": "WebCompanionController_commitUploadItem",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "objectKey"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "objectKey": {
+                    "type": "string"
+                  },
+                  "sizeBytes": {
+                    "type": "number"
+                  },
+                  "contentType": {
+                    "type": "string"
+                  },
+                  "remoteEtag": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "uploadItemId",
+                    "status"
+                  ],
+                  "properties": {
+                    "uploadItemId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "idempotent": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1044,9 +1347,49 @@
       "post": {
         "operationId": "WebCompanionController_retryUploadItem",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "uploadItemId",
+                    "status"
+                  ],
+                  "properties": {
+                    "uploadItemId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "idempotent": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1076,9 +1419,42 @@
       "post": {
         "operationId": "WebCompanionController_closeSession",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1100,9 +1476,42 @@
       "post": {
         "operationId": "WebCompanionController_submitSession",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1212,10 +1621,64 @@
     "/api/web-companion/sessions/{sessionId}/assets/{assetId}": {
       "get": {
         "operationId": "WebCompanionController_getAssetDetails",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "childId",
+                    "createdAt",
+                    "previewUrl",
+                    "tags"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "childId": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "previewUrl": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1244,7 +1707,24 @@
     "/api/web-companion/sessions/{sessionId}/books": {
       "get": {
         "operationId": "WebCompanionController_getBooksList",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "childId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -1268,7 +1748,16 @@
     "/api/web-companion/sessions/{sessionId}/books/{bookId}": {
       "get": {
         "operationId": "WebCompanionController_getBookDetails",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -1300,7 +1789,16 @@
     "/api/web-companion/sessions/{sessionId}/share": {
       "post": {
         "operationId": "WebCompanionController_createShareToken",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1324,10 +1822,34 @@
     "/api/web-companion/sessions/{sessionId}/share/{shareTokenId}/revoke": {
       "post": {
         "operationId": "WebCompanionController_revokeShareToken",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1429,9 +1951,78 @@
       "post": {
         "operationId": "DirectUploadController_createSession",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "childId"
+                ],
+                "properties": {
+                  "childId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "childId",
+                    "bucket",
+                    "sessionPath",
+                    "supabaseUrl",
+                    "anonKey",
+                    "publicUrl",
+                    "recommendedClientLimit",
+                    "expiresAtHintSeconds",
+                    "token"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "childId": {
+                      "type": "string"
+                    },
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "sessionPath": {
+                      "type": "string"
+                    },
+                    "supabaseUrl": {
+                      "type": "string"
+                    },
+                    "anonKey": {
+                      "type": "string"
+                    },
+                    "publicUrl": {
+                      "type": "string"
+                    },
+                    "recommendedClientLimit": {
+                      "type": "number"
+                    },
+                    "expiresAtHintSeconds": {
+                      "type": "number"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1442,10 +2033,65 @@
     "/api/web-companion/direct-upload/sessions/{sessionId}/objects": {
       "get": {
         "operationId": "DirectUploadController_listObjects",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "bucket",
+                    "objects"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "objectKey",
+                          "size",
+                          "contentType",
+                          "lastModified"
+                        ],
+                        "properties": {
+                          "objectKey": {
+                            "type": "string"
+                          },
+                          "size": {
+                            "type": "number"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "lastModified": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1467,9 +2113,79 @@
       "post": {
         "operationId": "DirectUploadController_pullback",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "objectKeys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "results"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "objectKey",
+                          "status"
+                        ],
+                        "properties": {
+                          "objectKey": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ready",
+                              "failed"
+                            ]
+                          },
+                          "errorCode": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "errorMessage": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1490,10 +2206,85 @@
     "/api/web-companion/direct-upload/sessions/{sessionId}/status": {
       "get": {
         "operationId": "DirectUploadController_getStatus",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "items",
+                    "summary"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "objectKey",
+                          "status"
+                        ],
+                        "properties": {
+                          "objectKey": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "errorCode": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "errorMessage": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "required": [
+                        "pending_remote",
+                        "downloading",
+                        "ready",
+                        "failed"
+                      ],
+                      "properties": {
+                        "pending_remote": {
+                          "type": "number"
+                        },
+                        "downloading": {
+                          "type": "number"
+                        },
+                        "ready": {
+                          "type": "number"
+                        },
+                        "failed": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1514,10 +2305,46 @@
     "/api/web-companion/direct-upload/sessions/{sessionId}/config": {
       "get": {
         "operationId": "DirectUploadController_getSessionConfig",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "supabaseUrl",
+                    "anonKey",
+                    "bucket",
+                    "recommendedClientLimit"
+                  ],
+                  "properties": {
+                    "supabaseUrl": {
+                      "type": "string"
+                    },
+                    "anonKey": {
+                      "type": "string"
+                    },
+                    "bucket": {
+                      "type": "string"
+                    },
+                    "recommendedClientLimit": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [

@@ -179,18 +179,16 @@ export class WebCompanionService {
     return false;
   }
 
-  async getSessionSummary(sessionId: string, token?: string): Promise<SessionSummaryResponse> {
+  async getSessionSummary(sessionId: string, token: string): Promise<SessionSummaryResponse> {
     const session = await this.getSessionById(sessionId);
 
     if (session.status === UploadSessionStatus.EXPIRED || session.expiresAt < new Date()) {
       throw this.createError(WebCompanionErrorCode.SESSION_EXPIRED, "Session has expired");
     }
 
-    if (token) {
-      const validation = await this.validateToken(token, sessionId);
-      if (!validation.valid) {
-        throw this.createError(validation.errorCode!, "Invalid token");
-      }
+    const validation = await this.validateToken(token, sessionId);
+    if (!validation.valid) {
+      throw this.createError(validation.errorCode!, "Invalid token");
     }
 
     const child = await this.getChildById(session.childId);
@@ -213,14 +211,12 @@ export class WebCompanionService {
     };
   }
 
-  async getSessionDetail(sessionId: string, token?: string): Promise<SessionDetailResponse> {
+  async getSessionDetail(sessionId: string, token: string): Promise<SessionDetailResponse> {
     const session = await this.getSessionById(sessionId);
 
-    if (token) {
-      const validation = await this.validateToken(token, sessionId);
-      if (!validation.valid) {
-        throw this.createError(validation.errorCode!);
-      }
+    const validation = await this.validateToken(token, sessionId);
+    if (!validation.valid) {
+      throw this.createError(validation.errorCode!);
     }
 
     const items = await this.getUploadItemsBySession(sessionId);

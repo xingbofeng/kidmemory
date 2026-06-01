@@ -273,13 +273,13 @@ describe("WebCompanionService", () => {
   });
 
   describe("getSessionSummary", () => {
-    test("returns session summary without token", async () => {
+    test("returns session summary with token", async () => {
       repository.addSession(createActiveSession({ maxItems: 200 }));
       for (let index = 0; index < 5; index += 1) {
         repository.addItem(createUploadItem({ id: `item-${index}` }));
       }
 
-      const summary = await service.getSessionSummary(mockSessionId);
+      const summary = await service.getSessionSummary(mockSessionId, mockToken);
 
       assert.equal(summary.sessionId, mockSessionId);
       assert.equal(summary.status, UploadSessionStatus.ACTIVE);
@@ -287,6 +287,15 @@ describe("WebCompanionService", () => {
       assert.equal(summary.child.displayName, "Test Child");
       assert.equal(summary.maxItems, 200);
       assert.equal(summary.usedItems, 5);
+    });
+
+    test("rejects missing token", async () => {
+      repository.addSession(createActiveSession());
+
+      await assert.rejects(
+        async () => service.getSessionSummary(mockSessionId, ""),
+        (error: unknown) => assertErrorIncludes(error, "Invalid token"),
+      );
     });
 
     test("rejects invalid tokens when a token is provided", async () => {

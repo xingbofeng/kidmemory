@@ -75,6 +75,8 @@ export const WebCompanionErrorCode = {
   SESSION_CLOSED: "SESSION_CLOSED",
   /** Token 无效 */
   TOKEN_INVALID: "TOKEN_INVALID",
+  /** Token 缺失 */
+  TOKEN_REQUIRED: "TOKEN_REQUIRED",
 
   // 上传限制错误
   /** 超过单会话上传项数量限制 */

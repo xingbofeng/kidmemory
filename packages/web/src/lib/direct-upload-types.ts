@@ -22,6 +22,7 @@ export interface DirectUploadConfig {
   anonKey: string
   /** Web Companion 静态部署对外公开 URL（用于二维码或回链）。 */
   publicUrl: string
+  /** sidecar 生成的会话 token；config、pullback 和状态查询都必须携带。 */
   token: string
   /** 体验约束的客户端张数上限，sidecar 默认下发 200。 */
   recommendedClientLimit: number

@@ -77,12 +77,12 @@ describe('FileUpload', () => {
     fireEvent.click(screen.getByRole('button', { name: /开始上传/ }))
 
     expect(await screen.findByText(/正在提交/)).toBeInTheDocument()
-    expect(screen.queryByText(/上传成功/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/已上传，等待入库/)).not.toBeInTheDocument()
 
     resolveCommit?.()
 
     await waitFor(() => {
-      expect(screen.getByText(/上传成功/)).toBeInTheDocument()
+      expect(screen.getByText(/已上传，等待入库/)).toBeInTheDocument()
     })
   })
 
@@ -114,7 +114,7 @@ describe('FileUpload', () => {
     expect(await screen.findByText(/正在上传/)).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText(/上传成功/)).toBeInTheDocument()
+      expect(screen.getByText(/已上传，等待入库/)).toBeInTheDocument()
       expect(uploadButton).not.toBeDisabled()
     })
   })
@@ -183,8 +183,18 @@ describe('FileUpload', () => {
     const uploadButton = screen.getByRole('button', { name: /开始上传/ })
     fireEvent.click(uploadButton)
 
-    expect(await screen.findByText(/上传成功/, {}, { timeout: 3000 })).toBeInTheDocument()
+    expect(await screen.findByText(/已上传，等待入库/, {}, { timeout: 3000 })).toBeInTheDocument()
     expect(uploadButton).not.toBeDisabled()
+  })
+
+  it('disables upload when no provider is available', async () => {
+    render(<FileUpload session={{ ...mockSession, providers: { lan: { available: false }, supabase: { available: false } } }} />)
+
+    const fileInput = screen.getByLabelText(/选择图片/)
+    const file = new File(['image'], 'blocked.jpg', { type: 'image/jpeg' })
+    fireEvent.change(fileInput, { target: { files: [file] } })
+
+    expect(screen.getByRole('button', { name: /开始上传/ })).toBeDisabled()
   })
 
   it('allows clearing all selected files', async () => {

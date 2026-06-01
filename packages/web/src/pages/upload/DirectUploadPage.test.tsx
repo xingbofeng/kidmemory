@@ -15,7 +15,7 @@ vi.mock('../../api/uploadApi', () => ({
  * 对照 spec：
  *   - 「扫码进入上传页并展示会话信息」: 必须显示 child、`{bucket}/{sessionId}` 路径与「Supabase 直传验证版」横幅。
  *   - 「文件类型与单次张数体验约束」: 必须展示「体验约束」提示。
- *   - 缺失必需 query 参数（sessionId/childId/bucket/supabaseUrl）时显示错误横幅；不渲染上传 UI。
+ *   - 缺失必需 query 参数（sessionId/childId/bucket/supabaseUrl/token）时显示错误横幅；不渲染上传 UI。
  *   - 默认计数 `0 / 200`，初始无进度行。
  *
  * 真实 Supabase 调用通过 `clientFactory` prop 注入 fake，避免任何网络。
@@ -78,6 +78,7 @@ describe('DirectUploadPage', () => {
     // risk banner
     expect(screen.getByText(/Supabase 直传验证版/)).toBeInTheDocument()
     expect(screen.getByText(/自动通知电脑端入库/)).toBeInTheDocument()
+    expect(getDirectUploadConfig).toHaveBeenCalledWith('wcs_direct_abc', 'session-token')
   })
 
   it('shows the default file count "0 / 200" before any selection', async () => {

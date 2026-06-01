@@ -121,7 +121,9 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
         <div className="recent-scroller">
           {filteredAssets.slice(0, 4).map((asset, index) => (
             <article className="recent-card" key={asset.id}>
-              <div className={`asset-art art-${(index + 2) % 6}`} />
+              <div className={`asset-art art-${(index + 2) % 6}`}>
+                <img src={asset.thumbnailUrl || transparentPixel} alt={asset.name} role="img" />
+              </div>
               <span>{t('upload.minutesAgo', { count: index * 5 + 1 })}</span>
             </article>
           ))}

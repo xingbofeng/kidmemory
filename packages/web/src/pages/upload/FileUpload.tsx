@@ -35,6 +35,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
     },
   }), [session.providers])
   const [selectedProvider, setSelectedProvider] = useState<UploadProvider>(providers.lan.available ? 'lan' : 'supabase')
+  const hasAvailableProvider = providers.lan.available || providers.supabase.available
 
   useEffect(() => {
     setSelectedProvider((current) => {
@@ -88,7 +89,13 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
 
     setIsUploading(true)
 
-    const provider: UploadProvider = providers[selectedProvider].available ? selectedProvider : 'supabase'
+    if (!hasAvailableProvider || !providers[selectedProvider].available) {
+      setFileError(t('upload.routeUnavailable'))
+      setIsUploading(false)
+      return
+    }
+
+    const provider: UploadProvider = selectedProvider
     try {
       const response = await createUploadItems(session.sessionId, {
         token: resolvedToken,
@@ -185,7 +192,12 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
 
       <UploadList selectedFiles={selectedFiles} onRemoveFile={handleRemoveFile} onClearAll={handleClearAll} />
 
-      <UploadProgress selectedFiles={selectedFiles} isUploading={isUploading} onUpload={handleUpload} />
+      <UploadProgress
+        selectedFiles={selectedFiles}
+        isUploading={isUploading}
+        disabled={!hasAvailableProvider}
+        onUpload={handleUpload}
+      />
 
       {!fileError && <div className="sr-only">{t('upload.unsupportedTypeSr')}</div>}
     </div>

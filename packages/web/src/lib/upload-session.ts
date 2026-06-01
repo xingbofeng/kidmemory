@@ -8,6 +8,9 @@ type UploadSessionResponse = Partial<UploadSession> & {
 
 export function formatRemainingTime(expiresAt: string): string {
   const remainingTime = new Date(expiresAt).getTime() - Date.now()
+  if (!Number.isFinite(remainingTime) || remainingTime <= 0) {
+    return i18n.t('trustedUploadStatus.expired')
+  }
   const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60))
   const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60))
 
@@ -25,10 +28,11 @@ export function getUploadStatus(uploadCount: number, maxUploads: number) {
   }
 }
 
-export async function fetchUploadSession(sessionId: string, token?: string): Promise<UploadSession> {
+export async function fetchUploadSession(sessionId: string, token: string): Promise<UploadSession> {
   try {
-    const query = token ? `?token=${encodeURIComponent(token)}` : ''
-    const data = await httpClient.get<UploadSessionResponse>(`/api/web-companion/sessions/${sessionId}${query}`)
+    const data = await httpClient.get<UploadSessionResponse>(
+      `/api/web-companion/sessions/${sessionId}?token=${encodeURIComponent(token)}`
+    )
     return {
       sessionId: data.sessionId ?? sessionId,
       token: data.token ?? '',

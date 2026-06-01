@@ -150,9 +150,33 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [DirectUploadControllerCreateSession201Response](doc/DirectUploadControllerCreateSession201Response.md)
+ - [DirectUploadControllerCreateSessionRequest](doc/DirectUploadControllerCreateSessionRequest.md)
+ - [DirectUploadControllerGetSessionConfig200Response](doc/DirectUploadControllerGetSessionConfig200Response.md)
+ - [DirectUploadControllerGetStatus200Response](doc/DirectUploadControllerGetStatus200Response.md)
+ - [DirectUploadControllerGetStatus200ResponseItemsInner](doc/DirectUploadControllerGetStatus200ResponseItemsInner.md)
+ - [DirectUploadControllerGetStatus200ResponseSummary](doc/DirectUploadControllerGetStatus200ResponseSummary.md)
+ - [DirectUploadControllerListObjects200Response](doc/DirectUploadControllerListObjects200Response.md)
+ - [DirectUploadControllerListObjects200ResponseObjectsInner](doc/DirectUploadControllerListObjects200ResponseObjectsInner.md)
+ - [DirectUploadControllerPullback201Response](doc/DirectUploadControllerPullback201Response.md)
+ - [DirectUploadControllerPullback201ResponseResultsInner](doc/DirectUploadControllerPullback201ResponseResultsInner.md)
+ - [DirectUploadControllerPullbackRequest](doc/DirectUploadControllerPullbackRequest.md)
+ - [WebCompanionControllerCloseSession201Response](doc/WebCompanionControllerCloseSession201Response.md)
+ - [WebCompanionControllerCommitUploadItem200Response](doc/WebCompanionControllerCommitUploadItem200Response.md)
+ - [WebCompanionControllerCommitUploadItemRequest](doc/WebCompanionControllerCommitUploadItemRequest.md)
+ - [WebCompanionControllerCreateSession201Response](doc/WebCompanionControllerCreateSession201Response.md)
+ - [WebCompanionControllerCreateSessionRequest](doc/WebCompanionControllerCreateSessionRequest.md)
+ - [WebCompanionControllerCreateUploadItems201Response](doc/WebCompanionControllerCreateUploadItems201Response.md)
+ - [WebCompanionControllerCreateUploadItems201ResponseItemsInner](doc/WebCompanionControllerCreateUploadItems201ResponseItemsInner.md)
+ - [WebCompanionControllerCreateUploadItems201ResponseItemsInnerSignedUpload](doc/WebCompanionControllerCreateUploadItems201ResponseItemsInnerSignedUpload.md)
+ - [WebCompanionControllerCreateUploadItemsRequest](doc/WebCompanionControllerCreateUploadItemsRequest.md)
+ - [WebCompanionControllerCreateUploadItemsRequestFilesInner](doc/WebCompanionControllerCreateUploadItemsRequestFilesInner.md)
  - [WebCompanionControllerGetRecentUploads200ResponseInner](doc/WebCompanionControllerGetRecentUploads200ResponseInner.md)
+ - [WebCompanionControllerGetSessionDetail200Response](doc/WebCompanionControllerGetSessionDetail200Response.md)
+ - [WebCompanionControllerGetSessionDetail200ResponseItemsInner](doc/WebCompanionControllerGetSessionDetail200ResponseItemsInner.md)
  - [WebCompanionControllerGetSessionSummary200Response](doc/WebCompanionControllerGetSessionSummary200Response.md)
  - [WebCompanionControllerGetSessionSummary200ResponseChild](doc/WebCompanionControllerGetSessionSummary200ResponseChild.md)
+ - [WebCompanionControllerRetryUploadItemRequest](doc/WebCompanionControllerRetryUploadItemRequest.md)
 
 
 ## Documentation For Authorization

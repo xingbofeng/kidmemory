@@ -319,7 +319,7 @@ test(
       body: Buffer.from("fake-c"),
     });
 
-    const response = await controller.listObjects(session.sessionId);
+    const response = await controller.listObjects(session.sessionId, session.token);
     assert.equal(response.objects.length, 2);
     const keys = response.objects.map((o) => o.objectKey).sort();
     assert.deepEqual(
@@ -335,6 +335,20 @@ test(
     const serialized = JSON.stringify(response);
     assert.equal(serialized.includes("/private/tmp"), false);
     assert.equal(serialized.includes("service-role-secret"), false);
+  },
+);
+
+test(
+  "GET /sessions/:sessionId/objects 缺失或错误 token 时拒绝列对象",
+  async () => {
+    const { controller } = buildController();
+    const session = await controller.createSession({ childId: "child_test" });
+
+    const missing = await captureRejected(controller.listObjects(session.sessionId, ""));
+    assert.equal((missing as { code?: string }).code, "token_required");
+
+    const invalid = await captureRejected(controller.listObjects(session.sessionId, "wrong-token"));
+    assert.equal((invalid as { code?: string }).code, "invalid_token");
   },
 );
 
@@ -482,7 +496,7 @@ test(
       token: session.token,
     });
 
-    const status = await controller.getStatus(session.sessionId);
+    const status = await controller.getStatus(session.sessionId, session.token);
     assert.equal(status.sessionId, session.sessionId);
     assert.equal(status.items.length, 1);
     assert.equal(status.items[0].status, "ready");
@@ -494,5 +508,31 @@ test(
     const serialized = JSON.stringify(status);
     assert.equal(serialized.includes("service-role-secret"), false);
     assert.equal(serialized.includes("/private/tmp"), false);
+  },
+);
+
+test(
+  "GET /sessions/:sessionId/config 与 status 都要求 token",
+  async () => {
+    const { controller } = buildController();
+    const session = await controller.createSession({ childId: "child_test" });
+
+    await assert.rejects(
+      () => controller.getSessionConfig(session.sessionId, ""),
+      (error: unknown) => {
+        assert.equal((error as { code?: string }).code, "token_required");
+        return true;
+      },
+    );
+    await assert.rejects(
+      () => controller.getStatus(session.sessionId, "wrong-token"),
+      (error: unknown) => {
+        assert.equal((error as { code?: string }).code, "invalid_token");
+        return true;
+      },
+    );
+
+    const config = await controller.getSessionConfig(session.sessionId, session.token);
+    assert.equal(config.bucket, "web-companion-uploads");
   },
 );

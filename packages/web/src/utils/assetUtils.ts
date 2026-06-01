@@ -21,10 +21,15 @@ export const filterAssets = (assets: Asset[], filter: AssetFilter, searchQuery: 
   }
 
   if (filter === 'recent') {
-    return [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return [...filtered].sort((a, b) => safeTime(b.createdAt) - safeTime(a.createdAt))
   }
 
   return filtered
+}
+
+const safeTime = (value: string): number => {
+  const time = new Date(value).getTime()
+  return Number.isFinite(time) ? time : 0
 }
 
 const ASSET_TYPE_LABEL_KEYS: Record<AssetType, string> = {

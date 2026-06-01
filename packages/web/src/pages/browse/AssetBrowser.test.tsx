@@ -167,6 +167,18 @@ describe('AssetBrowser', () => {
     })
   })
 
+  it('renders real thumbnails in the recent strip', async () => {
+    renderAssetBrowser()
+
+    await waitFor(() => {
+      expect(screen.getByText('我的画作')).toBeInTheDocument()
+    })
+
+    const images = screen.getAllByRole('img', { name: '我的画作' })
+    expect(images.length).toBeGreaterThanOrEqual(2)
+    expect(images[1]).toHaveAttribute('src', '/sample-assets/sun-garden.png')
+  })
+
   it('handles loading and error states', async () => {
     mockHttpClient.get.mockRejectedValueOnce(new Error('加载失败'))
 

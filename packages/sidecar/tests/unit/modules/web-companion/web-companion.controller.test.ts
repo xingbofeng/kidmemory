@@ -181,11 +181,21 @@ describe("WebCompanionController", () => {
     test("should get session summary successfully", async () => {
       mockService.getSessionSummary.setImplementation(async () => mockSessionSummaryResponse);
 
-      const result = await controller.getSessionSummary(mockSessionId);
+      const result = await controller.getSessionSummary(mockSessionId, mockToken);
 
       assert.deepEqual(result, mockSessionSummaryResponse);
       assert.equal(mockService.getSessionSummary.callCount(), 1);
       assert.equal(mockService.getSessionSummary.calls[0][0], mockSessionId);
+      assert.equal(mockService.getSessionSummary.calls[0][1], mockToken);
+    });
+
+    test("should reject session summary without token", async () => {
+      await assert.rejects(
+        async () => controller.getSessionSummary(mockSessionId),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+      assert.equal(mockService.getSessionSummary.callCount(), 0);
     });
 
     test("should handle session not found", async () => {
@@ -194,7 +204,7 @@ describe("WebCompanionController", () => {
       });
 
       await assert.rejects(
-        async () => controller.getSessionSummary("invalid-session"),
+        async () => controller.getSessionSummary("invalid-session", mockToken),
         (error: unknown) =>
           assertHttpError(error, 404, WebCompanionErrorCode.SESSION_NOT_FOUND, "Session not found"),
       );
@@ -228,6 +238,15 @@ describe("WebCompanionController", () => {
         (error: unknown) =>
           assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_INVALID, "Invalid token"),
       );
+    });
+
+    test("should reject session detail without token", async () => {
+      await assert.rejects(
+        async () => controller.getSessionDetail(mockSessionId),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+      assert.equal(mockService.getSessionDetail.callCount(), 0);
     });
   });
 
@@ -365,7 +384,7 @@ describe("WebCompanionController", () => {
       });
 
       await assert.rejects(
-        async () => controller.getSessionSummary(mockSessionId),
+        async () => controller.getSessionSummary(mockSessionId, mockToken),
         (error: unknown) =>
           assertHttpError(error, 500, "INTERNAL_ERROR", "Async service error"),
       );

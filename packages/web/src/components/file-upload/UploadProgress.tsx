@@ -5,10 +5,11 @@ import type { SelectedFile } from '../../types/fileUpload'
 interface UploadProgressProps {
   selectedFiles: SelectedFile[]
   isUploading: boolean
+  disabled?: boolean
   onUpload: () => void
 }
 
-export function UploadProgress({ selectedFiles, isUploading, onUpload }: UploadProgressProps) {
+export function UploadProgress({ selectedFiles, isUploading, disabled = false, onUpload }: UploadProgressProps) {
   const { t } = useTranslation()
   const uploadingCount = selectedFiles.filter((file) => file.status === 'uploading').length
 
@@ -25,7 +26,7 @@ export function UploadProgress({ selectedFiles, isUploading, onUpload }: UploadP
         className="primary-action"
         onClick={onUpload}
         aria-label={t('upload.startUploadAria')}
-        disabled={selectedFiles.length === 0 || isUploading}
+        disabled={selectedFiles.length === 0 || isUploading || disabled}
       >
         <Icon name="upload" /> {selectedFiles.length > 0 ? t('upload.startUpload') : t('upload.continueUpload')}
       </button>

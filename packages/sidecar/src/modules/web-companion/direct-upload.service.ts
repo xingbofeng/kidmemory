@@ -221,20 +221,23 @@ export class DirectUploadService {
 
   async getSessionConfig(
     sessionId: string,
+    token: string,
   ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number }> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
+    const session = this.validateSessionToken(sessionId, token);
     const config = this.appConfig.config;
     return {
       supabaseUrl: config.supabaseStorage.url,
       anonKey: config.supabaseStorage.anonKey,
-      bucket: config.webCompanionDirectUpload.bucket,
+      bucket: session.bucket,
       recommendedClientLimit: config.webCompanionDirectUpload.recommendedClientLimit,
     };
   }
 
-  async listObjects(sessionId: string): Promise<ListDirectUploadObjectsResponse> {
+  async listObjects(sessionId: string, token: string): Promise<ListDirectUploadObjectsResponse> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
-    const bucket = this.appConfig.config.webCompanionDirectUpload.bucket;
+    const session = this.validateSessionToken(sessionId, token);
+    const bucket = session.bucket;
     const prefix = `${sessionId}/`;
     const objects = await this.storage.listObjects({ bucket, prefix });
     return {
@@ -250,22 +253,12 @@ export class DirectUploadService {
   ): Promise<PullbackDirectUploadResponse> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
     const bucket = this.appConfig.config.webCompanionDirectUpload.bucket;
-    const session = this.sessionStore.get(sessionId);
-    if (!session) {
-      throw new Error(`Direct upload session ${sessionId} is not known by this sidecar process.`);
-    }
-
     if (!request || typeof request !== "object" || typeof request.token !== "string") {
       const error = new Error("Direct upload token is required for pullback.");
       (error as Error & { code?: string }).code = "token_required";
       throw error;
     }
-
-    if (request.token !== session.token) {
-      const error = new Error("Invalid session token.");
-      (error as Error & { code?: string }).code = "invalid_token";
-      throw error;
-    }
+    const session = this.validateSessionToken(sessionId, request.token);
 
     const childId = session.childId;
 
@@ -288,7 +281,8 @@ export class DirectUploadService {
     return { sessionId, results };
   }
 
-  async getStatus(sessionId: string): Promise<GetDirectUploadStatusResponse> {
+  async getStatus(sessionId: string, token: string): Promise<GetDirectUploadStatusResponse> {
+    this.validateSessionToken(sessionId, token);
     const rows = await this.pullbackStore.findBySessionId(sessionId);
     const summary = {
       pending_remote: 0,
@@ -306,6 +300,34 @@ export class DirectUploadService {
       };
     });
     return { sessionId, items, summary };
+  }
+
+  private validateSessionToken(sessionId: string, token?: string): SessionStoreEntry {
+    if (!token) {
+      const error = new Error("Direct upload token is required.");
+      (error as Error & { code?: string }).code = "token_required";
+      throw error;
+    }
+
+    const session = this.sessionStore.get(sessionId);
+    if (!session) {
+      throw new Error(`Direct upload session ${sessionId} is not known by this sidecar process.`);
+    }
+
+    if (session.expiresAt < new Date()) {
+      this.sessionStore.delete(sessionId);
+      const error = new Error("Direct upload session has expired.");
+      (error as Error & { code?: string }).code = "session_expired";
+      throw error;
+    }
+
+    if (token !== session.token) {
+      const error = new Error("Invalid session token.");
+      (error as Error & { code?: string }).code = "invalid_token";
+      throw error;
+    }
+
+    return session;
   }
 
   /**

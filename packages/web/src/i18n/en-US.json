@@ -225,7 +225,7 @@
     "pending": "Pending",
     "uploading": "Uploading",
     "committing": "Committing",
-    "success": "Imported",
+    "success": "Uploaded, waiting for import",
     "failed": "Failed"
   },
   "upload": {
@@ -268,6 +268,7 @@
     "uploading": "Uploading",
     "committing": "Committing",
     "uploadSuccess": "Uploaded",
+    "uploadAccepted": "Uploaded, waiting for import",
     "emptyUploadList": "Selected images will appear here",
     "summaryCount": "<1>{{count}}</1> / {{max}} items",
     "summaryRemaining": "Remaining <1>{{time}}</1>",

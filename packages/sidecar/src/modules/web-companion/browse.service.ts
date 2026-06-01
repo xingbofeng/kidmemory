@@ -375,7 +375,8 @@ export class BrowseService {
   }
 
   private validateLimit(limit: number): number {
-    return Math.max(1, Math.min(100, limit));
+    const resolved = Number.isFinite(limit) ? limit : 20;
+    return Math.max(1, Math.min(100, resolved));
   }
 
   private getStringMetadata(metadata: Record<string, unknown> | null | undefined, key: string): string | undefined {

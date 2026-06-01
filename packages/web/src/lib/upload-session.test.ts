@@ -59,7 +59,7 @@ describe('upload-session', () => {
     it('throws error when session fetch fails', async () => {
       mockHttpClient.get.mockRejectedValueOnce(new Error('Session not found'))
 
-      await expect(fetchUploadSession('invalid-session')).rejects.toThrow('Session not found')
+      await expect(fetchUploadSession('invalid-session', 'test-token')).rejects.toThrow('Session not found')
     })
   })
 
