@@ -5,12 +5,13 @@ import { UploadSession as UploadSessionType } from '../../types/api'
 
 interface ConnectViewProps {
   sessionId: string
+  sessionToken: string
   activeSession: UploadSessionType | null
   onSessionChange: (session: UploadSessionType | null) => void
   onStartUpload: () => void
 }
 
-export function ConnectView({ sessionId, activeSession, onSessionChange, onStartUpload }: ConnectViewProps) {
+export function ConnectView({ sessionId, sessionToken, activeSession, onSessionChange, onStartUpload }: ConnectViewProps) {
   const { t } = useTranslation()
 
   return (
@@ -25,7 +26,7 @@ export function ConnectView({ sessionId, activeSession, onSessionChange, onStart
       <h1 id="connect-title">{t('webCompanion.connectTitle')}</h1>
       <p className="lead">{t('webCompanion.connectLead')}</p>
 
-      <UploadSession sessionId={sessionId} onSessionChange={onSessionChange} />
+      <UploadSession sessionId={sessionId} sessionToken={sessionToken} onSessionChange={onSessionChange} />
 
       <button className="primary-action" onClick={onStartUpload} disabled={!activeSession || activeSession.isValid === false}>
         <Icon name="image" /> {t('webCompanion.startSelect')}

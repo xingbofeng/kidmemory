@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { UploadSession } from '../../types/api'
 import type { SelectedFile } from '../../types/fileUpload'
@@ -26,6 +26,22 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
   const remainingSlots = Math.max(0, (maxUploads ?? maxItems ?? 0) - uploadCount)
   const isAtLimit = remainingSlots <= 0
   const resolvedToken = sessionToken ?? session.token ?? ''
+  const providers = useMemo(() => ({
+    lan: {
+      available: Boolean((session.providers as { lan?: { available?: boolean } } | undefined)?.lan?.available),
+    },
+    supabase: {
+      available: (session.providers as { supabase?: { available?: boolean } } | undefined)?.supabase?.available !== false,
+    },
+  }), [session.providers])
+  const [selectedProvider, setSelectedProvider] = useState<UploadProvider>(providers.lan.available ? 'lan' : 'supabase')
+
+  useEffect(() => {
+    setSelectedProvider((current) => {
+      if (providers[current].available) return current
+      return providers.lan.available ? 'lan' : 'supabase'
+    })
+  }, [providers])
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
@@ -72,9 +88,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
 
     setIsUploading(true)
 
-    const provider: UploadProvider = (session.providers as { lan?: { available?: boolean } } | undefined)?.lan?.available
-      ? 'lan'
-      : 'supabase'
+    const provider: UploadProvider = providers[selectedProvider].available ? selectedProvider : 'supabase'
     try {
       const response = await createUploadItems(session.sessionId, {
         token: resolvedToken,
@@ -103,26 +117,42 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
           continue
         }
 
-        setSelectedFiles((prev) =>
-          prev.map((file) => (file.id === selectedFile.id ? { ...file, status: 'uploading' as const } : file)),
-        )
-        await uploadFileWithSignedUrl(selectedFile.file, item.signedUpload, (progress) => {
+        try {
           setSelectedFiles((prev) =>
-            prev.map((file) => (file.id === selectedFile.id ? { ...file, progress } : file)),
+            prev.map((file) => (file.id === selectedFile.id ? { ...file, status: 'uploading' as const } : file)),
           )
-        })
-        setSelectedFiles((prev) =>
-          prev.map((file) =>
-            file.id === selectedFile.id ? { ...file, status: 'success' as const, progress: 100 } : file,
-          ),
-        )
+          await uploadFileWithSignedUrl(selectedFile.file, item.signedUpload, (progress) => {
+            setSelectedFiles((prev) =>
+              prev.map((file) => (file.id === selectedFile.id ? { ...file, progress } : file)),
+            )
+          })
+          setSelectedFiles((prev) =>
+            prev.map((file) =>
+              file.id === selectedFile.id ? { ...file, status: 'committing' as const, progress: 100 } : file,
+            ),
+          )
 
-        await commitUploadItem(session.sessionId, item.uploadItemId, {
-          token: resolvedToken,
-          objectKey: item.objectKey,
-          sizeBytes: selectedFile.file.size,
-          contentType: selectedFile.file.type || 'application/octet-stream',
-        })
+          await commitUploadItem(session.sessionId, item.uploadItemId, {
+            token: resolvedToken,
+            objectKey: item.objectKey,
+            sizeBytes: selectedFile.file.size,
+            contentType: selectedFile.file.type || 'application/octet-stream',
+          })
+
+          setSelectedFiles((prev) =>
+            prev.map((file) =>
+              file.id === selectedFile.id ? { ...file, status: 'success' as const, progress: 100 } : file,
+            ),
+          )
+        } catch (error) {
+          const message = error instanceof Error ? error.message : t('upload.uploadFailed')
+          setSelectedFiles((prev) =>
+            prev.map((file) =>
+              file.id === selectedFile.id ? { ...file, status: 'error' as const, error: message } : file,
+            ),
+          )
+          setFileError(message)
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : t('upload.uploadFailed')
@@ -147,7 +177,7 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
   return (
     <div className="upload-console">
       <UploadSummary session={session} />
-      <RouteSelector />
+      <RouteSelector selectedProvider={selectedProvider} providers={providers} onSelect={setSelectedProvider} />
       <FilePickerRow onFileSelect={handleFileSelect} canSelectMore={canSelectMore} isUploading={isUploading} />
 
       {showLimitWarning && <div className="inline-alert warning">{t('upload.canUploadOnly', { count: remainingSlots })}</div>}

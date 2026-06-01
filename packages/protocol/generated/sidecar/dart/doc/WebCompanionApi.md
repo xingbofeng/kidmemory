@@ -391,7 +391,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetRecentUploads**
-> webCompanionControllerGetRecentUploads(sessionId)
+> List<WebCompanionControllerGetRecentUploads200ResponseInner> webCompanionControllerGetRecentUploads(sessionId, token, limit)
 
 
 
@@ -401,9 +401,12 @@ import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
 final String sessionId = sessionId_example; // String |
+final String token = token_example; // String |
+final num limit = 8.14; // num |
 
 try {
-    api.webCompanionControllerGetRecentUploads(sessionId);
+    final response = api.webCompanionControllerGetRecentUploads(sessionId, token, limit);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetRecentUploads: $e\n');
 }
@@ -414,10 +417,12 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sessionId** | **String**|  |
+ **token** | **String**|  |
+ **limit** | **num**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**List&lt;WebCompanionControllerGetRecentUploads200ResponseInner&gt;**](WebCompanionControllerGetRecentUploads200ResponseInner.md)
 
 ### Authorization
 
@@ -426,7 +431,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -471,7 +476,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSessionSummary**
-> webCompanionControllerGetSessionSummary(sessionId)
+> WebCompanionControllerGetSessionSummary200Response webCompanionControllerGetSessionSummary(sessionId, token)
 
 
 
@@ -481,9 +486,11 @@ import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
 final String sessionId = sessionId_example; // String |
+final String token = token_example; // String |
 
 try {
-    api.webCompanionControllerGetSessionSummary(sessionId);
+    final response = api.webCompanionControllerGetSessionSummary(sessionId, token);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSessionSummary: $e\n');
 }
@@ -494,10 +501,11 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sessionId** | **String**|  |
+ **token** | **String**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**WebCompanionControllerGetSessionSummary200Response**](WebCompanionControllerGetSessionSummary200Response.md)
 
 ### Authorization
 
@@ -506,7 +514,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

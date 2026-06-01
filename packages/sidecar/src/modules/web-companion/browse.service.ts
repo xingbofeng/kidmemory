@@ -7,6 +7,8 @@ export interface RecentUploadDto {
   childId: string;
   createdAt: string;
   previewUrl: string;
+  description?: string;
+  tags: string[];
 }
 
 export interface AssetDetailDto extends RecentUploadDto {
@@ -151,7 +153,9 @@ export class BrowseService {
       type: row.type,
       childId: row.childId || session.childId,
       createdAt: row.createdAt,
-      previewUrl: this.generatePreviewUrl(row.id)
+      previewUrl: this.generatePreviewUrl(row.id),
+      description: row.description || undefined,
+      tags: this.parseTags(row.tags),
     }));
   }
 

@@ -18,6 +18,8 @@ interface RecentUploadResponse {
   previewUrl?: string
   thumbnailUrl?: string
   createdAt: string
+  description?: string
+  tags?: string[]
 }
 
 export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
@@ -51,30 +53,7 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
   }, [sessionId, sessionToken, t])
 
   const filteredAssets = filterAssets(assets, selectedFilter, searchQuery)
-  const filters: AssetFilter[] = ['all', 'drawing', 'photo']
-  const galleryFillers: Asset[] = [
-    {
-      id: 'gallery-filler-1',
-      name: t('upload.filler1'),
-      type: 'drawing',
-      thumbnailUrl: transparentPixel,
-      createdAt: '',
-    },
-    {
-      id: 'gallery-filler-2',
-      name: t('upload.filler2'),
-      type: 'photo',
-      thumbnailUrl: transparentPixel,
-      createdAt: '',
-    },
-    {
-      id: 'gallery-filler-3',
-      name: t('upload.filler3'),
-      type: 'drawing',
-      thumbnailUrl: transparentPixel,
-      createdAt: '',
-    },
-  ]
+  const filters: AssetFilter[] = ['all', 'drawing', 'photo', 'craft', 'recent']
 
   if (loading) {
     return <div className="loading-card">{t('upload.loading')}</div>
@@ -107,12 +86,10 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
             onClick={() => setSelectedFilter(filter)}
             aria-pressed={selectedFilter === filter}
           >
-            <Icon name={filter === 'all' ? 'grid' : filter === 'drawing' ? 'palette' : 'camera'} />
+            <Icon name={getFilterIcon(filter)} />
             {getFilterLabel(filter)}
           </button>
         ))}
-        <button aria-pressed="false"><Icon name="brush" />{t('upload.handmade')}</button>
-        <button aria-pressed="false"><Icon name="time" />{t('upload.recentUpload')}</button>
       </div>
 
       <div className="section-heading">
@@ -124,8 +101,8 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
         <div className="empty-state">{t('upload.noAssetFound')}</div>
       ) : (
         <div className="asset-grid">
-          {filteredAssets.concat(galleryFillers).slice(0, 9).map((asset, index) => (
-            <article className="asset-card" key={`${asset.id}-${index}`}>
+          {filteredAssets.slice(0, 9).map((asset, index) => (
+            <article className="asset-card" key={`${asset.id}-${index}`} data-testid="asset-card">
               <div className={`asset-art art-${index % 6}`}>
                 <img src={asset.thumbnailUrl || transparentPixel} alt={asset.name} role="img" />
               </div>
@@ -170,9 +147,20 @@ const toAsset = (upload: RecentUploadResponse): Asset => ({
   type: toAssetType(upload.type),
   thumbnailUrl: upload.thumbnailUrl || upload.previewUrl || transparentPixel,
   createdAt: upload.createdAt,
+  description: upload.description,
+  tags: upload.tags,
 })
 
 const toAssetType = (type: string): Asset['type'] => {
-  if (type === 'drawing' || type === 'photo' || type === 'video') return type
-  return 'photo'
+  if (type === 'drawing' || type === 'photo' || type === 'video' || type === 'craft') return type
+  return 'other'
+}
+
+const getFilterIcon = (filter: AssetFilter) => {
+  if (filter === 'all') return 'grid'
+  if (filter === 'drawing') return 'palette'
+  if (filter === 'photo') return 'camera'
+  if (filter === 'craft') return 'brush'
+  if (filter === 'recent') return 'time'
+  return 'image'
 }

@@ -1,7 +1,7 @@
 export interface SelectedFile {
   file: File
   id: string
-  status: 'pending' | 'uploading' | 'success' | 'error'
+  status: 'pending' | 'uploading' | 'committing' | 'success' | 'error'
   progress: number
   error?: string
 }

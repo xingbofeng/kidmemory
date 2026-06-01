@@ -878,10 +878,71 @@
     "/api/web-companion/sessions/{sessionId}": {
       "get": {
         "operationId": "WebCompanionController_getSessionSummary",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "sessionId",
+                    "status",
+                    "child",
+                    "expiresAt",
+                    "maxItems",
+                    "usedItems",
+                    "providers"
+                  ],
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "child": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "displayName"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "maxItems": {
+                      "type": "number"
+                    },
+                    "usedItems": {
+                      "type": "number"
+                    },
+                    "providers": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1062,10 +1123,75 @@
     "/api/web-companion/sessions/{sessionId}/recent": {
       "get": {
         "operationId": "WebCompanionController_getRecentUploads",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "title",
+                      "type",
+                      "childId",
+                      "createdAt",
+                      "previewUrl",
+                      "tags"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "childId": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "previewUrl": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [

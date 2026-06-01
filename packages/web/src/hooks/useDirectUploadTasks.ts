@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../api/errors'
-import { getDirectUploadConfig } from '../api/uploadApi'
+import { getDirectUploadConfig, pullbackDirectUpload } from '../api/uploadApi'
 import {
   createDirectUploadClient,
   validateAddFiles,
@@ -35,12 +35,14 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
   const childId = params.get('childId') ?? ''
   const bucket = params.get('bucket') ?? ''
   const supabaseUrl = params.get('supabaseUrl') ?? ''
+  const token = params.get('token') ?? ''
 
   const missing: string[] = []
   if (!sessionId) missing.push('sessionId')
   if (!childId) missing.push('childId')
   if (!bucket) missing.push('bucket')
   if (!supabaseUrl) missing.push('supabaseUrl')
+  if (!token) missing.push('token')
   if (missing.length > 0) {
     return { ok: false, missing }
   }
@@ -61,6 +63,7 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
       bucket,
       supabaseUrl,
       publicUrl,
+      token,
       sessionPath: `${bucket}/${sessionId}`,
       recommendedClientLimit,
       expiresAtHintSeconds: DEFAULT_EXPIRES_HINT_SECONDS,
@@ -165,6 +168,37 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
               },
             })
             if (uploadResult.ok) {
+              setTasks((prev) =>
+                prev.map((item) =>
+                  item.id === task.id
+                    ? {
+                        ...item,
+                        status: 'importing',
+                        progress: 1,
+                        objectKey: uploadResult.objectKey,
+                      }
+                    : item,
+                ),
+              )
+              const pullback = await pullbackDirectUpload(fullConfig.sessionId, {
+                token: fullConfig.token,
+                objectKeys: [uploadResult.objectKey],
+              })
+              const result = pullback.results.find((item) => item.objectKey === uploadResult.objectKey)
+              if (result?.status !== 'ready') {
+                setTasks((prev) =>
+                  prev.map((item) =>
+                    item.id === task.id
+                      ? {
+                          ...item,
+                          status: 'failed',
+                          errorMessage: result?.errorMessage ?? t('directUpload.taskImportFailed'),
+                        }
+                      : item,
+                  ),
+                )
+                continue
+              }
               setTasks((prev) =>
                 prev.map((item) =>
                   item.id === task.id

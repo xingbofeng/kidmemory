@@ -102,7 +102,7 @@ describe("WebCompanionController", () => {
   const mockCreateSessionResponse: CreateSessionResponse = {
     sessionId: mockSessionId,
     token: mockToken,
-    webUrl: `http://localhost:3000/trusted-upload?sessionId=${mockSessionId}&token=${mockToken}`,
+    webUrl: `http://localhost:3000/app?sessionId=${mockSessionId}&token=${mockToken}`,
     expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     maxItems: 10,
   };

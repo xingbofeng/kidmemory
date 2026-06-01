@@ -76,7 +76,13 @@ describe("BrowseService repository boundary", () => {
 
   test("returns recent uploads inside the session child scope", async () => {
     repository.assets = [
-      assetRecord({ id: "asset_1", title: "测试图片1", childId: "child_456" }),
+      assetRecord({
+        id: "asset_1",
+        title: "测试图片1",
+        childId: "child_456",
+        description: "课堂手作",
+        tags: ["手工", "阳光"],
+      }),
       assetRecord({ id: "asset_2", title: "测试图片2", childId: "child_456" }),
       assetRecord({ id: "asset_3", title: "其他孩子", childId: "other_child" }),
     ];
@@ -91,6 +97,8 @@ describe("BrowseService repository boundary", () => {
     assert.equal(result[0].id, "asset_1");
     assert.equal(result[0].childId, "child_456");
     assert.equal(result[0].previewUrl, "/assets/asset_1/preview");
+    assert.equal(result[0].description, "课堂手作");
+    assert.deepEqual(result[0].tags, ["手工", "阳光"]);
     assert.deepEqual(repository.recentAssetRequests, [
       { childId: "child_456", limit: 10 },
     ]);

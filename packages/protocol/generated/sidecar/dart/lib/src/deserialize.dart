@@ -1,3 +1,6 @@
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response_child.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
 final _regSet = RegExp(r'^Set<(.*)>$');
@@ -17,6 +20,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (valueString == 'true' || valueString == '1') as ReturnType;
         case 'double':
           return (value is double ? value : double.parse('$value')) as ReturnType;
+        case 'WebCompanionControllerGetRecentUploads200ResponseInner':
+          return WebCompanionControllerGetRecentUploads200ResponseInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetSessionSummary200Response':
+          return WebCompanionControllerGetSessionSummary200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetSessionSummary200ResponseChild':
+          return WebCompanionControllerGetSessionSummary200ResponseChild.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:
           RegExpMatch? match;
 

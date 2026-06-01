@@ -46,9 +46,9 @@ describe('upload-session', () => {
 
       mockHttpClient.get.mockResolvedValueOnce(mockSession)
 
-      const result = await fetchUploadSession('test-session')
+      const result = await fetchUploadSession('test-session', 'test-token')
 
-      expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/sessions/test-session')
+      expect(mockHttpClient.get).toHaveBeenCalledWith('/api/web-companion/sessions/test-session?token=test-token')
       expect(result).toEqual({
         ...mockSession,
         maxItems: 50,

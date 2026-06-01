@@ -20,6 +20,7 @@ export function UploadTaskList({ tasks }: UploadTaskListProps) {
           {task.status === 'uploading' && (
             <span className="item-status uploading">{t('directUpload.taskUploading', { percent: Math.round((task.progress || 0) * 100) })}</span>
           )}
+          {task.status === 'importing' && <span className="item-status uploading">{t('directUpload.taskImporting')}</span>}
           {task.status === 'success' && <span className="item-status success">{t('directUpload.taskSuccess')}</span>}
           {task.status === 'failed' && <span className="item-status danger">{task.errorMessage || t('directUpload.taskFailed')}</span>}
         </div>

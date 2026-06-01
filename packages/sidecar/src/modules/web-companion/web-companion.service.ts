@@ -461,7 +461,7 @@ export class WebCompanionService {
   private generateWebUrl(sessionId: string, token: string): string {
     const baseUrl = this.appConfigService.config.sidecar.webCompanionBaseUrl;
     const query = new URLSearchParams({ sessionId, token });
-    return `${baseUrl.replace(/\/$/, "")}/trusted-upload?${query.toString()}`;
+    return `${baseUrl.replace(/\/$/, "")}/app?${query.toString()}`;
   }
 
   private async validateToken(token: string, sessionId: string): Promise<TokenValidationResult> {

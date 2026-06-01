@@ -1,7 +1,13 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { DirectUploadPage } from './DirectUploadPage'
 import type { DirectUploadConfig } from '../../lib/direct-upload-types'
+import { getDirectUploadConfig, pullbackDirectUpload } from '../../api/uploadApi'
+
+vi.mock('../../api/uploadApi', () => ({
+  getDirectUploadConfig: vi.fn(),
+  pullbackDirectUpload: vi.fn(),
+}))
 
 /**
  * Web Companion Direct Upload Page — 组件契约测试。
@@ -21,7 +27,7 @@ function makeSearchParams(overrides: Partial<Record<string, string>> = {}): URLS
     childId: 'child-123',
     bucket: 'web-companion-uploads',
     supabaseUrl: 'https://example.supabase.co',
-    anonKey: 'anon-public-key',
+    token: 'session-token',
   }
   const merged: Record<string, string> = { ...base }
   for (const [k, v] of Object.entries(overrides)) {
@@ -45,6 +51,17 @@ function makeFakeClientFactory() {
 }
 
 describe('DirectUploadPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getDirectUploadConfig).mockResolvedValue({
+      anonKey: 'anon-public-key',
+      bucket: 'web-companion-uploads',
+      supabaseUrl: 'https://example.supabase.co',
+      recommendedClientLimit: 200,
+    })
+    vi.mocked(pullbackDirectUpload).mockResolvedValue({ sessionId: 'wcs_direct_abc', results: [] })
+  })
+
   it('renders childId, session path and risk banner using query params', async () => {
     const { factory } = makeFakeClientFactory()
     render(
@@ -60,7 +77,7 @@ describe('DirectUploadPage', () => {
     expect(screen.getByText(/web-companion-uploads\/wcs_direct_abc/)).toBeInTheDocument()
     // risk banner
     expect(screen.getByText(/Supabase 直传验证版/)).toBeInTheDocument()
-    expect(screen.getByText(/对象需电脑端回拉后才算入库/)).toBeInTheDocument()
+    expect(screen.getByText(/自动通知电脑端入库/)).toBeInTheDocument()
   })
 
   it('shows the default file count "0 / 200" before any selection', async () => {
@@ -96,7 +113,7 @@ describe('DirectUploadPage', () => {
     expect(await screen.findByText(/体验约束/)).toBeInTheDocument()
   })
 
-  it('renders no upload progress rows initially', () => {
+  it('renders no upload progress rows initially', async () => {
     const { factory } = makeFakeClientFactory()
     render(
       <DirectUploadPage
@@ -104,6 +121,63 @@ describe('DirectUploadPage', () => {
         clientFactory={factory}
       />,
     )
+    expect(await screen.findByText(/0\s*\/\s*200/)).toBeInTheDocument()
     expect(screen.queryAllByTestId('direct-upload-row')).toHaveLength(0)
+  })
+
+  it('triggers sidecar pullback after each successful direct upload', async () => {
+    vi.mocked(pullbackDirectUpload).mockResolvedValue({
+      sessionId: 'wcs_direct_abc',
+      results: [{ objectKey: 'fake-object-key', status: 'ready' }],
+    })
+    const { factory } = makeFakeClientFactory()
+    render(
+      <DirectUploadPage
+        searchParams={makeSearchParams()}
+        clientFactory={factory}
+      />,
+    )
+
+    const fileInput = await screen.findByLabelText(/选择图片/)
+    fireEvent.change(fileInput, {
+      target: {
+        files: [new File(['image'], 'pullback.jpg', { type: 'image/jpeg' })],
+      },
+    })
+
+    await waitFor(() => {
+      expect(pullbackDirectUpload).toHaveBeenCalledWith('wcs_direct_abc', {
+        token: 'session-token',
+        objectKeys: ['fake-object-key'],
+      })
+      expect(screen.getByText(/已入库|Imported/)).toBeInTheDocument()
+    })
+  })
+
+  it('does not mark an upload imported when pullback omits the uploaded object', async () => {
+    vi.mocked(pullbackDirectUpload).mockResolvedValue({
+      sessionId: 'wcs_direct_abc',
+      results: [],
+    })
+    const { factory } = makeFakeClientFactory()
+    render(
+      <DirectUploadPage
+        searchParams={makeSearchParams()}
+        clientFactory={factory}
+      />,
+    )
+
+    const fileInput = await screen.findByLabelText(/选择图片/)
+    fireEvent.change(fileInput, {
+      target: {
+        files: [new File(['image'], 'missing-result.jpg', { type: 'image/jpeg' })],
+      },
+    })
+
+    await waitFor(() => {
+      expect(pullbackDirectUpload).toHaveBeenCalled()
+      expect(screen.getByText(/入库失败|Import failed/i)).toBeInTheDocument()
+    })
+    expect(screen.queryByText(/已入库|Imported/)).not.toBeInTheDocument()
   })
 })

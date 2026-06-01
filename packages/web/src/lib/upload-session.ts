@@ -25,9 +25,10 @@ export function getUploadStatus(uploadCount: number, maxUploads: number) {
   }
 }
 
-export async function fetchUploadSession(sessionId: string): Promise<UploadSession> {
+export async function fetchUploadSession(sessionId: string, token?: string): Promise<UploadSession> {
   try {
-    const data = await httpClient.get<UploadSessionResponse>(`/api/web-companion/sessions/${sessionId}`)
+    const query = token ? `?token=${encodeURIComponent(token)}` : ''
+    const data = await httpClient.get<UploadSessionResponse>(`/api/web-companion/sessions/${sessionId}${query}`)
     return {
       sessionId: data.sessionId ?? sessionId,
       token: data.token ?? '',

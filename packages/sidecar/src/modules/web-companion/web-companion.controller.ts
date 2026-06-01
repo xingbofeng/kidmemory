@@ -27,6 +27,7 @@ import {
   Put,
   Query,
 } from "@nestjs/common";
+import { ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { parseDto } from "../../infrastructure/validation/parse-dto.ts";
 
 import { WebCompanionService } from "./web-companion.service.ts";
@@ -60,6 +61,45 @@ import type {
 
 type CreateShareTokenRequestDto = Parameters<ShareTokenService["createShareToken"]>[0];
 type ShareTokenValidationResponseDto = ShareTokenValidation;
+
+const recentUploadResponseSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    required: ["id", "title", "type", "childId", "createdAt", "previewUrl", "tags"],
+    properties: {
+      id: { type: "string" },
+      title: { type: "string" },
+      type: { type: "string" },
+      childId: { type: "string" },
+      createdAt: { type: "string" },
+      previewUrl: { type: "string" },
+      description: { type: "string" },
+      tags: { type: "array", items: { type: "string" } },
+    },
+  },
+};
+
+const sessionSummaryResponseSchema = {
+  type: "object",
+  required: ["sessionId", "status", "child", "expiresAt", "maxItems", "usedItems", "providers"],
+  properties: {
+    sessionId: { type: "string" },
+    status: { type: "string" },
+    child: {
+      type: "object",
+      required: ["id", "displayName"],
+      properties: {
+        id: { type: "string" },
+        displayName: { type: "string" },
+      },
+    },
+    expiresAt: { type: "string" },
+    maxItems: { type: "number" },
+    usedItems: { type: "number" },
+    providers: { type: "object", additionalProperties: true },
+  },
+};
 
 type WebCompanionControllerService = Pick<
   WebCompanionService,
@@ -449,6 +489,8 @@ HttpCode(HttpStatus.CREATED)(proto, "createSession", desc("createSession"));
 Body()(proto, "createSession", 0);
 
 Get("sessions/:sessionId")(proto, "getSessionSummary", desc("getSessionSummary"));
+ApiQuery({ name: "token", required: false, type: String })(proto, "getSessionSummary", desc("getSessionSummary"));
+ApiResponse({ status: 200, schema: sessionSummaryResponseSchema })(proto, "getSessionSummary", desc("getSessionSummary"));
 Param("sessionId")(proto, "getSessionSummary", 0);
 Query("token")(proto, "getSessionSummary", 1);
 
@@ -480,6 +522,9 @@ Param("sessionId")(proto, "submitSession", 0);
 Body()(proto, "submitSession", 1);
 
 Get("sessions/:sessionId/recent")(proto, "getRecentUploads", desc("getRecentUploads"));
+ApiQuery({ name: "token", required: true, type: String })(proto, "getRecentUploads", desc("getRecentUploads"));
+ApiQuery({ name: "limit", required: false, type: Number })(proto, "getRecentUploads", desc("getRecentUploads"));
+ApiResponse({ status: 200, schema: recentUploadResponseSchema })(proto, "getRecentUploads", desc("getRecentUploads"));
 Param("sessionId")(proto, "getRecentUploads", 0);
 Query("token")(proto, "getRecentUploads", 1);
 Query("limit")(proto, "getRecentUploads", 2);

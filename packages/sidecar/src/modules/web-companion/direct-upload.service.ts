@@ -191,18 +191,18 @@ export class DirectUploadService {
     const config = this.appConfig.config;
     const bucket = config.webCompanionDirectUpload.bucket;
     const sessionPath = `${bucket}/${sessionId}`;
+    const token = generateSecureToken();
     const publicUrl = buildPublicUrl(config.webCompanionDirectUpload.publicUrl, {
       sessionId,
       childId,
       bucket,
       supabaseUrl: config.supabaseStorage.url,
+      token,
     });
 
     const expiresAt = new Date(
       Date.now() + config.webCompanionDirectUpload.expiresAtHintSeconds * 1000,
     );
-    const token = generateSecureToken();
-
     this.sessionStore.set(sessionId, { childId, bucket, expiresAt, token });
 
     return {
@@ -399,7 +399,7 @@ export class DirectUploadService {
 
 function buildPublicUrl(
   publicBase: string,
-  params: { sessionId: string; childId: string; bucket: string; supabaseUrl: string },
+  params: { sessionId: string; childId: string; bucket: string; supabaseUrl: string; token: string },
 ): string {
   const base = trimTrailingSlash(publicBase);
   const query = new URLSearchParams({
@@ -407,6 +407,7 @@ function buildPublicUrl(
     childId: params.childId,
     bucket: params.bucket,
     supabaseUrl: params.supabaseUrl,
+    token: params.token,
   });
   return `${base}/direct-upload?${query.toString()}`;
 }

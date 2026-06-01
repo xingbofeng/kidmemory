@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response.dart';
 
 class WebCompanionApi {
 
@@ -448,6 +450,8 @@ class WebCompanionApi {
   ///
   /// Parameters:
   /// * [sessionId]
+  /// * [token]
+  /// * [limit]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -455,10 +459,12 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<WebCompanionControllerGetRecentUploads200ResponseInner>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetRecentUploads({
+  Future<Response<List<WebCompanionControllerGetRecentUploads200ResponseInner>>> webCompanionControllerGetRecentUploads({
     required String sessionId,
+    required String token,
+    num? limit,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -479,15 +485,46 @@ class WebCompanionApi {
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      r'token': token,
+      if (limit != null) r'limit': limit,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<WebCompanionControllerGetRecentUploads200ResponseInner>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<WebCompanionControllerGetRecentUploads200ResponseInner>, WebCompanionControllerGetRecentUploads200ResponseInner>(rawData, 'List<WebCompanionControllerGetRecentUploads200ResponseInner>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<WebCompanionControllerGetRecentUploads200ResponseInner>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerGetSessionDetail
@@ -542,6 +579,7 @@ class WebCompanionApi {
   ///
   /// Parameters:
   /// * [sessionId]
+  /// * [token]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -549,10 +587,11 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [WebCompanionControllerGetSessionSummary200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSessionSummary({
+  Future<Response<WebCompanionControllerGetSessionSummary200Response>> webCompanionControllerGetSessionSummary({
     required String sessionId,
+    String? token,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -573,15 +612,45 @@ class WebCompanionApi {
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (token != null) r'token': token,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    WebCompanionControllerGetSessionSummary200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSessionSummary200Response, WebCompanionControllerGetSessionSummary200Response>(rawData, 'WebCompanionControllerGetSessionSummary200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WebCompanionControllerGetSessionSummary200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerGetSharedAssets

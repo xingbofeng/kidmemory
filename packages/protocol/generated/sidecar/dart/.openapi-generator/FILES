@@ -12,6 +12,9 @@ doc/LanReceiverApi.md
 doc/SecurityMonitorApi.md
 doc/StreamableHttpApi.md
 doc/WebCompanionApi.md
+doc/WebCompanionControllerGetRecentUploads200ResponseInner.md
+doc/WebCompanionControllerGetSessionSummary200Response.md
+doc/WebCompanionControllerGetSessionSummary200ResponseChild.md
 lib/kidmemory_protocol.dart
 lib/src/api.dart
 lib/src/api/agent_config_api.dart
@@ -29,6 +32,9 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/deserialize.dart
+lib/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart
+lib/src/model/web_companion_controller_get_session_summary200_response.dart
+lib/src/model/web_companion_controller_get_session_summary200_response_child.dart
 pubspec.yaml
 test/agent_config_api_test.dart
 test/config_api_test.dart
@@ -39,3 +45,6 @@ test/lan_receiver_api_test.dart
 test/security_monitor_api_test.dart
 test/streamable_http_api_test.dart
 test/web_companion_api_test.dart
+test/web_companion_controller_get_recent_uploads200_response_inner_test.dart
+test/web_companion_controller_get_session_summary200_response_child_test.dart
+test/web_companion_controller_get_session_summary200_response_test.dart

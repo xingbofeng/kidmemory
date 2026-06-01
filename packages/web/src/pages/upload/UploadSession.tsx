@@ -6,10 +6,11 @@ import { Icon } from '../../components/ui/Icon'
 
 interface UploadSessionProps {
   sessionId: string
+  sessionToken?: string
   onSessionChange?: (session: UploadSessionType | null) => void
 }
 
-export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps) {
+export function UploadSession({ sessionId, sessionToken, onSessionChange }: UploadSessionProps) {
   const { t } = useTranslation()
   const [session, setSession] = useState<UploadSessionType | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,7 +26,7 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
       onSessionChange?.(null)
 
       try {
-        const sessionData = await fetchUploadSession(sessionId)
+        const sessionData = await fetchUploadSession(sessionId, sessionToken)
         if (cancelled) return
         setSession(sessionData)
         onSessionChange?.(sessionData)
@@ -44,7 +45,7 @@ export function UploadSession({ sessionId, onSessionChange }: UploadSessionProps
     return () => {
       cancelled = true
     }
-  }, [onSessionChange, sessionId, t])
+  }, [onSessionChange, sessionId, sessionToken, t])
 
   if (loading) {
     return <div className="session-card loading-card">{t('upload.loading')}</div>

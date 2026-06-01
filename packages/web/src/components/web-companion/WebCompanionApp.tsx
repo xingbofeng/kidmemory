@@ -46,6 +46,7 @@ export function WebCompanionApp({ sessionId, sessionToken, recentBooks, onResetS
         return (
           <ConnectView
             sessionId={sessionId}
+            sessionToken={sessionToken}
             activeSession={activeSession}
             onSessionChange={handleSessionChange}
             onStartUpload={handleStartUpload}

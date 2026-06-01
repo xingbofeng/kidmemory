@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { DirectUploadPage } from './pages/upload/DirectUploadPage'
@@ -6,30 +5,17 @@ import { TrustedUploadPage } from './pages/upload/TrustedUploadPage'
 import { ShareBrowsePage } from './pages/share/ShareBrowsePage'
 import { ShareBookPage } from './pages/share/ShareBookPage'
 import { WebCompanionApp, Book } from './components/web-companion/WebCompanionApp'
-import { createUploadSession } from './api/uploadApi'
 import LandingPage from './pages/landing/LandingPage'
 import './i18n'
 import './App.css'
 import './styles/share.css'
 import './styles/landing.css'
 
-const DEFAULT_CHILD_ID = 'sample-child-001'
-
-function SessionLoading() {
-  const { t } = useTranslation()
-  return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '24px' }}>
-      <div className="session-card loading-card">{t('app.creatingSession')}</div>
-    </div>
-  )
-}
-
 function WebCompanionRoute() {
   const { t } = useTranslation()
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [sessionToken, setSessionToken] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
+  const sessionId = searchParams.get('sessionId')
+  const sessionToken = searchParams.get('token')
   const recentBooks: Book[] = [
     {
       title: t('webCompanion.sampleBook1Title'),
@@ -54,33 +40,11 @@ function WebCompanionRoute() {
     },
   ]
 
-  const createSession = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await createUploadSession(DEFAULT_CHILD_ID)
-      setSessionId(response.sessionId)
-      setSessionToken(response.token ?? null)
-    } catch (err) {
-      setSessionId(null)
-      setSessionToken(null)
-      setError(err instanceof Error ? err.message : String(err))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void createSession()
-  }, [createSession])
-
-  if (loading || !sessionId || !sessionToken) {
-    return error ? (
+  if (!sessionId || !sessionToken) {
+    return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '24px' }}>
-        <div className="session-card error-card">{error}</div>
+        <div className="session-card error-card">{t('app.missingTrustedParams')}</div>
       </div>
-    ) : (
-      <SessionLoading />
     )
   }
 
@@ -89,7 +53,7 @@ function WebCompanionRoute() {
       sessionId={sessionId}
       sessionToken={sessionToken}
       recentBooks={recentBooks}
-      onResetSession={createSession}
+      onResetSession={() => window.location.reload()}
     />
   )
 }

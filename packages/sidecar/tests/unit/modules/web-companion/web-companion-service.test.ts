@@ -231,7 +231,7 @@ describe("WebCompanionService", () => {
       assert.equal(response.token.length, 64);
       assert.ok(response.webUrl.includes(response.sessionId));
       assert.ok(response.webUrl.includes(response.token));
-      assert.ok(response.webUrl.includes("/trusted-upload?"));
+      assert.ok(response.webUrl.includes("/app?"));
       assert.equal(response.maxItems, DEFAULT_CONFIG.MAX_ITEMS_PER_SESSION);
       assert.ok(new Date(response.expiresAt) > new Date());
       assert.ok(repository.sessions.has(response.sessionId));

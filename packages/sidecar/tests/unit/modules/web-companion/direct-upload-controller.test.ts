@@ -266,6 +266,8 @@ test(
     assert.match(response.publicUrl, /^https:\/\/kidmemory-companion\.example\.com\/direct-upload\?/);
     assert.match(response.publicUrl, /sessionId=wcs_direct_/);
     assert.match(response.publicUrl, /childId=child_test/);
+    assert.match(response.publicUrl, /token=/);
+    assert.equal(new URL(response.publicUrl).searchParams.get("token"), response.token);
     assert.equal(response.recommendedClientLimit, 200);
     assert.equal(response.expiresAtHintSeconds, 3 * 60 * 60);
 

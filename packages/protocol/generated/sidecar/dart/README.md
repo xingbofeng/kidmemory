@@ -150,6 +150,9 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [WebCompanionControllerGetRecentUploads200ResponseInner](doc/WebCompanionControllerGetRecentUploads200ResponseInner.md)
+ - [WebCompanionControllerGetSessionSummary200Response](doc/WebCompanionControllerGetSessionSummary200Response.md)
+ - [WebCompanionControllerGetSessionSummary200ResponseChild](doc/WebCompanionControllerGetSessionSummary200ResponseChild.md)
 
 
 ## Documentation For Authorization

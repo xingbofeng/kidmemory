@@ -1,21 +1,51 @@
 import { useTranslation } from 'react-i18next'
 import { Icon } from '../ui/Icon'
+import type { UploadProvider } from '../../types/trustedUpload'
 
-export function RouteSelector() {
+interface RouteSelectorProps {
+  selectedProvider: UploadProvider
+  providers: Record<UploadProvider, { available: boolean }>
+  onSelect: (provider: UploadProvider) => void
+}
+
+export function RouteSelector({ selectedProvider, providers, onSelect }: RouteSelectorProps) {
   const { t } = useTranslation()
+  const options: Array<{
+    provider: UploadProvider
+    icon: 'link' | 'cloud-upload'
+    title: string
+    description: string
+  }> = [
+    {
+      provider: 'lan',
+      icon: 'link',
+      title: t('upload.lanDirect'),
+      description: providers.lan.available ? t('upload.lanFast') : t('upload.routeUnavailable'),
+    },
+    {
+      provider: 'supabase',
+      icon: 'cloud-upload',
+      title: t('upload.publicDirect'),
+      description: providers.supabase.available ? t('upload.backupAvailable') : t('upload.routeUnavailable'),
+    },
+  ]
 
   return (
     <div className="route-selector" aria-label={t('upload.routeAria')}>
-      <button className="selected">
-        <Icon name="link" />
-        <strong>{t('upload.lanDirect')}</strong>
-        <span>{t('upload.lanFast')}</span>
-      </button>
-      <button>
-        <Icon name="cloud-upload" />
-        <strong>{t('upload.publicDirect')}</strong>
-        <span>{t('upload.backupPending')}</span>
-      </button>
+      {options.map((option) => (
+        <button
+          key={option.provider}
+          type="button"
+          className={selectedProvider === option.provider ? 'selected' : ''}
+          disabled={!providers[option.provider].available}
+          aria-pressed={selectedProvider === option.provider}
+          onClick={() => onSelect(option.provider)}
+        >
+          <Icon name={option.icon} />
+          <strong>{option.title}</strong>
+          <span>{option.description}</span>
+        </button>
+      ))}
     </div>
   )
 }

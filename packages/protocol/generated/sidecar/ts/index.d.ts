@@ -2171,7 +2171,9 @@ export interface operations {
     };
     WebCompanionController_getSessionSummary: {
         parameters: {
-            query?: never;
+            query?: {
+                token?: string;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2184,7 +2186,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionId: string;
+                        status: string;
+                        child: {
+                            id: string;
+                            displayName: string;
+                        };
+                        expiresAt: string;
+                        maxItems: number;
+                        usedItems: number;
+                        providers: {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
             };
         };
     };
@@ -2306,7 +2323,10 @@ export interface operations {
     };
     WebCompanionController_getRecentUploads: {
         parameters: {
-            query?: never;
+            query: {
+                token: string;
+                limit?: number;
+            };
             header?: never;
             path: {
                 sessionId: string;
@@ -2319,7 +2339,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        type: string;
+                        childId: string;
+                        createdAt: string;
+                        previewUrl: string;
+                        description?: string;
+                        tags: string[];
+                    }[];
+                };
             };
         };
     };

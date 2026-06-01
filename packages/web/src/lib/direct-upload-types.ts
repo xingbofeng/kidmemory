@@ -22,6 +22,7 @@ export interface DirectUploadConfig {
   anonKey: string
   /** Web Companion 静态部署对外公开 URL（用于二维码或回链）。 */
   publicUrl: string
+  token: string
   /** 体验约束的客户端张数上限，sidecar 默认下发 200。 */
   recommendedClientLimit: number
   /** 体验约束的会话提示有效期（秒），仅前端展示用。 */
@@ -33,6 +34,7 @@ export interface DirectUploadConfig {
 export type DirectUploadFileStatus =
   | 'pending'
   | 'uploading'
+  | 'importing'
   | 'success'
   | 'failed'
 

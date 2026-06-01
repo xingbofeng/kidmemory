@@ -792,3 +792,22 @@ The following entries were moved out of the main implementation notes once it ap
 
 **旧决策项**：
 - 不再待用户决策：是否继续清理 Web Companion controller 中 `Browse endpoints`、`Share token endpoints` 等分段注释？
+
+## May 31 Main-File Cleanup Notes Archive - 2026-06-01
+
+The following detailed 2026-05-31 entries were moved out of `implementation-notes.md` to keep the active notes file under the maintenance threshold:
+
+- Sidecar Web Companion Local DTO Boundary Pass
+- Sidecar Generated Schema DTO Cleanup Pass
+- Agent Runtime MCP Adapter Single-Pass Pass
+- Cloud API Upload Item Mapper Dedup Pass
+- Cloud API Share Token Invalid Response Helper Pass
+- Agent Runtime Path Policy Input Reader Pass
+- Cloud API Sync Service Comment Cleanup Pass
+- Web API Comment Cleanup Pass
+- Sidecar Web Companion Comment Cleanup Pass
+- Sidecar Agent Config Comment Cleanup Pass
+- Sidecar Infrastructure Simplification Pass
+- Sidecar Bootstrap Comment Cleanup Pass
+
+这些条目的共同结论是：空 generated sidecar schemas 不作为运行时 DTO 来源；重复 mapper、错误判断、env/url/time helper、fake SQL 测试替身和复述性注释只在有测试或架构 guard 保护的边界内清理；真实外部服务调用需要在最终汇报中单独区分。

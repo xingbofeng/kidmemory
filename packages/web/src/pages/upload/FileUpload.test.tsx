@@ -60,6 +60,32 @@ describe('FileUpload', () => {
     vi.mocked(uploadApi.commitUploadItem).mockResolvedValue(undefined)
   })
 
+  it('shows committing state after storage upload and before commit succeeds', async () => {
+    let resolveCommit: (() => void) | undefined
+    vi.mocked(uploadApi.commitUploadItem).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveCommit = resolve
+        }),
+    )
+    render(<FileUpload session={mockSession} />)
+
+    const fileInput = screen.getByLabelText(/选择图片/)
+    const file = new File(['image'], 'commit-pending.jpg', { type: 'image/jpeg' })
+
+    fireEvent.change(fileInput, { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: /开始上传/ }))
+
+    expect(await screen.findByText(/正在提交/)).toBeInTheDocument()
+    expect(screen.queryByText(/上传成功/)).not.toBeInTheDocument()
+
+    resolveCommit?.()
+
+    await waitFor(() => {
+      expect(screen.getByText(/上传成功/)).toBeInTheDocument()
+    })
+  })
+
   it('allows selecting multiple files', async () => {
     render(<FileUpload session={mockSession} />)
 

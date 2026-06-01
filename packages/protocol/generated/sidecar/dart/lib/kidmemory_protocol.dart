@@ -18,3 +18,7 @@ export 'package:kidmemory_protocol/src/api/lan_receiver_api.dart';
 export 'package:kidmemory_protocol/src/api/security_monitor_api.dart';
 export 'package:kidmemory_protocol/src/api/streamable_http_api.dart';
 export 'package:kidmemory_protocol/src/api/web_companion_api.dart';
+
+export 'package:kidmemory_protocol/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart';
+export 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response.dart';
+export 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response_child.dart';
