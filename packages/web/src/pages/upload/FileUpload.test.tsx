@@ -2,10 +2,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { FileUpload } from './FileUpload'
 import * as uploadApi from '../../api/uploadApi'
+import { waitForUploadItemReady } from '../../lib/upload-item-ready'
 
 vi.mock('../../api/uploadApi', () => ({
   createUploadItems: vi.fn(),
   commitUploadItem: vi.fn(),
+}))
+
+vi.mock('../../lib/upload-item-ready', () => ({
+  waitForUploadItemReady: vi.fn(),
 }))
 
 describe('FileUpload', () => {
@@ -58,14 +63,22 @@ describe('FileUpload', () => {
       }],
     })
     vi.mocked(uploadApi.commitUploadItem).mockResolvedValue(undefined)
+    vi.mocked(waitForUploadItemReady).mockResolvedValue({ status: 'ready' })
   })
 
-  it('shows committing state after storage upload and before commit succeeds', async () => {
+  it('keeps the /app upload in committing state until sidecar detail reports READY', async () => {
     let resolveCommit: (() => void) | undefined
     vi.mocked(uploadApi.commitUploadItem).mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
           resolveCommit = resolve
+        }),
+    )
+    let resolveReady: (() => void) | undefined
+    vi.mocked(waitForUploadItemReady).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveReady = () => resolve({ status: 'ready' })
         }),
     )
     render(<FileUpload session={mockSession} />)
@@ -77,12 +90,18 @@ describe('FileUpload', () => {
     fireEvent.click(screen.getByRole('button', { name: /开始上传/ }))
 
     expect(await screen.findByText(/正在提交/)).toBeInTheDocument()
-    expect(screen.queryByText(/已上传，等待入库/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/已入库/)).not.toBeInTheDocument()
 
     resolveCommit?.()
+    await waitFor(() => {
+      expect(waitForUploadItemReady).toHaveBeenCalledWith('test-session-123', 'test-token-456', 'item-1')
+      expect(screen.getByText(/正在提交/)).toBeInTheDocument()
+    })
+
+    resolveReady?.()
 
     await waitFor(() => {
-      expect(screen.getByText(/已上传，等待入库/)).toBeInTheDocument()
+      expect(screen.getByText(/已入库/)).toBeInTheDocument()
     })
   })
 
@@ -114,7 +133,7 @@ describe('FileUpload', () => {
     expect(await screen.findByText(/正在上传/)).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText(/已上传，等待入库/)).toBeInTheDocument()
+      expect(screen.getByText(/已入库/)).toBeInTheDocument()
       expect(uploadButton).not.toBeDisabled()
     })
   })
@@ -183,7 +202,7 @@ describe('FileUpload', () => {
     const uploadButton = screen.getByRole('button', { name: /开始上传/ })
     fireEvent.click(uploadButton)
 
-    expect(await screen.findByText(/已上传，等待入库/, {}, { timeout: 3000 })).toBeInTheDocument()
+    expect(await screen.findByText(/已入库/, {}, { timeout: 3000 })).toBeInTheDocument()
     expect(uploadButton).not.toBeDisabled()
   })
 

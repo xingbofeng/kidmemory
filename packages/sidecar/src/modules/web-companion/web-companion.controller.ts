@@ -489,7 +489,7 @@ export class WebCompanionController {
   ): Promise<RecentUploadDto[]> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       const parsedLimit = limit ? parseInt(limit, 10) : undefined;
@@ -510,7 +510,7 @@ export class WebCompanionController {
   ): Promise<AssetDetailDto> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       return await this.browseService.getAssetDetails({
@@ -530,7 +530,7 @@ export class WebCompanionController {
   ): Promise<BookSummaryDto[]> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       return await this.browseService.getBooksList({
@@ -550,7 +550,7 @@ export class WebCompanionController {
   ): Promise<BookDetailDto> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       return await this.browseService.getBookDetails({
@@ -570,7 +570,7 @@ export class WebCompanionController {
   ): Promise<ShareTokenDto> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       return await this.shareTokenService.createShareToken({
@@ -590,7 +590,7 @@ export class WebCompanionController {
   ): Promise<{ success: boolean }> {
     try {
       if (!token) {
-        throw new Error('Authorization token required');
+        throw tokenRequiredError();
       }
 
       await this.shareTokenService.revokeShareToken(shareTokenId, sessionId, token);
@@ -684,7 +684,15 @@ export class WebCompanionController {
   private handleShareError(error: unknown): never {
     if (error instanceof HttpException) throw error;
 
+    const code = error instanceof Error ? (error as Error & { code?: string }).code : undefined;
     const message = error instanceof Error ? error.message : "An unexpected error occurred";
+
+    if (code === "TOKEN_REQUIRED" || message.includes('Authorization token required')) {
+      throw new HttpException(
+        { code: "TOKEN_REQUIRED", message },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     if (message.includes('Session not found') || message.includes('token invalid')) {
       throw new HttpException(
@@ -714,18 +722,17 @@ export class WebCompanionController {
       );
     }
 
-    if (message.includes('Authorization token required')) {
-      throw new HttpException(
-        { error: 'bad_request', message },
-        HttpStatus.BAD_REQUEST
-      );
-    }
-
     throw new HttpException(
       { error: 'internal_error', message },
       HttpStatus.INTERNAL_SERVER_ERROR
     );
   }
+}
+
+function tokenRequiredError(): Error & { code: string } {
+  return Object.assign(new Error("Authorization token required"), {
+    code: "TOKEN_REQUIRED",
+  });
 }
 
 // ---- 手动注册 NestJS 装饰器（避免 @ 语法）----

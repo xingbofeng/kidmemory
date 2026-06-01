@@ -197,6 +197,59 @@ describe('Direct Upload security', () => {
     restartedService.destroy();
   });
 
+  it('uses the bucket persisted with the session when pulling back after config changes', async () => {
+    const sessionStore = createPersistentSessionStore();
+    const listBuckets: string[] = [];
+    const downloadBuckets: string[] = [];
+    const service = new DirectUploadService({
+      ...makeMinimalDeps({
+        appConfig: {
+          config: {
+            supabaseStorage: {
+              url: 'https://test.supabase.co',
+              anonKey: 'anon-key',
+              serviceRoleKey: 'service-key',
+            },
+            webCompanionDirectUpload: {
+              enabled: true,
+              bucket: 'current-config-bucket',
+              publicUrl: 'http://localhost:3001',
+              recommendedClientLimit: 200,
+              expiresAtHintSeconds: 10800,
+            },
+          },
+        },
+        sessionStore,
+        storage: {
+          async listObjects({ bucket, prefix }) {
+            listBuckets.push(bucket);
+            return [{
+              objectKey: `${prefix}photo.jpg`,
+              size: 12,
+              contentType: 'image/jpeg',
+              lastModified: new Date().toISOString(),
+            }];
+          },
+          async downloadObject({ bucket }) {
+            downloadBuckets.push(bucket);
+            return { body: Buffer.from('image'), contentType: 'image/jpeg', size: 5 };
+          },
+        },
+      }),
+    });
+    const session = await service.createSession({ childId: 'child-1' });
+    const persisted = await sessionStore.findBySessionId(session.sessionId);
+    assert.ok(persisted);
+    persisted.bucket = 'persisted-session-bucket';
+
+    const result = await service.pullback(session.sessionId, { token: session.token });
+
+    assert.equal(result.sessionId, session.sessionId);
+    assert.deepEqual(listBuckets, ['persisted-session-bucket']);
+    assert.deepEqual(downloadBuckets, ['persisted-session-bucket']);
+    service.destroy();
+  });
+
   it('pullback without token is rejected', async () => {
     const service = new DirectUploadService(makeMinimalDeps());
     await service.createSession({ childId: 'child-1' });

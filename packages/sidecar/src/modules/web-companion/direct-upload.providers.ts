@@ -39,6 +39,7 @@ interface DirectUploadPrismaClient {
         status: string;
         expiresAt: Date;
         maxItems: number;
+        directUploadBucket?: string | null;
       };
     }): Promise<UploadSessionRow>;
     findUnique(input: { where: { id: string } }): Promise<UploadSessionRow | null>;
@@ -84,6 +85,7 @@ interface UploadSessionRow {
   status: string;
   expiresAt: Date;
   maxItems: number;
+  directUploadBucket?: string | null;
 }
 
 // ---- DirectUploadStorageGateway --------------------------------------------
@@ -221,33 +223,37 @@ export class DatasetServiceDirectUploadAssetGateway implements DirectUploadAsset
     const safeName = sanitizeFilename(objectKey.split("/").pop() || "upload.jpg");
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-direct-upload-"));
     const tempPath = path.join(tempDir, safeName);
-    await fs.writeFile(tempPath, body);
-    void contentType; // dataset import infers from file content
+    try {
+      await fs.writeFile(tempPath, body);
+      void contentType; // dataset import infers from file content
 
-    const result = await this.dataset.importAssets({
-      childId,
-      paths: [tempPath],
-      recursive: false,
-    });
-    const imported = result.imported?.[0] as
-      | { id?: string; assetId?: string; path?: string; imagePath?: string }
-      | undefined;
-    if (!imported) {
-      throw new Error(
-        `dataset.importAssets returned no imported entry for objectKey=${objectKey}`,
-      );
+      const result = await this.dataset.importAssets({
+        childId,
+        paths: [tempPath],
+        recursive: false,
+      });
+      const imported = result.imported?.[0] as
+        | { id?: string; assetId?: string; path?: string; imagePath?: string }
+        | undefined;
+      if (!imported) {
+        throw new Error(
+          `dataset.importAssets returned no imported entry for objectKey=${objectKey}`,
+        );
+      }
+      const assetId = imported.assetId || imported.id;
+      const localPath = imported.imagePath || imported.path || tempPath;
+      if (!assetId) {
+        throw new Error(
+          `dataset.importAssets returned an imported entry without id for objectKey=${objectKey}`,
+        );
+      }
+      return {
+        assetId,
+        localPath,
+      };
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
     }
-    const assetId = imported.assetId || imported.id;
-    const localPath = imported.imagePath || imported.path || tempPath;
-    if (!assetId) {
-      throw new Error(
-        `dataset.importAssets returned an imported entry without id for objectKey=${objectKey}`,
-      );
-    }
-    return {
-      assetId,
-      localPath,
-    };
   }
 }
 
@@ -263,6 +269,9 @@ export class PrismaDirectUploadSessionStore implements DirectUploadSessionStore 
   }
 
   async insert(session: DirectUploadSessionStoreEntry): Promise<void> {
+    if (!session.sessionId.startsWith("wcs_direct_")) {
+      throw new Error("Direct upload session id must start with wcs_direct_");
+    }
     await this.prisma.uploadSession.create({
       data: {
         id: session.sessionId,
@@ -271,6 +280,7 @@ export class PrismaDirectUploadSessionStore implements DirectUploadSessionStore 
         status: "active",
         expiresAt: session.expiresAt,
         maxItems: this.maxItems,
+        directUploadBucket: session.bucket,
       },
     });
   }
@@ -282,13 +292,14 @@ export class PrismaDirectUploadSessionStore implements DirectUploadSessionStore 
     return {
       sessionId: session.id,
       childId: session.childId,
-      bucket: "",
+      bucket: session.directUploadBucket ?? "",
       expiresAt: session.expiresAt,
       tokenHash: session.tokenHash,
     };
   }
 
   async delete(sessionId: string): Promise<void> {
+    if (!sessionId.startsWith("wcs_direct_")) return;
     await this.prisma.uploadSession.deleteMany({ where: { id: sessionId } });
   }
 

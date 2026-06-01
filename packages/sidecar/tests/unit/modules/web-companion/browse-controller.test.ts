@@ -112,7 +112,7 @@ function assertHttpError(error: unknown, expectedStatus: number, expectedError: 
   const response = error.getResponse();
   assert.equal(typeof response, "object");
   assert.notEqual(response, null);
-  assert.equal((response as { error?: string }).error, expectedError);
+  assert.equal((response as { error?: string; code?: string }).error ?? (response as { code?: string }).code, expectedError);
   return true;
 }
 
@@ -155,7 +155,7 @@ describe("WebCompanionController browse endpoints", () => {
       await assert.rejects(
         () => controller.getRecentUploads("session_123"),
         (error: unknown) =>
-          assertHttpError(error, HttpStatus.BAD_REQUEST, "bad_request"),
+          assertHttpError(error, HttpStatus.UNAUTHORIZED, "TOKEN_REQUIRED"),
       );
     });
   });

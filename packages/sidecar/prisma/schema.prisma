@@ -236,6 +236,7 @@ model UploadSession {
   status      String
   expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
   maxItems    Int      @default(200) @map("max_items")
+  directUploadBucket String?  @map("direct_upload_bucket")
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   closedAt    DateTime? @map("closed_at") @db.Timestamptz(6)

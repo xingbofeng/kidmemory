@@ -268,7 +268,7 @@
     "uploading": "上传中",
     "committing": "正在提交",
     "uploadSuccess": "上传成功",
-    "uploadAccepted": "已上传，等待入库",
+    "uploadAccepted": "已入库",
     "emptyUploadList": "选择图片后会出现在这里",
     "summaryCount": "<1>{{count}}</1> / {{max}} 张",
     "summaryRemaining": "会话剩余 <1>{{time}}</1>",

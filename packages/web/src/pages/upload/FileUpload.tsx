@@ -11,6 +11,7 @@ import { UploadProgress } from '../../components/file-upload/UploadProgress'
 import { commitUploadItem, createUploadItems } from '../../api/uploadApi'
 import type { UploadProvider } from '../../types/trustedUpload'
 import { uploadFileWithSignedUrl } from '../../lib/signed-upload'
+import { waitForUploadItemReady } from '../../lib/upload-item-ready'
 
 interface FileUploadProps {
   session: UploadSession
@@ -146,6 +147,18 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
             sizeBytes: selectedFile.file.size,
             contentType: selectedFile.file.type || 'application/octet-stream',
           })
+
+          const ready = await waitForUploadItemReady(session.sessionId, resolvedToken, item.uploadItemId)
+          if (ready.status !== 'ready') {
+            setSelectedFiles((prev) =>
+              prev.map((file) =>
+                file.id === selectedFile.id
+                  ? { ...file, status: 'error' as const, error: ready.errorMessage ?? t('directUpload.taskImportFailed') }
+                  : file,
+              ),
+            )
+            continue
+          }
 
           setSelectedFiles((prev) =>
             prev.map((file) =>

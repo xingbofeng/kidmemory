@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getUploadSession, getUploadSessionDetail, createUploadItems, commitUploadItem } from '../api/uploadApi'
+import { getUploadSession, createUploadItems, commitUploadItem } from '../api/uploadApi'
 import { sessionProvidersOf, type SessionSummary, type UploadProvider, type FileTask } from '../types/trustedUpload'
 import { nextTaskId, formatRemaining } from '../utils/trustedUploadUtils'
 import { resolveTrustedUploadErrorMessage } from './trustedUploadError'
 import { uploadFileWithSignedUrl } from '../lib/signed-upload'
+import { waitForUploadItemReady } from '../lib/upload-item-ready'
 
 interface UseTrustedUploadSessionProps {
   sessionId: string
@@ -188,24 +189,4 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
     handleFileSelect,
     handleClearTasks,
   }
-}
-
-async function waitForUploadItemReady(
-  sessionId: string,
-  token: string,
-  uploadItemId: string,
-): Promise<{ status: string; errorMessage?: string | null }> {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    const detail = await getUploadSessionDetail(sessionId, token)
-    const item = detail.items.find((candidate) => candidate.uploadItemId === uploadItemId)
-    if (item?.status === 'ready' || item?.status === 'failed') {
-      return { status: item.status, errorMessage: item.errorCode }
-    }
-    await delay(1000)
-  }
-  return { status: 'failed', errorMessage: 'Timed out waiting for local import.' }
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
 }

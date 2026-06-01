@@ -268,7 +268,7 @@
     "uploading": "Uploading",
     "committing": "Committing",
     "uploadSuccess": "Uploaded",
-    "uploadAccepted": "Uploaded, waiting for import",
+    "uploadAccepted": "Imported",
     "emptyUploadList": "Selected images will appear here",
     "summaryCount": "<1>{{count}}</1> / {{max}} items",
     "summaryRemaining": "Remaining <1>{{time}}</1>",

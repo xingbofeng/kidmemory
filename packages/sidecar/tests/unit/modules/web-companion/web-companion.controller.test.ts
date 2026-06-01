@@ -390,4 +390,46 @@ describe("WebCompanionController", () => {
       );
     });
   });
+
+  describe("Browse and share authorization", () => {
+    test("should reject browse endpoints without token as unauthorized", async () => {
+      await assert.rejects(
+        async () => controller.getRecentUploads(mockSessionId),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+
+      await assert.rejects(
+        async () => controller.getAssetDetails(mockSessionId, "asset_123"),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+
+      await assert.rejects(
+        async () => controller.getBooksList(mockSessionId),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+
+      await assert.rejects(
+        async () => controller.getBookDetails(mockSessionId, "book_123"),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+    });
+
+    test("should reject share management endpoints without token as unauthorized", async () => {
+      await assert.rejects(
+        async () => controller.createShareToken(mockSessionId, { sessionId: mockSessionId } as never),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+
+      await assert.rejects(
+        async () => controller.revokeShareToken(mockSessionId, "share_token_123"),
+        (error: unknown) =>
+          assertHttpError(error, 401, WebCompanionErrorCode.TOKEN_REQUIRED, "Authorization token required"),
+      );
+    });
+  });
 });

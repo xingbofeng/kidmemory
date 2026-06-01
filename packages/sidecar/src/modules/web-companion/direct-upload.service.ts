@@ -293,7 +293,6 @@ export class DirectUploadService {
     request?: Partial<PullbackDirectUploadRequest> | null,
   ): Promise<PullbackDirectUploadResponse> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
-    const bucket = this.appConfig.config.webCompanionDirectUpload.bucket;
     if (!request || typeof request !== "object" || typeof request.token !== "string") {
       const error = new Error("Direct upload token is required for pullback.");
       (error as Error & { code?: string }).code = "token_required";
@@ -302,6 +301,7 @@ export class DirectUploadService {
     const session = await this.validateSessionToken(sessionId, request.token);
 
     const childId = session.childId;
+    const bucket = session.bucket;
 
     const remoteObjects = await this.storage.listObjects({
       bucket,
