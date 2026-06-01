@@ -1727,7 +1727,45 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "title",
+                      "childId",
+                      "createdAt",
+                      "status",
+                      "previewUrl"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "childId": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "previewUrl": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1760,7 +1798,48 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title",
+                    "childId",
+                    "createdAt",
+                    "status",
+                    "previewUrl"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "childId": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "previewUrl": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "pageCount": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1799,9 +1878,105 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "resourceType"
+                ],
+                "properties": {
+                  "childId": {
+                    "type": "string"
+                  },
+                  "resourceType": {
+                    "type": "string",
+                    "enum": [
+                      "child_assets",
+                      "specific_book",
+                      "asset_collection"
+                    ]
+                  },
+                  "resourceId": {
+                    "type": "string"
+                  },
+                  "expiresInHours": {
+                    "type": "number"
+                  },
+                  "maxAccessCount": {
+                    "type": "number"
+                  },
+                  "accessType": {
+                    "type": "string",
+                    "enum": [
+                      "read_only",
+                      "time_limited"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "token",
+                    "childId",
+                    "expiresAt",
+                    "accessType",
+                    "resourceType",
+                    "shareUrl"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "childId": {
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string"
+                    },
+                    "accessType": {
+                      "type": "string",
+                      "enum": [
+                        "read_only",
+                        "time_limited"
+                      ]
+                    },
+                    "resourceType": {
+                      "type": "string",
+                      "enum": [
+                        "child_assets",
+                        "specific_book",
+                        "asset_collection"
+                      ]
+                    },
+                    "resourceId": {
+                      "type": "string"
+                    },
+                    "maxAccessCount": {
+                      "type": "number"
+                    },
+                    "shareUrl": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1881,7 +2056,60 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "isValid"
+                  ],
+                  "properties": {
+                    "isValid": {
+                      "type": "boolean"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "shareToken": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "childId",
+                        "resourceType",
+                        "accessType"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "childId": {
+                          "type": "string"
+                        },
+                        "resourceType": {
+                          "type": "string",
+                          "enum": [
+                            "child_assets",
+                            "specific_book",
+                            "asset_collection"
+                          ]
+                        },
+                        "resourceId": {
+                          "type": "string"
+                        },
+                        "accessType": {
+                          "type": "string",
+                          "enum": [
+                            "read_only",
+                            "time_limited"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1902,10 +2130,53 @@
     "/api/web-companion/share/{shareToken}/assets": {
       "get": {
         "operationId": "WebCompanionController_getSharedAssets",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "title",
+                      "type",
+                      "createdAt",
+                      "previewUrl"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "previewUrl": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -1926,10 +2197,56 @@
     "/api/web-companion/share/{shareToken}/book": {
       "get": {
         "operationId": "WebCompanionController_getSharedBook",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "bookId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "title",
+                    "createdAt",
+                    "status",
+                    "previewUrl"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "previewUrl": {
+                      "type": "string"
+                    },
+                    "pageCount": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [

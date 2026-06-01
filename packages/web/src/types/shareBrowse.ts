@@ -1,7 +1,14 @@
-import type { components } from '@kidmemory/protocol/cloud-api'
+import type { operations } from '@kidmemory/protocol/sidecar'
 
-export type SharedAsset = components['schemas']['SharedAssetDto'] & {
+type JsonResponse<
+  OperationId extends keyof operations,
+  Status extends keyof operations[OperationId]['responses'],
+> = operations[OperationId]['responses'][Status] extends { content: { 'application/json': infer Body } }
+  ? Body
+  : never
+
+export type SharedAsset = JsonResponse<'WebCompanionController_getSharedAssets', 200>[number] & {
   previewUrl?: string
 }
 
-export type ShareTokenValidation = components['schemas']['ShareTokenValidationResponseDto']
+export type ShareTokenValidation = JsonResponse<'WebCompanionController_accessSharedContent', 200>

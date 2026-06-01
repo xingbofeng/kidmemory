@@ -1,9 +1,19 @@
-import type { components } from '@kidmemory/protocol/cloud-api';
+import type { operations } from '@kidmemory/protocol/sidecar';
 import { httpClient } from '../lib/http-client';
-import type { SessionSummary } from '../types/trustedUpload';
-import type { UploadSession } from '../types/api';
+import type { SessionDetail, SessionSummary } from '../types/trustedUpload';
 
-export type DirectUploadConfigResponse = components['schemas']['DirectUploadConfigResponseDto'];
+type JsonResponse<
+  OperationId extends keyof operations,
+  Status extends keyof operations[OperationId]['responses'],
+> = operations[OperationId]['responses'][Status] extends { content: { 'application/json': infer Body } }
+  ? Body
+  : never
+
+type JsonRequestBody<OperationId extends keyof operations> = operations[OperationId] extends {
+  requestBody: { content: { 'application/json': infer Body } }
+} ? Body : never
+
+export type DirectUploadConfigResponse = JsonResponse<'DirectUploadController_getSessionConfig', 200>;
 
 export async function getDirectUploadConfig(sessionId: string, token: string): Promise<DirectUploadConfigResponse> {
   return httpClient.get<DirectUploadConfigResponse>(
@@ -11,20 +21,9 @@ export async function getDirectUploadConfig(sessionId: string, token: string): P
   );
 }
 
-export interface PullbackDirectUploadRequest {
-  token: string;
-  objectKeys?: string[];
-}
+export type PullbackDirectUploadRequest = JsonRequestBody<'DirectUploadController_pullback'>;
 
-export interface PullbackDirectUploadResponse {
-  sessionId: string;
-  results: Array<{
-    objectKey: string;
-    status: string;
-    errorCode?: string | null;
-    errorMessage?: string | null;
-  }>;
-}
+export type PullbackDirectUploadResponse = JsonResponse<'DirectUploadController_pullback', 201>;
 
 export async function pullbackDirectUpload(
   sessionId: string,
@@ -36,11 +35,13 @@ export async function pullbackDirectUpload(
   );
 }
 
-export type CreateUploadItemsRequest = components['schemas']['CreateUploadItemsRequestDto'];
+export type CreateUploadItemsRequest = JsonRequestBody<'WebCompanionController_createUploadItems'>;
 
-export type CreateUploadItemsResponse = components['schemas']['CreateUploadItemsResponseDto'];
+export type CreateUploadItemsResponse = JsonResponse<'WebCompanionController_createUploadItems', 201>;
 
-export type CommitUploadItemRequest = components['schemas']['CommitUploadItemRequestDto'];
+export type CommitUploadItemRequest = JsonRequestBody<'WebCompanionController_commitUploadItem'>;
+
+export type CommitUploadItemResponse = JsonResponse<'WebCompanionController_commitUploadItem', 200>;
 
 export async function getUploadSession(sessionId: string, token: string): Promise<SessionSummary> {
   return httpClient.get<SessionSummary>(
@@ -48,10 +49,10 @@ export async function getUploadSession(sessionId: string, token: string): Promis
   );
 }
 
-export async function createUploadSession(childId: string): Promise<UploadSession> {
-  return httpClient.post<UploadSession>('/api/web-companion/sessions', {
-    childId,
-  });
+export async function getUploadSessionDetail(sessionId: string, token: string): Promise<SessionDetail> {
+  return httpClient.get<SessionDetail>(
+    `/api/web-companion/sessions/${sessionId}/detail?token=${encodeURIComponent(token)}`
+  );
 }
 
 export async function createUploadItems(
@@ -68,8 +69,8 @@ export async function commitUploadItem(
   sessionId: string,
   uploadItemId: string,
   request: CommitUploadItemRequest
-): Promise<void> {
-  return httpClient.put(
+): Promise<CommitUploadItemResponse> {
+  return httpClient.put<CommitUploadItemResponse>(
     `/api/web-companion/sessions/${sessionId}/items/${uploadItemId}/commit`,
     request
   );

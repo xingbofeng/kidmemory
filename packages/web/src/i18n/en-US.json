@@ -225,7 +225,7 @@
     "pending": "Pending",
     "uploading": "Uploading",
     "committing": "Committing",
-    "success": "Uploaded, waiting for import",
+    "success": "Imported",
     "failed": "Failed"
   },
   "upload": {

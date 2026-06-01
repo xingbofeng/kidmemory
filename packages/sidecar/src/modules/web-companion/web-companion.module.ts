@@ -11,6 +11,7 @@ import { DirectUploadService } from "./direct-upload.service.ts";
 import {
   DatasetServiceDirectUploadAssetGateway,
   PrismaDirectUploadPullbackStore,
+  PrismaDirectUploadSessionStore,
   SupabaseDirectUploadStorageGateway,
 } from "./direct-upload.providers.ts";
 import { WebCompanionController } from "./web-companion.controller.ts";
@@ -92,9 +93,17 @@ const logger = new Logger("WebCompanionModule");
           storage: new SupabaseDirectUploadStorageGateway(appConfig),
           assets: new DatasetServiceDirectUploadAssetGateway(dataset),
           pullback: new PrismaDirectUploadPullbackStore(prisma),
+          sessionStore: new PrismaDirectUploadSessionStore(
+            prisma,
+            appConfig.config.webCompanionDirectUpload.recommendedClientLimit,
+          ),
           idFactory: {
             nextSessionId: () =>
               `wcs_direct_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+          },
+          childExists: async (childId) => {
+            const count = await prisma.child.count({ where: { id: childId } });
+            return count > 0;
           },
         });
       },

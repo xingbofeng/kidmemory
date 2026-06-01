@@ -4,22 +4,11 @@ import { httpClient, ApiError } from '../../lib/http-client'
 import { Asset, AssetFilter } from '../../types/asset'
 import { filterAssets, getFilterLabel } from '../../utils/assetUtils'
 import { Icon } from '../../components/ui/Icon'
+import type { RecentUpload } from '../../types/trustedUpload'
 
 interface AssetBrowserProps {
   sessionId: string
   sessionToken: string
-}
-
-interface RecentUploadResponse {
-  id: string
-  title?: string
-  name?: string
-  type: string
-  previewUrl?: string
-  thumbnailUrl?: string
-  createdAt: string
-  description?: string
-  tags?: string[]
 }
 
 export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
@@ -36,7 +25,7 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
       setError(null)
 
       try {
-        const data = await httpClient.get<RecentUploadResponse[] | { assets: RecentUploadResponse[] }>(
+        const data = await httpClient.get<RecentUpload[] | { assets: RecentUpload[] }>(
           `/api/web-companion/sessions/${sessionId}/recent?token=${encodeURIComponent(sessionToken)}&limit=20`,
         )
         const recentUploads = Array.isArray(data) ? data : data.assets || []
@@ -143,11 +132,11 @@ export function AssetBrowser({ sessionId, sessionToken }: AssetBrowserProps) {
 
 const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
 
-const toAsset = (upload: RecentUploadResponse): Asset => ({
+const toAsset = (upload: RecentUpload): Asset => ({
   id: upload.id,
-  name: upload.name || upload.title || upload.id,
+  name: upload.title || upload.id,
   type: toAssetType(upload.type),
-  thumbnailUrl: upload.thumbnailUrl || upload.previewUrl || transparentPixel,
+  thumbnailUrl: upload.previewUrl || transparentPixel,
   createdAt: upload.createdAt,
   description: upload.description,
   tags: upload.tags,

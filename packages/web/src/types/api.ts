@@ -1,8 +1,15 @@
 import type { ApiResponse as ProtocolApiResponse } from '@kidmemory/protocol'
-import type { components } from '@kidmemory/protocol/cloud-api'
+import type { operations } from '@kidmemory/protocol/sidecar'
 
-type SessionSummaryDto = components['schemas']['SessionSummaryResponseDto']
-type UploadItemResponseDto = components['schemas']['UploadItemResponseDto']
+type JsonResponse<
+  OperationId extends keyof operations,
+  Status extends keyof operations[OperationId]['responses'],
+> = operations[OperationId]['responses'][Status] extends { content: { 'application/json': infer Body } }
+  ? Body
+  : never
+
+type SessionSummaryDto = JsonResponse<'WebCompanionController_getSessionSummary', 200>
+type UploadItemResponseDto = JsonResponse<'WebCompanionController_createUploadItems', 201>['items'][number]
 
 // 0.5 Upload Session Types
 export type UploadSession = Omit<SessionSummaryDto, 'child' | 'providers'> & {
@@ -22,7 +29,7 @@ export type UploadSession = Omit<SessionSummaryDto, 'child' | 'providers'> & {
   }
 }
 
-export interface UploadSessionInput {
+export type UploadSessionInput = {
   childId: string
 }
 

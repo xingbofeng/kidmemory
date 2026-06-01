@@ -1,11 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import App from './App'
-import { createUploadSession } from './api/uploadApi'
 
-vi.mock('./api/uploadApi', () => ({
-  createUploadSession: vi.fn(),
-}))
+vi.mock('./api/uploadApi', () => ({}))
 
 vi.mock('./components/web-companion/WebCompanionApp', () => ({
   WebCompanionApp: ({ sessionId, sessionToken }: { sessionId: string; sessionToken: string }) => (
@@ -35,7 +32,6 @@ describe('App route guards', () => {
 
     render(<App />)
 
-    expect(createUploadSession).not.toHaveBeenCalled()
     expect(screen.getByText('web companion session session-from-desktop')).toBeInTheDocument()
     expect(screen.getByText('web companion token token-from-desktop')).toBeInTheDocument()
   })
@@ -45,7 +41,6 @@ describe('App route guards', () => {
 
     render(<App />)
 
-    expect(createUploadSession).not.toHaveBeenCalled()
     expect(screen.getByText('缺少必要参数：sessionId 和 token')).toBeInTheDocument()
   })
 })

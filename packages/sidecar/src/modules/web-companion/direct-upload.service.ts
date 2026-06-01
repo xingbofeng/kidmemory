@@ -8,6 +8,8 @@
  * 状态机：见 direct-upload-pullback-state.ts。
  */
 
+import { createHash, randomBytes } from "node:crypto";
+
 import {
   AppConfigService,
   assertWebCompanionDirectUploadReady,
@@ -93,6 +95,21 @@ export interface DirectUploadIdFactory {
   nextSessionId(): string;
 }
 
+export interface DirectUploadSessionStoreEntry {
+  sessionId: string;
+  childId: string;
+  bucket: string;
+  expiresAt: Date;
+  tokenHash: string;
+}
+
+export interface DirectUploadSessionStore {
+  insert(session: DirectUploadSessionStoreEntry): Promise<void>;
+  findBySessionId(sessionId: string): Promise<DirectUploadSessionStoreEntry | null>;
+  delete(sessionId: string): Promise<void>;
+  deleteExpired(now: Date): Promise<number>;
+}
+
 type DirectUploadAppConfig = Pick<AppConfigService, "config">;
 
 export interface DirectUploadServiceDeps {
@@ -101,17 +118,42 @@ export interface DirectUploadServiceDeps {
   assets: DirectUploadAssetGateway;
   pullback: DirectUploadPullbackStore;
   idFactory: DirectUploadIdFactory;
-  /** 内存中保存 sessionId → childId 的映射（不持久化 session 本身）。 */
-  sessionStore?: Map<string, SessionStoreEntry>;
+  sessionStore?: DirectUploadSessionStore;
   /** 验证 childId 是否存在于数据库，返回 true 表示存在。可选，未提供时跳过验证。 */
   childExists?: (childId: string) => Promise<boolean>;
 }
 
-interface SessionStoreEntry {
+interface ValidatedSession {
   childId: string;
   bucket: string;
   expiresAt: Date;
-  token: string;
+}
+
+class InMemoryDirectUploadSessionStore implements DirectUploadSessionStore {
+  private readonly sessions = new Map<string, DirectUploadSessionStoreEntry>();
+
+  async insert(session: DirectUploadSessionStoreEntry): Promise<void> {
+    this.sessions.set(session.sessionId, session);
+  }
+
+  async findBySessionId(sessionId: string): Promise<DirectUploadSessionStoreEntry | null> {
+    return this.sessions.get(sessionId) ?? null;
+  }
+
+  async delete(sessionId: string): Promise<void> {
+    this.sessions.delete(sessionId);
+  }
+
+  async deleteExpired(now: Date): Promise<number> {
+    let deleted = 0;
+    for (const [sessionId, session] of this.sessions.entries()) {
+      if (session.expiresAt < now) {
+        this.sessions.delete(sessionId);
+        deleted += 1;
+      }
+    }
+    return deleted;
+  }
 }
 
 export class DirectUploadService {
@@ -121,8 +163,7 @@ export class DirectUploadService {
   private readonly pullbackStore: DirectUploadPullbackStore;
   private readonly idFactory: DirectUploadIdFactory;
   private readonly childExists: ((childId: string) => Promise<boolean>) | undefined;
-  /** sessionId → childId/bucket 的内存映射。Direct Upload 刻意不持久化 session 本身（与 Trusted Upload 隔离）。 */
-  private readonly sessionStore: Map<string, SessionStoreEntry>;
+  private readonly sessionStore: DirectUploadSessionStore;
   private cleanupTimer: NodeJS.Timeout | null = null;
 
   constructor(deps: DirectUploadServiceDeps) {
@@ -132,14 +173,14 @@ export class DirectUploadService {
     this.pullbackStore = deps.pullback;
     this.idFactory = deps.idFactory;
     this.childExists = deps.childExists;
-    this.sessionStore = deps.sessionStore ?? new Map();
+    this.sessionStore = deps.sessionStore ?? new InMemoryDirectUploadSessionStore();
 
     this.startCleanupTimer();
   }
 
   private startCleanupTimer(): void {
     this.cleanupTimer = setInterval(() => {
-      this.cleanupExpiredSessions();
+      void this.cleanupExpiredSessions();
     }, 60 * 60 * 1000);
 
     // 确保 Node.js 进程退出时不会被定时器阻塞
@@ -148,14 +189,8 @@ export class DirectUploadService {
     }
   }
 
-  private cleanupExpiredSessions(): void {
-    const now = new Date();
-
-    for (const [sessionId, entry] of this.sessionStore.entries()) {
-      if (entry.expiresAt < now) {
-        this.sessionStore.delete(sessionId);
-      }
-    }
+  private async cleanupExpiredSessions(): Promise<void> {
+    await this.sessionStore.deleteExpired(new Date());
   }
 
   destroy(): void {
@@ -203,7 +238,13 @@ export class DirectUploadService {
     const expiresAt = new Date(
       Date.now() + config.webCompanionDirectUpload.expiresAtHintSeconds * 1000,
     );
-    this.sessionStore.set(sessionId, { childId, bucket, expiresAt, token });
+    await this.sessionStore.insert({
+      sessionId,
+      childId,
+      bucket,
+      expiresAt,
+      tokenHash: hashDirectUploadToken(token),
+    });
 
     return {
       sessionId,
@@ -224,7 +265,7 @@ export class DirectUploadService {
     token: string,
   ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number }> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
-    const session = this.validateSessionToken(sessionId, token);
+    const session = await this.validateSessionToken(sessionId, token);
     const config = this.appConfig.config;
     return {
       supabaseUrl: config.supabaseStorage.url,
@@ -236,7 +277,7 @@ export class DirectUploadService {
 
   async listObjects(sessionId: string, token: string): Promise<ListDirectUploadObjectsResponse> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
-    const session = this.validateSessionToken(sessionId, token);
+    const session = await this.validateSessionToken(sessionId, token);
     const bucket = session.bucket;
     const prefix = `${sessionId}/`;
     const objects = await this.storage.listObjects({ bucket, prefix });
@@ -258,7 +299,7 @@ export class DirectUploadService {
       (error as Error & { code?: string }).code = "token_required";
       throw error;
     }
-    const session = this.validateSessionToken(sessionId, request.token);
+    const session = await this.validateSessionToken(sessionId, request.token);
 
     const childId = session.childId;
 
@@ -282,7 +323,8 @@ export class DirectUploadService {
   }
 
   async getStatus(sessionId: string, token: string): Promise<GetDirectUploadStatusResponse> {
-    this.validateSessionToken(sessionId, token);
+    assertWebCompanionDirectUploadReady(this.appConfig.config);
+    await this.validateSessionToken(sessionId, token);
     const rows = await this.pullbackStore.findBySessionId(sessionId);
     const summary = {
       pending_remote: 0,
@@ -302,32 +344,38 @@ export class DirectUploadService {
     return { sessionId, items, summary };
   }
 
-  private validateSessionToken(sessionId: string, token?: string): SessionStoreEntry {
+  private async validateSessionToken(sessionId: string, token?: string): Promise<ValidatedSession> {
     if (!token) {
       const error = new Error("Direct upload token is required.");
       (error as Error & { code?: string }).code = "token_required";
       throw error;
     }
 
-    const session = this.sessionStore.get(sessionId);
+    const session = await this.sessionStore.findBySessionId(sessionId);
     if (!session) {
-      throw new Error(`Direct upload session ${sessionId} is not known by this sidecar process.`);
+      const error = new Error(`Direct upload session ${sessionId} was not found.`);
+      (error as Error & { code?: string }).code = "session_not_found";
+      throw error;
     }
 
     if (session.expiresAt < new Date()) {
-      this.sessionStore.delete(sessionId);
+      await this.sessionStore.delete(sessionId);
       const error = new Error("Direct upload session has expired.");
       (error as Error & { code?: string }).code = "session_expired";
       throw error;
     }
 
-    if (token !== session.token) {
+    if (hashDirectUploadToken(token) !== session.tokenHash) {
       const error = new Error("Invalid session token.");
       (error as Error & { code?: string }).code = "invalid_token";
       throw error;
     }
 
-    return session;
+    return {
+      childId: session.childId,
+      bucket: session.bucket || this.appConfig.config.webCompanionDirectUpload.bucket,
+      expiresAt: session.expiresAt,
+    };
   }
 
   /**
@@ -461,7 +509,9 @@ function toRecord(row: DirectUploadPullbackRow) {
 export type { CreateDirectUploadSessionRequest, CreateDirectUploadSessionResponse };
 
 function generateSecureToken(): string {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return randomBytes(32).toString("hex");
+}
+
+function hashDirectUploadToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }

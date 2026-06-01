@@ -9,7 +9,7 @@
  *   GET    /web-companion/direct-upload/sessions/:sessionId/config
  */
 
-import { Body, Controller, Get, Inject, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Inject, Param, Post, Query } from "@nestjs/common";
 import { ApiBody, ApiQuery, ApiResponse } from "@nestjs/swagger";
 
 import { DirectUploadService } from "./direct-upload.service.ts";
@@ -143,32 +143,79 @@ export class DirectUploadController {
     this.service = service;
   }
 
-  createSession(
+  async createSession(
     body: CreateDirectUploadSessionRequest,
   ): Promise<CreateDirectUploadSessionResponse> {
-    return this.service.createSession(body);
+    try {
+      return await this.service.createSession(body);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  listObjects(sessionId: string, token: string): Promise<ListDirectUploadObjectsResponse> {
-    return this.service.listObjects(sessionId, token);
+  async listObjects(sessionId: string, token: string): Promise<ListDirectUploadObjectsResponse> {
+    try {
+      return await this.service.listObjects(sessionId, token);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  pullback(
+  async pullback(
     sessionId: string,
     body: PullbackDirectUploadRequest,
   ): Promise<PullbackDirectUploadResponse> {
-    return this.service.pullback(sessionId, body);
+    try {
+      return await this.service.pullback(sessionId, body);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  getStatus(sessionId: string, token: string): Promise<GetDirectUploadStatusResponse> {
-    return this.service.getStatus(sessionId, token);
+  async getStatus(sessionId: string, token: string): Promise<GetDirectUploadStatusResponse> {
+    try {
+      return await this.service.getStatus(sessionId, token);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  getSessionConfig(
+  async getSessionConfig(
     sessionId: string,
     token: string,
   ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number }> {
-    return this.service.getSessionConfig(sessionId, token);
+    try {
+      return await this.service.getSessionConfig(sessionId, token);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  private handleError(error: unknown): never {
+    if (error instanceof HttpException) throw error;
+
+    const payload = error as { code?: unknown; missingConfigKeys?: unknown };
+    const code = typeof payload?.code === "string" ? payload.code : "internal_error";
+    const message = error instanceof Error ? error.message : "An unexpected error occurred";
+
+    switch (code) {
+      case "token_required":
+      case "invalid_token":
+      case "session_expired":
+        throw new HttpException({ code, message }, HttpStatus.UNAUTHORIZED);
+      case "child_id_required":
+        throw new HttpException({ code, message }, HttpStatus.BAD_REQUEST);
+      case "child_not_found":
+      case "session_not_found":
+        throw new HttpException({ code, message }, HttpStatus.NOT_FOUND);
+      case "web_companion_direct_upload_config_missing":
+        throw new HttpException(
+          { code, message, missingConfigKeys: payload.missingConfigKeys },
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+    }
+
+    throw new HttpException({ code: "internal_error", message }, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 

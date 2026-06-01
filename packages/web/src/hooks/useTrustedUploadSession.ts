@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getUploadSession, createUploadItems, commitUploadItem } from '../api/uploadApi'
-import { sessionProvidersOf, type SessionSummary, type UploadProvider, type UploadItem, type FileTask } from '../types/trustedUpload'
+import { getUploadSession, getUploadSessionDetail, createUploadItems, commitUploadItem } from '../api/uploadApi'
+import { sessionProvidersOf, type SessionSummary, type UploadProvider, type FileTask } from '../types/trustedUpload'
 import { nextTaskId, formatRemaining } from '../utils/trustedUploadUtils'
 import { resolveTrustedUploadErrorMessage } from './trustedUploadError'
+import { uploadFileWithSignedUrl } from '../lib/signed-upload'
 
 interface UseTrustedUploadSessionProps {
   sessionId: string
@@ -131,6 +132,22 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
               contentType: task.file.type || 'application/octet-stream',
             })
 
+            const ready = await waitForUploadItemReady(sessionId, token, item.uploadItemId)
+            if (ready.status !== 'ready') {
+              setTasks((prev) =>
+                prev.map((taskItem) =>
+                  taskItem.id === task.id
+                    ? {
+                        ...taskItem,
+                        status: 'failed',
+                        errorMessage: ready.errorMessage ?? t('directUpload.taskImportFailed'),
+                      }
+                    : taskItem,
+                ),
+              )
+              continue
+            }
+
             setTasks((prev) =>
               prev.map((taskItem) => (taskItem.id === task.id ? { ...taskItem, status: 'success', progress: 100 } : taskItem)),
             )
@@ -173,34 +190,22 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
   }
 }
 
-async function uploadFileWithSignedUrl(
-  file: File,
-  signedUpload: UploadItem['signedUpload'],
-  onProgress: (progress: number) => void,
-): Promise<void> {
-  if (!signedUpload) throw new Error('Missing signed upload target')
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
+async function waitForUploadItemReady(
+  sessionId: string,
+  token: string,
+  uploadItemId: string,
+): Promise<{ status: string; errorMessage?: string | null }> {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const detail = await getUploadSessionDetail(sessionId, token)
+    const item = detail.items.find((candidate) => candidate.uploadItemId === uploadItemId)
+    if (item?.status === 'ready' || item?.status === 'failed') {
+      return { status: item.status, errorMessage: item.errorCode }
+    }
+    await delay(1000)
+  }
+  return { status: 'failed', errorMessage: 'Timed out waiting for local import.' }
+}
 
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100))
-      }
-    })
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve()
-      else reject(new Error(`Upload failed (${xhr.status})`))
-    })
-    xhr.addEventListener('error', () => reject(new Error('Upload failed: network error')))
-
-    const method = String(signedUpload.method ?? "PUT")
-    const url = String(signedUpload.url)
-
-    xhr.open(method, url)
-    Object.entries(signedUpload.headers ?? {}).forEach(([key, value]) => {
-      xhr.setRequestHeader(key, String(value))
-    })
-    xhr.send(file)
-  })
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }

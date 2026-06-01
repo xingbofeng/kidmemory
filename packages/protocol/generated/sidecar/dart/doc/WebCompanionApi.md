@@ -29,7 +29,7 @@ Method | HTTP request | Description
 
 
 # **webCompanionControllerAccessSharedContent**
-> webCompanionControllerAccessSharedContent(shareToken)
+> WebCompanionControllerAccessSharedContent200Response webCompanionControllerAccessSharedContent(shareToken)
 
 
 
@@ -41,7 +41,8 @@ final api = KidmemoryProtocol().getWebCompanionApi();
 final String shareToken = shareToken_example; // String |
 
 try {
-    api.webCompanionControllerAccessSharedContent(shareToken);
+    final response = api.webCompanionControllerAccessSharedContent(shareToken);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerAccessSharedContent: $e\n');
 }
@@ -55,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+[**WebCompanionControllerAccessSharedContent200Response**](WebCompanionControllerAccessSharedContent200Response.md)
 
 ### Authorization
 
@@ -64,7 +65,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -198,7 +199,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerCreateShareToken**
-> webCompanionControllerCreateShareToken(sessionId, token)
+> WebCompanionControllerCreateShareToken201Response webCompanionControllerCreateShareToken(sessionId, token, webCompanionControllerCreateShareTokenRequest)
 
 
 
@@ -209,9 +210,11 @@ import 'package:kidmemory_protocol/api.dart';
 final api = KidmemoryProtocol().getWebCompanionApi();
 final String sessionId = sessionId_example; // String |
 final String token = token_example; // String |
+final WebCompanionControllerCreateShareTokenRequest webCompanionControllerCreateShareTokenRequest = ; // WebCompanionControllerCreateShareTokenRequest |
 
 try {
-    api.webCompanionControllerCreateShareToken(sessionId, token);
+    final response = api.webCompanionControllerCreateShareToken(sessionId, token, webCompanionControllerCreateShareTokenRequest);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerCreateShareToken: $e\n');
 }
@@ -223,10 +226,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sessionId** | **String**|  |
  **token** | **String**|  |
+ **webCompanionControllerCreateShareTokenRequest** | [**WebCompanionControllerCreateShareTokenRequest**](WebCompanionControllerCreateShareTokenRequest.md)|  |
 
 ### Return type
 
-void (empty response body)
+[**WebCompanionControllerCreateShareToken201Response**](WebCompanionControllerCreateShareToken201Response.md)
 
 ### Authorization
 
@@ -234,8 +238,8 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Content-Type**: application/json
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -328,7 +332,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetBookDetails**
-> webCompanionControllerGetBookDetails(sessionId, bookId, token)
+> WebCompanionControllerGetBookDetails200Response webCompanionControllerGetBookDetails(sessionId, bookId, token)
 
 
 
@@ -342,7 +346,8 @@ final String bookId = bookId_example; // String |
 final String token = token_example; // String |
 
 try {
-    api.webCompanionControllerGetBookDetails(sessionId, bookId, token);
+    final response = api.webCompanionControllerGetBookDetails(sessionId, bookId, token);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetBookDetails: $e\n');
 }
@@ -358,7 +363,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+[**WebCompanionControllerGetBookDetails200Response**](WebCompanionControllerGetBookDetails200Response.md)
 
 ### Authorization
 
@@ -367,12 +372,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetBooksList**
-> webCompanionControllerGetBooksList(sessionId, token, childId)
+> List<WebCompanionControllerGetBooksList200ResponseInner> webCompanionControllerGetBooksList(sessionId, token, childId)
 
 
 
@@ -386,7 +391,8 @@ final String token = token_example; // String |
 final String childId = childId_example; // String |
 
 try {
-    api.webCompanionControllerGetBooksList(sessionId, token, childId);
+    final response = api.webCompanionControllerGetBooksList(sessionId, token, childId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetBooksList: $e\n');
 }
@@ -402,7 +408,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+[**List&lt;WebCompanionControllerGetBooksList200ResponseInner&gt;**](WebCompanionControllerGetBooksList200ResponseInner.md)
 
 ### Authorization
 
@@ -411,7 +417,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -547,7 +553,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSharedAssets**
-> webCompanionControllerGetSharedAssets(shareToken)
+> List<WebCompanionControllerGetSharedAssets200ResponseInner> webCompanionControllerGetSharedAssets(shareToken, limit)
 
 
 
@@ -557,9 +563,11 @@ import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
 final String shareToken = shareToken_example; // String |
+final num limit = 8.14; // num |
 
 try {
-    api.webCompanionControllerGetSharedAssets(shareToken);
+    final response = api.webCompanionControllerGetSharedAssets(shareToken, limit);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSharedAssets: $e\n');
 }
@@ -570,10 +578,11 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **shareToken** | **String**|  |
+ **limit** | **num**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**List&lt;WebCompanionControllerGetSharedAssets200ResponseInner&gt;**](WebCompanionControllerGetSharedAssets200ResponseInner.md)
 
 ### Authorization
 
@@ -582,12 +591,12 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **webCompanionControllerGetSharedBook**
-> webCompanionControllerGetSharedBook(shareToken)
+> WebCompanionControllerGetSharedBook200Response webCompanionControllerGetSharedBook(shareToken, bookId)
 
 
 
@@ -597,9 +606,11 @@ import 'package:kidmemory_protocol/api.dart';
 
 final api = KidmemoryProtocol().getWebCompanionApi();
 final String shareToken = shareToken_example; // String |
+final String bookId = bookId_example; // String |
 
 try {
-    api.webCompanionControllerGetSharedBook(shareToken);
+    final response = api.webCompanionControllerGetSharedBook(shareToken, bookId);
+    print(response);
 } on DioException catch (e) {
     print('Exception when calling WebCompanionApi->webCompanionControllerGetSharedBook: $e\n');
 }
@@ -610,10 +621,11 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **shareToken** | **String**|  |
+ **bookId** | **String**|  | [optional]
 
 ### Return type
 
-void (empty response body)
+[**WebCompanionControllerGetSharedBook200Response**](WebCompanionControllerGetSharedBook200Response.md)
 
 ### Authorization
 
@@ -622,7 +634,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

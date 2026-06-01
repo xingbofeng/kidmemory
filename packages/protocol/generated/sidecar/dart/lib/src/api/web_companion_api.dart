@@ -9,16 +9,23 @@ import 'dart:convert';
 import 'package:kidmemory_protocol/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:kidmemory_protocol/src/model/web_companion_controller_access_shared_content200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_close_session201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_commit_upload_item200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_commit_upload_item_request.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_session201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_session_request.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_create_share_token201_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_create_share_token_request.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items_request.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_book_details200_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_books_list200_response_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_detail200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_shared_assets200_response_inner.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_shared_book200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_retry_upload_item_request.dart';
 
 class WebCompanionApi {
@@ -39,9 +46,9 @@ class WebCompanionApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [WebCompanionControllerAccessSharedContent200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerAccessSharedContent({
+  Future<Response<WebCompanionControllerAccessSharedContent200Response>> webCompanionControllerAccessSharedContent({
     required String shareToken,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -71,7 +78,32 @@ class WebCompanionApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    WebCompanionControllerAccessSharedContent200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<WebCompanionControllerAccessSharedContent200Response, WebCompanionControllerAccessSharedContent200Response>(rawData, 'WebCompanionControllerAccessSharedContent200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WebCompanionControllerAccessSharedContent200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerCloseSession
@@ -359,6 +391,7 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerCreat
   /// Parameters:
   /// * [sessionId]
   /// * [token]
+  /// * [webCompanionControllerCreateShareTokenRequest]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -366,11 +399,12 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerCreat
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [WebCompanionControllerCreateShareToken201Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerCreateShareToken({
+  Future<Response<WebCompanionControllerCreateShareToken201Response>> webCompanionControllerCreateShareToken({
     required String sessionId,
     required String token,
+    required WebCompanionControllerCreateShareTokenRequest webCompanionControllerCreateShareTokenRequest,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -388,6 +422,7 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerCreat
         'secure': <Map<String, String>>[],
         ...?extra,
       },
+      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
@@ -395,8 +430,27 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerCreat
       r'token': token,
     };
 
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(webCompanionControllerCreateShareTokenRequest);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+          queryParameters: _queryParameters,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
     final _response = await _dio.request<Object>(
       _path,
+      data: _bodyData,
       options: _options,
       queryParameters: _queryParameters,
       cancelToken: cancelToken,
@@ -404,7 +458,32 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerCreat
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    WebCompanionControllerCreateShareToken201Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<WebCompanionControllerCreateShareToken201Response, WebCompanionControllerCreateShareToken201Response>(rawData, 'WebCompanionControllerCreateShareToken201Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WebCompanionControllerCreateShareToken201Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerCreateUploadItems
@@ -595,9 +674,9 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetRe
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [WebCompanionControllerGetBookDetails200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetBookDetails({
+  Future<Response<WebCompanionControllerGetBookDetails200Response>> webCompanionControllerGetBookDetails({
     required String sessionId,
     required String bookId,
     required String token,
@@ -634,7 +713,32 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetRe
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    WebCompanionControllerGetBookDetails200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<WebCompanionControllerGetBookDetails200Response, WebCompanionControllerGetBookDetails200Response>(rawData, 'WebCompanionControllerGetBookDetails200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WebCompanionControllerGetBookDetails200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerGetBooksList
@@ -651,9 +755,9 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetRe
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<WebCompanionControllerGetBooksList200ResponseInner>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetBooksList({
+  Future<Response<List<WebCompanionControllerGetBooksList200ResponseInner>>> webCompanionControllerGetBooksList({
     required String sessionId,
     required String token,
     String? childId,
@@ -691,7 +795,32 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetRe
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<WebCompanionControllerGetBooksList200ResponseInner>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<WebCompanionControllerGetBooksList200ResponseInner>, WebCompanionControllerGetBooksList200ResponseInner>(rawData, 'List<WebCompanionControllerGetBooksList200ResponseInner>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<WebCompanionControllerGetBooksList200ResponseInner>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerGetRecentUploads
@@ -939,6 +1068,7 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
   ///
   /// Parameters:
   /// * [shareToken]
+  /// * [limit]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -946,10 +1076,11 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [List<WebCompanionControllerGetSharedAssets200ResponseInner>] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedAssets({
+  Future<Response<List<WebCompanionControllerGetSharedAssets200ResponseInner>>> webCompanionControllerGetSharedAssets({
     required String shareToken,
+    num? limit,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -970,15 +1101,45 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (limit != null) r'limit': limit,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    List<WebCompanionControllerGetSharedAssets200ResponseInner>? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<List<WebCompanionControllerGetSharedAssets200ResponseInner>, WebCompanionControllerGetSharedAssets200ResponseInner>(rawData, 'List<WebCompanionControllerGetSharedAssets200ResponseInner>', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<List<WebCompanionControllerGetSharedAssets200ResponseInner>>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerGetSharedBook
@@ -986,6 +1147,7 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
   ///
   /// Parameters:
   /// * [shareToken]
+  /// * [bookId]
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -993,10 +1155,11 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [WebCompanionControllerGetSharedBook200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> webCompanionControllerGetSharedBook({
+  Future<Response<WebCompanionControllerGetSharedBook200Response>> webCompanionControllerGetSharedBook({
     required String shareToken,
+    String? bookId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1017,15 +1180,45 @@ _responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSe
       validateStatus: validateStatus,
     );
 
+    final _queryParameters = <String, dynamic>{
+      if (bookId != null) r'bookId': bookId,
+    };
+
     final _response = await _dio.request<Object>(
       _path,
       options: _options,
+      queryParameters: _queryParameters,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    WebCompanionControllerGetSharedBook200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<WebCompanionControllerGetSharedBook200Response, WebCompanionControllerGetSharedBook200Response>(rawData, 'WebCompanionControllerGetSharedBook200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<WebCompanionControllerGetSharedBook200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// webCompanionControllerRetryUploadItem

@@ -121,6 +121,32 @@ describe("OpenAPI path parameters", () => {
     );
   });
 
+  test("sidecar web-companion generated client includes books and share response contracts", () => {
+    const generatedTypeFile = path.resolve(process.cwd(), "generated/sidecar/ts/index.d.ts");
+    const content = readFileSync(generatedTypeFile, "utf8");
+
+    const operations = [
+      "WebCompanionController_getBooksList",
+      "WebCompanionController_getBookDetails",
+      "WebCompanionController_createShareToken",
+      "WebCompanionController_accessSharedContent",
+      "WebCompanionController_getSharedAssets",
+      "WebCompanionController_getSharedBook",
+    ];
+
+    for (const operation of operations) {
+      const match = content.match(new RegExp(`${operation}:[\\s\\S]*?(?=\\n    [A-Za-z0-9_]+: \\{|\\n\\};)`));
+      assert.ok(match, `${operation} missing from generated sidecar client`);
+      assert.doesNotMatch(match[0], /content\?: never/, `${operation} response content should not be never`);
+    }
+
+    const createShareToken = content.match(
+      /WebCompanionController_createShareToken:[\s\S]*?(?=\n    [A-Za-z0-9_]+: \{|\n\};)/,
+    );
+    assert.ok(createShareToken, "WebCompanionController_createShareToken missing from generated sidecar client");
+    assert.doesNotMatch(createShareToken[0], /requestBody\?: never/, "createShareToken requestBody should not be never");
+  });
+
   test("generated TypeScript clients keep empty component maps typed as unknown", () => {
     const files = [
       "generated/cloud-api/ts/index.d.ts",

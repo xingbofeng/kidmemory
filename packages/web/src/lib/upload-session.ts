@@ -1,6 +1,6 @@
 import i18n from '../i18n'
 import { httpClient, ApiError } from './http-client'
-import { UploadResult, UploadSession } from '../types/api'
+import { UploadSession } from '../types/api'
 
 type UploadSessionResponse = Partial<UploadSession> & {
   child?: { id?: string; displayName?: string }
@@ -52,26 +52,5 @@ export async function fetchUploadSession(sessionId: string, token: string): Prom
       throw new Error(error.message)
     }
     throw error
-  }
-}
-
-export async function uploadSessionFile(session: UploadSession, file: File): Promise<UploadResult> {
-  const body = new FormData()
-  body.append('sessionId', session.sessionId)
-  body.append('token', session.token ?? '')
-  body.append('childId', session.childId ?? '')
-  body.append('file', file)
-
-  try {
-    return await httpClient.post<UploadResult>('/api/web-companion/upload', body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw new Error(error.message)
-    }
-    throw new Error('Upload failed')
   }
 }

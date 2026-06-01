@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 import {
   AppConfigService,
@@ -160,6 +161,17 @@ interface DirectUploadConfigError {
   missingConfigKeys: string[];
 }
 
+function assertHttpException(
+  error: unknown,
+  status: number,
+  code: string,
+): asserts error is HttpException {
+  assert.ok(error instanceof HttpException);
+  assert.equal(error.getStatus(), status);
+  const response = error.getResponse() as { code?: string; missingConfigKeys?: string[] };
+  assert.equal(response.code, code);
+}
+
 async function captureRejected(operation: Promise<unknown>): Promise<unknown> {
   try {
     await operation;
@@ -288,12 +300,30 @@ test(
       SUPABASE_ANON_KEY: "",
     });
     const err = await captureRejected(controller.createSession({ childId: "child_test" }));
-    assertDirectUploadConfigError(err);
-    assert.equal(err.code, "web_companion_direct_upload_config_missing");
-    assert.ok(err.missingConfigKeys.includes("SUPABASE_URL"));
-    assert.ok(err.missingConfigKeys.includes("SUPABASE_ANON_KEY"));
+    assertHttpException(err, HttpStatus.SERVICE_UNAVAILABLE, "web_companion_direct_upload_config_missing");
+    const body = err.getResponse() as DirectUploadConfigError;
+    assertDirectUploadConfigError(body);
+    assert.ok(body.missingConfigKeys.includes("SUPABASE_URL"));
+    assert.ok(body.missingConfigKeys.includes("SUPABASE_ANON_KEY"));
   },
 );
+
+test("POST /sessions maps validation errors to 400 instead of leaking 500", async () => {
+  const { controller } = buildController();
+
+  const err = await captureRejected(controller.createSession({ childId: "" }));
+
+  assertHttpException(err, HttpStatus.BAD_REQUEST, "child_id_required");
+});
+
+test("GET /sessions/:sessionId/status maps token errors to 401 instead of leaking 500", async () => {
+  const { controller } = buildController();
+  const session = await controller.createSession({ childId: "child_test" });
+
+  const err = await captureRejected(controller.getStatus(session.sessionId, "wrong-token"));
+
+  assertHttpException(err, HttpStatus.UNAUTHORIZED, "invalid_token");
+});
 
 test(
   "GET /sessions/:sessionId/objects 仅返回 {bucket}/{sessionId}/ 前缀对象，不混入其它 sessionId",
@@ -345,10 +375,10 @@ test(
     const session = await controller.createSession({ childId: "child_test" });
 
     const missing = await captureRejected(controller.listObjects(session.sessionId, ""));
-    assert.equal((missing as { code?: string }).code, "token_required");
+    assertHttpException(missing, HttpStatus.UNAUTHORIZED, "token_required");
 
     const invalid = await captureRejected(controller.listObjects(session.sessionId, "wrong-token"));
-    assert.equal((invalid as { code?: string }).code, "invalid_token");
+    assertHttpException(invalid, HttpStatus.UNAUTHORIZED, "invalid_token");
   },
 );
 
@@ -520,14 +550,14 @@ test(
     await assert.rejects(
       () => controller.getSessionConfig(session.sessionId, ""),
       (error: unknown) => {
-        assert.equal((error as { code?: string }).code, "token_required");
+        assertHttpException(error, HttpStatus.UNAUTHORIZED, "token_required");
         return true;
       },
     );
     await assert.rejects(
       () => controller.getStatus(session.sessionId, "wrong-token"),
       (error: unknown) => {
-        assert.equal((error as { code?: string }).code, "invalid_token");
+        assertHttpException(error, HttpStatus.UNAUTHORIZED, "invalid_token");
         return true;
       },
     );

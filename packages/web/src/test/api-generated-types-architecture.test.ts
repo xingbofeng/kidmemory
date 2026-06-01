@@ -33,14 +33,40 @@ describe('web generated api type architecture', () => {
     expect(source).not.toContain(historicalSuiteName);
   });
 
-  it('domain type files use generated cloud-api protocol types', () => {
+  it('web companion domain type files use generated sidecar protocol types', () => {
     const trustedUploadTypes = read('types/trustedUpload.ts');
     const shareBrowseTypes = read('types/shareBrowse.ts');
     const shareBookTypes = read('types/shareBook.ts');
 
-    expect(trustedUploadTypes).toContain("@kidmemory/protocol/cloud-api");
-    expect(shareBrowseTypes).toContain("@kidmemory/protocol/cloud-api");
-    expect(shareBookTypes).toContain("@kidmemory/protocol/cloud-api");
+    expect(trustedUploadTypes).toContain("@kidmemory/protocol/sidecar");
+    expect(shareBrowseTypes).toContain("@kidmemory/protocol/sidecar");
+    expect(shareBookTypes).toContain("@kidmemory/protocol/sidecar");
+  });
+
+  it('web companion production files do not import cloud-api contracts', () => {
+    const offenders = listProductionFiles(SRC_DIR)
+      .filter((filePath) => readFileSync(filePath, 'utf8').includes('@kidmemory/protocol/cloud-api'))
+      .map((filePath) => path.relative(SRC_DIR, filePath));
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('legacy upload session helpers are removed from the web companion client', () => {
+    const uploadApi = read('api/uploadApi.ts');
+    const uploadSession = read('lib/upload-session.ts');
+    const assetBrowser = read('pages/browse/AssetBrowser.tsx');
+
+    expect(uploadApi).not.toContain('createUploadSession');
+    expect(uploadSession).not.toContain('uploadSessionFile');
+    expect(assetBrowser).not.toContain('interface RecentUploadResponse');
+  });
+
+  it('signed upload XHR plumbing lives in one shared helper', () => {
+    const offenders = listProductionFiles(SRC_DIR)
+      .filter((filePath) => readFileSync(filePath, 'utf8').includes('new XMLHttpRequest'))
+      .map((filePath) => path.relative(SRC_DIR, filePath));
+
+    expect(offenders).toEqual(['lib/signed-upload.ts']);
   });
 
   it('api modules avoid hand-written response interfaces', () => {

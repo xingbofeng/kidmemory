@@ -9,21 +9,29 @@ import 'package:kidmemory_protocol/src/model/direct_upload_controller_list_objec
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_pullback201_response.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_pullback201_response_results_inner.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_pullback_request.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_access_shared_content200_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_access_shared_content200_response_share_token.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_close_session201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_commit_upload_item200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_commit_upload_item_request.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_session201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_session_request.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_create_share_token201_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_create_share_token_request.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items201_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items201_response_items_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items201_response_items_inner_signed_upload.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items_request.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_create_upload_items_request_files_inner.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_book_details200_response.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_books_list200_response_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_recent_uploads200_response_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_detail200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_detail200_response_items_inner.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_get_session_summary200_response_child.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_shared_assets200_response_inner.dart';
+import 'package:kidmemory_protocol/src/model/web_companion_controller_get_shared_book200_response.dart';
 import 'package:kidmemory_protocol/src/model/web_companion_controller_retry_upload_item_request.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
@@ -66,6 +74,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return DirectUploadControllerPullback201ResponseResultsInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadControllerPullbackRequest':
           return DirectUploadControllerPullbackRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerAccessSharedContent200Response':
+          return WebCompanionControllerAccessSharedContent200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerAccessSharedContent200ResponseShareToken':
+          return WebCompanionControllerAccessSharedContent200ResponseShareToken.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCloseSession201Response':
           return WebCompanionControllerCloseSession201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCommitUploadItem200Response':
@@ -76,6 +88,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return WebCompanionControllerCreateSession201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCreateSessionRequest':
           return WebCompanionControllerCreateSessionRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerCreateShareToken201Response':
+          return WebCompanionControllerCreateShareToken201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerCreateShareTokenRequest':
+          return WebCompanionControllerCreateShareTokenRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCreateUploadItems201Response':
           return WebCompanionControllerCreateUploadItems201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCreateUploadItems201ResponseItemsInner':
@@ -86,6 +102,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return WebCompanionControllerCreateUploadItemsRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerCreateUploadItemsRequestFilesInner':
           return WebCompanionControllerCreateUploadItemsRequestFilesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetBookDetails200Response':
+          return WebCompanionControllerGetBookDetails200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetBooksList200ResponseInner':
+          return WebCompanionControllerGetBooksList200ResponseInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerGetRecentUploads200ResponseInner':
           return WebCompanionControllerGetRecentUploads200ResponseInner.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerGetSessionDetail200Response':
@@ -96,6 +116,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return WebCompanionControllerGetSessionSummary200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerGetSessionSummary200ResponseChild':
           return WebCompanionControllerGetSessionSummary200ResponseChild.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetSharedAssets200ResponseInner':
+          return WebCompanionControllerGetSharedAssets200ResponseInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'WebCompanionControllerGetSharedBook200Response':
+          return WebCompanionControllerGetSharedBook200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'WebCompanionControllerRetryUploadItemRequest':
           return WebCompanionControllerRetryUploadItemRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:

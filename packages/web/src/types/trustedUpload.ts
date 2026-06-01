@@ -1,6 +1,15 @@
-import type { components } from '@kidmemory/protocol/cloud-api'
+import type { operations } from '@kidmemory/protocol/sidecar'
 
-export type SessionSummary = components['schemas']['SessionSummaryResponseDto']
+type JsonResponse<
+  OperationId extends keyof operations,
+  Status extends keyof operations[OperationId]['responses'],
+> = operations[OperationId]['responses'][Status] extends { content: { 'application/json': infer Body } }
+  ? Body
+  : never
+
+export type SessionSummary = JsonResponse<'WebCompanionController_getSessionSummary', 200>
+export type SessionDetail = JsonResponse<'WebCompanionController_getSessionDetail', 200>
+export type RecentUpload = JsonResponse<'WebCompanionController_getRecentUploads', 200>[number]
 export type SessionProviderAvailability = { available?: boolean }
 export type SessionProviders = {
   lan?: SessionProviderAvailability
@@ -18,7 +27,7 @@ export function sessionChildOf(session: SessionSummary): SessionChild {
 
 export type UploadProvider = 'lan' | 'supabase'
 
-export type UploadItem = components['schemas']['CreatedUploadItemDto']
+export type UploadItem = JsonResponse<'WebCompanionController_createUploadItems', 201>['items'][number]
 
 export interface FileTask {
   id: string

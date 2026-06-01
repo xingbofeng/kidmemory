@@ -80,6 +80,113 @@ const recentUploadResponseSchema = {
   },
 };
 
+const bookSummaryResponseSchema = {
+  type: "object",
+  required: ["id", "title", "childId", "createdAt", "status", "previewUrl"],
+  properties: {
+    id: { type: "string" },
+    title: { type: "string" },
+    childId: { type: "string" },
+    createdAt: { type: "string" },
+    status: { type: "string" },
+    previewUrl: { type: "string" },
+  },
+};
+
+const bookDetailResponseSchema = {
+  type: "object",
+  required: ["id", "title", "childId", "createdAt", "status", "previewUrl"],
+  properties: {
+    ...bookSummaryResponseSchema.properties,
+    description: { type: "string" },
+    pageCount: { type: "number" },
+  },
+};
+
+const createShareTokenRequestSchema = {
+  type: "object",
+  required: ["resourceType"],
+  properties: {
+    childId: { type: "string" },
+    resourceType: {
+      type: "string",
+      enum: ["child_assets", "specific_book", "asset_collection"],
+    },
+    resourceId: { type: "string" },
+    expiresInHours: { type: "number" },
+    maxAccessCount: { type: "number" },
+    accessType: { type: "string", enum: ["read_only", "time_limited"] },
+  },
+};
+
+const shareTokenResponseSchema = {
+  type: "object",
+  required: ["id", "token", "childId", "expiresAt", "accessType", "resourceType", "shareUrl"],
+  properties: {
+    id: { type: "string" },
+    token: { type: "string" },
+    childId: { type: "string" },
+    expiresAt: { type: "string" },
+    accessType: { type: "string", enum: ["read_only", "time_limited"] },
+    resourceType: {
+      type: "string",
+      enum: ["child_assets", "specific_book", "asset_collection"],
+    },
+    resourceId: { type: "string" },
+    maxAccessCount: { type: "number" },
+    shareUrl: { type: "string" },
+  },
+};
+
+const shareTokenValidationResponseSchema = {
+  type: "object",
+  required: ["isValid"],
+  properties: {
+    isValid: { type: "boolean" },
+    error: { type: "string" },
+    shareToken: {
+      type: "object",
+      required: ["id", "childId", "resourceType", "accessType"],
+      properties: {
+        id: { type: "string" },
+        childId: { type: "string" },
+        resourceType: {
+          type: "string",
+          enum: ["child_assets", "specific_book", "asset_collection"],
+        },
+        resourceId: { type: "string" },
+        accessType: { type: "string", enum: ["read_only", "time_limited"] },
+      },
+    },
+  },
+};
+
+const sharedAssetResponseSchema = {
+  type: "object",
+  required: ["id", "title", "type", "createdAt", "previewUrl"],
+  properties: {
+    id: { type: "string" },
+    title: { type: "string" },
+    type: { type: "string" },
+    createdAt: { type: "string" },
+    previewUrl: { type: "string" },
+  },
+};
+
+const sharedBookResponseSchema = {
+  type: "object",
+  required: ["id", "title", "createdAt", "status", "previewUrl"],
+  properties: {
+    id: { type: "string" },
+    title: { type: "string" },
+    createdAt: { type: "string" },
+    status: { type: "string" },
+    description: { type: "string" },
+    previewUrl: { type: "string" },
+    pageCount: { type: "number" },
+  },
+};
+
 const sessionSummaryResponseSchema = {
   type: "object",
   required: ["sessionId", "status", "child", "expiresAt", "maxItems", "usedItems", "providers"],
@@ -700,12 +807,14 @@ Query("token")(proto, "getAssetDetails", 2);
 Get("sessions/:sessionId/books")(proto, "getBooksList", desc("getBooksList"));
 ApiQuery({ name: "token", required: true, type: String })(proto, "getBooksList", desc("getBooksList"));
 ApiQuery({ name: "childId", required: false, type: String })(proto, "getBooksList", desc("getBooksList"));
+ApiResponse({ status: 200, schema: { type: "array", items: bookSummaryResponseSchema } })(proto, "getBooksList", desc("getBooksList"));
 Param("sessionId")(proto, "getBooksList", 0);
 Query("token")(proto, "getBooksList", 1);
 Query("childId")(proto, "getBooksList", 2);
 
 Get("sessions/:sessionId/books/:bookId")(proto, "getBookDetails", desc("getBookDetails"));
 ApiQuery({ name: "token", required: true, type: String })(proto, "getBookDetails", desc("getBookDetails"));
+ApiResponse({ status: 200, schema: bookDetailResponseSchema })(proto, "getBookDetails", desc("getBookDetails"));
 Param("sessionId")(proto, "getBookDetails", 0);
 Param("bookId")(proto, "getBookDetails", 1);
 Query("token")(proto, "getBookDetails", 2);
@@ -713,6 +822,8 @@ Query("token")(proto, "getBookDetails", 2);
 Post("sessions/:sessionId/share")(proto, "createShareToken", desc("createShareToken"));
 HttpCode(HttpStatus.CREATED)(proto, "createShareToken", desc("createShareToken"));
 ApiQuery({ name: "token", required: true, type: String })(proto, "createShareToken", desc("createShareToken"));
+ApiBody({ schema: createShareTokenRequestSchema })(proto, "createShareToken", desc("createShareToken"));
+ApiResponse({ status: 201, schema: shareTokenResponseSchema })(proto, "createShareToken", desc("createShareToken"));
 Param("sessionId")(proto, "createShareToken", 0);
 Body()(proto, "createShareToken", 1);
 Query("token")(proto, "createShareToken", 2);
@@ -725,14 +836,19 @@ Param("shareTokenId")(proto, "revokeShareToken", 1);
 Query("token")(proto, "revokeShareToken", 2);
 
 Get("share/:shareToken/access")(proto, "accessSharedContent", desc("accessSharedContent"));
+ApiResponse({ status: 200, schema: shareTokenValidationResponseSchema })(proto, "accessSharedContent", desc("accessSharedContent"));
 Param("shareToken")(proto, "accessSharedContent", 0);
 Query("clientIp")(proto, "accessSharedContent", 1);
 Query("userAgent")(proto, "accessSharedContent", 2);
 
 Get("share/:shareToken/assets")(proto, "getSharedAssets", desc("getSharedAssets"));
+ApiQuery({ name: "limit", required: false, type: Number })(proto, "getSharedAssets", desc("getSharedAssets"));
+ApiResponse({ status: 200, schema: { type: "array", items: sharedAssetResponseSchema } })(proto, "getSharedAssets", desc("getSharedAssets"));
 Param("shareToken")(proto, "getSharedAssets", 0);
 Query("limit")(proto, "getSharedAssets", 1);
 
 Get("share/:shareToken/book")(proto, "getSharedBook", desc("getSharedBook"));
+ApiQuery({ name: "bookId", required: false, type: String })(proto, "getSharedBook", desc("getSharedBook"));
+ApiResponse({ status: 200, schema: sharedBookResponseSchema })(proto, "getSharedBook", desc("getSharedBook"));
 Param("shareToken")(proto, "getSharedBook", 0);
 Query("bookId")(proto, "getSharedBook", 1);

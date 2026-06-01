@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DirectUploadService,
+  type DirectUploadSessionStore,
   type DirectUploadServiceDeps,
 } from '../../../../src/modules/web-companion/direct-upload.service.ts';
 
@@ -49,6 +50,31 @@ function makeMinimalDeps(
     },
     idFactory: { nextSessionId: () => 'test-session-id' },
     ...overrides,
+  };
+}
+
+function createPersistentSessionStore(): DirectUploadSessionStore {
+  const sessions = new Map<string, Parameters<DirectUploadSessionStore['insert']>[0]>();
+  return {
+    async insert(session) {
+      sessions.set(session.sessionId, session);
+    },
+    async findBySessionId(sessionId) {
+      return sessions.get(sessionId) ?? null;
+    },
+    async delete(sessionId) {
+      sessions.delete(sessionId);
+    },
+    async deleteExpired(now) {
+      let deleted = 0;
+      for (const [sessionId, session] of sessions.entries()) {
+        if (session.expiresAt < now) {
+          sessions.delete(sessionId);
+          deleted += 1;
+        }
+      }
+      return deleted;
+    },
   };
 }
 
@@ -150,6 +176,25 @@ describe('Direct Upload security', () => {
     const result = await service.pullback('test-session-id', { token: session.token });
     assert.equal(result.sessionId, 'test-session-id');
     service.destroy();
+  });
+
+  it('recovers direct upload session validation from the persistent store after service restart', async () => {
+    const sessionStore = createPersistentSessionStore();
+    const firstService = new DirectUploadService({
+      ...makeMinimalDeps(),
+      sessionStore,
+    });
+    const session = await firstService.createSession({ childId: 'child-1' });
+    firstService.destroy();
+
+    const restartedService = new DirectUploadService({
+      ...makeMinimalDeps(),
+      sessionStore,
+    });
+    const result = await restartedService.getStatus(session.sessionId, session.token);
+
+    assert.equal(result.sessionId, session.sessionId);
+    restartedService.destroy();
   });
 
   it('pullback without token is rejected', async () => {

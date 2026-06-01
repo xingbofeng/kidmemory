@@ -10,6 +10,7 @@ import { UploadList } from '../../components/file-upload/UploadList'
 import { UploadProgress } from '../../components/file-upload/UploadProgress'
 import { commitUploadItem, createUploadItems } from '../../api/uploadApi'
 import type { UploadProvider } from '../../types/trustedUpload'
+import { uploadFileWithSignedUrl } from '../../lib/signed-upload'
 
 interface FileUploadProps {
   session: UploadSession
@@ -202,36 +203,4 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
       {!fileError && <div className="sr-only">{t('upload.unsupportedTypeSr')}</div>}
     </div>
   )
-}
-
-async function uploadFileWithSignedUrl(
-  file: File,
-  signedUpload: {
-    method: string
-    url: string
-    headers: Record<string, string>
-  },
-  onProgress: (progress: number) => void,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100))
-      }
-    })
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve()
-      else reject(new Error(`Upload failed (${xhr.status})`))
-    })
-    xhr.addEventListener('error', () => reject(new Error('Upload failed: network error')))
-
-    xhr.open(signedUpload.method, signedUpload.url)
-    Object.entries(signedUpload.headers).forEach(([key, value]) => {
-      xhr.setRequestHeader(key, value)
-    })
-    xhr.send(file)
-  })
 }

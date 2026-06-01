@@ -15,6 +15,8 @@ import type {
   DirectUploadAssetGateway,
   DirectUploadPullbackRow,
   DirectUploadPullbackStore,
+  DirectUploadSessionStore,
+  DirectUploadSessionStoreEntry,
   DirectUploadStorageGateway,
 } from "./direct-upload.service.ts";
 import type { DirectUploadPullbackStatus } from "./direct-upload-pullback-state.ts";
@@ -28,6 +30,22 @@ import type { DatasetService } from "../dataset/dataset.service.ts";
 type DatasetAssetImporter = Pick<DatasetService, "importAssets">;
 
 interface DirectUploadPrismaClient {
+  uploadSession: {
+    create(input: {
+      data: {
+        id: string;
+        childId: string;
+        tokenHash: string;
+        status: string;
+        expiresAt: Date;
+        maxItems: number;
+      };
+    }): Promise<UploadSessionRow>;
+    findUnique(input: { where: { id: string } }): Promise<UploadSessionRow | null>;
+    deleteMany(input: {
+      where: { id?: string | { startsWith: string }; expiresAt?: { lt: Date }; status?: string };
+    }): Promise<{ count: number }>;
+  };
   directUploadPullback: {
     upsert(input: {
       where: { sessionId_objectKey: { sessionId: string; objectKey: string } };
@@ -57,6 +75,15 @@ interface DirectUploadPrismaClient {
     }): Promise<PullbackRow>;
     findUnique(input: { where: { id: string } }): Promise<PullbackRow | null>;
   };
+}
+
+interface UploadSessionRow {
+  id: string;
+  childId: string;
+  tokenHash: string;
+  status: string;
+  expiresAt: Date;
+  maxItems: number;
 }
 
 // ---- DirectUploadStorageGateway --------------------------------------------
@@ -225,6 +252,57 @@ export class DatasetServiceDirectUploadAssetGateway implements DirectUploadAsset
 }
 
 // ---- DirectUploadPullbackStore ---------------------------------------------
+
+export class PrismaDirectUploadSessionStore implements DirectUploadSessionStore {
+  private readonly prisma: DirectUploadPrismaClient;
+  private readonly maxItems: number;
+
+  constructor(prisma: DirectUploadPrismaClient, maxItems: number) {
+    this.prisma = prisma;
+    this.maxItems = maxItems;
+  }
+
+  async insert(session: DirectUploadSessionStoreEntry): Promise<void> {
+    await this.prisma.uploadSession.create({
+      data: {
+        id: session.sessionId,
+        childId: session.childId,
+        tokenHash: session.tokenHash,
+        status: "active",
+        expiresAt: session.expiresAt,
+        maxItems: this.maxItems,
+      },
+    });
+  }
+
+  async findBySessionId(sessionId: string): Promise<DirectUploadSessionStoreEntry | null> {
+    if (!sessionId.startsWith("wcs_direct_")) return null;
+    const session = await this.prisma.uploadSession.findUnique({ where: { id: sessionId } });
+    if (!session || session.status !== "active") return null;
+    return {
+      sessionId: session.id,
+      childId: session.childId,
+      bucket: "",
+      expiresAt: session.expiresAt,
+      tokenHash: session.tokenHash,
+    };
+  }
+
+  async delete(sessionId: string): Promise<void> {
+    await this.prisma.uploadSession.deleteMany({ where: { id: sessionId } });
+  }
+
+  async deleteExpired(now: Date): Promise<number> {
+    const result = await this.prisma.uploadSession.deleteMany({
+      where: {
+        id: { startsWith: "wcs_direct_" },
+        expiresAt: { lt: now },
+        status: "active",
+      },
+    });
+    return result.count;
+  }
+}
 
 /**
  * 通过 Prisma ORM 读写 direct_upload_pullbacks 表。

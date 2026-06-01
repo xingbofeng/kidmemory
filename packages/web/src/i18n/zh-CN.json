@@ -225,7 +225,7 @@
     "pending": "等待上传",
     "uploading": "上传中",
     "committing": "正在提交",
-    "success": "已上传，等待入库",
+    "success": "已入库",
     "failed": "失败"
   },
   "upload": {

@@ -2519,7 +2519,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        childId: string;
+                        createdAt: string;
+                        status: string;
+                        previewUrl: string;
+                    }[];
+                };
             };
         };
     };
@@ -2541,7 +2550,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        childId: string;
+                        createdAt: string;
+                        status: string;
+                        previewUrl: string;
+                        description?: string;
+                        pageCount?: number;
+                    };
+                };
             };
         };
     };
@@ -2556,13 +2576,40 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    childId?: string;
+                    /** @enum {string} */
+                    resourceType: "child_assets" | "specific_book" | "asset_collection";
+                    resourceId?: string;
+                    expiresInHours?: number;
+                    maxAccessCount?: number;
+                    /** @enum {string} */
+                    accessType?: "read_only" | "time_limited";
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        token: string;
+                        childId: string;
+                        expiresAt: string;
+                        /** @enum {string} */
+                        accessType: "read_only" | "time_limited";
+                        /** @enum {string} */
+                        resourceType: "child_assets" | "specific_book" | "asset_collection";
+                        resourceId?: string;
+                        maxAccessCount?: number;
+                        shareUrl: string;
+                    };
+                };
             };
         };
     };
@@ -2607,13 +2654,29 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        isValid: boolean;
+                        error?: string;
+                        shareToken?: {
+                            id: string;
+                            childId: string;
+                            /** @enum {string} */
+                            resourceType: "child_assets" | "specific_book" | "asset_collection";
+                            resourceId?: string;
+                            /** @enum {string} */
+                            accessType: "read_only" | "time_limited";
+                        };
+                    };
+                };
             };
         };
     };
     WebCompanionController_getSharedAssets: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+            };
             header?: never;
             path: {
                 shareToken: string;
@@ -2626,13 +2689,23 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        type: string;
+                        createdAt: string;
+                        previewUrl: string;
+                    }[];
+                };
             };
         };
     };
     WebCompanionController_getSharedBook: {
         parameters: {
-            query?: never;
+            query?: {
+                bookId?: string;
+            };
             header?: never;
             path: {
                 shareToken: string;
@@ -2645,7 +2718,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        createdAt: string;
+                        status: string;
+                        description?: string;
+                        previewUrl: string;
+                        pageCount?: number;
+                    };
+                };
             };
         };
     };
