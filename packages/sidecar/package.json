@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "prepare:agent-runtime": "npm --prefix ../agent-runtime run compile",
+    "prepare:agent-runtime": "node scripts/prepare-agent-runtime.mjs",
     "dev": "npm run prepare:agent-runtime && tsx watch src/main.ts",
     "test": "npm run prepare:agent-runtime && find tests -name '*.test.ts' -print0 | xargs -0 tsx --test",
     "test:unit": "npm run prepare:agent-runtime && find tests/unit -name '*.test.ts' -print0 | xargs -0 tsx --test",
