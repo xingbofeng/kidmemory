@@ -77,12 +77,16 @@ function runDockerGenerator(inputFile, outputDir) {
   const containerRoot = '/local/protocol'
   const inputInContainer = inputFile.replace(root, containerRoot)
   const outputInContainer = outputDir.replace(root, containerRoot)
+  const userArgs = typeof process.getuid === 'function' && typeof process.getgid === 'function'
+    ? ['--user', `${process.getuid()}:${process.getgid()}`]
+    : []
 
   return spawnSync(
     'docker',
     [
       'run',
       '--rm',
+      ...userArgs,
       '-v',
       `${root}:${containerRoot}`,
       'openapitools/openapi-generator-cli:v7.22.0',
@@ -101,8 +105,8 @@ function runDockerGenerator(inputFile, outputDir) {
   )
 }
 
-const useDocker = hasDockerDaemon()
-const useLocal = !useDocker && hasWorkingJava()
+const useLocal = hasWorkingJava()
+const useDocker = !useLocal && hasDockerDaemon()
 
 if (!useLocal && !useDocker) {
   console.error('Neither Java nor Docker is available; cannot generate Dart clients.')

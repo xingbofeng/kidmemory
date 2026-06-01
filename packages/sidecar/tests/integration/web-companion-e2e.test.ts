@@ -79,7 +79,7 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
     assert.equal(sessionResponse.token.length, 64);
     assert.ok(sessionResponse.webUrl.includes(sessionResponse.sessionId));
 
-    const summary = await service.getSessionSummary(sessionResponse.sessionId);
+    const summary = await service.getSessionSummary(sessionResponse.sessionId, sessionResponse.token);
     assert.equal(summary.status, UploadSessionStatus.ACTIVE);
     assert.equal(summary.child.id, testChildId);
     assert.equal(summary.usedItems, 0);
@@ -143,7 +143,7 @@ describe("Web Companion E2E", { skip: process.env.DATABASE_URL ? false : "DATABA
     });
 
     // 7. 验证会话已关闭
-    const finalSummary = await service.getSessionSummary(sessionResponse.sessionId);
+    const finalSummary = await service.getSessionSummary(sessionResponse.sessionId, sessionResponse.token);
     assert.equal(finalSummary.status, UploadSessionStatus.CLOSED);
   });
 

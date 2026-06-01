@@ -1468,8 +1468,8 @@ test("runtime scripts build agent-runtime file dependency before loading sidecar
 
   assert.match(
     scripts["prepare:agent-runtime"] ?? "",
-    /npm --prefix \.\.\/agent-runtime run compile/,
-    "prepare:agent-runtime must compile @kidmemory/agent-runtime",
+    /node scripts\/prepare-agent-runtime\.mjs/,
+    "prepare:agent-runtime must prepare @kidmemory/agent-runtime through the dedicated script",
   );
   for (const scriptName of runtimeScripts) {
     assert.match(

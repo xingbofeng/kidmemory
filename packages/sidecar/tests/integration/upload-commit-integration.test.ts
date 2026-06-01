@@ -353,7 +353,7 @@ describe("Upload Commit Integration", { skip: process.env.DATABASE_URL ? false :
     });
 
     // 6. Verify session is closed
-    const summary = await service.getSessionSummary(sessionResponse.sessionId);
+    const summary = await service.getSessionSummary(sessionResponse.sessionId, sessionResponse.token);
     assert.strictEqual(summary.status, "closed");
   });
 
