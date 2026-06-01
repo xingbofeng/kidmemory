@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fetchUploadSession } from './upload-session'
 import { UploadSession } from '../types/api'
-import { httpClient, ApiError } from './http-client'
+import { httpClient } from './http-client'
 
 vi.mock('./http-client', () => ({
   ApiError: class ApiError extends Error {
