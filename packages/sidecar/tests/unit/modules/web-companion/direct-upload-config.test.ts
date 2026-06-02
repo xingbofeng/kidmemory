@@ -51,6 +51,23 @@ function createDirectUploadConfig(overrides: {
   return config;
 }
 
+function createCosDirectUploadConfig(): AppConfig {
+  const config = createDirectUploadConfig({
+    supabaseUrl: "",
+    supabaseServiceRoleKey: "",
+    supabaseAnonKey: "",
+  });
+  config.supabaseStorage.provider = "cos" as AppConfig["supabaseStorage"]["provider"];
+  config.supabaseStorage.bucket = "counter-1252496948";
+  config.supabaseStorage.s3 = {
+    endpoint: "https://cos.ap-guangzhou.myqcloud.com",
+    region: "ap-guangzhou",
+    accessKeyId: "cos-secret-id",
+    secretAccessKey: "cos-secret-key",
+  };
+  return config;
+}
+
 test(
   "redactConfig 暴露 Web Companion Direct Upload 脱敏快照，但不泄露 service role key、anon key 原文、本地绝对路径或 db 连接串",
   () => {
@@ -153,6 +170,22 @@ test(
         return true;
       },
     );
+  },
+);
+
+test(
+  "COS/S3 provider 直传会话不要求 Supabase URL 或 anon key",
+  () => {
+    const config = createCosDirectUploadConfig();
+
+    assert.deepEqual(collectWebCompanionDirectUploadMissing(config), []);
+    assert.doesNotThrow(() => assertWebCompanionDirectUploadReady(config));
+
+    const snapshot = redactWebCompanionDirectUpload(config);
+    assert.equal(snapshot.canSignSession, true);
+    assert.equal(snapshot.bucketConfigured, true);
+    assert.equal(snapshot.provider, "cos");
+    assert.equal(JSON.stringify(snapshot).includes("cos-secret-key"), false);
   },
 );
 

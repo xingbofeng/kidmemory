@@ -83,11 +83,31 @@ export function createDatasetService(dependencies: DatasetDependencies) {
       const current = await db.getChild?.(id);
       if (!current) return { status: 404, data: { ok: false, message: "Child not found" } };
       const assets = await db.getAssets({ childId: id });
-      if (assets.length > 0) {
-        return { status: 409, data: { ok: false, message: "Child has assets. Remove assets before deleting child." } };
-      }
+      const targetAssetIds = assets.map((asset) => asset.id);
+      const deletedRelatedRecords = typeof db.deleteChildRelatedRecords === "function"
+        ? await db.deleteChildRelatedRecords(id)
+        : {};
+      const deletedEmbeddingJobs = typeof db.deleteEmbeddingJobsByAssetIds === "function"
+        ? await db.deleteEmbeddingJobsByAssetIds(targetAssetIds)
+        : 0;
+      const deletedCandidatePoolItems =
+        typeof db.deleteCandidatePoolItemsByChildId === "function"
+          ? await db.deleteCandidatePoolItemsByChildId(id)
+          : 0;
+      const deletedAssets = typeof db.deleteAssetsByChildId === "function"
+        ? await db.deleteAssetsByChildId(id)
+        : (await Promise.all(assets.map((asset) => db.deleteAsset?.(asset.id)))).filter(Boolean).length;
       const deleted = await db.deleteChild?.(id);
-      return { status: deleted ? 200 : 404, data: { ok: deleted === true } };
+      return {
+        status: deleted ? 200 : 404,
+        data: {
+          ok: deleted === true,
+          deletedAssets,
+          deletedEmbeddingJobs,
+          deletedCandidatePoolItems,
+          deletedRelatedRecords,
+        },
+      };
     },
     async listAssets(filter: { type?: string; childId?: string; query?: string } = {}) {
       return { assets: await listAssets(await dependencies.datasetState.current(), filter) };

@@ -3923,7 +3923,7 @@ abstract class AppLocalizations {
   /// datasetChildrenS300
   ///
   /// In zh, this message translates to:
-  /// **'删除失败：请先清空这个孩子关联的素材'**
+  /// **'删除失败：请检查本地服务状态后重试'**
   String get datasetChildrenS300;
 
   /// datasetChildrenS906
@@ -4877,8 +4877,14 @@ abstract class AppLocalizations {
   /// Child profile delete confirmation message.
   ///
   /// In zh, this message translates to:
-  /// **'确定删除「{name}」吗？删除前需要先清空这个孩子关联的素材。'**
+  /// **'确定要删除「{name}」吗？'**
   String datasetChildDeleteConfirmMessage(String name);
+
+  /// Child profile delete confirmation warning.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除后，这个孩子的素材、索引和相关本地记录也会一起删除。'**
+  String get datasetChildDeleteConfirmWarning;
 
   /// Child profile deleted log.
   ///
@@ -5155,6 +5161,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'智能助手已为你挑选 {count} 张素材'**
   String assetLibrarySmartPickedCount(int count);
+
+  /// Smart pick dialog hint when every visible asset is already included.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前可见素材已全部纳入，可直接确认或手动调整。'**
+  String get assetLibrarySmartPickAllIncludedHint;
 
   /// Smart pick applied toast message.
   ///

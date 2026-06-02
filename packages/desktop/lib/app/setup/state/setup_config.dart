@@ -26,6 +26,7 @@ class _OpenAiConfigDraft {
 
 class _SupabaseStorageConfigDraft {
   const _SupabaseStorageConfigDraft({
+    required this.provider,
     required this.url,
     required this.bucket,
     required this.serviceRoleKey,
@@ -38,6 +39,7 @@ class _SupabaseStorageConfigDraft {
   });
 
   factory _SupabaseStorageConfigDraft.fromControllers({
+    required String provider,
     required TextEditingController url,
     required TextEditingController bucket,
     required TextEditingController serviceRoleKey,
@@ -49,6 +51,7 @@ class _SupabaseStorageConfigDraft {
     required TextEditingController s3SecretAccessKey,
   }) {
     return _SupabaseStorageConfigDraft(
+      provider: provider,
       url: url.text.trim(),
       bucket: bucket.text.trim(),
       serviceRoleKey: serviceRoleKey.text.trim(),
@@ -62,6 +65,7 @@ class _SupabaseStorageConfigDraft {
     );
   }
 
+  final String provider;
   final String url;
   final String bucket;
   final String serviceRoleKey;

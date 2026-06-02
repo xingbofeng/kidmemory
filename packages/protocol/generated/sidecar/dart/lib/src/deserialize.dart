@@ -1,5 +1,7 @@
+import 'package:kidmemory_protocol/src/model/creation_controller_create_task_request.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_create_session201_response.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_create_session_request.dart';
+import 'package:kidmemory_protocol/src/model/direct_upload_controller_create_signed_upload_target_request.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_get_session_config200_response.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_get_status200_response.dart';
 import 'package:kidmemory_protocol/src/model/direct_upload_controller_get_status200_response_items_inner.dart';
@@ -52,10 +54,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (valueString == 'true' || valueString == '1') as ReturnType;
         case 'double':
           return (value is double ? value : double.parse('$value')) as ReturnType;
+        case 'CreationControllerCreateTaskRequest':
+          return CreationControllerCreateTaskRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadControllerCreateSession201Response':
           return DirectUploadControllerCreateSession201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadControllerCreateSessionRequest':
           return DirectUploadControllerCreateSessionRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DirectUploadControllerCreateSignedUploadTargetRequest':
+          return DirectUploadControllerCreateSignedUploadTargetRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadControllerGetSessionConfig200Response':
           return DirectUploadControllerGetSessionConfig200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DirectUploadControllerGetStatus200Response':

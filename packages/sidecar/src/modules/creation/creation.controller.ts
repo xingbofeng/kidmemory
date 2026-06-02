@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Inject, Param, Post, Res } from "@nestjs/common";
+import { ApiBody } from "@nestjs/swagger";
 import { ApiCode } from "@kidmemory/protocol";
 import type { Response } from "express";
 
@@ -15,6 +16,19 @@ export class CreationController {
   constructor(@Inject(CreationService) private readonly creationService: CreationService) {}
 
   @Post()
+  @ApiBody({
+    schema: {
+      type: "object",
+      required: ["goal", "creationType", "assetIds"],
+      additionalProperties: false,
+      properties: {
+        goal: { type: "string", minLength: 1 },
+        creationType: { type: "string", enum: ["storybook", "memory_book", "memoir_video"] },
+        assetIds: { type: "array", minItems: 1, items: { type: "string", minLength: 1 } },
+        settings: { type: "object", additionalProperties: true },
+      },
+    },
+  })
   async createTask(@Body() body: unknown) {
     const dto = parseDto(CreateCreationTaskDtoSchema, body, "creation/tasks");
     const result = await this.creationService.createTask(dto);

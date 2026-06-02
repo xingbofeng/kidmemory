@@ -151,9 +151,43 @@ export class PrismaDatasetDbService implements SampleDb {
     return result.count > 0;
   }
 
+  async deleteChildRelatedRecords(childId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const deletedAgentJobs = await tx.agentJob.deleteMany({
+        where: {
+          OR: [
+            { childId },
+            { book: { is: { childId } } },
+          ],
+        },
+      });
+      const deletedBooks = await tx.book.deleteMany({ where: { childId } });
+      const deletedDirectUploadPullbacks = await tx.directUploadPullback.deleteMany({ where: { childId } });
+      const deletedLanSessions = await tx.lanSession.deleteMany({ where: { childId } });
+      return {
+        deletedAgentJobs: deletedAgentJobs.count,
+        deletedBooks: deletedBooks.count,
+        deletedDirectUploadPullbacks: deletedDirectUploadPullbacks.count,
+        deletedLanSessions: deletedLanSessions.count,
+      };
+    });
+  }
+
   async deleteAssetsByChildId(childId: string) {
-    const result = await this.prisma.asset.deleteMany({ where: { childId } });
-    return result.count;
+    return this.prisma.$transaction(async (tx) => {
+      const assets = await tx.asset.findMany({
+        where: { childId },
+        select: { id: true },
+      });
+      const assetIds = assets.map((asset) => asset.id);
+      if (assetIds.length > 0) {
+        await tx.storageSyncJob.deleteMany({
+          where: { targetType: "asset", targetId: { in: assetIds } },
+        });
+      }
+      const result = await tx.asset.deleteMany({ where: { childId } });
+      return result.count;
+    });
   }
 
   async deleteEmbeddingJobsByAssetIds(assetIds: string[]) {

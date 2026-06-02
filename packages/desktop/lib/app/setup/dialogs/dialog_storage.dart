@@ -11,6 +11,9 @@ extension _DesktopShellSetupDialogStorage on _DesktopShellState {
         ? storageRaw['s3'] as Map<String, dynamic>
         : const <String, dynamic>{};
     final storage = SupabaseStorageConfigDto.fromJson(storageRaw);
+    var selectedProvider = _normalizeSupabaseStorageProvider(
+      _stringOrDefault(storage.providerValue, supabaseStorage.provider),
+    );
     final urlController = TextEditingController(
       text: _stringOrDefault(storage.url, supabaseStorage.url),
     );
@@ -58,6 +61,8 @@ extension _DesktopShellSetupDialogStorage on _DesktopShellState {
       ),
     );
     final shouldSave = await _showSupabaseStorageDialog(
+      selectedProvider: selectedProvider,
+      onProviderChanged: (value) => selectedProvider = value,
       urlController: urlController,
       bucketController: bucketController,
       publicBaseUrlController: publicBaseUrlController,
@@ -73,6 +78,7 @@ extension _DesktopShellSetupDialogStorage on _DesktopShellState {
     );
     if (shouldSave != true) return;
     await _submitSupabaseStorageConfig(
+      provider: selectedProvider,
       urlController: urlController,
       bucketController: bucketController,
       publicBaseUrlController: publicBaseUrlController,

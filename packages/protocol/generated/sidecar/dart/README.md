@@ -115,6 +115,7 @@ Class | Method | HTTP request | Description
 [*DatasetApi*](doc/DatasetApi.md) | [**datasetControllerUpdateAssetPatch**](doc/DatasetApi.md#datasetcontrollerupdateassetpatch) | **PATCH** /assets/{id} |
 [*DatasetApi*](doc/DatasetApi.md) | [**datasetControllerUpdateChild**](doc/DatasetApi.md#datasetcontrollerupdatechild) | **PATCH** /children/{id} |
 [*DirectUploadApi*](doc/DirectUploadApi.md) | [**directUploadControllerCreateSession**](doc/DirectUploadApi.md#directuploadcontrollercreatesession) | **POST** /api/web-companion/direct-upload/sessions |
+[*DirectUploadApi*](doc/DirectUploadApi.md) | [**directUploadControllerCreateSignedUploadTarget**](doc/DirectUploadApi.md#directuploadcontrollercreatesigneduploadtarget) | **POST** /api/web-companion/direct-upload/sessions/{sessionId}/sign-upload |
 [*DirectUploadApi*](doc/DirectUploadApi.md) | [**directUploadControllerGetSessionConfig**](doc/DirectUploadApi.md#directuploadcontrollergetsessionconfig) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/config |
 [*DirectUploadApi*](doc/DirectUploadApi.md) | [**directUploadControllerGetStatus**](doc/DirectUploadApi.md#directuploadcontrollergetstatus) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/status |
 [*DirectUploadApi*](doc/DirectUploadApi.md) | [**directUploadControllerListObjects**](doc/DirectUploadApi.md#directuploadcontrollerlistobjects) | **GET** /api/web-companion/direct-upload/sessions/{sessionId}/objects |
@@ -150,8 +151,10 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [CreationControllerCreateTaskRequest](doc/CreationControllerCreateTaskRequest.md)
  - [DirectUploadControllerCreateSession201Response](doc/DirectUploadControllerCreateSession201Response.md)
  - [DirectUploadControllerCreateSessionRequest](doc/DirectUploadControllerCreateSessionRequest.md)
+ - [DirectUploadControllerCreateSignedUploadTargetRequest](doc/DirectUploadControllerCreateSignedUploadTargetRequest.md)
  - [DirectUploadControllerGetSessionConfig200Response](doc/DirectUploadControllerGetSessionConfig200Response.md)
  - [DirectUploadControllerGetStatus200Response](doc/DirectUploadControllerGetStatus200Response.md)
  - [DirectUploadControllerGetStatus200ResponseItemsInner](doc/DirectUploadControllerGetStatus200ResponseItemsInner.md)

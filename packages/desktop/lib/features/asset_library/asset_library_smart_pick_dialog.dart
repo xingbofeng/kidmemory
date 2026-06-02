@@ -32,7 +32,7 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
   }
 
   var target = 'picture_book';
-  var seed = DateTime.now().millisecondsSinceEpoch;
+  var seed = 0;
   var suggested = buildAssetLibrarySmartSuggestion(
     assets: assets,
     target: target,
@@ -45,7 +45,9 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
       return StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.assetLibrarySmartPickLabel),
+            title: Text(
+              AppLocalizations.of(context)!.assetLibrarySmartPickLabel,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +60,7 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
                     if (value == null) return;
                     setDialogState(() {
                       target = value;
-                      seed = DateTime.now().millisecondsSinceEpoch;
+                      seed = 0;
                       suggested = buildAssetLibrarySmartSuggestion(
                         assets: assets,
                         target: target,
@@ -70,17 +72,23 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
                     children: [
                       RadioListTile<String>(
                         value: 'picture_book',
-                        title: Text(AppLocalizations.of(context)!.assetLibraryPageS902),
+                        title: Text(
+                          AppLocalizations.of(context)!.assetLibraryPageS902,
+                        ),
                         dense: true,
                       ),
                       RadioListTile<String>(
                         value: 'memory_album',
-                        title: Text(AppLocalizations.of(context)!.assetLibraryPageS901),
+                        title: Text(
+                          AppLocalizations.of(context)!.assetLibraryPageS901,
+                        ),
                         dense: true,
                       ),
                       RadioListTile<String>(
                         value: 'memory_video',
-                        title: Text(AppLocalizations.of(context)!.assetLibraryPageS900),
+                        title: Text(
+                          AppLocalizations.of(context)!.assetLibraryPageS900,
+                        ),
                         dense: true,
                       ),
                     ],
@@ -92,6 +100,19 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
                     context,
                   )!.assetLibrarySmartPickedCount(suggested.length),
                 ),
+                const SizedBox(height: 10),
+                AssetLibrarySmartPickPreview(assets: suggested),
+                if (assets.length <= suggested.length) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.assetLibrarySmartPickAllIncludedHint,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
             ),
             actions: [
@@ -102,16 +123,18 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
                 child: Text(AppLocalizations.of(context)!.assetLibraryPageS503),
               ),
               TextButton(
-                onPressed: () {
-                  setDialogState(() {
-                    seed = DateTime.now().millisecondsSinceEpoch;
-                    suggested = buildAssetLibrarySmartSuggestion(
-                      assets: assets,
-                      target: target,
-                      seed: seed,
-                    );
-                  });
-                },
+                onPressed: assets.length <= suggested.length
+                    ? null
+                    : () {
+                        setDialogState(() {
+                          seed += 1;
+                          suggested = buildAssetLibrarySmartSuggestion(
+                            assets: assets,
+                            target: target,
+                            seed: seed,
+                          );
+                        });
+                      },
                 child: Text(AppLocalizations.of(context)!.assetLibraryPageS919),
               ),
               FilledButton(
@@ -132,4 +155,28 @@ Future<AssetLibrarySmartPickDialogResult?> showAssetLibrarySmartPickDialog({
     action: action,
     suggestedAssets: suggested,
   );
+}
+
+class AssetLibrarySmartPickPreview extends StatelessWidget {
+  const AssetLibrarySmartPickPreview({super.key, required this.assets});
+
+  final List<AssetVm> assets;
+
+  @override
+  Widget build(BuildContext context) {
+    final previewAssets = assets.take(4).toList();
+    if (previewAssets.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final asset in previewAssets)
+          InputChip(
+            label: Text(asset.title.trim().isEmpty ? asset.id : asset.title),
+            showCheckmark: false,
+            selected: true,
+          ),
+      ],
+    );
+  }
 }

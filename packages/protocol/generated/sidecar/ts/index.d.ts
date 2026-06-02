@@ -1114,6 +1114,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/web-companion/direct-upload/sessions/{sessionId}/sign-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DirectUploadController_createSignedUploadTarget"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/web-companion/lan/discover": {
         parameters: {
             query?: never;
@@ -2028,7 +2046,19 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    goal: string;
+                    /** @enum {string} */
+                    creationType: "storybook" | "memory_book" | "memoir_video";
+                    assetIds: string[];
+                    settings?: {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -2759,6 +2789,10 @@ export interface operations {
                         sessionPath: string;
                         supabaseUrl: string;
                         anonKey: string;
+                        /** @enum {string} */
+                        provider: "supabase" | "cos" | "s3";
+                        /** @enum {string} */
+                        uploadMode: "supabase-js" | "signed-url";
                         publicUrl: string;
                         recommendedClientLimit: number;
                         expiresAtHintSeconds: number;
@@ -2897,6 +2931,48 @@ export interface operations {
                         anonKey: string;
                         bucket: string;
                         recommendedClientLimit: number;
+                        /** @enum {string} */
+                        provider: "supabase" | "cos" | "s3";
+                        /** @enum {string} */
+                        uploadMode: "supabase-js" | "signed-url";
+                    };
+                };
+            };
+        };
+    };
+    DirectUploadController_createSignedUploadTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    objectKey: string;
+                    contentType?: string;
+                    sizeBytes?: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        method: "PUT";
+                        url: string;
+                        expiresAt: string;
+                        headers: {
+                            [key: string]: string;
+                        };
                     };
                 };
             };

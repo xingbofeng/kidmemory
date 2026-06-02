@@ -194,6 +194,34 @@ void main() {
     ]);
   });
 
+  test('AgentConfigApi treats missing default agent config as empty', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() async => server.close(force: true));
+
+    server.listen((request) async {
+      request.response
+        ..statusCode = 404
+        ..headers.contentType = ContentType.json
+        ..write(
+          jsonEncode({
+            'code': 404,
+            'msg': 'Default agent config not found',
+            'data': null,
+          }),
+        );
+      await request.response.close();
+    });
+
+    final api = AgentConfigApi(
+      SidecarApi(
+        baseUrl: 'http://${server.address.host}:${server.port}',
+        retries: 0,
+      ),
+    );
+
+    expect(await api.getDefaultAgentConfig(), isNull);
+  });
+
   test('DesktopSidecarGateway calls task-first creation routes', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final seen = <String>[];
@@ -329,7 +357,7 @@ void main() {
 
     expect(task['taskId'], 'task_desktop_1');
     expect(taskBody['assetIds'], ['asset_a', 'asset_b']);
-    expect(taskBody.containsKey('settings'), isFalse);
+    expect(taskBody['settings'], {'tone': 'warm'});
     expect(generated['status'], 'succeeded');
     expect(detail['taskId'], 'task_desktop_1');
     expect(events['events'], isA<List<dynamic>>());

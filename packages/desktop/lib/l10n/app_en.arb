@@ -2019,7 +2019,7 @@
   "@datasetChildrenS301": {
     "description": "datasetChildrenS301"
   },
-  "datasetChildrenS300": "删除失败：请先清空这个孩子关联的素材",
+  "datasetChildrenS300": "Delete failed. Check the local service and try again.",
   "@datasetChildrenS300": {
     "description": "datasetChildrenS300"
   },
@@ -2904,7 +2904,7 @@
       }
     }
   },
-  "datasetChildDeleteConfirmMessage": "Delete \"{name}\"? Clear this child's linked assets before deleting.",
+  "datasetChildDeleteConfirmMessage": "Delete \"{name}\"?",
   "@datasetChildDeleteConfirmMessage": {
     "description": "Child profile delete confirmation message.",
     "placeholders": {
@@ -2912,6 +2912,10 @@
         "type": "String"
       }
     }
+  },
+  "datasetChildDeleteConfirmWarning": "This will also delete this child's assets, indexes, and related local records.",
+  "@datasetChildDeleteConfirmWarning": {
+    "description": "Child profile delete confirmation warning."
   },
   "datasetChildDeletedLog": "Deleted child profile: {childId} {name}",
   "@datasetChildDeletedLog": {
@@ -3340,6 +3344,10 @@
         "type": "int"
       }
     }
+  },
+  "assetLibrarySmartPickAllIncludedHint": "All visible assets are already included. Confirm them or fine-tune manually.",
+  "@assetLibrarySmartPickAllIncludedHint": {
+    "description": "Smart pick dialog hint when every visible asset is already included."
   },
   "assetLibrarySmartPickAppliedMessage": "Selected {count} assets. You can fine-tune them manually.",
   "@assetLibrarySmartPickAppliedMessage": {

@@ -40,9 +40,9 @@ class GenerateExportPage extends StatelessWidget {
     required this.onExport,
     required this.onExportTargetChanged,
     this.selectedCreationType = 'storybook',
-    this.onGeneratePictureBook,
-    this.onGenerateMemoryAlbum,
-    this.onGenerateMemoryVideo,
+    this.creationGoal = '',
+    this.onCreationGoalChanged,
+    this.onCreationTypeChanged,
     this.creationTask,
     this.creationFailure,
     this.creationTaskSteps = const [],
@@ -79,13 +79,13 @@ class GenerateExportPage extends StatelessWidget {
   final String selectedStyle;
   final String selectedExportTarget;
   final String selectedCreationType;
+  final String creationGoal;
   final VoidCallback onGenerate;
-  final VoidCallback? onGeneratePictureBook;
-  final VoidCallback? onGenerateMemoryAlbum;
-  final VoidCallback? onGenerateMemoryVideo;
   final VoidCallback onConfirmPlan;
   final VoidCallback onExport;
   final ValueChanged<String> onExportTargetChanged;
+  final ValueChanged<String>? onCreationGoalChanged;
+  final ValueChanged<String>? onCreationTypeChanged;
   final bool shareCreating;
   final ExportResultVm? exportResult;
   final String previewFailureReason;
@@ -153,6 +153,8 @@ class GenerateExportPage extends StatelessWidget {
         selectedCount > 0 &&
         !generating &&
         creationPhase != CreationWorkflowPhase.planReady;
+    final canEditCreationInputs =
+        !generating && creationPhase != CreationWorkflowPhase.planReady;
     final mainStage = mainStageFor(
       creationPhase,
       generated: generated,
@@ -235,15 +237,14 @@ class GenerateExportPage extends StatelessWidget {
                 selectedCount: selectedCount,
                 generating: generating,
                 selectedCreationType: selectedCreationType,
-                onGeneratePictureBook: canGenerate
-                    ? (onGeneratePictureBook ?? onGenerate)
+                creationGoal: creationGoal,
+                onGoalChanged: canEditCreationInputs
+                    ? onCreationGoalChanged
                     : null,
-                onGenerateMemoryAlbum: canGenerate
-                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                onCreationTypeChanged: canEditCreationInputs
+                    ? onCreationTypeChanged
                     : null,
-                onGenerateMemoryVideo: canGenerate
-                    ? (onGenerateMemoryVideo ?? onGenerate)
-                    : null,
+                onGenerate: canGenerate ? onGenerate : null,
               ),
               const SizedBox(height: 5),
               AssetInputCard(
@@ -260,15 +261,14 @@ class GenerateExportPage extends StatelessWidget {
                 selectedCount: selectedCount,
                 generating: generating,
                 selectedCreationType: selectedCreationType,
-                onGeneratePictureBook: canGenerate
-                    ? (onGeneratePictureBook ?? onGenerate)
+                creationGoal: creationGoal,
+                onGoalChanged: canEditCreationInputs
+                    ? onCreationGoalChanged
                     : null,
-                onGenerateMemoryAlbum: canGenerate
-                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                onCreationTypeChanged: canEditCreationInputs
+                    ? onCreationTypeChanged
                     : null,
-                onGenerateMemoryVideo: canGenerate
-                    ? (onGenerateMemoryVideo ?? onGenerate)
-                    : null,
+                onGenerate: canGenerate ? onGenerate : null,
               ),
               const SizedBox(height: 1),
               AssetInputCard(
@@ -285,15 +285,14 @@ class GenerateExportPage extends StatelessWidget {
                 selectedCount: selectedCount,
                 generating: generating,
                 selectedCreationType: selectedCreationType,
-                onGeneratePictureBook: canGenerate
-                    ? (onGeneratePictureBook ?? onGenerate)
+                creationGoal: creationGoal,
+                onGoalChanged: canEditCreationInputs
+                    ? onCreationGoalChanged
                     : null,
-                onGenerateMemoryAlbum: canGenerate
-                    ? (onGenerateMemoryAlbum ?? onGenerate)
+                onCreationTypeChanged: canEditCreationInputs
+                    ? onCreationTypeChanged
                     : null,
-                onGenerateMemoryVideo: canGenerate
-                    ? (onGenerateMemoryVideo ?? onGenerate)
-                    : null,
+                onGenerate: canGenerate ? onGenerate : null,
               ),
               const SizedBox(height: 1),
               AssetInputCard(

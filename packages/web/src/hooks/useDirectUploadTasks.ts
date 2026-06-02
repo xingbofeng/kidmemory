@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../api/errors'
-import { getDirectUploadConfig, pullbackDirectUpload } from '../api/uploadApi'
+import { getDirectUploadConfig, pullbackDirectUpload, signDirectUploadObject } from '../api/uploadApi'
 import {
   createDirectUploadClient,
   validateAddFiles,
@@ -36,12 +36,15 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
   const bucket = params.get('bucket') ?? ''
   const supabaseUrl = params.get('supabaseUrl') ?? ''
   const token = params.get('token') ?? ''
+  const uploadMode = params.get('uploadMode') === 'signed-url' ? 'signed-url' : 'supabase-js'
+  const providerParam = params.get('provider')
+  const provider = providerParam === 'cos' || providerParam === 's3' ? providerParam : 'supabase'
 
   const missing: string[] = []
   if (!sessionId) missing.push('sessionId')
   if (!childId) missing.push('childId')
   if (!bucket) missing.push('bucket')
-  if (!supabaseUrl) missing.push('supabaseUrl')
+  if (!supabaseUrl && uploadMode !== 'signed-url') missing.push('supabaseUrl')
   if (!token) missing.push('token')
   if (missing.length > 0) {
     return { ok: false, missing }
@@ -62,6 +65,8 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
       childId,
       bucket,
       supabaseUrl,
+      provider,
+      uploadMode,
       publicUrl,
       token,
       sessionPath: `${bucket}/${sessionId}`,
@@ -90,6 +95,7 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
   const parsed = useMemo(() => parseConfigFromQuery(params), [params])
 
   const [anonKey, setAnonKey] = useState<string | null>(null)
+  const [serverConfig, setServerConfig] = useState<Awaited<ReturnType<typeof getDirectUploadConfig>> | null>(null)
   const [anonKeyError, setAnonKeyError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -98,7 +104,10 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
     const { sessionId, token } = parsed.partial
     getDirectUploadConfig(sessionId, token)
       .then((data) => {
-        if (!cancelled) setAnonKey(data.anonKey)
+        if (!cancelled) {
+          setServerConfig(data)
+          setAnonKey(data.anonKey ?? '')
+        }
       })
       .catch((err) => {
         if (!cancelled) {
@@ -112,15 +121,26 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
   }, [parsed])
 
   const fullConfig = useMemo((): DirectUploadConfig | null => {
-    if (!parsed.ok || !anonKey) return null
-    return { ...parsed.partial, anonKey }
-  }, [parsed, anonKey])
+    if (!parsed.ok || anonKey == null) return null
+    return {
+      ...parsed.partial,
+      anonKey,
+      provider: serverConfig?.provider ?? parsed.partial.provider,
+      uploadMode: serverConfig?.uploadMode ?? parsed.partial.uploadMode,
+    }
+  }, [parsed, anonKey, serverConfig])
 
   const [tasks, setTasks] = useState<DirectUploadFileTask[]>([])
   const [validationError, setValidationError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
-  const factory = clientFactory ?? createDirectUploadClient
+  const factory = clientFactory ?? ((config: DirectUploadConfig) =>
+    createDirectUploadClient(config, {
+      signUpload: (input) => signDirectUploadObject(config.sessionId, {
+        token: config.token,
+        ...input,
+      }),
+    }))
 
   const handleFiles = useCallback(
     async (incoming: File[]) => {

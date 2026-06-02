@@ -171,6 +171,7 @@ class PathsConfigRequestDto {
 
 class SupabaseStorageConfigRequestDto {
   SupabaseStorageConfigRequestDto({
+    this.provider,
     required this.url,
     required this.bucket,
     this.serviceRoleKey,
@@ -181,6 +182,7 @@ class SupabaseStorageConfigRequestDto {
     this.s3AccessKeyId,
     this.s3SecretAccessKey,
   });
+  final String? provider;
   final String url;
   final String bucket;
   final String? serviceRoleKey;
@@ -191,6 +193,7 @@ class SupabaseStorageConfigRequestDto {
   final String? s3AccessKeyId;
   final String? s3SecretAccessKey;
   JsonMap toJson() => {
+        if (provider != null) 'provider': provider,
         'url': url,
         'bucket': bucket,
         if (serviceRoleKey != null) 'serviceRoleKey': serviceRoleKey,
@@ -285,9 +288,10 @@ class SupabaseS3ConfigResponseDto {
 }
 
 class SupabaseStorageConfigResponseDto {
-  SupabaseStorageConfigResponseDto({this.configured = false, this.url = '', this.bucket = '', this.serviceRoleKeyConfigured = false, this.publicBaseUrl = '', this.signedUrlTtlSeconds = 3600, this.s3CredentialsDetected = false, this.authMode = '', this.diagnosticMessage = '', this.s3});
-  factory SupabaseStorageConfigResponseDto.fromJson(JsonMap json) => SupabaseStorageConfigResponseDto(configured: _bool(json['configured']) ?? false, url: _string(json['url']) ?? '', bucket: _string(json['bucket']) ?? '', serviceRoleKeyConfigured: _bool(json['serviceRoleKeyConfigured']) ?? false, publicBaseUrl: _string(json['publicBaseUrl']) ?? '', signedUrlTtlSeconds: _int(json['signedUrlTtlSeconds']) ?? 3600, s3CredentialsDetected: _bool(json['s3CredentialsDetected']) ?? false, authMode: _string(json['authMode']) ?? '', diagnosticMessage: _string(json['diagnosticMessage']) ?? '', s3: SupabaseS3ConfigResponseDto.fromJson(_asMap(json['s3'])));
+  SupabaseStorageConfigResponseDto({this.configured = false, this.provider = 'supabase', this.url = '', this.bucket = '', this.serviceRoleKeyConfigured = false, this.publicBaseUrl = '', this.signedUrlTtlSeconds = 3600, this.s3CredentialsDetected = false, this.authMode = '', this.diagnosticMessage = '', this.s3});
+  factory SupabaseStorageConfigResponseDto.fromJson(JsonMap json) => SupabaseStorageConfigResponseDto(configured: _bool(json['configured']) ?? false, provider: _string(json['provider']) ?? 'supabase', url: _string(json['url']) ?? '', bucket: _string(json['bucket']) ?? '', serviceRoleKeyConfigured: _bool(json['serviceRoleKeyConfigured']) ?? false, publicBaseUrl: _string(json['publicBaseUrl']) ?? '', signedUrlTtlSeconds: _int(json['signedUrlTtlSeconds']) ?? 3600, s3CredentialsDetected: _bool(json['s3CredentialsDetected']) ?? false, authMode: _string(json['authMode']) ?? '', diagnosticMessage: _string(json['diagnosticMessage']) ?? '', s3: SupabaseS3ConfigResponseDto.fromJson(_asMap(json['s3'])));
   final bool? configured;
+  final String? provider;
   final String? url;
   final String? bucket;
   final bool? serviceRoleKeyConfigured;
@@ -297,7 +301,7 @@ class SupabaseStorageConfigResponseDto {
   final String? authMode;
   final String? diagnosticMessage;
   final SupabaseS3ConfigResponseDto? s3;
-  JsonMap toJson() => {'configured': configured, 'url': url, 'bucket': bucket, 'serviceRoleKeyConfigured': serviceRoleKeyConfigured, 'publicBaseUrl': publicBaseUrl, 'signedUrlTtlSeconds': signedUrlTtlSeconds, 's3CredentialsDetected': s3CredentialsDetected, 'authMode': authMode, 'diagnosticMessage': diagnosticMessage, 's3': s3?.toJson()};
+  JsonMap toJson() => {'configured': configured, 'provider': provider, 'url': url, 'bucket': bucket, 'serviceRoleKeyConfigured': serviceRoleKeyConfigured, 'publicBaseUrl': publicBaseUrl, 'signedUrlTtlSeconds': signedUrlTtlSeconds, 's3CredentialsDetected': s3CredentialsDetected, 'authMode': authMode, 'diagnosticMessage': diagnosticMessage, 's3': s3?.toJson()};
 }
 
 class ReadinessCheckResponseDto {

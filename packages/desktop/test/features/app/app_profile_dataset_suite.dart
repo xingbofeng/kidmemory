@@ -110,6 +110,41 @@ void appProfileAndDatasetSuite() {
     expect(api.deletedAssetIds, isNot(contains('asset-dino-world')));
   });
 
+  testWidgets('delete child profile confirms before deleting linked data', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _MultiChildSidecarApi();
+    await tester.pumpWidget(localizedTestApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+
+    await gotoStep(tester, '孩子档案');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('删除').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('确定要删除「澄澄」吗？'), findsOneWidget);
+    expect(find.text('删除后，这个孩子的素材、索引和相关本地记录也会一起删除。'), findsOneWidget);
+    expect(api.deletedChildIds, isEmpty);
+
+    await tester.tap(
+      find.descendant(of: find.byType(AlertDialog), matching: find.text('取消')),
+    );
+    await tester.pumpAndSettle();
+    expect(api.deletedChildIds, isEmpty);
+
+    await tester.tap(find.text('删除').first);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: find.byType(AlertDialog), matching: find.text('删除')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(api.deletedChildIds, contains('child-1'));
+  });
+
   testWidgets(
     'desktop shell starts without a hardcoded selected sample asset and uses sidecar child data',
     (tester) async {

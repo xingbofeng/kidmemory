@@ -9,6 +9,8 @@ export interface CreateDirectUploadSessionResponse {
   sessionPath: string;
   supabaseUrl: string;
   anonKey: string;
+  provider: string;
+  uploadMode: "supabase-js" | "signed-url";
   publicUrl: string;
   recommendedClientLimit: number;
   expiresAtHintSeconds: number;

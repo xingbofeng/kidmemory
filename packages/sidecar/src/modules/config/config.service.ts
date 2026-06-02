@@ -8,12 +8,19 @@ import {
 } from "../../infrastructure/config/app-config.service.ts";
 import { PrismaMigrationService } from "../../infrastructure/database/prisma-migration.service.ts";
 import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
-import { createSupabaseStorageProvider } from "../storage/providers/supabase-storage.ts";
+import { createObjectStorageProvider } from "../storage/providers/object-storage.ts";
 import { createConfigReadinessService } from "./providers/config.domain.ts";
 
 type ConfigReadinessDelegate = ReturnType<typeof createConfigReadinessService>;
+type StorageProviderFactory = (
+  config: AppConfig["supabaseStorage"],
+  fetchImpl: typeof fetch,
+) => Pick<ReturnType<typeof createObjectStorageProvider>, "testConnection">;
+
 export const CONFIG_STORAGE_FETCH = Symbol("CONFIG_STORAGE_FETCH");
+export const CONFIG_STORAGE_PROVIDER_FACTORY = Symbol("CONFIG_STORAGE_PROVIDER_FACTORY");
 const SUPABASE_STORAGE_RUNTIME_CONFIG_KEY = "supabaseStorage";
+const WEB_COMPANION_DIRECT_UPLOAD_RUNTIME_CONFIG_KEY = "webCompanionDirectUpload";
 
 @Injectable()
 export class ConfigService {
@@ -21,6 +28,7 @@ export class ConfigService {
   private readonly prisma: PrismaService;
   private readonly migrations: PrismaMigrationService;
   private readonly storageFetch: typeof fetch;
+  private readonly storageProviderFactory: StorageProviderFactory;
   private readinessDelegate?: ConfigReadinessDelegate;
   private runtimeConfigHydrated = false;
   private runtimeConfigHydration?: Promise<void>;
@@ -30,11 +38,17 @@ export class ConfigService {
     @Inject(PrismaService) prisma: PrismaService,
     @Optional() @Inject(PrismaMigrationService) migrations?: PrismaMigrationService,
     @Optional() @Inject(CONFIG_STORAGE_FETCH) storageFetch?: typeof fetch,
+    @Optional() @Inject(CONFIG_STORAGE_PROVIDER_FACTORY) storageProviderFactory?: StorageProviderFactory,
   ) {
     this.config = config;
     this.prisma = prisma;
     this.migrations = migrations ?? new PrismaMigrationService(config);
     this.storageFetch = storageFetch ?? fetch;
+    this.storageProviderFactory = storageProviderFactory
+      ?? ((storageConfig, fetchImpl) => createObjectStorageProvider({
+        config: storageConfig,
+        fetch: fetchImpl,
+      }));
   }
 
   private get delegate(): ConfigReadinessDelegate {
@@ -77,9 +91,12 @@ export class ConfigService {
     return { ok: true, config };
   }
   async updateSupabaseStorage(body: Record<string, unknown> = {}) {
+    const provider = stringFromBody(body.provider) as AppConfig["supabaseStorage"]["provider"] | undefined;
+    const bucket = stringFromBody(body.bucket);
     this.config.updateSupabaseStorageConfig({
+      provider,
       url: stringFromBody(body.url),
-      bucket: stringFromBody(body.bucket),
+      bucket,
       serviceRoleKey: stringFromBody(body.serviceRoleKey),
       publicBaseUrl: stringFromBody(body.publicBaseUrl),
       signedUrlTtlSeconds: numberFromBody(body.signedUrlTtlSeconds),
@@ -90,9 +107,16 @@ export class ConfigService {
         secretAccessKey: stringFromBody(body.s3SecretAccessKey),
       },
     });
+    if (bucket && (provider === "cos" || provider === "s3")) {
+      this.config.updateWebCompanionDirectUploadConfig({ bucket });
+    }
     await this.persistRuntimeConfig(
       SUPABASE_STORAGE_RUNTIME_CONFIG_KEY,
       this.config.config.supabaseStorage,
+    );
+    await this.persistRuntimeConfig(
+      WEB_COMPANION_DIRECT_UPLOAD_RUNTIME_CONFIG_KEY,
+      this.config.config.webCompanionDirectUpload,
     );
     return {
       ok: true,
@@ -101,10 +125,10 @@ export class ConfigService {
   }
   async testSupabaseStorage() {
     await this.hydrateRuntimeConfig();
-    return createSupabaseStorageProvider({
-      config: this.config.config.supabaseStorage,
-      fetch: this.storageFetch,
-    }).testConnection();
+    return this.storageProviderFactory(
+      this.config.config.supabaseStorage,
+      this.storageFetch,
+    ).testConnection();
   }
   postgresReadiness() { return this.delegate.postgresReadiness(); }
   claudeReadiness() { return this.delegate.claudeReadiness(); }
@@ -126,6 +150,7 @@ export class ConfigService {
           key: {
             in: [
               SUPABASE_STORAGE_RUNTIME_CONFIG_KEY,
+              WEB_COMPANION_DIRECT_UPLOAD_RUNTIME_CONFIG_KEY,
             ],
           },
         },
@@ -134,6 +159,11 @@ export class ConfigService {
         if (row.key === SUPABASE_STORAGE_RUNTIME_CONFIG_KEY) {
           this.config.updateSupabaseStorageConfig(
             asRuntimeConfigObject(row.value) as SupabaseStorageUpdateConfig,
+          );
+        }
+        if (row.key === WEB_COMPANION_DIRECT_UPLOAD_RUNTIME_CONFIG_KEY) {
+          this.config.updateWebCompanionDirectUploadConfig(
+            asRuntimeConfigObject(row.value),
           );
         }
       }

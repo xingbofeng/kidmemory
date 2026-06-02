@@ -197,6 +197,118 @@ export function createSupabaseStorageProvider(dependencies: ProviderDependencies
         expiresInSeconds: config.signedUrlTtlSeconds,
       };
     },
+
+    async listObjects(input: { prefix: string }) {
+      if (storageAuthMode(config) === "s3") {
+        return listS3Objects({ config, fetchImpl, prefix: input.prefix });
+      }
+      return listSupabaseRestObjects({ config, fetchImpl, prefix: input.prefix });
+    },
+
+    async downloadObject(objectPath: string) {
+      if (storageAuthMode(config) === "s3") {
+        return downloadS3Object({ config, fetchImpl, objectPath });
+      }
+      return downloadSupabaseRestObject({ config, fetchImpl, objectPath });
+    },
+  };
+}
+
+async function listSupabaseRestObjects(input: {
+  config: SupabaseStorageConfig;
+  fetchImpl: typeof fetch;
+  prefix: string;
+}) {
+  const response = await input.fetchImpl(
+    `${trimTrailingSlash(input.config.url.trim())}/storage/v1/object/list/${encodeURIComponent(input.config.bucket)}`,
+    {
+      method: "POST",
+      headers: authHeaders(input.config, "application/json"),
+      body: JSON.stringify({
+        prefix: input.prefix,
+        limit: 1000,
+        offset: 0,
+        sortBy: { column: "name", order: "asc" },
+      }),
+    },
+  );
+  if (!response.ok) throw new Error(`Object storage list failed: HTTP ${response.status} ${response.statusText}`);
+  const payload = await safeJson(response);
+  const items = Array.isArray(payload) ? payload as Array<{
+    name?: string;
+    metadata?: { size?: number; mimetype?: string; lastModified?: string };
+    updated_at?: string;
+  }> : [];
+  return items
+    .filter((item) => item.name && !item.name.endsWith("/"))
+    .map((item) => ({
+      objectKey: `${input.prefix}${item.name}`,
+      size: item.metadata?.size ?? 0,
+      contentType: item.metadata?.mimetype || "application/octet-stream",
+      lastModified: item.metadata?.lastModified || item.updated_at || new Date().toISOString(),
+    }));
+}
+
+async function listS3Objects(input: {
+  config: SupabaseStorageConfig;
+  fetchImpl: typeof fetch;
+  prefix: string;
+}) {
+  const url = new URL(`${trimTrailingSlash(input.config.s3.endpoint.trim())}/${encodeURIComponent(input.config.bucket)}`);
+  url.searchParams.set("list-type", "2");
+  url.searchParams.set("prefix", input.prefix);
+  url.searchParams.set("max-keys", "1000");
+  const headers = signedS3Headers({
+    config: input.config,
+    method: "GET",
+    url: url.toString(),
+    body: "",
+  });
+  const response = await input.fetchImpl(url.toString(), { method: "GET", headers });
+  if (!response.ok) throw new Error(`Object storage list failed: HTTP ${response.status} ${response.statusText}`);
+  return parseS3ListObjectsXml(await response.text());
+}
+
+async function downloadSupabaseRestObject(input: {
+  config: SupabaseStorageConfig;
+  fetchImpl: typeof fetch;
+  objectPath: string;
+}) {
+  const response = await input.fetchImpl(
+    `${trimTrailingSlash(input.config.url.trim())}/storage/v1/object/${encodeURIComponent(input.config.bucket)}/${normalizeObjectPath(input.objectPath)}`,
+    {
+      method: "GET",
+      headers: authHeaders(input.config),
+    },
+  );
+  return responseToDownload(response);
+}
+
+async function downloadS3Object(input: {
+  config: SupabaseStorageConfig;
+  fetchImpl: typeof fetch;
+  objectPath: string;
+}) {
+  const url = s3ObjectUrl(input.config, input.objectPath);
+  const headers = signedS3Headers({
+    config: input.config,
+    method: "GET",
+    url,
+    body: "",
+  });
+  const response = await input.fetchImpl(url, { method: "GET", headers });
+  return responseToDownload(response);
+}
+
+async function responseToDownload(response: Response) {
+  if (!response.ok) {
+    throw new Error(`Object storage download failed: HTTP ${response.status} ${response.statusText}`);
+  }
+  const body = Buffer.from(await response.arrayBuffer());
+  return {
+    body,
+    contentType: response.headers.get("content-type") || "application/octet-stream",
+    size: body.byteLength,
   };
 }
 
@@ -338,9 +450,10 @@ function mapStorageResponseError(status: number, body: string): StorageActionRes
 }
 
 function authHeaders(config: SupabaseStorageConfig, contentType?: string) {
+  const apiKey = config.serviceRoleKey || config.anonKey;
   const headers: Record<string, string> = {
-    apikey: config.serviceRoleKey,
-    authorization: `Bearer ${config.serviceRoleKey}`,
+    apikey: apiKey,
+    authorization: `Bearer ${apiKey}`,
   };
   if (contentType) headers["content-type"] = contentType;
   return headers;
@@ -479,6 +592,33 @@ function canonicalQueryString(params: URLSearchParams) {
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join("&");
+}
+
+function parseS3ListObjectsXml(xml: string) {
+  const contents = [...xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)];
+  return contents.map((match) => {
+    const block = match[1];
+    return {
+      objectKey: xmlValue(block, "Key"),
+      size: Number(xmlValue(block, "Size") || 0),
+      contentType: "application/octet-stream",
+      lastModified: xmlValue(block, "LastModified") || new Date().toISOString(),
+    };
+  }).filter((item) => item.objectKey.length > 0);
+}
+
+function xmlValue(block: string, tag: string) {
+  const match = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`).exec(block);
+  return match ? decodeXml(match[1].trim()) : "";
+}
+
+function decodeXml(value: string) {
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
 }
 
 function sha256Hex(value: FetchBody | string) {

@@ -1972,7 +1972,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get datasetChildrenS301 => '删除孩子档案';
 
   @override
-  String get datasetChildrenS300 => '删除失败：请先清空这个孩子关联的素材';
+  String get datasetChildrenS300 => '删除失败：请检查本地服务状态后重试';
 
   @override
   String get datasetChildrenS906 => '选择生日';
@@ -2541,8 +2541,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String datasetChildDeleteConfirmMessage(String name) {
-    return '确定删除「$name」吗？删除前需要先清空这个孩子关联的素材。';
+    return '确定要删除「$name」吗？';
   }
+
+  @override
+  String get datasetChildDeleteConfirmWarning => '删除后，这个孩子的素材、索引和相关本地记录也会一起删除。';
 
   @override
   String datasetChildDeletedLog(String childId, String name) {
@@ -2764,6 +2767,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String assetLibrarySmartPickedCount(int count) {
     return '智能助手已为你挑选 $count 张素材';
   }
+
+  @override
+  String get assetLibrarySmartPickAllIncludedHint => '当前可见素材已全部纳入，可直接确认或手动调整。';
 
   @override
   String assetLibrarySmartPickAppliedMessage(int count) {

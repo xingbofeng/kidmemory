@@ -110,13 +110,10 @@ extension _DesktopShellPages on _DesktopShellState {
       selectedStyle: generationStyle,
       selectedExportTarget: generationExportTarget,
       selectedCreationType: generationCreationType,
+      creationGoal: generationGoal,
       onGenerate: () => unawaited(generateBook()),
-      onGeneratePictureBook: () =>
-          unawaited(generateBook(creationType: 'storybook')),
-      onGenerateMemoryAlbum: () =>
-          unawaited(generateBook(creationType: 'memory_book')),
-      onGenerateMemoryVideo: () =>
-          unawaited(generateBook(creationType: 'memoir_video')),
+      onCreationGoalChanged: _updateCreationGoal,
+      onCreationTypeChanged: _updateCreationType,
       onConfirmPlan: () => unawaited(confirmCreationPlan()),
       onExport: exportPdf,
       onExportTargetChanged: _updateGenerationExportTarget,
@@ -147,5 +144,26 @@ extension _DesktopShellPages on _DesktopShellState {
   void _updateGenerationExportTarget(String target) {
     if (target == generationExportTarget) return;
     _setShellState(() => generationExportTarget = target);
+  }
+
+  void _updateCreationGoal(String goal) {
+    if (goal == generationGoal) return;
+    _invalidateCreationPlanForInputChange();
+    _setShellState(() => generationGoal = goal);
+  }
+
+  void _updateCreationType(String creationType) {
+    final nextExportTarget = _exportTargetForCreationType(creationType);
+    if (creationType == generationCreationType &&
+        nextExportTarget == generationExportTarget) {
+      return;
+    }
+    if (creationType != generationCreationType) {
+      _invalidateCreationPlanForInputChange();
+    }
+    _setShellState(() {
+      generationCreationType = creationType;
+      generationExportTarget = nextExportTarget;
+    });
   }
 }

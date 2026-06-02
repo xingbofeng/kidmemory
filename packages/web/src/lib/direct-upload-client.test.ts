@@ -155,6 +155,39 @@ describe('createDirectUploadClient', () => {
     expect(options.contentType).toBe('image/jpeg')
     expect(options.upsert).toBe(false)
   })
+
+  it('uses provider-neutral signed URL upload when the sidecar exposes a signer', async () => {
+    const createClient = vi.fn<DirectUploadCreateClient>(() => {
+      throw new Error('Supabase SDK should not be used for signed-url direct upload')
+    })
+    const signUpload = vi.fn(async (input: { objectKey: string; contentType: string }) => ({
+      method: 'PUT' as const,
+      url: `https://cos.ap-guangzhou.myqcloud.com/counter-1252496948/${input.objectKey}?X-Amz-Signature=test`,
+      headers: { 'content-type': input.contentType },
+    }))
+    const uploadWithSignedUrl = vi.fn(async (
+      file: File,
+      signedUpload: { method?: string; url: string; headers?: Record<string, string> },
+      onProgress: (progress: number) => void,
+    ) => {
+      expect(file.name).toBe('hello.jpg')
+      expect(signedUpload.url).toContain('X-Amz-Signature=test')
+      onProgress(1)
+    })
+    const client = createDirectUploadClient(
+      { ...baseConfig, provider: 'cos', uploadMode: 'signed-url', anonKey: '', supabaseUrl: '' },
+      { createClient, signUpload, uploadWithSignedUrl },
+    )
+    const file = makeFile('hello.jpg', 'image/jpeg')
+
+    const result = await client.uploadFile(file, {})
+
+    expect(result.ok).toBe(true)
+    expect(createClient).not.toHaveBeenCalled()
+    expect(signUpload).toHaveBeenCalledTimes(1)
+    expect(signUpload.mock.calls[0][0]).toMatchObject({ contentType: 'image/jpeg' })
+    expect(uploadWithSignedUrl).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('startDirectUpload', () => {

@@ -560,6 +560,68 @@ void main() {
     expect(replaced, isNotNull);
     expect(replaced!.isNotEmpty, isTrue);
   });
+
+  testWidgets('smart pick dialog explains when no alternate batch exists', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: AssetLibraryPage(
+            children: const [ChildVm(id: 'child-1', name: '澄澄')],
+            selectedChildId: 'child-1',
+            assets: const [
+              AssetVm(
+                id: 'asset-1',
+                title: '太阳',
+                type: 'artwork',
+                description: 'desc',
+                tags: ['tag'],
+                capturedAt: '2026-05-12',
+                icon: Icons.palette,
+              ),
+              AssetVm(
+                id: 'asset-2',
+                title: '大海',
+                type: 'photo',
+                description: 'desc',
+                tags: ['tag'],
+                capturedAt: '2026-05-10',
+                icon: Icons.photo,
+              ),
+            ],
+            selectedAssets: const {},
+            onChildChanged: (_) {},
+            onToggle: (_) {},
+            onReplaceSelectedAssets: (_) {},
+            onUpdateAsset: (_, _) async => true,
+            onDeleteAsset: (_) async => true,
+            onDeleteSelected: () async => 0,
+            typeOptions: const [
+              {'value': 'all', 'label': '全部'},
+              {'value': 'artwork', 'label': '绘画'},
+              {'value': 'photo', 'label': '照片'},
+              {'value': 'craft', 'label': '手工'},
+            ],
+            onImportFiles: () async => _okImportReport,
+            onImportFolder: () async => _okImportReport,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('帮我挑素材').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('当前可见素材已全部纳入，可直接确认或手动调整。'), findsOneWidget);
+    final reshuffleButton = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, '重新挑选'),
+    );
+    expect(reshuffleButton.onPressed, isNull);
+  });
 }
 
 Widget _assetLibraryHarness({

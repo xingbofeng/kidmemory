@@ -29,7 +29,7 @@ export type AppConfig = {
     apiKey?: string;
   };
   supabaseStorage: {
-    provider: "supabase";
+    provider: "supabase" | "cos" | "s3";
     url: string;
     bucket: string;
     serviceRoleKey: string;
@@ -108,6 +108,9 @@ export function loadConfigFromEnv(
   env: Record<string, string | undefined> = { ...readDotEnv(), ...process.env },
 ): AppConfig {
   const pathRoot = defaultKidMemoryPathRoot(env);
+  const objectStorageProvider = parseObjectStorageProvider(
+    env.KIDMEMORY_OBJECT_STORAGE_PROVIDER,
+  );
   return {
     postgres: {
       host: env.POSTGRES_HOST || "localhost",
@@ -133,23 +136,58 @@ export function loadConfigFromEnv(
       apiKey: env.LOCAL_AGENT_API_KEY,
     } : undefined,
     supabaseStorage: {
-      provider: "supabase",
+      provider: objectStorageProvider,
       url: "",
-      bucket: "",
+      bucket: objectStorageProvider === "cos"
+        ? env.COS_BUCKET || ""
+        : objectStorageProvider === "s3"
+          ? env.SUPABASE_S3_BUCKET || env.SUPABASE_STORAGE_BUCKET || ""
+        : "",
       serviceRoleKey: "",
       anonKey: "",
-      publicBaseUrl: "",
-      signedUrlTtlSeconds: 3600,
+      publicBaseUrl: objectStorageProvider === "cos"
+        ? env.COS_PUBLIC_BASE_URL || ""
+        : objectStorageProvider === "s3"
+          ? env.SUPABASE_STORAGE_PUBLIC_BASE_URL || ""
+        : "",
+      signedUrlTtlSeconds: numberOrCurrent(
+        objectStorageProvider === "cos"
+          ? env.COS_SIGNED_URL_TTL_SECONDS
+          : objectStorageProvider === "s3"
+            ? env.SUPABASE_STORAGE_SIGNED_URL_TTL_SECONDS
+          : undefined,
+        3600,
+      ),
       s3: {
-        endpoint: "",
-        region: "auto",
-        accessKeyId: "",
-        secretAccessKey: "",
+        endpoint: objectStorageProvider === "cos"
+          ? env.COS_ENDPOINT || ""
+          : objectStorageProvider === "s3"
+            ? env.SUPABASE_S3_ENDPOINT || ""
+          : "",
+        region: objectStorageProvider === "cos"
+          ? env.COS_REGION || "ap-guangzhou"
+          : objectStorageProvider === "s3"
+            ? env.SUPABASE_S3_REGION || "auto"
+          : "auto",
+        accessKeyId: objectStorageProvider === "cos"
+          ? env.COS_SECRET_ID || ""
+          : objectStorageProvider === "s3"
+            ? env.SUPABASE_S3_ACCESS_KEY_ID || ""
+          : "",
+        secretAccessKey: objectStorageProvider === "cos"
+          ? env.COS_SECRET_KEY || ""
+          : objectStorageProvider === "s3"
+            ? env.SUPABASE_S3_SECRET_ACCESS_KEY || ""
+          : "",
       },
     },
     webCompanionDirectUpload: {
       enabled: parseEnvBoolean(env.WEB_COMPANION_DIRECT_UPLOAD_ENABLED, false),
-      bucket: env.SUPABASE_DIRECT_UPLOAD_BUCKET || "",
+      bucket: objectStorageProvider === "cos"
+        ? env.COS_DIRECT_UPLOAD_BUCKET || env.COS_BUCKET || ""
+        : objectStorageProvider === "s3"
+          ? env.SUPABASE_DIRECT_UPLOAD_BUCKET || env.SUPABASE_S3_BUCKET || env.SUPABASE_STORAGE_BUCKET || ""
+        : env.SUPABASE_DIRECT_UPLOAD_BUCKET || "",
       publicUrl: env.WEB_COMPANION_DIRECT_PUBLIC_URL || "",
       recommendedClientLimit: numberOrCurrent(
         env.WEB_COMPANION_DIRECT_RECOMMENDED_CLIENT_LIMIT,
@@ -186,6 +224,11 @@ export function loadConfigFromEnv(
   };
 }
 
+function parseObjectStorageProvider(value: string | undefined): AppConfig["supabaseStorage"]["provider"] {
+  if (value === "cos" || value === "s3") return value;
+  return "supabase";
+}
+
 export function pathsForLocalDataRoot(rootPath: string): AppPathConfig {
   const root = path.resolve(rootPath.trim());
   return {
@@ -210,21 +253,17 @@ function defaultKidMemoryPathRoot(env: Record<string, string | undefined>) {
 
 export function redactConfig(config: AppConfig) {
   const supabaseRestConfigured = Boolean(
-    config.supabaseStorage.url
+    config.supabaseStorage.provider === "supabase"
+      && config.supabaseStorage.url
       && config.supabaseStorage.bucket
       && config.supabaseStorage.serviceRoleKey,
   );
-  const supabaseS3CredentialsDetected = Boolean(
+  const storageS3CredentialsDetected = Boolean(
     config.supabaseStorage.s3.accessKeyId
       || config.supabaseStorage.s3.secretAccessKey,
   );
-  const supabaseS3Configured = Boolean(
-    config.supabaseStorage.s3.endpoint
-      && config.supabaseStorage.bucket
-      && config.supabaseStorage.s3.accessKeyId
-      && config.supabaseStorage.s3.secretAccessKey,
-  );
-  const supabaseStorageConfigured = supabaseRestConfigured || supabaseS3Configured;
+  const storageS3Configured = isS3CompatibleStorageConfigured(config);
+  const supabaseStorageConfigured = supabaseRestConfigured || storageS3Configured;
   return {
     postgres: {
       host: config.postgres.host,
@@ -262,7 +301,7 @@ export function redactConfig(config: AppConfig) {
       configured: supabaseStorageConfigured,
       authMode: supabaseRestConfigured
         ? "rest"
-        : (supabaseS3Configured ? "s3" : "none"),
+        : (storageS3Configured ? "s3" : "none"),
       s3: {
         endpoint: config.supabaseStorage.s3.endpoint,
         region: config.supabaseStorage.s3.region,
@@ -270,12 +309,12 @@ export function redactConfig(config: AppConfig) {
         accessKeyIdConfigured: Boolean(config.supabaseStorage.s3.accessKeyId),
         secretAccessKey: config.supabaseStorage.s3.secretAccessKey ? "[REDACTED]" : "",
         secretAccessKeyConfigured: Boolean(config.supabaseStorage.s3.secretAccessKey),
-        configured: supabaseS3Configured,
+        configured: storageS3Configured,
       },
-      s3CredentialsDetected: supabaseS3CredentialsDetected,
+      s3CredentialsDetected: storageS3CredentialsDetected,
       diagnosticMessage:
-        !supabaseStorageConfigured && supabaseS3CredentialsDetected
-          ? "检测到 Supabase S3 凭据。S3 模式还需要配置 endpoint、bucket、access key 和 secret key；region 默认 auto。"
+        !supabaseStorageConfigured && storageS3CredentialsDetected
+          ? "检测到对象存储 S3 兼容凭据。S3 模式还需要配置 endpoint、bucket、access key 和 secret key；region 默认 auto。"
           : "",
     },
     webCompanionDirectUpload: redactWebCompanionDirectUpload(config),
@@ -295,6 +334,7 @@ export function redactWebCompanionDirectUpload(config: AppConfig) {
   const missing = collectWebCompanionDirectUploadMissing(config);
   return {
     enabled: config.webCompanionDirectUpload.enabled,
+    provider: config.supabaseStorage.provider,
     bucket: config.webCompanionDirectUpload.bucket,
     publicUrl: config.webCompanionDirectUpload.publicUrl,
     recommendedClientLimit: config.webCompanionDirectUpload.recommendedClientLimit,
@@ -318,8 +358,10 @@ export function redactWebCompanionDirectUpload(config: AppConfig) {
  */
 export function collectWebCompanionDirectUploadMissing(config: AppConfig): string[] {
   const missing: string[] = [];
-  if (!config.supabaseStorage.url) missing.push("SUPABASE_URL");
-  if (!config.supabaseStorage.anonKey) missing.push("SUPABASE_ANON_KEY");
+  if (!isS3CompatibleStorageConfigured(config)) {
+    if (!config.supabaseStorage.url) missing.push("SUPABASE_URL");
+    if (!config.supabaseStorage.anonKey) missing.push("SUPABASE_ANON_KEY");
+  }
   if (!config.webCompanionDirectUpload.bucket) {
     missing.push("SUPABASE_DIRECT_UPLOAD_BUCKET");
   }
@@ -327,6 +369,26 @@ export function collectWebCompanionDirectUploadMissing(config: AppConfig): strin
     missing.push("WEB_COMPANION_DIRECT_PUBLIC_URL");
   }
   return missing;
+}
+
+function isS3CompatibleStorageConfigured(config: AppConfig) {
+  const s3 = config.supabaseStorage.s3;
+  if (config.supabaseStorage.provider === "cos") {
+    return Boolean(
+      s3
+        && config.supabaseStorage.bucket
+        && s3.region
+        && s3.accessKeyId
+        && s3.secretAccessKey,
+    );
+  }
+  return Boolean(
+    s3
+      && s3.endpoint
+      && config.supabaseStorage.bucket
+      && s3.accessKeyId
+      && s3.secretAccessKey,
+  );
 }
 
 /**
@@ -409,7 +471,7 @@ export class AppConfigService {
   updateSupabaseStorageConfig(nextConfig: SupabaseStorageUpdateConfig) {
     this.config.supabaseStorage = {
       ...this.config.supabaseStorage,
-      provider: "supabase",
+      provider: nextConfig.provider ?? this.config.supabaseStorage.provider,
       url: textOrCurrent(nextConfig.url, this.config.supabaseStorage.url),
       bucket: textOrCurrent(
         nextConfig.bucket,

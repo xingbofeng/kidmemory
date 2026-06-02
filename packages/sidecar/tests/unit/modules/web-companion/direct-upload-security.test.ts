@@ -250,6 +250,91 @@ describe('Direct Upload security', () => {
     service.destroy();
   });
 
+  it('signs a COS direct upload object inside the session prefix without exposing the secret key', async () => {
+    const service = new DirectUploadService({
+      ...makeMinimalDeps({
+        appConfig: {
+          config: {
+            supabaseStorage: {
+              provider: 'cos',
+              url: '',
+              anonKey: '',
+              serviceRoleKey: '',
+              bucket: 'counter-1252496948',
+              publicBaseUrl: '',
+              signedUrlTtlSeconds: 300,
+              s3: {
+                endpoint: 'https://cos.ap-guangzhou.myqcloud.com',
+                region: 'ap-guangzhou',
+                accessKeyId: 'cos-secret-id',
+                secretAccessKey: 'cos-secret-key',
+              },
+            },
+            webCompanionDirectUpload: {
+              enabled: true,
+              bucket: 'counter-1252496948',
+              publicUrl: 'http://localhost:3001',
+              recommendedClientLimit: 200,
+              expiresAtHintSeconds: 10800,
+            },
+          },
+        },
+      }),
+    });
+    const session = await service.createSession({ childId: 'child-1' });
+
+    const signed = await service.createSignedUploadTarget(session.sessionId, {
+      token: session.token,
+      objectKey: `${session.sessionId}/photo.jpg`,
+      contentType: 'image/jpeg',
+      sizeBytes: 12,
+    });
+
+    assert.equal(signed.method, 'PUT');
+    assert.match(signed.url, /^https:\/\/counter-1252496948\.cos\.ap-guangzhou\.myqcloud\.com\//);
+    assert.match(signed.url, /q-sign-algorithm|sign=/);
+    assert.equal(signed.url.includes('cos-secret-key'), false);
+    service.destroy();
+  });
+
+  it('refuses to sign a direct upload object outside the session prefix', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
+    const session = await service.createSession({ childId: 'child-1' });
+
+    await assert.rejects(
+      () => service.createSignedUploadTarget(session.sessionId, {
+        token: session.token,
+        objectKey: 'other-session/photo.jpg',
+        contentType: 'image/jpeg',
+        sizeBytes: 12,
+      }),
+      (err: Error & { code?: string }) => {
+        assert.equal(err.code, 'object_key_mismatch');
+        return true;
+      },
+    );
+    service.destroy();
+  });
+
+  it('refuses to sign a direct upload object with traversal path segments', async () => {
+    const service = new DirectUploadService(makeMinimalDeps());
+    const session = await service.createSession({ childId: 'child-1' });
+
+    await assert.rejects(
+      () => service.createSignedUploadTarget(session.sessionId, {
+        token: session.token,
+        objectKey: `${session.sessionId}/../other-session/photo.jpg`,
+        contentType: 'image/jpeg',
+        sizeBytes: 12,
+      }),
+      (err: Error & { code?: string }) => {
+        assert.equal(err.code, 'object_key_mismatch');
+        return true;
+      },
+    );
+    service.destroy();
+  });
+
   it('pullback without token is rejected', async () => {
     const service = new DirectUploadService(makeMinimalDeps());
     await service.createSession({ childId: 'child-1' });

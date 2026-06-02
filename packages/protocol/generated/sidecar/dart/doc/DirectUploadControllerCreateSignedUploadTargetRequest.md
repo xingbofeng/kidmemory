@@ -1,4 +1,4 @@
-# kidmemory_protocol.model.DirectUploadControllerGetSessionConfig200Response
+# kidmemory_protocol.model.DirectUploadControllerCreateSignedUploadTargetRequest
 
 ## Load the model package
 ```dart
@@ -8,11 +8,9 @@ import 'package:kidmemory_protocol/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**supabaseUrl** | **String** |  |
-**anonKey** | **String** |  |
-**bucket** | **String** |  |
-**recommendedClientLimit** | **num** |  |
-**provider** | **String** |  |
-**uploadMode** | **String** |  |
+**token** | **String** |  |
+**objectKey** | **String** |  |
+**contentType** | **String** |  | [optional]
+**sizeBytes** | **num** |  | [optional]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

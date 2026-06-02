@@ -53,6 +53,8 @@ export const StorageProvider = {
   LAN: "lan",
   /** Supabase Storage */
   SUPABASE: "supabase",
+  /** Tencent Cloud COS / S3-compatible object storage */
+  COS: "cos",
 } as const;
 
 export type StorageProviderType = typeof StorageProvider[keyof typeof StorageProvider];

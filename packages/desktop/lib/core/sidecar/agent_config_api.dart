@@ -17,9 +17,20 @@ class AgentConfigApi {
   }
 
   Future<AgentConfigResponseDto?> getDefaultAgentConfig() async {
-    final response = await _api.get('/api/config/agent-configs/default');
+    final response = await _getOptionalDefaultAgentConfig();
     if (response.isEmpty) return null;
     return AgentConfigResponseDto.fromJson(_asMap(response));
+  }
+
+  Future<JsonMap> _getOptionalDefaultAgentConfig() async {
+    try {
+      return await _api.get('/api/config/agent-configs/default');
+    } on SidecarApiException catch (error) {
+      if (error.statusCode == 404 || error.code == 404) {
+        return const {};
+      }
+      rethrow;
+    }
   }
 
   Future<AgentConfigResponseDto> createAgentConfig(

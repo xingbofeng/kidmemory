@@ -14,6 +14,8 @@ Name | Type | Description | Notes
 **sessionPath** | **String** |  |
 **supabaseUrl** | **String** |  |
 **anonKey** | **String** |  |
+**provider** | **String** |  |
+**uploadMode** | **String** |  |
 **publicUrl** | **String** |  |
 **recommendedClientLimit** | **num** |  |
 **expiresAtHintSeconds** | **num** |  |

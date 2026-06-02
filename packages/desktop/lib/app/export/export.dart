@@ -31,10 +31,11 @@ extension _DesktopShellExportFlow on _DesktopShellState {
     );
     _markGenerationStarted();
     try {
+      final trimmedGoal = generationGoal.trim();
       final task = await gateway.createCreationTaskRaw(
-        goal: generationTemplate.trim().isEmpty
-            ? 'KidMemory storybook'
-            : generationTemplate.trim(),
+        goal: trimmedGoal.isEmpty
+            ? _defaultGoalForCreationType(context, nextCreationType)
+            : trimmedGoal,
         creationType: nextCreationType,
         assetIds: selectedAssets.toList(),
         settings: {
@@ -51,6 +52,15 @@ extension _DesktopShellExportFlow on _DesktopShellState {
     } finally {
       api.clearRequestContext();
     }
+  }
+
+  String _defaultGoalForCreationType(BuildContext context, String creationType) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (creationType) {
+      'memory_book' => l10n.generateExportMemoryBookDescription,
+      'memoir_video' => l10n.generateExportMemoryVideoDescription,
+      _ => l10n.generateExportStorybookDescription,
+    };
   }
 
   Future<void> confirmCreationPlan() async {
@@ -169,8 +179,7 @@ extension _DesktopShellExportFlow on _DesktopShellState {
         target: _artifactKindForTarget(target),
         targetPath: destinationPath,
       );
-      exportedOk =
-          result['artifactId']?.toString().trim().isNotEmpty ?? false;
+      exportedOk = result['artifactId']?.toString().trim().isNotEmpty ?? false;
       actualPath = result['localPath']?.toString().trim().isNotEmpty == true
           ? result['localPath'].toString()
           : destinationPath;

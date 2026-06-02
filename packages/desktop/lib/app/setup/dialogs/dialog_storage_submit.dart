@@ -2,6 +2,7 @@ part of '../../desktop_shell.dart';
 
 extension _DesktopShellSetupDialogStorageSubmit on _DesktopShellState {
   Future<void> _submitSupabaseStorageConfig({
+    required String provider,
     required TextEditingController urlController,
     required TextEditingController bucketController,
     required TextEditingController publicBaseUrlController,
@@ -13,6 +14,7 @@ extension _DesktopShellSetupDialogStorageSubmit on _DesktopShellState {
     required TextEditingController s3SecretKeyController,
   }) async {
     final draft = _SupabaseStorageConfigDraft.fromControllers(
+      provider: provider,
       url: urlController,
       bucket: bucketController,
       serviceRoleKey: serviceRoleKeyController,
@@ -25,6 +27,7 @@ extension _DesktopShellSetupDialogStorageSubmit on _DesktopShellState {
     );
     final result = await gateway.configureSupabaseStorageDto(
       payload: SupabaseStorageConfigInput(
+        provider: draft.provider,
         url: draft.url,
         bucket: draft.bucket,
         serviceRoleKey: draft.serviceRoleKey,

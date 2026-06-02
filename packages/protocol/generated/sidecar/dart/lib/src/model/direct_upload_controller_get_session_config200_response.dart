@@ -27,6 +27,10 @@ class DirectUploadControllerGetSessionConfig200Response {
     required  this.bucket,
 
     required  this.recommendedClientLimit,
+
+    required  this.provider,
+
+    required  this.uploadMode,
   });
 
   @JsonKey(
@@ -77,6 +81,30 @@ class DirectUploadControllerGetSessionConfig200Response {
 
 
 
+  @JsonKey(
+
+    name: r'provider',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DirectUploadControllerGetSessionConfig200ResponseProviderEnum provider;
+
+
+
+  @JsonKey(
+
+    name: r'uploadMode',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DirectUploadControllerGetSessionConfig200ResponseUploadModeEnum uploadMode;
+
+
+
 
 
     @override
@@ -84,14 +112,18 @@ class DirectUploadControllerGetSessionConfig200Response {
       other.supabaseUrl == supabaseUrl &&
       other.anonKey == anonKey &&
       other.bucket == bucket &&
-      other.recommendedClientLimit == recommendedClientLimit;
+      other.recommendedClientLimit == recommendedClientLimit &&
+      other.provider == provider &&
+      other.uploadMode == uploadMode;
 
     @override
     int get hashCode =>
         supabaseUrl.hashCode +
         anonKey.hashCode +
         bucket.hashCode +
-        recommendedClientLimit.hashCode;
+        recommendedClientLimit.hashCode +
+        provider.hashCode +
+        uploadMode.hashCode;
 
   factory DirectUploadControllerGetSessionConfig200Response.fromJson(Map<String, dynamic> json) => _$DirectUploadControllerGetSessionConfig200ResponseFromJson(json);
 
@@ -102,4 +134,37 @@ class DirectUploadControllerGetSessionConfig200Response {
     return toJson().toString();
   }
 
+}
+
+
+enum DirectUploadControllerGetSessionConfig200ResponseProviderEnum {
+@JsonValue(r'supabase')
+supabase(r'supabase'),
+@JsonValue(r'cos')
+cos(r'cos'),
+@JsonValue(r's3')
+s3(r's3');
+
+const DirectUploadControllerGetSessionConfig200ResponseProviderEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+
+enum DirectUploadControllerGetSessionConfig200ResponseUploadModeEnum {
+@JsonValue(r'supabase-js')
+supabaseJs(r'supabase-js'),
+@JsonValue(r'signed-url')
+signedUrl(r'signed-url');
+
+const DirectUploadControllerGetSessionConfig200ResponseUploadModeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }

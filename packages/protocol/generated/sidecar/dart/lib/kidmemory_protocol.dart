@@ -19,8 +19,10 @@ export 'package:kidmemory_protocol/src/api/security_monitor_api.dart';
 export 'package:kidmemory_protocol/src/api/streamable_http_api.dart';
 export 'package:kidmemory_protocol/src/api/web_companion_api.dart';
 
+export 'package:kidmemory_protocol/src/model/creation_controller_create_task_request.dart';
 export 'package:kidmemory_protocol/src/model/direct_upload_controller_create_session201_response.dart';
 export 'package:kidmemory_protocol/src/model/direct_upload_controller_create_session_request.dart';
+export 'package:kidmemory_protocol/src/model/direct_upload_controller_create_signed_upload_target_request.dart';
 export 'package:kidmemory_protocol/src/model/direct_upload_controller_get_session_config200_response.dart';
 export 'package:kidmemory_protocol/src/model/direct_upload_controller_get_status200_response.dart';
 export 'package:kidmemory_protocol/src/model/direct_upload_controller_get_status200_response_items_inner.dart';

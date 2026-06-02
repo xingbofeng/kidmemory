@@ -15,6 +15,7 @@ import {
   assertWebCompanionDirectUploadReady,
 } from "../../infrastructure/config/app-config.service.ts";
 import { trimTrailingSlash } from "../../infrastructure/url/trailing-slash.ts";
+import { createObjectStorageProvider } from "../storage/providers/object-storage.ts";
 
 import type {
   CreateDirectUploadSessionRequest,
@@ -34,6 +35,20 @@ import {
   applyDirectUploadPullbackTransition,
   type DirectUploadPullbackStatus,
 } from "./direct-upload-pullback-state.ts";
+
+export interface CreateDirectUploadSignedUploadRequest {
+  token: string;
+  objectKey: string;
+  contentType?: string;
+  sizeBytes?: number;
+}
+
+export interface CreateDirectUploadSignedUploadResponse {
+  method: "PUT";
+  url: string;
+  expiresAt: string;
+  headers: Record<string, string>;
+}
 
 /**
  * Storage 网关：sidecar 用 service role key（若配置）或 anon key 通过 Supabase Storage REST 调用 list / download。
@@ -227,12 +242,15 @@ export class DirectUploadService {
     const bucket = config.webCompanionDirectUpload.bucket;
     const sessionPath = `${bucket}/${sessionId}`;
     const token = generateSecureToken();
+    const uploadMode = isS3CompatibleStorageConfigured(config) ? "signed-url" : "supabase-js";
     const publicUrl = buildPublicUrl(config.webCompanionDirectUpload.publicUrl, {
       sessionId,
       childId,
       bucket,
       supabaseUrl: config.supabaseStorage.url,
       token,
+      provider: config.supabaseStorage.provider,
+      uploadMode,
     });
 
     const expiresAt = new Date(
@@ -253,6 +271,8 @@ export class DirectUploadService {
       sessionPath,
       supabaseUrl: config.supabaseStorage.url,
       anonKey: config.supabaseStorage.anonKey,
+      provider: config.supabaseStorage.provider,
+      uploadMode,
       publicUrl,
       recommendedClientLimit: config.webCompanionDirectUpload.recommendedClientLimit,
       expiresAtHintSeconds: config.webCompanionDirectUpload.expiresAtHintSeconds,
@@ -263,7 +283,7 @@ export class DirectUploadService {
   async getSessionConfig(
     sessionId: string,
     token: string,
-  ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number }> {
+  ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number; provider: string; uploadMode: string }> {
     assertWebCompanionDirectUploadReady(this.appConfig.config);
     const session = await this.validateSessionToken(sessionId, token);
     const config = this.appConfig.config;
@@ -272,6 +292,43 @@ export class DirectUploadService {
       anonKey: config.supabaseStorage.anonKey,
       bucket: session.bucket,
       recommendedClientLimit: config.webCompanionDirectUpload.recommendedClientLimit,
+      provider: config.supabaseStorage.provider,
+      uploadMode: isS3CompatibleStorageConfigured(config) ? "signed-url" : "supabase-js",
+    };
+  }
+
+  async createSignedUploadTarget(
+    sessionId: string,
+    request: CreateDirectUploadSignedUploadRequest,
+  ): Promise<CreateDirectUploadSignedUploadResponse> {
+    assertWebCompanionDirectUploadReady(this.appConfig.config);
+    const session = await this.validateSessionToken(sessionId, request.token);
+    const objectKey = (request.objectKey || "").trim();
+    if (!isObjectKeyInsideDirectUploadSession(objectKey, sessionId)) {
+      const error = new Error("Direct upload objectKey must stay inside the session prefix.");
+      (error as Error & { code?: string }).code = "object_key_mismatch";
+      throw error;
+    }
+    const storageProvider = createObjectStorageProvider({
+      config: {
+        ...this.appConfig.config.supabaseStorage,
+        bucket: session.bucket,
+      },
+    });
+    const signed = await storageProvider.createSignedUploadUrl(objectKey);
+    if (!signed.ok) {
+      const error = new Error(signed.message || "Failed to create direct upload signed URL.");
+      (error as Error & { code?: string }).code = signed.code || "signed_upload_unavailable";
+      throw error;
+    }
+    const expiresInSeconds = signed.expiresInSeconds
+      || this.appConfig.config.supabaseStorage.signedUrlTtlSeconds
+      || 900;
+    return {
+      method: "PUT",
+      url: signed.url,
+      expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
+      headers: request.contentType ? { "content-type": request.contentType } : {},
     };
   }
 
@@ -469,17 +526,42 @@ export class DirectUploadService {
 
 function buildPublicUrl(
   publicBase: string,
-  params: { sessionId: string; childId: string; bucket: string; supabaseUrl: string; token: string },
+  params: { sessionId: string; childId: string; bucket: string; supabaseUrl: string; token: string; provider: string; uploadMode: string },
 ): string {
   const base = trimTrailingSlash(publicBase);
   const query = new URLSearchParams({
     sessionId: params.sessionId,
     childId: params.childId,
     bucket: params.bucket,
-    supabaseUrl: params.supabaseUrl,
     token: params.token,
+    provider: params.provider,
+    uploadMode: params.uploadMode,
   });
+  if (params.supabaseUrl) query.set("supabaseUrl", params.supabaseUrl);
   return `${base}/direct-upload?${query.toString()}`;
+}
+
+function isObjectKeyInsideDirectUploadSession(objectKey: string, sessionId: string) {
+  const parts = objectKey.split("/");
+  if (parts.length < 2 || parts[0] !== sessionId) return false;
+  return parts.slice(1).every((part) => part.length > 0 && part !== "." && part !== "..");
+}
+
+function isS3CompatibleStorageConfigured(config: AppConfigService["config"]) {
+  if (config.supabaseStorage.provider === "cos") {
+    return Boolean(
+      config.supabaseStorage.bucket
+        && config.supabaseStorage.s3?.region
+        && config.supabaseStorage.s3.accessKeyId
+        && config.supabaseStorage.s3.secretAccessKey,
+    );
+  }
+  return Boolean(
+    config.supabaseStorage.s3?.endpoint
+      && config.supabaseStorage.bucket
+      && config.supabaseStorage.s3.accessKeyId
+      && config.supabaseStorage.s3.secretAccessKey,
+  );
 }
 
 function classifyError(error: unknown): string {

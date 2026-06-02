@@ -10,7 +10,12 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
 
   Future<void> _configureOpenAI() async {
     final agentConfigApi = AgentConfigApi(api);
-    final currentConfig = await agentConfigApi.getDefaultAgentConfig();
+    AgentConfigResponseDto? currentConfig;
+    try {
+      currentConfig = await agentConfigApi.getDefaultAgentConfig();
+    } catch (error) {
+      _appendLog('读取大模型默认配置失败，将打开空配置表单: $error');
+    }
     if (!mounted) return;
 
     final baseUrlController = TextEditingController(

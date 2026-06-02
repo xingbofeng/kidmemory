@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const UpdateSupabaseStorageDtoSchema = z
   .object({
+    provider: z.enum(["supabase", "cos", "s3"]).optional(),
     url: z.string().optional(),
     bucket: z.string().optional(),
     serviceRoleKey: z.string().optional(),

@@ -121,6 +121,7 @@ export type SampleDb = {
     updates: { title?: string; description?: string; tags?: string[]; capturedAt?: string; type?: string },
   ): Promise<SampleAsset | null>;
   deleteAsset?(id: string): Promise<boolean>;
+  deleteChildRelatedRecords?(childId: string): Promise<Record<string, number>>;
   deleteAssetsByChildId?(childId: string): Promise<number>;
   deleteEmbeddingJobsByAssetIds?(assetIds: string[]): Promise<number>;
   deleteCandidatePoolItemsByChildId?(childId: string): Promise<number>;

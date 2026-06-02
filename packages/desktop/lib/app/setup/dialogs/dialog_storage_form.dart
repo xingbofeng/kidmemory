@@ -2,6 +2,8 @@ part of '../../desktop_shell.dart';
 
 extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
   Future<bool?> _showSupabaseStorageDialog({
+    required String selectedProvider,
+    required void Function(String provider) onProviderChanged,
     required TextEditingController urlController,
     required TextEditingController bucketController,
     required TextEditingController publicBaseUrlController,
@@ -18,6 +20,7 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
     var showServiceRoleKey = false;
     var showS3AccessKey = false;
     var showS3SecretKey = false;
+    var provider = _normalizeSupabaseStorageProvider(selectedProvider);
 
     return showDialog<bool>(
       context: context,
@@ -36,6 +39,7 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: _buildSupabaseStorageDialogFields(
                       urlController: urlController,
+                      selectedProvider: provider,
                       bucketController: bucketController,
                       publicBaseUrlController: publicBaseUrlController,
                       ttlController: ttlController,
@@ -50,6 +54,11 @@ extension _DesktopShellSetupDialogStorageForm on _DesktopShellState {
                       showServiceRoleKey: showServiceRoleKey,
                       showS3AccessKey: showS3AccessKey,
                       showS3SecretKey: showS3SecretKey,
+                      onProviderChanged: (value) {
+                        provider = _normalizeSupabaseStorageProvider(value);
+                        onProviderChanged(provider);
+                        setDialogState(() {});
+                      },
                       onToggleServiceRoleKey: () => setDialogState(
                         () => showServiceRoleKey = !showServiceRoleKey,
                       ),

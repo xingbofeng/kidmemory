@@ -50,6 +50,8 @@ test("imports images, skips unsupported files, and reports duplicates by hash", 
   const managed = report.imported[0].path;
   const managedStat = await fs.stat(managed);
   assert.equal(managedStat.isFile(), true);
+  const imported = await db.getAsset(report.imported[0].id);
+  assert.equal(imported?.type, "photo");
 });
 
 test("imports assets with a default capture date", async () => {

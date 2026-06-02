@@ -2019,7 +2019,7 @@
   "@datasetChildrenS301": {
     "description": "datasetChildrenS301"
   },
-  "datasetChildrenS300": "删除失败：请先清空这个孩子关联的素材",
+  "datasetChildrenS300": "删除失败：请检查本地服务状态后重试",
   "@datasetChildrenS300": {
     "description": "datasetChildrenS300"
   },
@@ -2904,7 +2904,7 @@
       }
     }
   },
-  "datasetChildDeleteConfirmMessage": "确定删除「{name}」吗？删除前需要先清空这个孩子关联的素材。",
+  "datasetChildDeleteConfirmMessage": "确定要删除「{name}」吗？",
   "@datasetChildDeleteConfirmMessage": {
     "description": "Child profile delete confirmation message.",
     "placeholders": {
@@ -2912,6 +2912,10 @@
         "type": "String"
       }
     }
+  },
+  "datasetChildDeleteConfirmWarning": "删除后，这个孩子的素材、索引和相关本地记录也会一起删除。",
+  "@datasetChildDeleteConfirmWarning": {
+    "description": "Child profile delete confirmation warning."
   },
   "datasetChildDeletedLog": "删除孩子档案：{childId} {name}",
   "@datasetChildDeletedLog": {
@@ -3340,6 +3344,10 @@
         "type": "int"
       }
     }
+  },
+  "assetLibrarySmartPickAllIncludedHint": "当前可见素材已全部纳入，可直接确认或手动调整。",
+  "@assetLibrarySmartPickAllIncludedHint": {
+    "description": "Smart pick dialog hint when every visible asset is already included."
   },
   "assetLibrarySmartPickAppliedMessage": "已选 {count} 张素材，可继续手动微调。",
   "@assetLibrarySmartPickAppliedMessage": {

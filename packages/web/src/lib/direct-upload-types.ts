@@ -10,6 +10,10 @@
  */
 
 export interface DirectUploadConfig {
+  /** 对象存储 provider。旧链接缺省为 supabase。 */
+  provider?: 'supabase' | 'cos' | 's3'
+  /** 上传模式。signed-url 是跨 provider 的安全默认。 */
+  uploadMode?: 'supabase-js' | 'signed-url'
   /** sidecar 分配的会话 ID，做 storage path 隔离用，非可信会话。 */
   sessionId: string
   /** Supabase Storage bucket 名称。 */

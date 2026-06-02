@@ -93,6 +93,10 @@ class _FakeSidecarApi extends SidecarApi {
     if (path.startsWith('/config/check/')) {
       return {'ok': true};
     }
+    if (path == '/config/paths') {
+      lastPathBody = body;
+      return {'ok': true, 'paths': body};
+    }
     if (path == '/creation/tasks') {
       lastTaskBody = body;
       return {
@@ -772,7 +776,7 @@ class _SupabaseStorageSidecarApi extends _FakeSidecarApi {
       return {
         'ok': true,
         'config': {
-          'provider': 'supabase',
+          'provider': body['provider'] ?? 'supabase',
           'url': body['url'] ?? 'https://project.supabase.co',
           'bucket': body['bucket'] ?? 'kidmemory-exports',
           'serviceRoleKeyConfigured': body['serviceRoleKey'] != null,
@@ -973,6 +977,7 @@ class _MergedSearchSidecarApi extends _FakeSidecarApi {
 class _MultiChildSidecarApi extends SidecarApi {
   Map<String, dynamic>? lastGenerateBody;
   final deletedAssetIds = <String>[];
+  final deletedChildIds = <String>[];
   final calls = <String>[];
   String? lastChildrenName;
 
@@ -1088,7 +1093,11 @@ class _MultiChildSidecarApi extends SidecarApi {
   @override
   Future<Map<String, dynamic>> delete(String path) async {
     calls.add('DELETE $path');
-    deletedAssetIds.add(path.split('/').last);
+    if (path.startsWith('/children/')) {
+      deletedChildIds.add(path.split('/').last);
+    } else {
+      deletedAssetIds.add(path.split('/').last);
+    }
     return {'ok': true};
   }
 }

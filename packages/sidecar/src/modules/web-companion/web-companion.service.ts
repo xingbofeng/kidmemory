@@ -4,7 +4,7 @@ import { Logger, ServiceUnavailableException } from "@nestjs/common";
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import type { SessionQuotaMiddleware } from "../../infrastructure/security/session-quota.middleware.ts";
 import { delay } from "../../infrastructure/time/delay.ts";
-import { createSupabaseStorageProvider } from "../storage/providers/supabase-storage.ts";
+import { createObjectStorageProvider } from "../storage/providers/object-storage.ts";
 import { DatasetService } from "../dataset/dataset.service.ts";
 
 import {
@@ -684,37 +684,33 @@ export class WebCompanionService {
   private async checkProviderAvailability(): Promise<SessionSummaryResponse["providers"]> {
     const config = this.appConfigService.config.supabaseStorage;
 
-    const supabaseAvailable = !!(
-      config.url &&
-      config.serviceRoleKey &&
-      config.bucket
-    );
+    const cloudAvailable = this.isObjectStorageConfigured(config);
 
     return {
       lan: { available: false },
-      supabase: { available: supabaseAvailable },
+      supabase: { available: cloudAvailable },
+      cos: { available: cloudAvailable },
     };
   }
 
   private async generateSignedUploadTarget(item: UploadItem): Promise<SignedUploadTarget> {
     const config = this.appConfigService.config.supabaseStorage;
 
-    if (!config.url || !config.serviceRoleKey || !config.bucket) {
+    if (!this.isObjectStorageConfigured(config)) {
       throw this.createError(
         WebCompanionErrorCode.PROVIDER_UNAVAILABLE,
-        "Supabase configuration is incomplete"
+        "Object storage configuration is incomplete"
       );
     }
 
-    // 只为 Supabase provider 生成 signed upload
-    if (item.provider !== StorageProvider.SUPABASE) {
+    if (item.provider === StorageProvider.LAN) {
       throw this.createError(
         WebCompanionErrorCode.PROVIDER_UNAVAILABLE,
         `Signed upload not supported for provider: ${item.provider}`
       );
     }
 
-    const storageProvider = createSupabaseStorageProvider({ config });
+    const storageProvider = createObjectStorageProvider({ config });
     const signedUpload = await storageProvider.createSignedUploadUrl(item.objectKey);
     if (signedUpload.ok) {
       const ttlSeconds = signedUpload.expiresInSeconds || config.signedUrlTtlSeconds || 900;
@@ -724,6 +720,13 @@ export class WebCompanionService {
         expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
         headers: {},
       };
+    }
+
+    if (config.provider !== StorageProvider.SUPABASE) {
+      throw this.createError(
+        WebCompanionErrorCode.SIGNED_UPLOAD_UNAVAILABLE,
+        "S3-compatible object storage did not return a signed upload URL"
+      );
     }
 
     const { createClient } = await import("@supabase/supabase-js");
@@ -758,6 +761,19 @@ export class WebCompanionService {
     };
   }
 
+  private isObjectStorageConfigured(config: WebCompanionAppConfig["config"]["supabaseStorage"]) {
+    const hasS3 = config.provider === StorageProvider.COS
+      ? Boolean(config.bucket && config.s3.region && config.s3.accessKeyId && config.s3.secretAccessKey)
+      : Boolean(config.s3.endpoint && config.bucket && config.s3.accessKeyId && config.s3.secretAccessKey);
+    const hasSupabaseRest = Boolean(
+      config.provider === StorageProvider.SUPABASE
+        && config.url
+        && config.serviceRoleKey
+        && config.bucket,
+    );
+    return hasS3 || hasSupabaseRest;
+  }
+
   private async startPullbackProcess(item: UploadItem, retryCount = 0): Promise<void> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_BASE = 1000; // 1 秒基础延迟
@@ -776,7 +792,7 @@ export class WebCompanionService {
       const session = await this.getSessionById(item.sessionId);
 
       const config = this.appConfigService.config.supabaseStorage;
-      const storageProvider = createSupabaseStorageProvider({ config });
+      const storageProvider = createObjectStorageProvider({ config });
       const signedDownload = await storageProvider.createSignedUrl(item.objectKey);
       if (!signedDownload.ok || !signedDownload.url) {
         throw new Error(signedDownload.message || "Failed to generate signed download URL");

@@ -7,32 +7,64 @@ import '../../../shared/widgets/chrome.dart';
 import '../../../shared/widgets/layout.dart';
 import '../generate_export_assets.dart';
 
-class SmartGenerateActions extends StatelessWidget {
+class SmartGenerateActions extends StatefulWidget {
   const SmartGenerateActions({
     required this.selectedCount,
     required this.generating,
     required this.selectedCreationType,
-    required this.onGeneratePictureBook,
-    required this.onGenerateMemoryAlbum,
-    required this.onGenerateMemoryVideo,
+    required this.creationGoal,
+    required this.onGoalChanged,
+    required this.onCreationTypeChanged,
+    required this.onGenerate,
     super.key,
   });
 
   final int selectedCount;
   final bool generating;
   final String selectedCreationType;
-  final VoidCallback? onGeneratePictureBook;
-  final VoidCallback? onGenerateMemoryAlbum;
-  final VoidCallback? onGenerateMemoryVideo;
+  final String creationGoal;
+  final ValueChanged<String>? onGoalChanged;
+  final ValueChanged<String>? onCreationTypeChanged;
+  final VoidCallback? onGenerate;
+
+  @override
+  State<SmartGenerateActions> createState() => _SmartGenerateActionsState();
+}
+
+class _SmartGenerateActionsState extends State<SmartGenerateActions> {
+  late final TextEditingController _goalController;
+
+  @override
+  void initState() {
+    super.initState();
+    _goalController = TextEditingController(text: widget.creationGoal);
+  }
+
+  @override
+  void didUpdateWidget(covariant SmartGenerateActions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.creationGoal != oldWidget.creationGoal &&
+        widget.creationGoal != _goalController.text) {
+      _goalController.text = widget.creationGoal;
+      _goalController.selection = TextSelection.collapsed(
+        offset: _goalController.text.length,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _goalController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final startAction = switch (selectedCreationType) {
-      'memory_book' => onGenerateMemoryAlbum,
-      'memoir_video' => onGenerateMemoryVideo,
-      _ => onGeneratePictureBook,
-    };
-    final canStart = selectedCount > 0 && !generating;
+    final canStart =
+        widget.selectedCount > 0 &&
+        !widget.generating &&
+        widget.onGenerate != null;
+    final canEdit = !widget.generating;
     final l10n = AppLocalizations.of(context)!;
     return SurfaceCard(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
@@ -67,7 +99,20 @@ class SmartGenerateActions extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
-                    enabled: !generating,
+                    controller: _goalController,
+                    enabled: canEdit && widget.onGoalChanged != null,
+                    maxLength: 200,
+                    buildCounter:
+                        (
+                          context, {
+                          required currentLength,
+                          required isFocused,
+                          required maxLength,
+                        }) => const SizedBox.shrink(),
+                    onChanged: (value) {
+                      setState(() {});
+                      widget.onGoalChanged?.call(value);
+                    },
                     style: const TextStyle(fontSize: 15),
                     decoration: InputDecoration(
                       hintText: l10n.generateExportGoalHint,
@@ -81,8 +126,8 @@ class SmartGenerateActions extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  '0 / 200',
+                Text(
+                  '${_goalController.text.length} / 200',
                   style: TextStyle(
                     color: Color(0xff8f8072),
                     fontWeight: FontWeight.w600,
@@ -107,8 +152,10 @@ class SmartGenerateActions extends StatelessWidget {
                   tagText: l10n.generateExportStorybookTag,
                   iconAsset: creationComposeIconAsset,
                   iconSize: 80,
-                  selected: selectedCreationType == 'storybook',
-                  onPressed: onGeneratePictureBook,
+                  selected: widget.selectedCreationType == 'storybook',
+                  onPressed: widget.onCreationTypeChanged == null
+                      ? null
+                      : () => widget.onCreationTypeChanged!('storybook'),
                 ),
               ),
               const SizedBox(width: 6),
@@ -119,8 +166,10 @@ class SmartGenerateActions extends StatelessWidget {
                   tagText: l10n.generateExportMemoryBookTag,
                   iconAsset: bearDocumentIconAsset,
                   iconSize: 76,
-                  selected: selectedCreationType == 'memory_book',
-                  onPressed: onGenerateMemoryAlbum,
+                  selected: widget.selectedCreationType == 'memory_book',
+                  onPressed: widget.onCreationTypeChanged == null
+                      ? null
+                      : () => widget.onCreationTypeChanged!('memory_book'),
                 ),
               ),
               const SizedBox(width: 6),
@@ -133,24 +182,26 @@ class SmartGenerateActions extends StatelessWidget {
                   tagText: l10n.generateExportMemoryVideoTag,
                   iconAsset: creationVideoBoardIconAsset,
                   iconSize: 76,
-                  selected: selectedCreationType == 'memoir_video',
-                  onPressed: onGenerateMemoryVideo,
+                  selected: widget.selectedCreationType == 'memoir_video',
+                  onPressed: widget.onCreationTypeChanged == null
+                      ? null
+                      : () => widget.onCreationTypeChanged!('memoir_video'),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 7),
-          _AssetStatusStrip(selectedCount: selectedCount),
+          _AssetStatusStrip(selectedCount: widget.selectedCount),
           const SizedBox(height: 7),
           PrimaryButton(
             label: AppLocalizations.of(
               context,
             )!.generateExportStartPlanningAction,
-            onPressed: canStart ? startAction : null,
+            onPressed: canStart ? widget.onGenerate : null,
             height: 42,
             fontSize: 15,
-            backgroundColor: const Color(0xff83b88e),
-            disabledBackgroundColor: const Color(0xffcfe1d3),
+            backgroundColor: const Color(0xff3f9460),
+            disabledBackgroundColor: const Color(0xffd7dfd6),
             disabledForegroundColor: const Color(0xfff6faf7),
           ),
           if (!canStart) ...[

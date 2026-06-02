@@ -35,6 +35,7 @@ class SetupCheckVm {
 class SupabaseStorageVm {
   const SupabaseStorageVm({
     required this.configured,
+    this.provider = 'supabase',
     required this.url,
     required this.bucket,
     required this.serviceRoleKeyConfigured,
@@ -52,6 +53,7 @@ class SupabaseStorageVm {
   });
 
   final bool configured;
+  final String provider;
   final String url;
   final String bucket;
   final bool serviceRoleKeyConfigured;
@@ -79,6 +81,7 @@ class SupabaseStorageVm {
   SupabaseStorageVm copyWith({
     bool? configured,
     String? url,
+    String? provider,
     String? bucket,
     bool? serviceRoleKeyConfigured,
     String? publicBaseUrl,
@@ -95,6 +98,7 @@ class SupabaseStorageVm {
   }) {
     return SupabaseStorageVm(
       configured: configured ?? this.configured,
+      provider: provider ?? this.provider,
       url: url ?? this.url,
       bucket: bucket ?? this.bucket,
       serviceRoleKeyConfigured:

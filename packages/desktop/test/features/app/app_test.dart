@@ -113,6 +113,9 @@ Future<void> confirmReadyCreationPlan(WidgetTester tester) async {
 }
 
 Future<void> generateStorybookFromPrimary(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('生成儿童绘本').first);
+  await tester.tap(find.text('生成儿童绘本').first);
+  await tester.pumpAndSettle();
   await tester.ensureVisible(primaryButton('开始规划'));
   await tester.tap(primaryButton('开始规划'));
   await tester.pumpAndSettle();
@@ -122,6 +125,9 @@ Future<void> generateStorybookFromPrimary(WidgetTester tester) async {
 Future<void> generateMemoryVideoFromCard(WidgetTester tester) async {
   await tester.ensureVisible(find.text('生成回忆视频'));
   await tester.tap(find.text('生成回忆视频'));
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(primaryButton('开始规划'));
+  await tester.tap(primaryButton('开始规划'));
   await tester.pumpAndSettle();
   await confirmReadyCreationPlan(tester);
 }

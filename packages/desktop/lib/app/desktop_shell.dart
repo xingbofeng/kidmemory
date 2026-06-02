@@ -11,6 +11,7 @@ import '../core/sidecar/sidecar_api.dart';
 import '../core/sidecar/desktop_sidecar_gateway.dart';
 import '../core/sidecar/sidecar_launcher.dart';
 import '../core/sidecar/agent_config_api.dart';
+import '../core/sidecar/sidecar_dtos.dart';
 import '../core/logging/desktop_log_cleanup_worker.dart';
 import '../core/logging/desktop_logger.dart';
 import '../core/logging/desktop_trace_context.dart';
@@ -160,6 +161,7 @@ class _DesktopShellState extends State<DesktopShell> {
   List<String> generationStyles = const [];
   List<String> generationExportTargets = const [];
   String generationCreationType = 'storybook';
+  String generationGoal = '';
   String generationTemplate = '';
   String generationPageSize = '';
   String generationStyle = '';

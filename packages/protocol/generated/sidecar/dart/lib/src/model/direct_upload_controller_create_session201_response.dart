@@ -32,6 +32,10 @@ class DirectUploadControllerCreateSession201Response {
 
     required  this.anonKey,
 
+    required  this.provider,
+
+    required  this.uploadMode,
+
     required  this.publicUrl,
 
     required  this.recommendedClientLimit,
@@ -115,6 +119,30 @@ class DirectUploadControllerCreateSession201Response {
 
   @JsonKey(
 
+    name: r'provider',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DirectUploadControllerCreateSession201ResponseProviderEnum provider;
+
+
+
+  @JsonKey(
+
+    name: r'uploadMode',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DirectUploadControllerCreateSession201ResponseUploadModeEnum uploadMode;
+
+
+
+  @JsonKey(
+
     name: r'publicUrl',
     required: true,
     includeIfNull: false,
@@ -171,6 +199,8 @@ class DirectUploadControllerCreateSession201Response {
       other.sessionPath == sessionPath &&
       other.supabaseUrl == supabaseUrl &&
       other.anonKey == anonKey &&
+      other.provider == provider &&
+      other.uploadMode == uploadMode &&
       other.publicUrl == publicUrl &&
       other.recommendedClientLimit == recommendedClientLimit &&
       other.expiresAtHintSeconds == expiresAtHintSeconds &&
@@ -184,6 +214,8 @@ class DirectUploadControllerCreateSession201Response {
         sessionPath.hashCode +
         supabaseUrl.hashCode +
         anonKey.hashCode +
+        provider.hashCode +
+        uploadMode.hashCode +
         publicUrl.hashCode +
         recommendedClientLimit.hashCode +
         expiresAtHintSeconds.hashCode +
@@ -198,4 +230,37 @@ class DirectUploadControllerCreateSession201Response {
     return toJson().toString();
   }
 
+}
+
+
+enum DirectUploadControllerCreateSession201ResponseProviderEnum {
+@JsonValue(r'supabase')
+supabase(r'supabase'),
+@JsonValue(r'cos')
+cos(r'cos'),
+@JsonValue(r's3')
+s3(r's3');
+
+const DirectUploadControllerCreateSession201ResponseProviderEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+
+enum DirectUploadControllerCreateSession201ResponseUploadModeEnum {
+@JsonValue(r'supabase-js')
+supabaseJs(r'supabase-js'),
+@JsonValue(r'signed-url')
+signedUrl(r'signed-url');
+
+const DirectUploadControllerCreateSession201ResponseUploadModeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }

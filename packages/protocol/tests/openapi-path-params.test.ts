@@ -147,6 +147,39 @@ describe("OpenAPI path parameters", () => {
     assert.doesNotMatch(createShareToken[0], /requestBody\?: never/, "createShareToken requestBody should not be never");
   });
 
+  test("sidecar creation task generated client includes planning request body settings", () => {
+    const openapiFile = path.resolve(process.cwd(), "openapi/sidecar.openapi.json");
+    const doc = JSON.parse(readFileSync(openapiFile, "utf8")) as OpenApiDoc;
+    const createTask = doc.paths?.["/creation/tasks"]?.post as
+      | {
+          requestBody?: {
+            content?: {
+              "application/json"?: {
+                schema?: {
+                  properties?: Record<string, unknown>;
+                };
+              };
+            };
+          };
+        }
+      | undefined;
+
+    const schema = createTask?.requestBody?.content?.["application/json"]?.schema;
+    assert.ok(schema?.properties?.goal, "creation task request body should include goal");
+    assert.ok(schema?.properties?.creationType, "creation task request body should include creationType");
+    assert.ok(schema?.properties?.assetIds, "creation task request body should include assetIds");
+    assert.ok(schema?.properties?.settings, "creation task request body should include settings");
+
+    const generatedTypeFile = path.resolve(process.cwd(), "generated/sidecar/ts/index.d.ts");
+    const content = readFileSync(generatedTypeFile, "utf8");
+    const createTaskOperation = content.match(
+      /CreationController_createTask:[\s\S]*?(?=\n    [A-Za-z0-9_]+: \{|\n\};)/,
+    );
+    assert.ok(createTaskOperation, "CreationController_createTask missing from generated sidecar client");
+    assert.doesNotMatch(createTaskOperation[0], /requestBody\?: never/, "createTask requestBody should not be never");
+    assert.match(createTaskOperation[0], /settings\?:\s*\{[\s\S]*?\[key: string\]: unknown/, "createTask settings should be typed");
+  });
+
   test("generated TypeScript clients keep empty component maps typed as unknown", () => {
     const files = [
       "generated/cloud-api/ts/index.d.ts",

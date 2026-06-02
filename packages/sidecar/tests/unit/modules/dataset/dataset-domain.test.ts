@@ -78,6 +78,82 @@ test("dataset domain updates and deletes assets", async () => {
   assert.equal(await db.getAsset("a3"), null);
 });
 
+test("dataset domain deletes a child and its associated assets", async () => {
+  const db = new MemoryDatasetDb();
+  const service = createDatasetService({ datasetState: createDatasetState(db) });
+  await db.upsertChild({ id: "child-delete", name: "可可" });
+  await db.upsertChild({ id: "child-keep", name: "澄澄" });
+  await db.upsertAsset({
+    id: "asset-delete",
+    childId: "child-delete",
+    type: "artwork",
+    title: "delete me",
+    tags: [],
+    description: "",
+    imagePath: "x",
+    thumbnailPath: "x",
+    sourceUrl: "",
+    license: "local",
+  });
+  await db.upsertAsset({
+    id: "asset-keep",
+    childId: "child-keep",
+    type: "artwork",
+    title: "keep me",
+    tags: [],
+    description: "",
+    imagePath: "x",
+    thumbnailPath: "x",
+    sourceUrl: "",
+    license: "local",
+  });
+
+  const result = await service.deleteChild("child-delete");
+
+  assert.equal(result.status, 200);
+  assert.equal(result.data.ok, true);
+  assert.equal(result.data.deletedAssets, 1);
+  assert.equal(await db.getChild("child-delete"), null);
+  assert.equal((await db.getAssets({ childId: "child-delete" })).length, 0);
+  assert.equal((await db.getAssets({ childId: "child-keep" })).length, 1);
+});
+
+test("dataset domain clears child related records before deleting assets", async () => {
+  const db = new MemoryDatasetDb() as MemoryDatasetDb & {
+    deleteChildRelatedRecords?: (childId: string) => Promise<{ deletedBooks: number }>;
+  };
+  const calls: string[] = [];
+  const originalDeleteAssetsByChildId = db.deleteAssetsByChildId.bind(db);
+  db.deleteChildRelatedRecords = async (childId) => {
+    calls.push(`related:${childId}`);
+    return { deletedBooks: 1 };
+  };
+  db.deleteAssetsByChildId = async (childId) => {
+    calls.push(`assets:${childId}`);
+    return originalDeleteAssetsByChildId(childId);
+  };
+  const service = createDatasetService({ datasetState: createDatasetState(db) });
+  await db.upsertChild({ id: "child-related", name: "可可" });
+  await db.upsertAsset({
+    id: "asset-related",
+    childId: "child-related",
+    type: "artwork",
+    title: "delete me",
+    tags: [],
+    description: "",
+    imagePath: "x",
+    thumbnailPath: "x",
+    sourceUrl: "",
+    license: "local",
+  });
+
+  const result = await service.deleteChild("child-related");
+
+  assert.equal(result.status, 200);
+  assert.deepEqual(calls, ["related:child-related", "assets:child-related"]);
+  assert.equal(result.data.deletedRelatedRecords?.deletedBooks, 1);
+});
+
 test("dataset domain persists the selected child before importing real assets", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-domain-import-"));
   const image = path.join(root, "drawing.jpg");

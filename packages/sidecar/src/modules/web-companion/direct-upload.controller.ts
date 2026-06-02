@@ -33,6 +33,8 @@ const directUploadSessionResponseSchema = {
     "sessionPath",
     "supabaseUrl",
     "anonKey",
+    "provider",
+    "uploadMode",
     "publicUrl",
     "recommendedClientLimit",
     "expiresAtHintSeconds",
@@ -45,6 +47,8 @@ const directUploadSessionResponseSchema = {
     sessionPath: { type: "string" },
     supabaseUrl: { type: "string" },
     anonKey: { type: "string" },
+    provider: { type: "string", enum: ["supabase", "cos", "s3"] },
+    uploadMode: { type: "string", enum: ["supabase-js", "signed-url"] },
     publicUrl: { type: "string" },
     recommendedClientLimit: { type: "number" },
     expiresAtHintSeconds: { type: "number" },
@@ -54,12 +58,28 @@ const directUploadSessionResponseSchema = {
 
 const directUploadConfigResponseSchema = {
   type: "object",
-  required: ["supabaseUrl", "anonKey", "bucket", "recommendedClientLimit"],
+  required: ["supabaseUrl", "anonKey", "bucket", "recommendedClientLimit", "provider", "uploadMode"],
   properties: {
     supabaseUrl: { type: "string" },
     anonKey: { type: "string" },
     bucket: { type: "string" },
     recommendedClientLimit: { type: "number" },
+    provider: { type: "string", enum: ["supabase", "cos", "s3"] },
+    uploadMode: { type: "string", enum: ["supabase-js", "signed-url"] },
+  },
+};
+
+const directUploadSignedUploadResponseSchema = {
+  type: "object",
+  required: ["method", "url", "expiresAt", "headers"],
+  properties: {
+    method: { type: "string", enum: ["PUT"] },
+    url: { type: "string" },
+    expiresAt: { type: "string" },
+    headers: {
+      type: "object",
+      additionalProperties: { type: "string" },
+    },
   },
 };
 
@@ -183,9 +203,20 @@ export class DirectUploadController {
   async getSessionConfig(
     sessionId: string,
     token: string,
-  ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number }> {
+  ): Promise<{ supabaseUrl: string; anonKey: string; bucket: string; recommendedClientLimit: number; provider: string; uploadMode: string }> {
     try {
       return await this.service.getSessionConfig(sessionId, token);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async createSignedUploadTarget(
+    sessionId: string,
+    body: { token: string; objectKey: string; contentType?: string; sizeBytes?: number },
+  ) {
+    try {
+      return await this.service.createSignedUploadTarget(sessionId, body);
     } catch (error) {
       this.handleError(error);
     }
@@ -204,6 +235,7 @@ export class DirectUploadController {
       case "session_expired":
         throw new HttpException({ code, message }, HttpStatus.UNAUTHORIZED);
       case "child_id_required":
+      case "object_key_mismatch":
         throw new HttpException({ code, message }, HttpStatus.BAD_REQUEST);
       case "child_not_found":
       case "session_not_found":
@@ -318,4 +350,29 @@ ApiResponse({ status: 200, schema: directUploadConfigResponseSchema })(
   DirectUploadController.prototype,
   "getSessionConfig",
   Object.getOwnPropertyDescriptor(DirectUploadController.prototype, "getSessionConfig")!,
+);
+
+Post("sessions/:sessionId/sign-upload")(
+  DirectUploadController.prototype,
+  "createSignedUploadTarget",
+  Object.getOwnPropertyDescriptor(DirectUploadController.prototype, "createSignedUploadTarget")!,
+);
+Param("sessionId")(DirectUploadController.prototype, "createSignedUploadTarget", 0);
+Body()(DirectUploadController.prototype, "createSignedUploadTarget", 1);
+ApiBody({
+  schema: {
+    type: "object",
+    required: ["token", "objectKey"],
+    properties: {
+      token: { type: "string" },
+      objectKey: { type: "string" },
+      contentType: { type: "string" },
+      sizeBytes: { type: "number" },
+    },
+  },
+})(DirectUploadController.prototype, "createSignedUploadTarget", Object.getOwnPropertyDescriptor(DirectUploadController.prototype, "createSignedUploadTarget")!);
+ApiResponse({ status: 201, schema: directUploadSignedUploadResponseSchema })(
+  DirectUploadController.prototype,
+  "createSignedUploadTarget",
+  Object.getOwnPropertyDescriptor(DirectUploadController.prototype, "createSignedUploadTarget")!,
 );

@@ -14,6 +14,7 @@
  */
 
 import { buildDirectUploadObjectKey } from './direct-upload-naming'
+import { uploadFileWithSignedUrl, type SignedUploadTarget } from './signed-upload'
 import i18n from '../i18n'
 import type {
   DirectUploadConfig,
@@ -58,6 +59,12 @@ export interface DirectUploadStorageBucket {
 
 export interface DirectUploadDeps {
   createClient?: DirectUploadCreateClient
+  signUpload?: (input: {
+    objectKey: string
+    contentType: string
+    sizeBytes: number
+  }) => Promise<SignedUploadTarget>
+  uploadWithSignedUrl?: typeof uploadFileWithSignedUrl
 }
 
 export interface ValidateAddFilesInput {
@@ -171,8 +178,28 @@ export function createDirectUploadClient(
         filename: file.name,
       })
       try {
-        const client = await ensureClient()
         callbacks.onProgress?.(0)
+        if (config.uploadMode === 'signed-url' || deps?.signUpload) {
+          if (!deps?.signUpload) {
+            throw new Error('Missing signed upload target signer')
+          }
+          const signedUpload = await deps.signUpload({
+            objectKey,
+            contentType: file.type || 'application/octet-stream',
+            sizeBytes: file.size,
+          })
+          await (deps.uploadWithSignedUrl ?? uploadFileWithSignedUrl)(
+            file,
+            signedUpload,
+            (progress) => {
+              callbacks.onProgress?.(progress > 1 ? progress / 100 : progress)
+            },
+          )
+          callbacks.onProgress?.(1)
+          return { ok: true, objectKey }
+        }
+
+        const client = await ensureClient()
         const { data, error } = await client.storage
           .from(config.bucket)
           .upload(objectKey, file, {

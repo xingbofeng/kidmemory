@@ -413,6 +413,36 @@ paths:
     post:
       operationId: CreationController_createTask
       parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - goal
+                - creationType
+                - assetIds
+              additionalProperties: false
+              properties:
+                goal:
+                  type: string
+                  minLength: 1
+                creationType:
+                  type: string
+                  enum:
+                    - storybook
+                    - memory_book
+                    - memoir_video
+                assetIds:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    minLength: 1
+                settings:
+                  type: object
+                  additionalProperties: true
       responses:
         "201":
           description: ""
@@ -1423,6 +1453,8 @@ paths:
                   - sessionPath
                   - supabaseUrl
                   - anonKey
+                  - provider
+                  - uploadMode
                   - publicUrl
                   - recommendedClientLimit
                   - expiresAtHintSeconds
@@ -1440,6 +1472,17 @@ paths:
                     type: string
                   anonKey:
                     type: string
+                  provider:
+                    type: string
+                    enum:
+                      - supabase
+                      - cos
+                      - s3
+                  uploadMode:
+                    type: string
+                    enum:
+                      - supabase-js
+                      - signed-url
                   publicUrl:
                     type: string
                   recommendedClientLimit:
@@ -1645,6 +1688,8 @@ paths:
                   - anonKey
                   - bucket
                   - recommendedClientLimit
+                  - provider
+                  - uploadMode
                 properties:
                   supabaseUrl:
                     type: string
@@ -1654,6 +1699,71 @@ paths:
                     type: string
                   recommendedClientLimit:
                     type: number
+                  provider:
+                    type: string
+                    enum:
+                      - supabase
+                      - cos
+                      - s3
+                  uploadMode:
+                    type: string
+                    enum:
+                      - supabase-js
+                      - signed-url
+      tags: *a7
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+  /api/web-companion/direct-upload/sessions/{sessionId}/sign-upload:
+    post:
+      operationId: DirectUploadController_createSignedUploadTarget
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - objectKey
+              properties:
+                token:
+                  type: string
+                objectKey:
+                  type: string
+                contentType:
+                  type: string
+                sizeBytes:
+                  type: number
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - method
+                  - url
+                  - expiresAt
+                  - headers
+                properties:
+                  method:
+                    type: string
+                    enum:
+                      - PUT
+                  url:
+                    type: string
+                  expiresAt:
+                    type: string
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
       tags: *a7
     parameters:
       - name: sessionId

@@ -82,7 +82,9 @@ extension _DesktopShellSidecarLifecycle on _DesktopShellState {
   List<SetupCheckVm> _applySequentialSetupLocks(List<SetupCheckVm> checks) {
     var blocked = false;
     return checks.map((check) {
-      final enabled = check.actionEnabled && !blocked;
+      final isLocalDataDirectory =
+          check.title == AppLocalizations.of(context)!.setupLocalDataDirTitle;
+      final enabled = check.actionEnabled && (!blocked || isLocalDataDirectory);
       final next = enabled
           ? check
           : _copySetupCheck(

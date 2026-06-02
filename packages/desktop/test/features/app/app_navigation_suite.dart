@@ -99,11 +99,24 @@ void appNavigationSuite() {
       expect(find.text('生成成长纪念册'), findsOneWidget);
       expect(find.text('生成回忆视频'), findsOneWidget);
 
-      await tester.tap(find.text('生成儿童绘本').first);
+      await tester.tap(find.text('生成成长纪念册'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('将使用免费生图服务生成封面图'), findsNothing);
-      expect(api.lastTaskBody?['creationType'], 'storybook');
+      expect(api.lastTaskBody, isNull);
+      expect(api.lastGenerateBody, isNull);
+
+      await tester.enterText(
+        find.byType(TextField).first,
+        '用恐龙画做一本勇敢主题的成长纪念册',
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(primaryButton('开始规划'));
+      await tester.tap(primaryButton('开始规划'));
+      await tester.pumpAndSettle();
+
+      expect(api.lastTaskBody?['creationType'], 'memory_book');
+      expect(api.lastTaskBody?['goal'], '用恐龙画做一本勇敢主题的成长纪念册');
+      expect((api.lastTaskBody?['settings'] as Map?)?['childId'], 'child-1');
       expect(api.lastGenerateBody, isNull);
       expect(find.text('确认创作计划'), findsOneWidget);
       expect(find.text('KidMemory storybook'), findsOneWidget);
@@ -133,6 +146,9 @@ void appNavigationSuite() {
     await tester.ensureVisible(find.text('生成成长纪念册'));
     await tester.tap(find.text('生成成长纪念册'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
 
     expect(api.lastTaskBody?['creationType'], 'memory_book');
     expect(find.text('确认创作计划'), findsOneWidget);
@@ -152,7 +168,7 @@ void appNavigationSuite() {
     await gotoStep(tester, '创作台');
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('生成儿童绘本').first);
+    await tester.tap(primaryButton('开始规划'));
     await tester.pump();
 
     expect(find.text('规划中'), findsWidgets);
@@ -385,6 +401,9 @@ void appNavigationSuite() {
     await tester.ensureVisible(find.text('生成回忆视频'));
     await tester.tap(find.text('生成回忆视频'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
 
     final confirmButton = primaryButton('确认计划并开始生成').last;
     await tester.ensureVisible(confirmButton);
@@ -489,10 +508,11 @@ void appNavigationSuite() {
       await gotoStep(tester, '创作台');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('生成儿童绘本').first);
+      await tester.tap(primaryButton('开始规划'));
       await tester.pumpAndSettle();
 
       expect(find.text('封面图生成失败'), findsWidgets);
+      expect(api.lastTaskBody?['goal'], '将照片和故事变成精美绘本');
       expect(secondaryButton('重试'), findsOneWidget);
       expect(secondaryButton('跳过封面继续导出'), findsNothing);
       expect(find.text('跳过封面'), findsNothing);

@@ -4,9 +4,9 @@ import { AppConfigService } from "../../infrastructure/config/app-config.service
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
 import type { ExportArtifact, SampleDb } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
 import {
-  createSupabaseStorageProvider,
-  type SupabaseStorageProvider,
-} from "../storage/providers/supabase-storage.ts";
+  createObjectStorageProvider,
+  type ObjectStorageProvider,
+} from "../storage/providers/object-storage.ts";
 import {
   createStorageSyncService,
   type StorageProviderForSync,
@@ -16,7 +16,7 @@ import { createOpenAIAssetMetadataInferer, type InferAssetMetadata } from "./pro
 import type { StorageSyncJobStatus } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
 
 type DatasetServiceFactories = {
-  createStorageProvider?: (config: AppConfigService) => StorageProviderForSync | SupabaseStorageProvider;
+  createStorageProvider?: (config: AppConfigService) => StorageProviderForSync | ObjectStorageProvider;
   createStorageSync?: (input: {
     db: Awaited<ReturnType<DatasetStateService["activatePersistent"]>>;
     provider: StorageProviderForSync;
@@ -45,7 +45,7 @@ export class DatasetService {
     this.factories = {
       createStorageProvider:
         factories.createStorageProvider
-        ?? ((cfg) => createSupabaseStorageProvider({ config: cfg.config.supabaseStorage })),
+        ?? ((cfg) => createObjectStorageProvider({ config: cfg.config.supabaseStorage })),
       createStorageSync: factories.createStorageSync ?? createStorageSyncService,
       createInferAssetMetadata: factories.createInferAssetMetadata ?? ((cfg) => createOpenAIAssetMetadataInferer(cfg)),
     };

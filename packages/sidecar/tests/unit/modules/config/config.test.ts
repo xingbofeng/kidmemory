@@ -4,6 +4,7 @@ import { test } from "node:test";
 
 import {
   AppConfigService,
+  type AppConfig,
   loadConfigFromEnv,
   redactConfig,
 } from "../../../../src/infrastructure/config/app-config.service.ts";
@@ -20,6 +21,9 @@ type ConfigServiceTestOptions = {
   runtimeConfigRows?: RuntimeConfigRecord[];
   upserts?: RuntimeConfigRecord[];
   storageFetch?: typeof fetch;
+  storageProviderFactory?: (config: AppConfig["supabaseStorage"], fetchImpl: typeof fetch) => {
+    testConnection(): Promise<{ ok: boolean; cleanup: { ok: boolean } }>;
+  };
 };
 
 function createConfigService(
@@ -43,7 +47,7 @@ function createConfigService(
     },
   } as unknown as PrismaMigrationService;
 
-  return new ConfigService(appConfig, prisma, migrations, options.storageFetch);
+  return new ConfigService(appConfig, prisma, migrations, options.storageFetch, options.storageProviderFactory);
 }
 
 test("loads startup .env values without treating setup config as env fallback", () => {
@@ -197,6 +201,105 @@ test("loads complete Supabase S3 runtime config as a configured storage mode", (
   assert.equal(serialized.includes("s3-secret-key"), false);
 });
 
+test("updates COS object storage provider through runtime setup config", async () => {
+  const appConfig = new AppConfigService(loadConfigFromEnv({}));
+  const service = createConfigService(appConfig);
+
+  await service.updateSupabaseStorage({
+    provider: "cos",
+    bucket: "counter-1252496948",
+    s3Endpoint: "https://cos.ap-guangzhou.myqcloud.com",
+    s3Region: "ap-guangzhou",
+    s3AccessKeyId: "cos-secret-id",
+    s3SecretAccessKey: "cos-secret-key",
+    signedUrlTtlSeconds: 300,
+  });
+
+  const redacted = redactConfig(appConfig.config);
+
+  assert.equal(appConfig.config.supabaseStorage.provider, "cos");
+  assert.equal(redacted.supabaseStorage.provider, "cos");
+  assert.equal(redacted.supabaseStorage.configured, true);
+  assert.equal(redacted.supabaseStorage.authMode, "s3");
+  assert.equal(JSON.stringify(redacted).includes("cos-secret-key"), false);
+});
+
+test("COS setup config keeps direct upload bucket with the configured storage bucket", async () => {
+  const appConfig = new AppConfigService(loadConfigFromEnv({}));
+  const upserts: RuntimeConfigRecord[] = [];
+  const service = createConfigService(appConfig, { upserts });
+
+  await service.updateSupabaseStorage({
+    provider: "cos",
+    bucket: "counter-1252496948",
+    s3Endpoint: "https://cos.ap-guangzhou.myqcloud.com",
+    s3Region: "ap-guangzhou",
+    s3AccessKeyId: "cos-secret-id",
+    s3SecretAccessKey: "cos-secret-key",
+    signedUrlTtlSeconds: 900,
+  });
+
+  assert.equal(
+    appConfig.config.webCompanionDirectUpload.bucket,
+    "counter-1252496948",
+  );
+  assert.deepEqual(
+    upserts.map((record) => record.key),
+    ["supabaseStorage", "webCompanionDirectUpload"],
+  );
+});
+
+test("loads Tencent COS object storage from .env keys without exposing secrets in redacted config", () => {
+  const config = loadConfigFromEnv({
+    KIDMEMORY_OBJECT_STORAGE_PROVIDER: "cos",
+    COS_SECRET_ID: "cos-secret-id",
+    COS_SECRET_KEY: "cos-secret-key",
+    COS_BUCKET: "counter-1252496948",
+    COS_REGION: "ap-guangzhou",
+    COS_SIGNED_URL_TTL_SECONDS: "900",
+    COS_DIRECT_UPLOAD_BUCKET: "counter-1252496948",
+  });
+
+  const redacted = redactConfig(config);
+
+  assert.equal(config.supabaseStorage.provider, "cos");
+  assert.equal(config.supabaseStorage.bucket, "counter-1252496948");
+  assert.equal(config.supabaseStorage.s3.region, "ap-guangzhou");
+  assert.equal(config.webCompanionDirectUpload.bucket, "counter-1252496948");
+  assert.equal(redacted.supabaseStorage.configured, true);
+  assert.equal(redacted.supabaseStorage.s3.accessKeyId, "[REDACTED]");
+  assert.equal(redacted.supabaseStorage.s3.secretAccessKey, "[REDACTED]");
+  assert.equal(JSON.stringify(redacted).includes("cos-secret-key"), false);
+});
+
+test("loads generic S3 object storage from .env keys without requiring Supabase REST config", () => {
+  const config = loadConfigFromEnv({
+    KIDMEMORY_OBJECT_STORAGE_PROVIDER: "s3",
+    SUPABASE_S3_ENDPOINT: "https://s3.example.test",
+    SUPABASE_S3_REGION: "us-east-1",
+    SUPABASE_S3_ACCESS_KEY_ID: "s3-access-key",
+    SUPABASE_S3_SECRET_ACCESS_KEY: "s3-secret-key",
+    SUPABASE_S3_BUCKET: "kidmemory-s3-uploads",
+    SUPABASE_STORAGE_SIGNED_URL_TTL_SECONDS: "1200",
+    SUPABASE_DIRECT_UPLOAD_BUCKET: "kidmemory-s3-direct",
+    WEB_COMPANION_DIRECT_PUBLIC_URL: "https://kidmemory-companion.example.com",
+  });
+
+  const redacted = redactConfig(config);
+
+  assert.equal(config.supabaseStorage.provider, "s3");
+  assert.equal(config.supabaseStorage.bucket, "kidmemory-s3-uploads");
+  assert.equal(config.supabaseStorage.s3.endpoint, "https://s3.example.test");
+  assert.equal(config.supabaseStorage.s3.region, "us-east-1");
+  assert.equal(config.supabaseStorage.signedUrlTtlSeconds, 1200);
+  assert.equal(config.webCompanionDirectUpload.bucket, "kidmemory-s3-direct");
+  assert.equal(redacted.supabaseStorage.configured, true);
+  assert.equal(redacted.supabaseStorage.authMode, "s3");
+  assert.equal(redacted.webCompanionDirectUpload.canSignSession, true);
+  assert.deepEqual(redacted.webCompanionDirectUpload.missingConfigKeys, []);
+  assert.equal(JSON.stringify(redacted).includes("s3-secret-key"), false);
+});
+
 test("OpenAI 配置在未设置时默认为空", () => {
   const config = loadConfigFromEnv({});
 
@@ -249,7 +352,7 @@ test("persists setup config updates to database runtime config", async () => {
 
   assert.deepEqual(
     upserts.map((entry) => entry.key),
-    ["supabaseStorage"],
+    ["supabaseStorage", "webCompanionDirectUpload"],
   );
 });
 
@@ -338,6 +441,32 @@ test("tests Supabase Storage connection through config service", async () => {
   assert.equal(calls.some((call) => call.startsWith("POST ")), true);
   assert.equal(calls.some((call) => call.startsWith("GET ")), true);
   assert.equal(JSON.stringify(result).includes("supabase-service-secret"), false);
+});
+
+test("tests COS Storage connection through the provider-neutral config service gateway", async () => {
+  const appConfig = new AppConfigService(loadConfigFromEnv({
+    KIDMEMORY_OBJECT_STORAGE_PROVIDER: "cos",
+    COS_SECRET_ID: "cos-secret-id",
+    COS_SECRET_KEY: "cos-secret-key",
+    COS_BUCKET: "counter-1252496948",
+    COS_REGION: "ap-guangzhou",
+  }));
+  const providers: string[] = [];
+  const service = createConfigService(appConfig, {
+    storageProviderFactory(config) {
+      providers.push(config.provider);
+      return {
+        async testConnection() {
+          return { ok: true, cleanup: { ok: true } };
+        },
+      };
+    },
+  });
+
+  const result = await service.testSupabaseStorage();
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(providers, ["cos"]);
 });
 
 test("Supabase Storage connection test returns actionable bucket errors", async () => {

@@ -35,6 +35,30 @@ export async function pullbackDirectUpload(
   );
 }
 
+export interface SignDirectUploadObjectRequest {
+  token: string;
+  objectKey: string;
+  contentType?: string;
+  sizeBytes?: number;
+}
+
+export interface SignDirectUploadObjectResponse {
+  method: 'PUT';
+  url: string;
+  expiresAt: string;
+  headers: Record<string, string>;
+}
+
+export async function signDirectUploadObject(
+  sessionId: string,
+  request: SignDirectUploadObjectRequest
+): Promise<SignDirectUploadObjectResponse> {
+  return httpClient.post<SignDirectUploadObjectResponse>(
+    `/api/web-companion/direct-upload/sessions/${encodeURIComponent(sessionId)}/sign-upload`,
+    request
+  );
+}
+
 export type CreateUploadItemsRequest = JsonRequestBody<'WebCompanionController_createUploadItems'>;
 
 export type CreateUploadItemsResponse = JsonResponse<'WebCompanionController_createUploadItems', 201>;

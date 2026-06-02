@@ -1973,7 +1973,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get datasetChildrenS301 => '删除孩子档案';
 
   @override
-  String get datasetChildrenS300 => '删除失败：请先清空这个孩子关联的素材';
+  String get datasetChildrenS300 =>
+      'Delete failed. Check the local service and try again.';
 
   @override
   String get datasetChildrenS906 => '选择生日';
@@ -2550,8 +2551,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String datasetChildDeleteConfirmMessage(String name) {
-    return 'Delete \"$name\"? Clear this child\'s linked assets before deleting.';
+    return 'Delete \"$name\"?';
   }
+
+  @override
+  String get datasetChildDeleteConfirmWarning =>
+      'This will also delete this child\'s assets, indexes, and related local records.';
 
   @override
   String datasetChildDeletedLog(String childId, String name) {
@@ -2773,6 +2778,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String assetLibrarySmartPickedCount(int count) {
     return 'The assistant picked $count assets for you';
   }
+
+  @override
+  String get assetLibrarySmartPickAllIncludedHint =>
+      'All visible assets are already included. Confirm them or fine-tune manually.';
 
   @override
   String assetLibrarySmartPickAppliedMessage(int count) {

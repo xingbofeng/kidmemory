@@ -24,8 +24,8 @@ import type { DirectUploadRemoteObject } from "./dto/list-direct-upload-objects.
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
 import { isPrismaNotFoundError } from "../../infrastructure/database/prisma-errors.ts";
-import { trimTrailingSlash } from "../../infrastructure/url/trailing-slash.ts";
 import type { DatasetService } from "../dataset/dataset.service.ts";
+import { createObjectStorageProvider } from "../storage/providers/object-storage.ts";
 
 type DatasetAssetImporter = Pick<DatasetService, "importAssets">;
 
@@ -91,10 +91,9 @@ interface UploadSessionRow {
 // ---- DirectUploadStorageGateway --------------------------------------------
 
 /**
- * 通过 Supabase Storage REST API 实现 list / download。
- *
- * 优先使用 service role key（仅 sidecar 持有）；缺失时回退到 anon key + bucket policy。
- * 调用方（DirectUploadService）已负责把 prefix 限制为 `{sessionId}/`。
+ * 通过当前对象存储 provider 实现 list / download。
+ * 调用方（DirectUploadService）已负责把 prefix 限制为 `{sessionId}/`，这里负责把
+ * session 持久化 bucket 覆盖到运行时对象存储配置上。
  */
 export class SupabaseDirectUploadStorageGateway implements DirectUploadStorageGateway {
   private readonly appConfig: AppConfigService;
@@ -112,41 +111,7 @@ export class SupabaseDirectUploadStorageGateway implements DirectUploadStorageGa
     bucket: string;
     prefix: string;
   }): Promise<DirectUploadRemoteObject[]> {
-    const { url, apiKey } = this.endpointAndKey();
-    const listUrl = `${trimTrailingSlash(url)}/storage/v1/object/list/${encodeURIComponent(bucket)}`;
-    const response = await this.fetchImpl(listUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        apikey: apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prefix,
-        limit: 1000,
-        offset: 0,
-        sortBy: { column: "name", order: "asc" },
-      }),
-    });
-    if (!response.ok) {
-      throw new Error(
-        `Supabase Storage list failed: HTTP ${response.status} ${response.statusText}`,
-      );
-    }
-    const items = (await response.json()) as Array<{
-      name: string;
-      metadata?: { size?: number; mimetype?: string; lastModified?: string };
-      updated_at?: string;
-    }>;
-    return items
-      .filter((item) => item.name && !item.name.endsWith("/"))
-      .map((item) => ({
-        objectKey: `${prefix}${item.name}`,
-        size: item.metadata?.size ?? 0,
-        contentType: item.metadata?.mimetype || "application/octet-stream",
-        lastModified:
-          item.metadata?.lastModified || item.updated_at || new Date().toISOString(),
-      }));
+    return this.providerForBucket(bucket).listObjects({ prefix });
   }
 
   async downloadObject({
@@ -156,43 +121,18 @@ export class SupabaseDirectUploadStorageGateway implements DirectUploadStorageGa
     bucket: string;
     objectKey: string;
   }): Promise<{ body: Buffer; contentType: string; size: number }> {
-    const { url, apiKey } = this.endpointAndKey();
-    const objectUrl = `${trimTrailingSlash(url)}/storage/v1/object/${encodeURIComponent(bucket)}/${objectKey
-      .split("/")
-      .map(encodeURIComponent)
-      .join("/")}`;
-    const response = await this.fetchImpl(objectUrl, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        apikey: apiKey,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(
-        `Supabase Storage download failed: HTTP ${response.status} ${response.statusText}`,
-      );
-    }
-    const arrayBuffer = await response.arrayBuffer();
-    const body = Buffer.from(arrayBuffer);
-    return {
-      body,
-      contentType: response.headers.get("content-type") || "application/octet-stream",
-      size: body.byteLength,
-    };
+    return this.providerForBucket(bucket).downloadObject(objectKey);
   }
 
-  /**
-   * 选择 list/download 使用的密钥：service role key（更稳） > anon key（更安全）。
-   * 这一行为对前端不可见，前端始终拿到的是 anon key。
-   */
-  private endpointAndKey() {
+  private providerForBucket(bucket: string) {
     const cfg = this.appConfig.config.supabaseStorage;
-    const apiKey = cfg.serviceRoleKey || cfg.anonKey;
-    if (!cfg.url || !apiKey) {
-      throw new Error("Supabase storage URL or key missing for direct-upload gateway.");
-    }
-    return { url: cfg.url, apiKey };
+    return createObjectStorageProvider({
+      config: {
+        ...cfg,
+        bucket,
+      },
+      fetch: this.fetchImpl,
+    });
   }
 }
 

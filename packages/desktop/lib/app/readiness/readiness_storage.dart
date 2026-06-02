@@ -21,6 +21,9 @@ extension _DesktopShellReadinessStorage on _DesktopShellState {
           (storage.urlValue.trim().isNotEmpty &&
               storage.bucketValue.trim().isNotEmpty &&
               storage.serviceRoleKeyConfiguredValue),
+      provider: storage.providerValue.trim().isEmpty
+          ? 'supabase'
+          : storage.providerValue.trim(),
       url: storage.urlValue.trim(),
       bucket: storage.bucketValue.trim(),
       serviceRoleKeyConfigured: storage.serviceRoleKeyConfiguredValue,

@@ -78,10 +78,22 @@ extension _DesktopShellDatasetChildren on _DesktopShellState {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.datasetChildrenS301),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!.datasetChildDeleteConfirmMessage(current.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(
+                context,
+              )!.datasetChildDeleteConfirmMessage(current.name),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              AppLocalizations.of(
+                context,
+              )!.datasetChildDeleteConfirmWarning,
+            ),
+          ],
         ),
         actions: [
           TextButton(

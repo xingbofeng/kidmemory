@@ -59,6 +59,51 @@ void appSetupAndExportSuite() {
   });
 
   testWidgets(
+    'setup local data directory actions stay clickable when OpenAI is not configured',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1440, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final api = _UnconfiguredSidecarApi();
+      final openedTargets = <String>[];
+      await tester.pumpWidget(
+        localizedTestApp(
+          home: DesktopShell(
+            api: api,
+            pickDataDirectoryPath: () async => '/tmp/kidmemory-selected-root',
+            openExternalTarget: (target) async {
+              openedTargets.add(target);
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await gotoStep(tester, '设置');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(secondaryButton('打开目录').last);
+      await tester.tap(secondaryButton('打开目录').last);
+      await tester.pumpAndSettle();
+
+      expect(openedTargets, contains(contains('KidMemory/data')));
+
+      await tester.ensureVisible(secondaryButton('配置目录').last);
+      await tester.tap(secondaryButton('配置目录').last);
+      await tester.pumpAndSettle();
+
+      expect(api.lastPathBody?['dataDir'], '/tmp/kidmemory-selected-root/data');
+      expect(
+        api.lastPathBody?['workspaceDir'],
+        '/tmp/kidmemory-selected-root/workspace',
+      );
+      expect(
+        api.lastPathBody?['exportDir'],
+        '/tmp/kidmemory-selected-root/exports',
+      );
+    },
+  );
+
+  testWidgets(
     'setup page manages Supabase Storage without exposing service role key',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1440, 900));
@@ -146,6 +191,7 @@ void appSetupAndExportSuite() {
         matching: find.byType(TextField),
       );
       expect(fields, findsNWidgets(9));
+      expect(find.text('存储服务商'), findsOneWidget);
       expect(find.textContaining('推荐使用云端私有存储'), findsOneWidget);
 
       await tester.tap(find.byTooltip('打开 Supabase S3 官方说明'));
@@ -218,6 +264,69 @@ void appSetupAndExportSuite() {
       );
     },
   );
+
+  testWidgets('setup page can configure COS object storage provider', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = _SupabaseStorageSidecarApi();
+    await tester.pumpWidget(localizedTestApp(home: DesktopShell(api: api)));
+    await tester.pumpAndSettle();
+    await gotoStep(tester, '设置');
+    await tester.pumpAndSettle();
+
+    final configureButton = find
+        .byWidgetPredicate(
+          (widget) => widget is SecondaryButton && widget.label == '修改配置',
+        )
+        .last;
+    await tester.ensureVisible(configureButton);
+    await tester.tap(configureButton);
+    await tester.pumpAndSettle();
+
+    final dialog = find.byType(AlertDialog);
+    final providerDropdown = find.descendant(
+      of: dialog,
+      matching: find.byType(DropdownButtonFormField<String>),
+    );
+    expect(providerDropdown, findsOneWidget);
+
+    await tester.tap(providerDropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('腾讯云 COS').last);
+    await tester.pumpAndSettle();
+
+    final fields = find.descendant(
+      of: dialog,
+      matching: find.byType(TextField),
+    );
+    expect(fields, findsNWidgets(5));
+    expect(find.text('REST 方式（可选）'), findsNothing);
+
+    await tester.enterText(
+      fields.at(0),
+      'https://cos.ap-guangzhou.myqcloud.com',
+    );
+    await tester.enterText(fields.at(1), 'ap-guangzhou');
+    await tester.enterText(fields.at(2), 'counter-1252496948');
+    await tester.enterText(fields.at(3), 'cos-secret-id');
+    await tester.enterText(fields.at(4), 'cos-secret-key');
+
+    await tester.tap(find.descendant(of: dialog, matching: find.text('保存')));
+    await tester.pumpAndSettle();
+
+    expect(api.lastStorageConfigBody?['provider'], 'cos');
+    expect(
+      api.lastStorageConfigBody?['s3Endpoint'],
+      'https://cos.ap-guangzhou.myqcloud.com',
+    );
+    expect(api.lastStorageConfigBody?['s3Region'], 'ap-guangzhou');
+    expect(api.lastStorageConfigBody?['bucket'], 'counter-1252496948');
+    expect(api.lastStorageConfigBody?['s3AccessKeyId'], 'cos-secret-id');
+    expect(api.lastStorageConfigBody?['s3SecretAccessKey'], 'cos-secret-key');
+  });
 
   testWidgets(
     'export flow uses configured export directory before calling sidecar export',
@@ -468,6 +577,9 @@ void appSetupAndExportSuite() {
     await tester.ensureVisible(find.text('生成回忆视频'));
     await tester.tap(find.text('生成回忆视频'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
+    await tester.pumpAndSettle();
     expect(api.lastTaskBody?['creationType'], 'memoir_video');
 
     await tester.ensureVisible(secondaryButton('修改需求'));
@@ -478,6 +590,9 @@ void appSetupAndExportSuite() {
 
     await tester.ensureVisible(find.text('生成儿童绘本').first);
     await tester.tap(find.text('生成儿童绘本').first);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(primaryButton('开始规划'));
+    await tester.tap(primaryButton('开始规划'));
     await tester.pumpAndSettle();
     await confirmReadyCreationPlan(tester);
 

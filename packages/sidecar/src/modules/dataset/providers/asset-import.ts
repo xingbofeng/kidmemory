@@ -95,7 +95,7 @@ export async function importLocalAssets(db: SampleDb, input: ImportAssetsInput):
       const asset: SampleAsset = {
         id,
         childId: input.childId,
-        type: "artwork",
+        type: "photo",
         title,
         description: "",
         tags: [],

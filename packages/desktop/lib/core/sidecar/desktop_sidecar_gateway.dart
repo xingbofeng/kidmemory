@@ -63,6 +63,7 @@ class DesktopSidecarGateway {
       'goal': goal,
       'creationType': creationType,
       'assetIds': assetIds,
+      if (settings.isNotEmpty) 'settings': settings,
     });
   }
 
@@ -421,6 +422,7 @@ extension PostgresConfigDtoExt on PostgresConfigDto {
 extension SupabaseStorageConfigDtoExt on SupabaseStorageConfigDto {
   Map<String, dynamic> get raw => toJson();
   bool get configuredValue => configured ?? false;
+  String get providerValue => provider ?? 'supabase';
   String get urlValue => url ?? '';
   String get bucketValue => bucket ?? '';
   bool get serviceRoleKeyConfiguredValue => serviceRoleKeyConfigured ?? false;
@@ -477,6 +479,7 @@ extension ConfigureSupabaseStorageResultDtoExt
       config ??
       SupabaseStorageConfigDto(
         configured: false,
+        provider: 'supabase',
         url: '',
         bucket: '',
         serviceRoleKeyConfigured: false,

@@ -811,3 +811,194 @@ The following detailed 2026-05-31 entries were moved out of `implementation-note
 - Sidecar Bootstrap Comment Cleanup Pass
 
 这些条目的共同结论是：空 generated sidecar schemas 不作为运行时 DTO 来源；重复 mapper、错误判断、env/url/time helper、fake SQL 测试替身和复述性注释只在有测试或架构 guard 保护的边界内清理；真实外部服务调用需要在最终汇报中单独区分。
+
+
+## Archived implementation-notes.md entries - 2026-06-03
+
+## Archived Sidecar Typing Notes - 2026-05-31
+
+较早的 Sidecar typing pass 已迁入 `implementation-notes-archive.md`，主文件只保留近期高频规则和最近任务要点。
+
+## Archived Cross-Package Cleanup Notes - 2026-05-31
+
+Earlier Protocol, Desktop, Web, and Sidecar Config readiness cleanup passes were moved to `implementation-notes-archive.md` to keep this file focused on recent work.
+
+## Archived May 31 Cleanup Notes - 2026-06-01
+
+Sidecar DTO/comment cleanup, Agent Runtime helper cleanup, Cloud API mapper/share-token cleanup, Web API comment cleanup, and Sidecar bootstrap/infrastructure cleanup notes from 2026-05-31 were moved to `implementation-notes-archive.md` before appending this session's Web Companion completion notes.
+
+## Archived Late-May Cleanup Notes - 2026-05-31
+
+Desktop sidecar API response comment cleanup, Storage Sync test-double typing, Sidecar SyncService comment cleanup, Sidecar Web Companion service comment cleanup, and Sidecar LAN Receiver comment cleanup were moved to `implementation-notes-archive.md` before this file crossed the 300-line maintenance threshold.
+
+## Sidecar Web Companion Test Boundary Simplification Pass - 2026-05-31
+
+**目标**：继续完成 Code Simplifier 未收口项，清理 Web Companion controller endpoint 分段注释、Direct Upload task-number 注释，以及 Web Companion/Browse/ShareToken 测试中的 fake SQL/`any` 历史替身。
+
+**设计决策**：选择用 architecture tests 先暴露回归，再把 `web-companion-service.test.ts`、`browse-service-repository.test.ts` 与 `share-token.test.ts` 改成 typed in-memory repository 行为测试；原因是测试应验证 session/upload-item/child/share-token 边界行为，而不是断言假的 SQL 字符串。旧 `protocol-api-dto-architecture.test.ts` 改为守住当前事实：generated sidecar `components.schemas` 为空时，Sidecar runtime DTO 使用本地显式边界，禁止重新依赖空 generated schema。
+
+**偏差说明**：没有改变 Web Companion 路由、WebCompanionService、Direct Upload pullback 状态机、BrowseService、ShareTokenService 或 Agent Config DTO 运行时行为；本轮以本地单元/架构/HTTP 合同测试验证，没有真实 PostgreSQL、Supabase、OpenAI、LAN 设备或浏览器 UI 调用。
+
+**权衡分析**：
+- 方案一：typed memory repository doubles + behavior assertions。优点是删除 fake SQL 和类型逃逸，测试贴近 service port 合同；缺点是测试 helper 比字符串 mock 略多。
+- 方案二：继续保留 SQL 字符串 mock。优点是 diff 少；缺点是它没有真实数据库约束，且容易和 repository port 漂移。
+- 选择方案一，因为：当前目标是删除历史维护面，行为测试比假的查询文本更能保护真实功能。
+
+**决策状态**：
+- [x] 已决策：只清理生产/一方测试中的宽类型与 fake SQL；第三方生成物中必须存在的宽类型不再当作本轮问题。
+
+## Cloud Jobs Sync Removal and OpenAPI Schema Restoration Pass - 2026-06-01
+
+**目标**：按用户授权自行决策，删除 Cloud API 与 Sidecar 之间的历史 `/jobs` 分布式同步链路，并让 Cloud OpenAPI/TS/Dart 生成物不再暴露 Job API。
+
+**设计决策**：选择一次性移除 Cloud API `JobsModule`、`jobs` Prisma 模型/初始化迁移、Sidecar cloud job polling、Job DTO 别名、相关单元测试和生成客户端中的 `JobsApi`/`JobResponseDto`；原因是当前产品以 `/creation/tasks` 和本地 storage/embedding/agent jobs 为正统任务入口，Cloud `/jobs` 没有真实执行价值，保留只会让 Sidecar 多跑一条空的历史同步链路。
+
+**偏差说明**：保留了本地非 Cloud-sync job 概念，包括 Sidecar storage sync jobs、embedding jobs、agent job store，以及 `/creation/jobs`、`/books/jobs` 的已移除入口 404 合同测试；本轮没有启动真实 Cloud API/Sidecar 服务，也没有连接真实 PostgreSQL、Supabase 或外部网络服务。
+
+**权衡分析**：
+- 方案一：删除 Cloud `/jobs` API、数据库表和 Sidecar polling。优点是合同、数据库、运行时和生成客户端一致，直接消除旧任务入口；缺点是外部仍调用 Cloud `/jobs/*` 的客户端会断。
+- 方案二：保留 Cloud `/jobs` API，只让 Sidecar 不执行部分 job type。优点是兼容旧客户端；缺点是继续维护没有当前产品路径支撑的 API、DTO、迁移和生成物。
+- 选择方案一，因为：用户已授权自行决策，且 `CONTEXT.md` 明确 `/creation/tasks` 是 canonical creation API，历史 `/creation/jobs` 应保持移除，Cloud `/jobs` 也不再承担当前有效职责。
+
+**附加修复**：Cloud API 控制器使用 protocol 类型别名时，Swagger 无法从运行时反射生成 `components.schemas`；本轮在 `packages/cloud-api/scripts/generate-openapi.ts` 明确登记 Cloud API 当前 DTO schemas，重新生成 OpenAPI、TS 与 Dart 客户端，并用测试守住不再回流 Job schemas。
+
+**决策状态**：
+- [x] 无需用户继续决策；已按“删除历史 Cloud jobs 同步链路、保留本地非 Cloud-sync jobs”的最优方案执行。
+
+## Cloud API Named Schema Generation Pass - 2026-06-01
+
+**目标**：完成 Cloud OpenAPI schema 恢复后的生成物收口，避免 Dart client 继续生成 `SessionSummaryResponseDtoChild`、`SessionSummaryResponseDtoProviders` 等 inline resolver 模型名。
+
+**设计决策**：选择把 Web Companion 嵌套响应对象提升为稳定命名 schema：`TrustedUploadSessionChildDto`、`ProviderAvailabilityDto`、`DirectUploadProvidersDto` 和 `ShareTokenAccessDto`；同时禁止 Cloud API DTO 模块用本地 `Omit<...>` 修补 generated response 类型，原因是稳定 schema 应该由 OpenAPI 合同表达，而不是由运行时代码和生成客户端各自补丁。
+
+**偏差说明**：没有改变 trusted upload session summary、direct upload providers、share token validation 或分享/上传运行时字段；本轮改变的是 OpenAPI 组件命名、生成客户端模型名和类型别名边界。
+
+**权衡分析**：
+- 方案一：提升嵌套对象为命名 schema。优点是 TS/Dart 生成物稳定、可读，旧 inline model 文件会自然删除；缺点是 OpenAPI 脚本多维护几个组件。
+- 方案二：接受 generator 的 inline resolver 名。优点是脚本少写 schema；缺点是生成物命名不稳定，后续字段调整容易让客户端 API 产生无意义漂移。
+- 选择方案一，因为：协议生成物是跨 Web、Desktop 和服务端的公共边界，命名稳定比少写几行 schema 更重要。
+
+**决策状态**：
+- [x] 已决策：Cloud API response DTO 只直接 alias generated schemas；嵌套对象必须有稳定 component schema 名，测试禁止 inline resolver 模型名回流。
+
+## Sidecar MCP HTTP Test Env Helper Pass - 2026-06-01
+
+**目标**：继续清理全仓扫描发现的重复测试逻辑，删除多份 Sidecar MCP HTTP 测试里手写保存/恢复 `KIDMEMORY_MCP_ENABLED` 与 `KIDMEMORY_MCP_PATH` 的分支。
+
+**设计决策**：选择在 `tests/http/mcp-test-helpers.ts` 增加 `useMcpTestEnv`，由测试上下文统一注册环境变量恢复；原因是这些测试只差 enabled true/false，重复 `oldEnabled`/`oldPath` 分支没有行为差异。
+
+**偏差说明**：没有改变 MCP endpoint 注册条件、测试端口启动、SDK client 调用或 tools/list/tools/call 行为；本轮只收敛测试环境设置与恢复逻辑。
+
+**权衡分析**：
+- 方案一：共享 `useMcpTestEnv`。优点是环境恢复规则单点维护，后续新增 MCP HTTP 测试不再复制分支；缺点是测试读者需要跳到 helper 查看恢复细节。
+- 方案二：保留每个测试内联保存/恢复。优点是局部完整；缺点是多份 MCP HTTP 测试重复同一套易漂移代码。
+- 选择方案一，因为：这是纯测试基础设施重复，且已用 architecture guard 防止回流。
+
+**决策状态**：
+- [x] 已决策：MCP HTTP 测试环境设置统一走 `useMcpTestEnv`；允许各测试继续各自关闭 app/client，因为资源生命周期不同。
+
+## Web Companion Session Upload and Browse Completion - 2026-06-01
+
+**目标**：收口 Web Companion 真实会话入口，确保 `/app` 必须携带 `sessionId/token`，Trusted Upload 与 Direct Upload 都沿会话 token 边界提交，浏览页使用真实 session recent 数据而不是本地假 childId。
+
+**设计决策**：选择让 Web Companion 路由只消费 URL 中的 `sessionId/token`，让 `AssetBrowser` 调用 `/api/web-companion/sessions/:sessionId/recent?token=...&limit=20`，Direct Upload 回拉只在匹配 objectKey 的结果为 `ready` 时标记成功；原因是 Sidecar 的会话 token 才是 Web Companion 授权边界，空回拉结果不能被当成已入库。
+
+**偏差说明**：保留 `/trusted-upload` 路由兼容，但 Sidecar 生成的 trusted upload `webUrl` 改为 `/app`；没有真实调用 Supabase Storage 或外部 OpenAI/Cloud 服务，Direct Upload 的 Supabase 客户端路径以组件/单元测试和 Sidecar 单测覆盖。
+
+**权衡分析**：
+- 方案一：Web 端统一依赖 sessionId/token，并在 browse/upload/direct-upload 各路径显式传递 token。优点是授权边界一致、真实 sidecar 浏览可用、空回拉不误报成功；缺点是组件 props 和 query 参数处理更明确。
+- 方案二：继续由 Web 端创建 sample child/session 或按 childId 浏览素材。优点是页面更容易脱离 sidecar 单独演示；缺点是绕开真实上传会话，真实桌面生成链接时会出现数据与权限漂移。
+- 选择方案一，因为：这次修复的是真实桌面生成 Web Companion 链接后的端到端合同，而不是 demo fallback。
+
+**验证方式与结果**：
+- [x] 静态/单元/构建：Web lint/test/build、Sidecar build、Protocol test/build、Cloud API build、Desktop flutter test/analyze 均通过。
+- [x] 真实桌面运行：Xcode macOS Debug 构建 `KidMemory.app` 成功，Computer Use 确认窗口打开，sidecar 健康检查通过。
+- [x] 真实浏览器运行：Codex Browser 打开真实 `/app?sessionId=...&token=...`，缺参页拦截、连接页会话有效、浏览页显示 9 张 sample 素材、搜索空结果和控制台 error 检查通过。
+- [ ] 未验证真实 Supabase Storage 上传；当前环境未配置可用外部 Supabase，Direct Upload 以 mock/单元测试和 sidecar 服务测试替代。
+
+## Sidecar Agent Runtime File Dependency Preparation Pass - 2026-06-01
+
+**目标**：修复 Sidecar runtime/test 脚本隐式依赖未跟踪 `packages/agent-runtime/dist` 的问题，避免本地残留构建产物决定 Sidecar app 是否能加载。
+
+**设计决策**：选择在 Sidecar package scripts 中增加 `prepare:agent-runtime`，并让 `dev`、`test*`、`type-check`、`check:tests`、`build:prod` 和 `gen:openapi` 在加载 Sidecar runtime 前通过 Node 脚本准备 `../agent-runtime`：缺少 TypeScript/Node 类型依赖时先运行 `npm ci`，再显式编译；原因是 Sidecar 通过 `file:../agent-runtime` 依赖 package export，而该 package 的 `main`/`exports` 指向被 gitignore 的 `dist/`。
+
+**偏差说明**：没有改变 AgentRuntimeService、CreationService、MCP 工具或运行时执行逻辑；本轮只让脚本自举 file dependency，避免靠开发机上的旧 dist 目录。
+
+**权衡分析**：
+- 方案一：Sidecar 脚本显式准备 agent-runtime。优点是测试、开发、OpenAPI 生成和生产构建入口都可从干净工作区运行；缺点是这些脚本多一次 TypeScript compile。
+- 方案二：提交 agent-runtime `dist/`。优点是运行时少一步；缺点是提交生成物会扩大维护面，并和当前 gitignore 约定冲突。
+- 选择方案一，因为：`dist/` 是生成产物，正确边界是脚本生成而不是源码仓库保存。
+
+**决策状态**：
+- [x] 已决策：Sidecar 不依赖预先存在的 agent-runtime dist；所有会加载 Sidecar runtime 的脚本先执行 `node scripts/prepare-agent-runtime.mjs`，并在 agent-runtime dev 依赖缺失时自动 `npm ci` 后编译。
+
+## Shared Test Env and Integration Skip Cleanup Pass - 2026-06-01
+
+**目标**：收口 Code Simplifier 最后发现的测试环境重复逻辑，避免 env 污染、误导性 skip 日志和慢重试测试继续维护。
+
+**设计决策**：选择新增 Sidecar `tests/test-env.ts` 的 `useTestEnv`，让 MCP/trace/contracts/sync/cloud-client/search-indexing 测试统一恢复 `process.env`；`cloud-sync` 重试失败测试改用 `node:test` mock timers；integration 数据库测试只通过 `describe({ skip })` 表达无 `DATABASE_URL` 跳过；agent-runtime workspace command 测试恢复原有 env 值。
+
+**偏差说明**：没有改变 Sidecar/Agent Runtime 生产行为、MCP 路由、Cloud sync 语义、integration 数据库行为或命令隔离策略；当前真实数据库 integration 仍因本机未配置 `DATABASE_URL` 按预期 skip。
+
+**权衡分析**：方案一：共享 env helper 与 mock timers，优点是测试更短、更快且恢复规则一致；缺点是多一个测试 helper。方案二：保留内联恢复与真实退避等待，优点是局部完整；缺点是重复且容易污染环境。选择方案一，因为：这是纯测试基础设施冗余，已有 architecture guard 防止回流。
+
+**决策状态**：
+- [x] 无需用户继续决策；按统一 env helper、真实 skip 语义和无真实退避等待的方案收口。
+
+## Web Companion 安全边界与合同补强 - 2026-06-01
+
+**目标**：核对复审文本中指出的 token 边界、Direct Upload 暴露面、上传成功语义、recent 缩略图和 OpenAPI 合同问题，并修复属实项。
+
+**设计决策**：选择在服务端强制 summary/detail 与 Direct Upload config/list/status 的 token 校验，而不是只依赖前端 URL 参数；Trusted Upload 暂不阻塞等待后台 pullback ready，先把 UI 文案改为“已上传，等待入库”，避免把 remote uploaded 误表达成已入库。
+
+**偏差说明**：复审中提到的 Direct Upload session 持久化、旧上传路径删除、上传工具抽离属于较大结构调整，本次未扩散处理；先收口安全边界、合同和用户可见语义。
+
+**权衡分析**：
+- 方案一：commit 后同步等待 pullback ready。优点是语义最强；缺点是上传响应会被后台回拉和外部存储拖慢。
+- 方案二：保留后台 pullback，但 UI 明确显示“已上传，等待入库”。优点是改动小且不误导；缺点是还没有细粒度 ready 轮询。
+- 选择方案二，因为：本轮目标是快速修正真实风险，同时避免引入新的长耗时请求边界。
+
+**待确认**：
+- [ ] 是否需要为 Trusted Upload 增加 upload item detail 轮询，直到 READY 再显示“已入库”？
+- [ ] Direct Upload 验证版 session 是否需要持久化到数据库，支持 sidecar 重启后继续 pullback？
+
+## Web Companion 上传与 Sidecar 合同补完 - 2026-06-01
+
+**目标**：修复复审确认仍未完成的 Direct Upload 错误映射、Web 使用 cloud-api 类型、Books/Share/Public Share sidecar generated contract 缺 content/requestBody、Direct Upload session 进程内 Map、Trusted Upload 未等 READY，以及旧上传 helper 清理问题。
+
+**设计决策**：选择让 Direct Upload session 元数据通过 `web_companion_upload_sessions` 持久化 token hash/child/expiresAt，并在 Prisma-backed store 中只接受/清理 `wcs_direct_` 前缀会话，bucket 继续从当前 sidecar config 解析；原因是这张表已经承担 Web Companion 会话 token 边界，不需要新增 Prisma 模型。Web 前端统一改为 `@kidmemory/protocol/sidecar` generated operations 类型；Trusted Upload 在 commit 后轮询 session detail，只有 item status 为 `ready` 才进入 UI success。
+
+**偏差说明**：没有新增真实 Supabase Storage 端到端上传验证；Direct Upload/Trusted Upload 的外部存储路径仍以单元测试、HTTP 合同、类型检查和 build 验证覆盖。`generated/sidecar/ts` 中其它历史 GET endpoint 仍可能有 `content?: never`，本轮只为用户点名的 Books/Share/Public Share 和 Direct Upload 合同补齐 guard。
+
+**权衡分析**：
+- 方案一：复用 `web_companion_upload_sessions` 存 Direct Upload session。优点是无需迁移新表，重启可恢复 token 校验；缺点是 Direct Upload 与 Trusted Upload 共用会话表，需要用 `wcs_direct_*` id 和当前配置区分语义。
+- 方案二：新增 direct_upload_sessions 表。优点是边界更显式；缺点是需要迁移和更多 repository 代码，当前字段与现有会话表高度重叠。
+- 选择方案一，因为：最小改动即可修复重启不可恢复，并保持 token hash 不落明文。
+
+**验证方式与结果**：
+- [x] `npm --prefix packages/web run test -- src/test/api-generated-types-architecture.test.ts src/hooks/useTrustedUploadSession.test.tsx src/lib/upload-session.test.ts src/pages/upload/FileUpload.test.tsx src/App.test.tsx --run`
+- [x] `npm --prefix packages/web run build`
+- [x] `npm --prefix packages/protocol run test -- tests/openapi-path-params.test.ts`
+- [x] `npm --prefix packages/protocol run build`
+- [x] `npm --prefix packages/sidecar run type-check`
+- [x] `npm --prefix packages/sidecar run build`
+
+**待确认**：
+- [ ] 是否要为所有 sidecar generated endpoints 统一补齐 response schemas，而不是只覆盖 Web Companion Books/Share/Public Share？
+
+## Web Companion READY 与 Direct Upload 边界补强 - 2026-06-01
+
+**目标**：补齐新一轮 review 指出的 `/app` 主上传未等 READY、Direct Upload 回拉临时文件泄漏、browse/share 缺 token 返回 400、Direct Upload bucket 未随 session 持久化与前缀隔离不足问题。
+
+**设计决策**：把 READY 轮询抽到 Web 共享 helper，`/app` 与 legacy Trusted Upload 共用同一等待逻辑；Direct Upload bucket 使用 `web_companion_upload_sessions.direct_upload_bucket` 持久化，旧 session 缺字段时仍回退当前配置；临时回拉目录用 `finally fs.rm(..., { recursive: true, force: true })` 清理。
+
+**偏差说明**：未在本轮做真实 Supabase Storage smoke test；该项需要可用的真实 Supabase 项目、bucket policy 与外部凭据。
+
+**权衡分析**：
+- 方案一：仅改文案承认 `/app` 是 accepted 状态。优点是改动小；缺点是成功语义继续分叉。
+- 方案二：让 `/app` 也等 sidecar detail READY。优点是成功语义统一；缺点是用户等待时间更长。
+- 选择方案二，因为：review 明确要求“成功”等于真正 READY，且已有 detail API 可复用。
+
+**待确认**：
+- [ ] 是否要继续把 `FileTask.status` 从 `success` 迁移为后端同名 `ready`。
+- [ ] 是否安排真实 Supabase Storage upload/list/pullback/import smoke test。

@@ -108,7 +108,7 @@ describe("WebCompanionService - Signed Upload", () => {
           assertWebCompanionError(
             error,
             WebCompanionErrorCode.PROVIDER_UNAVAILABLE,
-            /Supabase configuration is incomplete/,
+            /Object storage configuration is incomplete/,
           ),
         "Should throw error for missing Supabase URL"
       );
@@ -158,6 +158,34 @@ describe("WebCompanionService - Signed Upload", () => {
           ),
         "Should throw error for non-Supabase provider"
       );
+    });
+
+    it("generates a signed upload target for COS without requiring Supabase REST credentials", async () => {
+      const service = makeService({
+        provider: "cos" as SupabaseStorageConfig["provider"],
+        url: "",
+        serviceRoleKey: "",
+        anonKey: "",
+        bucket: "counter-1252496948",
+        s3: {
+          endpoint: "https://cos.ap-guangzhou.myqcloud.com",
+          region: "ap-guangzhou",
+          accessKeyId: "cos-secret-id",
+          secretAccessKey: "cos-secret-key",
+        },
+      });
+      const uploadItem = {
+        ...makeUploadItem("cos" as UploadItem["provider"]),
+        bucket: "counter-1252496948",
+        objectKey: "web-companion/child_123/session_123/item_123/test.jpg",
+      };
+
+      const target = await service["generateSignedUploadTarget"](uploadItem);
+
+      assert.equal(target.method, "PUT");
+      assert.match(target.url, /^https:\/\/counter-1252496948\.cos\.ap-guangzhou\.myqcloud\.com\/web-companion\//);
+      assert.match(target.url, /q-sign-algorithm|sign=/);
+      assert.equal(target.url.includes("cos-secret-key"), false);
     });
   });
 });
