@@ -1002,3 +1002,142 @@ Desktop sidecar API response comment cleanup, Storage Sync test-double typing, S
 **待确认**：
 - [ ] 是否要继续把 `FileTask.status` 从 `success` 迁移为后端同名 `ready`。
 - [ ] 是否安排真实 Supabase Storage upload/list/pullback/import smoke test。
+
+
+## Archived Early-June Active Notes - 2026-06-03
+
+## COS/S3 Direct Upload 与 Agent Runtime Smoke 收口 - 2026-06-01
+
+**目标**：继续完成上轮中断的 Direct Upload provider 兼容与真实链路验证，确保 COS/S3 不依赖 Supabase REST 配置，并把 sidecar 到 agent runtime 的最小生成链路跑通。
+
+**设计决策**：选择把对象存储健康检查统一到 provider-neutral `createObjectStorageProvider`，让 `KIDMEMORY_OBJECT_STORAGE_PROVIDER=s3` 从 `.env` 读取 S3 endpoint/bucket/credential，并为 COS/通用 S3 使用 signed-url 上传模式；同时收紧 Direct Upload signed upload 的 objectKey 校验，要求第一段严格等于 sessionId，且后续 path segment 不得为空、`.` 或 `..`。
+
+**偏差说明**：没有改变 `/creation/tasks` 的生产任务状态机，也没有把 agent config 持久化逻辑迁到 `.env`；本轮用 OpenRouter 配置真实调用 AgentRuntimeService smoke，通过 sidecar service 层确认可产出 `output/plan.json`。优先 OpenAI 配置的 smoke 返回 401，判定为该 provider key 不可用而非 runtime 链路失败。
+
+**权衡分析**：
+- 方案一：Direct Upload 继续只识别 Supabase/COS。优点是改动少；缺点是类型中已有 `s3` provider 但 env 无法启用，和“兼容所有 provider”目标冲突。
+- 方案二：补齐通用 S3 env 入口并复用现有 S3 签名实现。优点是 COS、Supabase S3 和普通 S3 共享安全边界；缺点是配置命名仍沿用历史 `SUPABASE_S3_*`。
+- 选择方案二，因为：最小改动即可让三个 provider 在配置、签名、上传和回拉边界上保持一致。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：`config.test.ts` 覆盖 S3 env、COS provider-neutral health gateway；`direct-upload-security.test.ts` 覆盖 traversal objectKey 拒签。
+- [x] `npm --prefix packages/sidecar run build`
+- [x] `npm --prefix packages/web run build`
+- [x] `npm --prefix packages/protocol run build`
+- [x] 真实 COS SDK smoke：upload/list/download/sign 成功并清理 `kidmemory-smoke/` 临时对象。
+- [x] 真实 DirectUploadService + COS smoke：sidecar 签发 PUT URL、真实 PUT、list、download、pullback ready 成功并清理对象。
+- [x] 真实 AgentRuntimeService smoke：OpenRouter `custom-chat` 产出 `output/plan.json` 成功。
+
+**待确认**：
+- [ ] 是否要把配置 UI 中的 `SUPABASE_S3_*` 文案进一步泛化为对象存储 S3，而不仅是 Supabase S3。
+- [ ] 当前 `.env` 的优先 OpenAI-compatible key 返回 401；是否要清理或替换这组 OpenAI 配置，避免后续 smoke 优先命中失效凭据。
+
+## 桌面端素材库智能挑选交互说明 - 2026-06-02
+
+**目标**：修复素材库“帮我挑素材”弹窗里“重新挑选”看起来无响应的问题，并确认素材搜索与调素材的数据来源。
+
+**设计决策**：选择让智能挑选弹窗展示本次建议素材预览，并在当前可见素材不超过 12 张时禁用“重新挑选”且显示“全部纳入”提示；原因是当前智能挑选是桌面端本地启发式重排，不调用 Agent 或 sidecar，候选不足时继续重算不会产生新结果。
+
+**偏差说明**：没有把素材库智能挑选改成后端 Agent/PGSQL 搜索，也没有改变确认使用后的 selectedAssets 行为；搜索按钮仍走 `DesktopSidecarGateway.searchAssetsDto -> /search/query -> DatasetService.searchAssets`，持久化成功时由 Prisma-backed PostgreSQL 素材与 embedding 数据支撑，sidecar 持久库激活失败时仍可能 fallback 到内存数据集。
+
+**权衡分析**：
+- 方案一：只给“重新挑选”加 toast。优点是改动更小；缺点是用户仍看不到具体换了哪组素材。
+- 方案二：展示建议素材预览并禁用无效重挑。优点是按钮行为可见，候选不足时语义明确；缺点是弹窗内容略多。
+- 选择方案二，因为：问题根因是状态不可见和候选不足时无差异结果，预览与禁用能直接解释交互。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：新增 `smart pick dialog explains when no alternate batch exists` widget 测试，先复现缺少提示，再验证修复。
+- [x] `cd packages/desktop && flutter test test/features/asset_library/asset_library_test.dart`
+- [x] `cd packages/desktop && flutter test test/architecture_static_test.dart --plain-name 'asset library page delegates smart pick dialog UI'`
+- [x] `cd packages/desktop && flutter analyze lib/features/asset_library test/features/asset_library/asset_library_test.dart lib/l10n`
+- [ ] 全量 `cd packages/desktop && flutter analyze` 未通过；阻塞在既有 `test/features/setup/openai_setup_dialog_test.dart` 的 `SecondaryButton` 未定义与未使用 import，非本次改动文件。
+
+**待确认**：
+- [ ] 是否要把素材库“智能挑选”升级为真正调用 sidecar 搜索/Agent 的推荐接口，而不是继续使用桌面端本地启发式？
+
+## 删除孩子档案级联清理 - 2026-06-02
+
+**目标**：删除孩子档案时不再要求用户先清空关联素材；确认弹窗明确提示风险，用户确认后允许删除孩子及关联本地数据。
+
+**设计决策**：选择在桌面端保留确认 modal，并在 Sidecar dataset domain 中先清理孩子关联记录、embedding jobs、候选池和素材，再删除孩子档案；原因是删除边界应由 sidecar 可信服务统一执行，不能让 UI 用“先清空数据”的前置条件阻断真实删除。
+
+**偏差说明**：本轮没有启动真实桌面 `.app` 或真实 PostgreSQL 数据库；Prisma 适配器新增关联清理方法并通过 TypeScript type-check 验证，行为以内存 dataset 单元测试覆盖。
+
+**权衡分析**：
+- 方案一：只改 modal 文案，后端仍遇到素材返回 409。优点是 UI 改动小；缺点是用户确认后仍无法删除示例孩子。
+- 方案二：确认后由 sidecar 级联清理关联数据。优点是符合用户“确认后真的删除”的预期；缺点是删除是不可逆操作，必须在 modal 中清楚提示。
+- 选择方案二，因为：删除孩子档案是数据所有权操作，确认后应由后端一次性完成关联数据清理。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：`npx tsx --test tests/unit/modules/dataset/dataset-domain.test.ts`
+- [x] `npm --prefix packages/sidecar run type-check`
+- [ ] 桌面 widget 测试当前工作区未能 fresh 通过；`cd packages/desktop && flutter test test/features/app/app_test.dart --name "delete child profile confirms before deleting linked data"` 被既有 GenerateExport/SmartGenerateActions 参数不匹配阻塞。
+
+**待确认**：
+- [ ] 是否需要继续把真实 PostgreSQL 中的书、导出 artifact 等更广义历史生成记录纳入可审计删除报告。
+
+## 桌面端设置目录按钮与 COS 配置入口修复 - 2026-06-02
+
+**目标**：修复设置页“本地数据目录”卡片中“打开目录 / 配置目录”点击无响应的问题，并让“云端分享设置”支持选择 Supabase 或腾讯云 COS。
+
+**设计决策**：选择让本地数据目录操作不受前置 OpenAI 配置顺序锁阻断；云端分享弹窗在现有 `/config/supabase-storage` 合同上补传 `provider`，通过下拉框在 `supabase` 与 `cos` 间切换。COS 复用已有 S3 兼容字段（endpoint、region、bucket、access key、secret key），Supabase 继续保留既有 S3 与 REST 可选字段。
+
+**偏差说明**：没有改 sidecar 对象存储运行时，也没有新增真实 COS 连接 smoke；本次只修桌面端配置入口、DTO 字段透传和 widget 行为测试。
+
+**权衡分析**：
+- 方案一：新增独立 COS 配置弹窗。优点是文案可完全贴合 COS；缺点是会复制大量对象存储字段与保存逻辑。
+- 方案二：在现有云端分享弹窗增加 provider 下拉框。优点是最小改动复用 sidecar 已支持的 provider-neutral 配置；缺点是 Supabase 命名历史仍存在于部分内部类型名中。
+- 选择方案二，因为：当前 sidecar 合同已经统一在 `/config/supabase-storage`，桌面端缺的是 provider 选择和字段透传，而不是新的配置边界。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：新增设置页 widget 测试覆盖 OpenAI 未配置时本地目录按钮仍可打开/配置，以及 COS provider 下拉框提交 `provider: cos` 与 COS S3 字段。
+- [x] `cd packages/desktop && flutter test test/features/app/app_test.dart --name 'setup local data directory actions stay clickable|setup page can configure COS object storage provider'`
+- [x] `cd packages/desktop && flutter test test/features/app/app_test.dart --name 'setup page manages Supabase Storage|setup page storage test failure|setup page configures Supabase S3|setup local data directory actions stay clickable|setup page can configure COS'`
+- [x] `cd packages/desktop && flutter analyze lib/app/desktop_shell.dart lib/core/sidecar/desktop_sidecar_gateway.dart lib/core/sidecar/sidecar_dtos.dart lib/features/setup/setup_page.dart test/features/app/app_test.dart`
+
+**待确认**：
+- [ ] 是否要把云端分享弹窗中的 Supabase S3 帮助链接进一步按 provider 切换为腾讯云 COS 官方文档？
+
+## 真实导入素材默认类型调整 - 2026-06-02
+
+**目标**：把真实导入图片的默认素材类型从 `artwork` 调整为更中性的 `photo`，避免所有本地图片导入后都被智能挑选当作绘画素材。
+
+**设计决策**：选择只修改 `importLocalAssets` 的默认 `type`，不在本轮新增 `unknown` 类型或 AI 分类字段；原因是新增类型会牵动筛选、统计、搜索和生成逻辑，而用户当前目标是先把写死的 `artwork` 调整为 `photo`。
+
+**偏差说明**：本轮没有实现导入时用户选择类型，也没有让 OpenAI metadata inferer 返回/覆盖 `type`；当前 AI metadata 仍只补充标题、描述和标签。
+
+**权衡分析**：
+- 方案一：默认改为 `photo`。优点是最小改动，导入图片不再全部冒充绘画；缺点是儿童画图片仍需要后续手动或 AI 归类。
+- 方案二：立即新增 `unknown` 并重做 UI。优点是语义最准确；缺点是改动面大，当前筛选和统计都要同步扩展。
+- 选择方案一，因为：它满足当前修正目标，并保留后续分类能力的设计空间。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：`asset-import.test.ts` 增加真实导入默认 `photo` 断言，先复现 `artwork`，再改实现通过。
+- [x] `cd packages/sidecar && npx tsx --test tests/unit/infrastructure/asset-import.test.ts`
+- [x] `npm --prefix packages/sidecar run type-check`
+- [ ] `npm --prefix packages/sidecar run test -- tests/unit/infrastructure/asset-import.test.ts` 会额外执行整套测试，并被当前工作区已有 Direct Upload 架构守卫失败阻塞，非本次导入类型改动。
+
+**待确认**：
+- [ ] 后续导入流程支持用户选择素材类型。
+- [ ] 后续 AI metadata inference 支持白名单判别 `artwork` / `photo` / `craft` 并允许覆盖默认类型。
+
+## 桌面端大模型配置弹窗 404 兜底 - 2026-06-02
+
+**目标**：修复设置页点击“大模型接口配置”的“修改配置”在默认 agent 配置接口返回 404 时没有弹窗、看起来无响应的问题。
+
+**设计决策**：选择让 `AgentConfigApi.getDefaultAgentConfig()` 将 404 归一为 `null`，并让桌面端弹窗读取默认配置失败时继续打开空配置表单；原因是“没有默认配置”是可编辑的初始状态，不应阻塞用户填写新配置。
+
+**偏差说明**：没有改变保存配置的 create/update/set-default 行为，也没有真实调用外部 OpenAI/OpenRouter 服务；本轮只修复配置表单打开前的本地 UI/API 兜底。
+
+**权衡分析**：
+- 方案一：只在 UI 层 catch 404。优点是改动局部；缺点是其它调用默认配置的桌面入口仍会把“未配置”当异常。
+- 方案二：API 层把 404 归一为 null，UI 层同时对读取失败兜底。优点是语义集中且按钮不会再被默认配置读取失败卡住；缺点是非 404 异常在 UI 打开阶段也会被记录后继续显示空表单。
+- 选择方案二，因为：默认配置缺失本来就是首次配置路径，用户最需要看到可填写表单。
+
+**验证方式与结果**：
+- [x] TDD 红/绿：`flutter test test/core/sidecar/sidecar_api_test.dart --plain-name "AgentConfigApi treats missing default agent config as empty"`
+- [x] Widget 回归：`flutter test test/features/setup/openai_setup_dialog_test.dart`
+- [x] 静态检查：`flutter analyze lib/app/setup/dialogs/dialog_openai.dart lib/app/desktop_shell.dart lib/core/sidecar/agent_config_api.dart test/features/setup/openai_setup_dialog_test.dart test/core/sidecar/sidecar_api_test.dart`
+
+**待确认**：
+- [ ] 是否需要把读取默认配置失败时的日志文案改为本地化字符串。

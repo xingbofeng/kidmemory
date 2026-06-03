@@ -137,6 +137,23 @@ test("AgentRuntime passes maxTurns from run request or initialization to the exe
   assert.deepEqual(seen, [24, 40]);
 });
 
+test("AgentRuntime passes abort signal from run request to the executor", async () => {
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-runtime-signal-"));
+  const signal = { aborted: false, reason: undefined };
+  const seenSignals: unknown[] = [];
+  const runtime = new AgentRuntime({
+    executor: new FakeExecutor(async ({ signal: executorSignal }) => {
+      seenSignals.push(executorSignal);
+      return { ok: true };
+    }),
+  });
+
+  const result = await runtime.run({ workspaceDir, prompt: "signal propagation", signal });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(seenSignals, [signal]);
+});
+
 test("AgentRuntime does not inject workspace file tools by default", async () => {
   const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-runtime-default-tools-"));
   const runtime = new AgentRuntime({

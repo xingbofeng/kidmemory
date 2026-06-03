@@ -23,6 +23,7 @@ import {
   OpenAISandboxExecutor,
   type AgentExecutor,
   type ExecutorKind,
+  type RuntimeAbortSignal,
   type RuntimeProviderConfig,
 } from "../executors/index.js";
 import type { McpServerDefinition } from "../mcp/index.js";
@@ -39,6 +40,7 @@ export type AgentRunRequest = {
   sessionId?: string;
   traceId?: string;
   metadata?: Record<string, unknown>;
+  signal?: RuntimeAbortSignal;
 };
 
 export type AgentGoalInput = {
@@ -251,6 +253,7 @@ export class AgentRuntime {
       tools,
       mcpServers: this.mcpServers,
       requiredOutputFiles: request.requiredOutputFiles ?? [],
+      signal: request.signal,
     });
     const artifacts = (await new ArtifactScanner().scan({ workspaceDir: request.workspaceDir })).artifacts;
     await this.runAfterArtifactScan({ ...runContext, artifacts });
@@ -491,6 +494,7 @@ export class AgentRuntime {
             workspaceDir: context.workspaceDir,
             runId: input.runContext.runId,
             traceId: input.runContext.traceId,
+            signal: context.signal,
           });
           await input.eventBus.publish(createEvent({
             type: "agent.tool.finished",

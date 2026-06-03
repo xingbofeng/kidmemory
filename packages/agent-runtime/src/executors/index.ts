@@ -3,6 +3,7 @@ export type {
   ExecutorKind,
   ExecutorRunRequest,
   ExecutorRunResult,
+  RuntimeAbortSignal,
   RuntimeProviderConfig,
 } from "./types.js";
 export { FakeExecutor } from "./fake-executor.js";

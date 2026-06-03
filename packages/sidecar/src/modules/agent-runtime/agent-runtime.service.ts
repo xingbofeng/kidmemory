@@ -55,6 +55,7 @@ export class AgentRuntimeService {
 
     const providerConfig = await this.resolveProviderConfig();
     const timeoutMs = STAGE_TIMEOUT_MS[input.stage];
+    const abortController = new AbortController();
 
     const runtime = new AgentRuntime({
       executorKind: providerConfig.executorKind,
@@ -103,13 +104,14 @@ export class AgentRuntimeService {
         ...input.metadata,
       },
       requiredOutputFiles: REQUIRED_OUTPUT_FILES_BY_STAGE[input.stage],
+      signal: abortController.signal,
     };
 
     let result: AgentRunResult | RunCreationStageResult;
     try {
       result = await Promise.race([
         runtime.run(runRequest),
-        this.timeoutFailure(timeoutMs, input.stage, runRequest.sessionId),
+        this.timeoutFailure(timeoutMs, input.stage, runRequest.sessionId, abortController),
       ]);
     } catch (error) {
       return {
@@ -175,19 +177,29 @@ export class AgentRuntimeService {
     message: string,
     stepId?: string,
   ): Promise<void> {
-    await this.prisma.creationEvent.create({
-      data: {
-        id: `event_${taskId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        taskId,
-        type,
-        stepId,
-        message,
-      },
-    });
+    try {
+      await this.prisma.creationEvent.create({
+        data: {
+          id: `event_${taskId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          taskId,
+          type,
+          stepId,
+          message,
+        },
+      });
+    } catch {
+      // Runtime audit events are best-effort; generation should not fail because the audit log is unavailable.
+    }
   }
 
-  private async timeoutFailure(ms: number, stage: RuntimeStage, sessionId: string): Promise<RunCreationStageResult> {
+  private async timeoutFailure(
+    ms: number,
+    stage: RuntimeStage,
+    sessionId: string,
+    abortController: AbortController,
+  ): Promise<RunCreationStageResult> {
     await delay(ms);
+    abortController.abort(new Error(`Stage timed out after ${ms}ms.`));
     return {
       ok: false,
       sessionId,

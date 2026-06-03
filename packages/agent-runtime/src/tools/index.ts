@@ -24,6 +24,12 @@ export type ToolExecutionContext = {
   workspaceDir: string;
   runId?: string;
   traceId?: string;
+  signal?: {
+    aborted: boolean;
+    reason?: unknown;
+    addEventListener?: (type: "abort", listener: () => void, options?: { once?: boolean }) => void;
+    removeEventListener?: (type: "abort", listener: () => void) => void;
+  };
 };
 
 type NonStrictOpenAIToolOptions = Extract<

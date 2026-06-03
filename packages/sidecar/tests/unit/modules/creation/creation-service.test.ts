@@ -1,12 +1,16 @@
 import "reflect-metadata";
 
+import { execFile } from "node:child_process";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { CreationService } from "../../../../src/modules/creation/creation.service.ts";
+
+const execFileAsync = promisify(execFile);
 
 type JsonObject = Record<string, unknown>;
 
@@ -324,6 +328,104 @@ test("createTask passes creation settings into the request file and plan prompt"
   });
 });
 
+test("createTask returns the persisted plan steps and requirement items", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-creation-plan-return-"),
+  );
+  const { prisma } = createPrismaStub();
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+    agentRuntime: {
+      async runCreationStage(input: { workspacePath: string }) {
+        await fs.mkdir(path.join(input.workspacePath, "output"), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "plan.json"),
+          JSON.stringify({
+            summary: "Plan with requirements",
+            skillName: "kidmemory-picturebook",
+            steps: [
+              {
+                stepId: "generate",
+                label: "Render validated book",
+                detail: "Use the picturebook skill.",
+              },
+            ],
+            requirements: ["Use selected assets", "Validate output contract"],
+          }),
+        );
+        return { ok: true };
+      },
+    },
+  });
+
+  const result = await service.createTask({
+    creationType: "storybook",
+    goal: "make a book",
+    assetIds: ["asset-1"],
+  });
+
+  assert.equal(result.status, 201);
+  assert.deepEqual("steps" in result.data ? result.data.steps : [], [
+    {
+      stepId: "generate",
+      label: "Render validated book",
+      status: "pending",
+      detail: "Use the picturebook skill.",
+    },
+  ]);
+  assert.deepEqual(
+    "requirementItems" in result.data ? result.data.requirementItems : [],
+    ["Use selected assets", "Validate output contract"],
+  );
+});
+
+test("createTask falls back to creation-type steps and real skill ids when plan fields are missing", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-creation-plan-fallback-"),
+  );
+  const { prisma } = createPrismaStub();
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+    agentRuntime: {
+      async runCreationStage(input: { workspacePath: string }) {
+        await fs.mkdir(path.join(input.workspacePath, "output"), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "plan.json"),
+          JSON.stringify({
+            summary: "Video plan",
+            steps: "not-an-array",
+            requirements: [],
+          }),
+        );
+        return { ok: true };
+      },
+    },
+  });
+
+  const result = await service.createTask({
+    creationType: "memoir_video",
+    goal: "make a video",
+    assetIds: ["asset-1"],
+  });
+
+  assert.equal(result.status, 201);
+  assert.equal("skillName" in result.data ? result.data.skillName : undefined, "kidmemory-memoir-video");
+  assert.equal(
+    "steps" in result.data
+      ? result.data.steps.find((step) => step.stepId === "generate")?.label
+      : undefined,
+    "Generate MP4",
+  );
+});
+
 test("exportTask renders a generated book HTML task to a real PDF file", async () => {
   const dir = await fs.mkdtemp(
     path.join(os.tmpdir(), "kidmemory-creation-export-"),
@@ -486,6 +588,7 @@ test("generateTask persists generated book artifacts from the task workspace", a
   assert.equal(stageCalls[0]?.stage, "generate_book");
   assert.equal(stageCalls[0]?.workspacePath, workspacePath);
   assert.match(stageCalls[0]?.prompt ?? "", /run_skill_shell/);
+  assert.match(stageCalls[0]?.prompt ?? "", /work\/curation\.json/);
   assert.match(stageCalls[0]?.prompt ?? "", /output\/book\.json/);
   assert.match(stageCalls[0]?.prompt ?? "", /output\/book\.html/);
   assert.equal(stores.artifacts.length, 2);
@@ -498,6 +601,166 @@ test("generateTask persists generated book artifacts from the task workspace", a
   );
   assert.equal(detail.status, 200);
   assert.equal("artifacts" in detail.data && detail.data.artifacts.length, 2);
+});
+
+test("picturebook skill renders from agent-authored curation.json", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-picturebook-curation-"),
+  );
+  const { prisma } = createPrismaStub();
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+    agentRuntime: {
+      async runCreationStage(input: { workspacePath: string }) {
+        await fs.mkdir(path.join(input.workspacePath, "output"), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "plan.json"),
+          JSON.stringify({
+            summary: "Plan with curation",
+            skillName: "kidmemory-picturebook",
+            steps: [],
+            requirements: [],
+          }),
+        );
+        return { ok: true };
+      },
+    },
+  });
+
+  const taskResult = await service.createTask({
+    creationType: "storybook",
+    goal: "make a moon story",
+    assetIds: ["asset-1"],
+  });
+  assert.equal(taskResult.status, 201);
+  const workspacePath =
+    "workspacePath" in taskResult.data ? taskResult.data.workspacePath : "";
+  assert.ok(workspacePath);
+
+  const skillDoc = await fs.readFile(
+    path.join(
+      workspacePath,
+      ".kidmemory",
+      "skills",
+      "kidmemory-picturebook",
+      "SKILL.md",
+    ),
+    "utf8",
+  );
+  assert.match(skillDoc, /work\/curation\.json/);
+
+  await fs.mkdir(path.join(workspacePath, "work"), { recursive: true });
+  await fs.writeFile(
+    path.join(workspacePath, "work", "curation.json"),
+    JSON.stringify({
+      metadata: {
+        title: "Moon Day",
+        childName: "Mina",
+      },
+      pages: [
+        { type: "cover", title: "Moon Day", subtitle: "A silver morning." },
+        {
+          type: "content",
+          title: "The Bright Crater",
+          text: "Mina picked this memory first.",
+          assetId: "asset-1",
+        },
+        { type: "closing", title: "Home Again", text: "The moon waved goodnight." },
+      ],
+    }),
+  );
+
+  await execFileAsync(
+    process.execPath,
+    [".kidmemory/skills/kidmemory-picturebook/render-picturebook.mjs"],
+    { cwd: workspacePath },
+  );
+
+  const book = JSON.parse(
+    await fs.readFile(path.join(workspacePath, "output", "book.json"), "utf8"),
+  ) as {
+    metadata?: { title?: string; childName?: string };
+    pages?: Array<{ title?: string; assetId?: string }>;
+  };
+  const html = await fs.readFile(
+    path.join(workspacePath, "output", "book.html"),
+    "utf8",
+  );
+
+  assert.equal(book.metadata?.title, "Moon Day");
+  assert.equal(book.metadata?.childName, "Mina");
+  assert.equal(book.pages?.[0]?.kind, "cover");
+  assert.equal(book.pages?.[1]?.title, "The Bright Crater");
+  assert.equal(book.pages?.[1]?.kind, "artwork");
+  assert.equal(book.pages?.[1]?.assetId, "asset-1");
+  assert.equal(book.pages?.[2]?.kind, "closing");
+  assert.match(html, /The Bright Crater/);
+});
+
+test("generateTask rejects invalid generated book output before marking succeeded", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-creation-invalid-book-"),
+  );
+  const workspacePath = path.join(dir, "workspace", "task-1");
+  const { prisma, stores } = createPrismaStub([
+    {
+      id: "task-1",
+      creationType: "storybook",
+      goal: "make a book",
+      assetIds: ["asset-1"],
+      status: "ready",
+      workspacePath,
+      steps: JSON.stringify([]),
+    },
+  ]);
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+    agentRuntime: {
+      async runCreationStage(input: { workspacePath: string }) {
+        await fs.mkdir(path.join(input.workspacePath, "output"), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "book.json"),
+          JSON.stringify({
+            metadata: { title: "Broken Book" },
+            pages: [
+              { kind: "cover", title: "Cover", text: "Start" },
+              {
+                kind: "artwork",
+                title: "Wrong asset",
+                text: "Middle",
+                assetId: "asset-not-selected",
+              },
+            ],
+          }),
+        );
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "book.html"),
+          "<html><body>Broken Book</body></html>",
+        );
+        return { ok: true };
+      },
+    },
+  });
+
+  const result = await service.generateTask("task-1");
+
+  assert.equal(result.status, 500);
+  assert.equal(stores.artifacts.length, 0);
+  assert.equal(stores.tasks.get("task-1")?.status, "failed");
+  assert.deepEqual(stores.tasks.get("task-1")?.error, {
+    category: "generation",
+    message:
+      "Book artifact contract failed: Book metadata.childName is required.; Book pages must include cover, content and closing pages.; Book must include a closing page.; Page 2 references unselected asset asset-not-selected.",
+    code: "INVALID_BOOK_ARTIFACT",
+  });
 });
 
 test("generateTask rejects placeholder memoir video output", async () => {

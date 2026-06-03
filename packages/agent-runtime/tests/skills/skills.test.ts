@@ -75,6 +75,7 @@ Always write a structured draft.
 
 test("createSkillDeckAgentTools normalizes shell cwd to the workspace root", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-skill-deck-shell-"));
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-shell-workspace-"));
   const skillDir = path.join(root, "shell-skill");
   await fs.mkdir(skillDir, { recursive: true });
   await fs.writeFile(
@@ -85,11 +86,16 @@ test("createSkillDeckAgentTools normalizes shell cwd to the workspace root", asy
       "description: Writes a shell marker.",
       "---",
       "",
-      "Run shell commands from the workspace root.",
+      "Run from the workspace root: `node .kidmemory/skills/shell-skill/render.mjs`.",
       "",
     ].join("\n"),
   );
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-shell-workspace-"));
+  const workspaceSkillDir = path.join(workspaceDir, ".kidmemory", "skills", "shell-skill");
+  await fs.mkdir(workspaceSkillDir, { recursive: true });
+  await fs.writeFile(
+    path.join(workspaceSkillDir, "render.mjs"),
+    "process.stdout.write(process.cwd())\n",
+  );
   const result = await new SkillDeckProvider().load({ roots: [root] });
   const runShell = createSkillDeckAgentTools(result).find((tool) => tool.id === "run_skill_shell");
   assert.ok(runShell);
@@ -97,7 +103,7 @@ test("createSkillDeckAgentTools normalizes shell cwd to the workspace root", asy
   const output = await runShell.execute(
     {
       skillRef: "shell-skill",
-      command: "node -e \"process.stdout.write(process.cwd())\"",
+      command: "node .kidmemory/skills/shell-skill/render.mjs",
       cwd: workspaceDir,
     },
     {
@@ -107,6 +113,105 @@ test("createSkillDeckAgentTools normalizes shell cwd to the workspace root", asy
   );
 
   assert.match(JSON.stringify(output), new RegExp(workspaceDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
+test("createSkillDeckAgentTools rejects shell commands not declared by the skill", async () => {
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-skill-shell-policy-"));
+  const skillRoot = path.join(workspaceDir, ".kidmemory", "skills");
+  const skillDir = path.join(skillRoot, "shell-skill");
+  await fs.mkdir(skillDir, { recursive: true });
+  await fs.writeFile(
+    path.join(skillDir, "SKILL.md"),
+    [
+      "---",
+      "name: shell-skill",
+      "description: Writes a shell marker.",
+      "---",
+      "",
+      "# Shell Skill",
+      "",
+      "Run from the workspace root: `node .kidmemory/skills/shell-skill/render.mjs`.",
+      "",
+    ].join("\n"),
+  );
+  await fs.writeFile(
+    path.join(skillDir, "render.mjs"),
+    "process.stdout.write(process.cwd())\n",
+  );
+  const result = await new SkillDeckProvider().load({ roots: [skillRoot] });
+  const runShell = createSkillDeckAgentTools(result).find((tool) => tool.id === "run_skill_shell");
+  assert.ok(runShell);
+
+  await assert.rejects(
+    runShell.execute(
+      {
+        skillRef: "shell-skill",
+        command: "node -e \"process.stdout.write(process.cwd())\"",
+        cwd: workspaceDir,
+      },
+      {
+        workspaceDir,
+        runId: "run-shell-policy",
+      },
+    ),
+    /not declared by skill shell policy/,
+  );
+});
+
+test("createSkillDeckAgentTools aborts a running shell command", async () => {
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-skill-shell-abort-"));
+  const skillRoot = path.join(workspaceDir, ".kidmemory", "skills");
+  const skillDir = path.join(skillRoot, "shell-skill");
+  const markerPath = path.join(workspaceDir, "output", "late-marker.txt");
+  await fs.mkdir(skillDir, { recursive: true });
+  await fs.mkdir(path.dirname(markerPath), { recursive: true });
+  await fs.writeFile(
+    path.join(skillDir, "SKILL.md"),
+    [
+      "---",
+      "name: shell-skill",
+      "description: Writes a delayed marker.",
+      "---",
+      "",
+      "# Shell Skill",
+      "",
+      "Run from the workspace root: `node .kidmemory/skills/shell-skill/delayed-write.mjs`.",
+      "",
+    ].join("\n"),
+  );
+  await fs.writeFile(
+    path.join(skillDir, "delayed-write.mjs"),
+    [
+      "import fs from 'node:fs/promises';",
+      "import path from 'node:path';",
+      "await new Promise((resolve) => setTimeout(resolve, 800));",
+      "await fs.writeFile(path.join(process.cwd(), 'output', 'late-marker.txt'), 'late');",
+      "process.stdout.write('done');",
+      "",
+    ].join("\n"),
+  );
+  const result = await new SkillDeckProvider().load({ roots: [skillRoot] });
+  const runShell = createSkillDeckAgentTools(result).find((tool) => tool.id === "run_skill_shell");
+  const controller = new globalThis.AbortController();
+  assert.ok(runShell);
+
+  const execution = runShell.execute(
+    {
+      skillRef: "shell-skill",
+      command: "node .kidmemory/skills/shell-skill/delayed-write.mjs",
+      cwd: workspaceDir,
+    },
+    {
+      workspaceDir,
+      runId: "run-shell-abort",
+      signal: controller.signal,
+    },
+  );
+  setTimeout(() => controller.abort(new Error("stage timed out")), 100);
+
+  await assert.rejects(execution, /stage timed out|aborted/i);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await assert.rejects(fs.stat(markerPath), /ENOENT/);
 });
 
 test("createSkillDeckAgentTools reports validation failures as tool errors", async () => {

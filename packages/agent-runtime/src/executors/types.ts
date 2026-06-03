@@ -3,6 +3,13 @@ import type { McpServerDefinition } from "../mcp/index.js";
 import type { SkillDeckLoadResult } from "../skills/index.js";
 import type { AgentTool } from "../tools/index.js";
 
+export type RuntimeAbortSignal = {
+  aborted: boolean;
+  reason?: unknown;
+  addEventListener?: (type: "abort", listener: () => void, options?: { once?: boolean }) => void;
+  removeEventListener?: (type: "abort", listener: () => void) => void;
+};
+
 export type ExecutorKind = "sandbox" | "agent";
 
 export type RuntimeProviderConfig = {
@@ -24,6 +31,7 @@ export type ExecutorRunRequest = {
   tools: AgentTool[];
   mcpServers: McpServerDefinition[];
   requiredOutputFiles?: string[];
+  signal?: RuntimeAbortSignal;
 };
 
 export type ExecutorRunResult =

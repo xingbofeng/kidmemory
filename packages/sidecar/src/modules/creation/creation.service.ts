@@ -101,7 +101,7 @@ export class CreationService {
       { recordEvent: false },
     );
 
-    const task = await this.prisma.creationTask.create({
+    await this.prisma.creationTask.create({
       data: {
         id: taskId,
         creationType: dto.creationType,
@@ -167,12 +167,12 @@ export class CreationService {
       typeof planJson.skillName === "string"
         ? planJson.skillName
         : this.skillNameFor(dto.creationType);
-    const planSteps = this.normalizePlanSteps(planJson.steps);
+    const planSteps = this.normalizePlanSteps(planJson.steps, dto.creationType);
     const requirementItems = Array.isArray(planJson.requirements)
       ? planJson.requirements.map(String)
       : [];
 
-    await this.prisma.creationTask.update({
+    const updatedTask = await this.prisma.creationTask.update({
       where: { id: taskId },
       data: {
         status: "ready",
@@ -187,7 +187,7 @@ export class CreationService {
 
     return {
       status: 201,
-      data: this.mapTask({ ...task, status: "ready", summary, skillName }),
+      data: this.mapTask(updatedTask),
     };
   }
 
@@ -276,6 +276,28 @@ export class CreationService {
           },
         });
         await this.addEvent(taskId, "error", videoReady.message);
+        return { status: 500, data: this.mapTask(failed) };
+      }
+    } else {
+      const bookReady = await this.ensureBookArtifact(
+        taskId,
+        workspacePath,
+        new Set(task.assetIds),
+      );
+      if (bookReady.ok !== true) {
+        const failed = await this.prisma.creationTask.update({
+          where: { id: taskId },
+          data: {
+            status: "failed",
+            currentStepId: "generate",
+            error: {
+              category: "generation",
+              message: bookReady.message,
+              code: "INVALID_BOOK_ARTIFACT",
+            },
+          },
+        });
+        await this.addEvent(taskId, "error", bookReady.message);
         return { status: 500, data: this.mapTask(failed) };
       }
     }
@@ -446,6 +468,8 @@ export class CreationService {
         "## Contract",
         "",
         "- Read the selected asset manifest from `input/assets.json`.",
+        "- Before running this skill, the agent must write `work/curation.json` with metadata.title, metadata.childName, and curated pages.",
+        "- `work/curation.json` pages must include cover, at least one content page, and closing page.",
         "- Render structured JSON to `output/book.json`.",
         "- Render complete HTML to `output/book.html`.",
         "- Run from the workspace root: `node .kidmemory/skills/kidmemory-picturebook/render-picturebook.mjs`.",
@@ -499,6 +523,7 @@ import path from "node:path";
 
 const workspaceDir = process.cwd();
 const inputPath = path.join(workspaceDir, "input", "assets.json");
+const curationPath = path.join(workspaceDir, "work", "curation.json");
 const bookJsonPath = path.join(workspaceDir, "output", "book.json");
 const bookHtmlPath = path.join(workspaceDir, "output", "book.html");
 
@@ -510,43 +535,73 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
-function pageForAsset(asset, index) {
-  const title = typeof asset?.title === "string" && asset.title.trim()
-    ? asset.title.trim()
+function assetImagePath(asset) {
+  for (const value of [asset?.imagePath, asset?.thumbnailPath, asset?.storagePath]) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function normalizePage(page, index, assetById) {
+  const rawKind = typeof page?.kind === "string" && page.kind.trim()
+    ? page.kind.trim()
+    : typeof page?.type === "string" && page.type.trim()
+      ? page.type.trim()
+      : "artwork";
+  const kind = normalizePageKind(rawKind);
+  const title = typeof page?.title === "string" && page.title.trim()
+    ? page.title.trim()
     : "Memory " + (index + 1);
-  const description = typeof asset?.description === "string" && asset.description.trim()
-    ? asset.description.trim()
+  const text = typeof page?.text === "string" && page.text.trim()
+    ? page.text.trim()
+    : typeof page?.subtitle === "string" && page.subtitle.trim()
+      ? page.subtitle.trim()
     : "A warm KidMemory moment.";
+  const assetId = typeof page?.assetId === "string" && page.assetId.trim()
+    ? page.assetId.trim()
+    : undefined;
+  const asset = assetId ? assetById.get(assetId) : undefined;
+  const imagePath = typeof page?.imagePath === "string" && page.imagePath.trim()
+    ? page.imagePath.trim()
+    : assetImagePath(asset);
   return {
-    kind: "artwork",
+    kind,
     title,
-    text: description,
-    assetId: typeof asset?.id === "string" ? asset.id : undefined,
-    imagePath: typeof asset?.imagePath === "string" ? asset.imagePath : undefined,
+    text,
+    assetId,
+    imagePath,
   };
+}
+
+function normalizePageKind(value) {
+  if (value === "cover" || value === "closing" || value === "photo" || value === "craft" || value === "artwork") {
+    return value;
+  }
+  if (value === "content" || value === "page" || value === "memory") return "artwork";
+  return "artwork";
 }
 
 async function main() {
   const input = JSON.parse(await fs.readFile(inputPath, "utf8"));
+  const curation = JSON.parse(await fs.readFile(curationPath, "utf8"));
   const assets = Array.isArray(input.assets) ? input.assets : [];
-  const title = input.goal || "KidMemory Picture Book";
-  const pages = [
-    {
-      kind: "cover",
-      title,
-      text: "A warm story made from selected childhood memories.",
-    },
-    ...assets.slice(0, 6).map(pageForAsset),
-    {
-      kind: "closing",
-      title: "The End",
-      text: "Every little moment is worth keeping.",
-    },
-  ];
+  const assetById = new Map(assets.map((asset) => [asset.id, asset]));
+  const metadata = curation && typeof curation.metadata === "object" ? curation.metadata : {};
+  const title = typeof metadata.title === "string" && metadata.title.trim()
+    ? metadata.title.trim()
+    : input.goal || "KidMemory Picture Book";
+  const childName = typeof metadata.childName === "string" && metadata.childName.trim()
+    ? metadata.childName.trim()
+    : input.settings?.childName || "KidMemory Child";
+  const curatedPages = Array.isArray(curation?.pages) ? curation.pages : [];
+  if (curatedPages.length === 0) {
+    throw new Error("work/curation.json must include curated pages before rendering.");
+  }
+  const pages = curatedPages.map((page, index) => normalizePage(page, index, assetById));
   const book = {
     metadata: {
       title,
-      childName: input.settings?.childName || "KidMemory Child",
+      childName,
     },
     pages,
   };
@@ -560,7 +615,7 @@ async function main() {
   await fs.mkdir(path.join(workspaceDir, "output"), { recursive: true });
   await fs.writeFile(bookJsonPath, JSON.stringify(book, null, 2) + "\n");
   await fs.writeFile(bookHtmlPath, html);
-  console.log(JSON.stringify({ ok: true, outputs: ["output/book.json", "output/book.html"], pageCount: pages.length }));
+  console.log(JSON.stringify({ ok: true, inputs: ["work/curation.json"], outputs: ["output/book.json", "output/book.html"], pageCount: pages.length }));
 }
 
 main().catch((error) => {
@@ -686,6 +741,26 @@ main().catch((error) => {
       "Agent runtime did not produce a valid MP4 at output/video.mp4. The task is failed instead of replacing the artifact.";
     await this.addEvent(taskId, "step", message);
     return { ok: false, message };
+  }
+
+  private async ensureBookArtifact(
+    taskId: string,
+    workspacePath: string,
+    selectedAssetIds: Set<string>,
+  ): Promise<{ ok: true } | { ok: false; message: string }> {
+    try {
+      const output = await loadValidatedBookOutput(workspacePath, selectedAssetIds);
+      if (output.ok) return { ok: true };
+
+      const message = `Book artifact contract failed: ${output.errors.join("; ")}`;
+      await this.addEvent(taskId, "step", message);
+      return { ok: false, message };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Unknown validation error";
+      const message = `Book artifact contract failed: ${reason}`;
+      await this.addEvent(taskId, "step", message);
+      return { ok: false, message };
+    }
   }
 
   private async isMp4File(filePath: string): Promise<boolean> {
@@ -1046,8 +1121,8 @@ main().catch((error) => {
     ];
   }
 
-  private normalizePlanSteps(value: unknown): CreationStep[] {
-    if (!Array.isArray(value)) return this.defaultSteps("storybook", "pending");
+  private normalizePlanSteps(value: unknown, creationType: CreationType): CreationStep[] {
+    if (!Array.isArray(value)) return this.defaultSteps(creationType, "pending");
     return value
       .map((item) => {
         if (!item || typeof item !== "object") return undefined;
@@ -1105,6 +1180,9 @@ main().catch((error) => {
       task.skillName
         ? `The confirmed plan selected skillName: ${task.skillName}. Use that skill unless it is unavailable.`
         : "Choose the relevant KidMemory skill from the available skill-deck skills.",
+      creationType === "memoir_video"
+        ? "For memoir_video, read input/assets.json and let the video skill create its own working files."
+        : "For storybook and memory_book, write work/curation.json before running the skill. It must contain metadata.title, metadata.childName, and curated pages that reflect the selected assets and goal.",
       "Execute the skill's documented shell command through run_skill_shell. Do not stop after reading the skill.",
       creationType === "memoir_video"
         ? "Required final artifact: output/video.mp4."
@@ -1121,6 +1199,10 @@ main().catch((error) => {
             creationType === "memoir_video"
               ? ["output/video.mp4"]
               : ["output/book.json", "output/book.html"],
+          intermediateOutputs:
+            creationType === "memoir_video"
+              ? []
+              : ["work/curation.json"],
         },
         null,
         2,
@@ -1129,9 +1211,8 @@ main().catch((error) => {
   }
 
   private skillNameFor(creationType: CreationType): string {
-    if (creationType === "memoir_video") return "Hyperframes skill";
-    if (creationType === "memory_book") return "KidMemory memory book";
-    return "KidMemory storybook";
+    if (creationType === "memoir_video") return "kidmemory-memoir-video";
+    return "kidmemory-picturebook";
   }
 
   private mapTask(

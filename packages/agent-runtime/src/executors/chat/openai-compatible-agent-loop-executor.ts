@@ -3,7 +3,13 @@ import path from "node:path";
 import OpenAI from "openai";
 
 import type { AgentTool } from "../../tools/index.js";
-import type { AgentExecutor, ExecutorRunRequest, ExecutorRunResult, RuntimeProviderConfig } from "../types.js";
+import type {
+  AgentExecutor,
+  ExecutorRunRequest,
+  ExecutorRunResult,
+  RuntimeAbortSignal,
+  RuntimeProviderConfig,
+} from "../types.js";
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -13,7 +19,7 @@ type ChatMessage = {
 type ChatClient = {
   chat: {
     completions: {
-      create(input: unknown): Promise<{ choices?: Array<{ message?: { content?: string | null } }> }>;
+      create(input: unknown, options?: unknown): Promise<{ choices?: Array<{ message?: { content?: string | null } }> }>;
     };
   };
 };
@@ -50,13 +56,25 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
         { role: "system", content: this.systemPrompt(request) },
         { role: "user", content: request.prompt },
       ];
+      let supportsJsonResponseFormat = true;
 
       for (let turn = 0; turn < maxTurns; turn += 1) {
-        const completion = await client.chat.completions.create({
+        this.throwIfAborted(request.signal);
+        const completion = await this.createCompletion(client, {
           model: provider.model,
           messages,
           temperature: 0.2,
-          response_format: { type: "json_object" },
+          ...(supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
+        }, request.signal).catch(async (error) => {
+          if (supportsJsonResponseFormat && this.isUnsupportedResponseFormatError(error)) {
+            supportsJsonResponseFormat = false;
+            return this.createCompletion(client, {
+              model: provider.model,
+              messages,
+              temperature: 0.2,
+            }, request.signal);
+          }
+          throw error;
         });
         const content = completion.choices?.[0]?.message?.content;
         if (!content) return this.fail("AGENT_LOOP_EMPTY_RESPONSE", "Model returned an empty agent-loop response.");
@@ -80,15 +98,10 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
         const response = parsed.response;
         if (response.toolCalls?.length) {
           for (const toolCall of response.toolCalls) {
-            const output = await this.executeTool(request, toolCall);
+            const toolResult = await this.executeToolForLoop(request, toolCall);
             messages.push({
               role: "user",
-              content: JSON.stringify({
-                toolResult: {
-                  tool: toolCall.tool,
-                  output,
-                },
-              }),
+              content: JSON.stringify(toolResult),
             });
           }
           continue;
@@ -133,6 +146,14 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
     });
   }
 
+  private createCompletion(
+    client: ChatClient,
+    input: unknown,
+    signal?: RuntimeAbortSignal,
+  ): Promise<{ choices?: Array<{ message?: { content?: string | null } }> }> {
+    return client.chat.completions.create(input, { signal });
+  }
+
   private systemPrompt(request: ExecutorRunRequest): string {
     return [
       "You are a KidMemory agent loop. You must complete tasks by choosing and using available tools.",
@@ -169,6 +190,17 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
       if (parsed.toolCalls !== undefined && !Array.isArray(parsed.toolCalls)) {
         return { ok: false, message: "Agent response toolCalls must be an array." };
       }
+      if (parsed.final !== undefined && typeof parsed.final !== "string") {
+        return { ok: false, message: "Agent response final must be a string." };
+      }
+      for (const [index, toolCall] of (parsed.toolCalls ?? []).entries()) {
+        if (!toolCall || typeof toolCall !== "object" || Array.isArray(toolCall)) {
+          return { ok: false, message: `Agent response toolCalls[${index}] must be an object.` };
+        }
+        if (typeof (toolCall as ToolCall).tool !== "string" || !(toolCall as ToolCall).tool.trim()) {
+          return { ok: false, message: `Agent response toolCalls[${index}].tool must be a non-empty string.` };
+        }
+      }
       return { ok: true, response: parsed };
     } catch (error) {
       return {
@@ -191,6 +223,7 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
   }
 
   private async executeTool(request: ExecutorRunRequest, toolCall: ToolCall): Promise<unknown> {
+    this.throwIfAborted(request.signal);
     if (typeof toolCall.tool !== "string" || !toolCall.tool.trim()) {
       throw new Error("Agent tool call must include a tool id.");
     }
@@ -203,7 +236,30 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
       workspaceDir: request.workspaceDir,
       runId: request.runId,
       traceId: request.traceId,
+      signal: request.signal,
     });
+  }
+
+  private async executeToolForLoop(
+    request: ExecutorRunRequest,
+    toolCall: ToolCall,
+  ): Promise<{ toolResult: { tool: string; output: unknown } } | { toolError: { tool: string; message: string } }> {
+    try {
+      return {
+        toolResult: {
+          tool: toolCall.tool,
+          output: await this.executeTool(request, toolCall),
+        },
+      };
+    } catch (error) {
+      if (request.signal?.aborted) throw error;
+      return {
+        toolError: {
+          tool: typeof toolCall.tool === "string" ? toolCall.tool : "(invalid tool)",
+          message: error instanceof Error ? error.message : "Tool execution failed.",
+        },
+      };
+    }
   }
 
   private async missingRequiredOutputFiles(request: ExecutorRunRequest): Promise<string[]> {
@@ -234,10 +290,12 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
     const requestedName = toolCall.tool
       .slice("use_skill_".length)
       .replaceAll("_", "-");
-    const matchedSkill = request.skills.skills.find((skill) => {
+    const exactSkill = request.skills.skills.find((skill) => skill.name.replaceAll("_", "-") === requestedName);
+    const prefixMatches = request.skills.skills.filter((skill) => {
       const normalizedName = skill.name.replaceAll("_", "-");
-      return normalizedName === requestedName || normalizedName.startsWith(`${requestedName}-`);
+      return normalizedName.startsWith(`${requestedName}-`);
     });
+    const matchedSkill = exactSkill ?? (prefixMatches.length === 1 ? prefixMatches[0] : undefined);
     if (!matchedSkill) return undefined;
     return {
       execute: () =>
@@ -247,9 +305,20 @@ export class OpenAICompatibleAgentLoopExecutor implements AgentExecutor {
             workspaceDir: request.workspaceDir,
             runId: request.runId,
             traceId: request.traceId,
+            signal: request.signal,
           },
         ),
     };
+  }
+
+  private isUnsupportedResponseFormatError(error: unknown): boolean {
+    const text = error instanceof Error ? error.message : String(error);
+    return /response_format|json_object/i.test(text) && /unsupported|unknown|invalid|not support/i.test(text);
+  }
+
+  private throwIfAborted(signal?: RuntimeAbortSignal): void {
+    if (!signal?.aborted) return;
+    throw signal.reason instanceof Error ? signal.reason : new Error("Agent run was aborted.");
   }
 
   private fail(code: string, message: string): ExecutorRunResult {
