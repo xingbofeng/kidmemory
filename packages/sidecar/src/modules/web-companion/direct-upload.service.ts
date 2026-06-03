@@ -366,13 +366,21 @@ export class DirectUploadService {
     });
 
     const requestedObjectKeys = request.objectKeys;
+    const remoteObjectByKey = new Map(
+      remoteObjects.map((object) => [object.objectKey, object]),
+    );
     const targetObjects = requestedObjectKeys && requestedObjectKeys.length > 0
-      ? remoteObjects.filter((object) => requestedObjectKeys.includes(object.objectKey))
+      ? requestedObjectKeys.map((objectKey) => remoteObjectByKey.get(objectKey) ?? {
+        objectKey,
+        missing: true as const,
+      })
       : remoteObjects;
 
     const results: PullbackDirectUploadItemResult[] = [];
     for (const object of targetObjects) {
-      const result = await this.processOnePullback(sessionId, childId, bucket, object);
+      const result = "missing" in object
+        ? await this.processMissingPullbackObject(sessionId, childId, object.objectKey)
+        : await this.processOnePullback(sessionId, childId, bucket, object);
       results.push(result);
     }
 
@@ -521,6 +529,56 @@ export class DirectUploadService {
         errorMessage: failed.errorMessage,
       };
     }
+  }
+
+  private async processMissingPullbackObject(
+    sessionId: string,
+    childId: string,
+    objectKey: string,
+  ): Promise<PullbackDirectUploadItemResult> {
+    const row = await this.pullbackStore.upsertPending({
+      sessionId,
+      childId,
+      objectKey,
+    });
+
+    if (row.status === "ready") {
+      return {
+        objectKey: row.objectKey,
+        status: "ready",
+        errorCode: null,
+        errorMessage: null,
+      };
+    }
+
+    const downloading = applyDirectUploadPullbackTransition(toRecord(row), {
+      type: "begin_download",
+    });
+    await this.pullbackStore.update(row.id, {
+      status: downloading.status,
+      errorCode: null,
+      errorMessage: null,
+    });
+
+    const failed = applyDirectUploadPullbackTransition(downloading, {
+      type: "mark_failed",
+      errorCode: "remote_object_missing",
+      errorMessage: "Remote object was not found in direct upload storage.",
+    });
+    await this.pullbackStore.update(row.id, {
+      status: failed.status,
+      assetId: null,
+      localPath: null,
+      errorCode: failed.errorCode,
+      errorMessage: failed.errorMessage,
+    });
+
+    return {
+      objectKey: failed.objectKey,
+      status: "failed",
+      errorCode: failed.errorCode,
+      errorMessage: failed.errorMessage,
+    };
   }
 }
 

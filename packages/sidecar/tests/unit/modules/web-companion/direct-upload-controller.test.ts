@@ -452,6 +452,32 @@ test(
 );
 
 test(
+  "POST /sessions/:sessionId/pullback 指定不存在 objectKey 时返回 failed result",
+  async () => {
+    const { controller, storage } = buildController();
+    const session = await controller.createSession({ childId: "child_test" });
+    storage.state.objects.set(`${session.sessionId}/uuid-a.jpg`, {
+      size: 100,
+      contentType: "image/jpeg",
+      lastModified: "2026-05-14T09:00:00.000Z",
+      body: Buffer.from("a"),
+    });
+
+    const missingObjectKey = `${session.sessionId}/missing.jpg`;
+    const response = await controller.pullback(session.sessionId, {
+      token: session.token,
+      objectKeys: [missingObjectKey],
+    });
+
+    assert.equal(response.results.length, 1);
+    assert.equal(response.results[0].objectKey, missingObjectKey);
+    assert.equal(response.results[0].status, "failed");
+    assert.equal(response.results[0].errorCode, "remote_object_missing");
+    assert.equal(response.results[0].errorMessage, "Remote object was not found in direct upload storage.");
+  },
+);
+
+test(
   "POST /sessions/:sessionId/pullback 重复回拉对已 ready 对象幂等保持 ready",
   async () => {
     const { controller, storage, asset } = buildController();
