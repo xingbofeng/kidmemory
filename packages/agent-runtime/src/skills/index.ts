@@ -1,6 +1,7 @@
 import path from "node:path";
 import { localDir, skills as sandboxSkills, type Skills } from "@openai/agents/sandbox";
 import {
+  createLocalShellRunner,
   createSkillHandlers,
   getAgenticSkillTools,
   scanSkills,
@@ -76,16 +77,45 @@ export class SkillDeckProvider {
 export function createSkillDeckAgentTools(result: SkillDeckLoadResult): AgentTool[] {
   if (result.skills.length === 0) return [];
 
-  const agenticTools = getAgenticSkillTools({ skills: result.skills, skillMode: "active" });
-  const handlers = createSkillHandlers({
+  const agenticTools = getAgenticSkillTools({
     skills: result.skills,
     skillMode: "active",
+    includeShell: true,
+    exposeSkills: result.skills.length,
   });
 
   return agenticTools
-    .filter((tool) => typeof handlers[tool.name] === "function")
-    .map((tool) => createSkillDeckAgentTool(tool, async (input) => {
-      const validatedInput = validateSkillDeckToolInput(tool.name, normalizeSkillDeckToolInput(tool.name, input, result.skills));
+    .map((tool) => createSkillDeckAgentTool(tool, async (toolInput, context) => {
+      const handlers = createSkillHandlers({
+        skills: result.skills,
+        skillMode: "active",
+        exposeSkills: result.skills.length,
+        runShell: createLocalShellRunner({
+          inheritEnv: false,
+          timeoutMs: 120000,
+          maxOutputLength: 20000,
+        }),
+        security: {
+          allowedRoots: [context.workspaceDir],
+          defaultCwd: context.workspaceDir,
+          timeoutMs: 120000,
+          maxOutputLength: 20000,
+          env: {
+            PATH: process.env.PATH ?? "",
+            HOME: process.env.HOME ?? "",
+            TMPDIR: process.env.TMPDIR ?? "/tmp",
+          },
+        },
+      });
+      const validatedInput = validateSkillDeckToolInput(
+        tool.name,
+        normalizeSkillDeckToolInput(
+          tool.name,
+          toolInput,
+          result.skills,
+          context.workspaceDir,
+        ),
+      );
       const handler = handlers[tool.name];
       if (!handler) {
         throw new Error(`SkillDeck handler is not available: ${tool.name}`);
@@ -105,13 +135,40 @@ function normalizeSkillDeckToolInput(
   toolName: string,
   input: unknown,
   skills: AgenticSkill[],
+  workspaceDir?: string,
 ): unknown {
+  if (toolName === "run_skill_shell") {
+    return normalizeSkillShellInput(input, workspaceDir);
+  }
   if (toolName !== "read_skill" && toolName !== "get_skill_info") return input;
   if (!input || typeof input !== "object" || !("ref" in input)) return input;
   const ref = (input as Record<string, unknown>).ref;
   if (typeof ref !== "string" || !ref.startsWith("use_skill_")) return input;
   const matched = skills.find((skill) => toUseSkillToolName(skill) === ref);
   return matched ? { ...input, ref: matched.id } : input;
+}
+
+function normalizeSkillShellInput(input: unknown, workspaceDir?: string): unknown {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return input;
+  const normalized = { ...(input as Record<string, unknown>) };
+  if (!workspaceDir) return normalized;
+
+  const cwd = normalized.cwd;
+  if (typeof cwd !== "string" || !cwd.trim()) {
+    delete normalized.cwd;
+    return normalized;
+  }
+
+  const root = path.resolve(workspaceDir);
+  const resolved = path.resolve(root, cwd);
+  const insideRoot = resolved === root || resolved.startsWith(`${root}${path.sep}`);
+  if (!insideRoot) {
+    delete normalized.cwd;
+    return normalized;
+  }
+
+  normalized.cwd = resolved;
+  return normalized;
 }
 
 function validateSkillDeckToolInput(toolName: string, input: unknown): Record<string, unknown> {
@@ -127,7 +184,7 @@ function validateSkillDeckToolInput(toolName: string, input: unknown): Record<st
 
 function createSkillDeckAgentTool(
   tool: AgenticTool,
-  execute: AgentTool["execute"],
+  execute: (input: unknown, context: Parameters<AgentTool["execute"]>[1]) => Promise<unknown>,
 ): AgentTool {
   return {
     id: tool.name,
@@ -136,6 +193,6 @@ function createSkillDeckAgentTool(
     source: "skill-deck",
     inputSchema: tool.inputSchema,
     risk: tool.name === "run_skill_shell" ? "high" : "low",
-    execute,
+    execute: (input, context) => execute(input, context),
   };
 }

@@ -1,8 +1,12 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { AgentRuntime, OpenAICompatibleChatExecutor } from "@kidmemory/agent-runtime";
+import {
+  AgentRuntime,
+  OpenAICompatibleAgentLoopExecutor,
+} from "@kidmemory/agent-runtime";
 import type { ExecutorKind, AgentRunRequest, AgentRunResult } from "@kidmemory/agent-runtime";
 
 import { delay } from "../../infrastructure/time/delay.ts";
+import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
 import { AgentConfigApplicationService } from "../agent-config/application/agent-config-application.service.ts";
 import { ENCRYPTION_PORT } from "../agent-config/ports/agent-config.ports.ts";
 import type { EncryptionPort } from "../agent-config/ports/agent-config.ports.ts";
@@ -37,6 +41,7 @@ export class AgentRuntimeService {
     @Inject(AgentConfigApplicationService)
     private readonly agentConfig: AgentConfigApplicationService,
     @Inject(ENCRYPTION_PORT) private readonly encryption: EncryptionPort,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
   ) {}
 
   async runCreationStage(input: RunCreationStageInput): Promise<RunCreationStageResult> {
@@ -53,15 +58,37 @@ export class AgentRuntimeService {
 
     const runtime = new AgentRuntime({
       executorKind: providerConfig.executorKind,
-      executor: providerConfig.executorKind === "agent" ? new OpenAICompatibleChatExecutor() : undefined,
-      provider: {
-        model: providerConfig.model,
-        baseURL: providerConfig.baseURL,
-        apiKey: providerConfig.apiKey,
-        useResponses: providerConfig.useResponses,
-      },
+      executor: providerConfig.executorKind === "agent"
+        ? new OpenAICompatibleAgentLoopExecutor()
+        : undefined,
+      provider: providerConfig
+        ? {
+          model: providerConfig.model,
+          baseURL: providerConfig.baseURL,
+          apiKey: providerConfig.apiKey,
+          useResponses: providerConfig.useResponses,
+        }
+        : undefined,
       maxTurns: 50,
       builtinTools: { pollinations: true },
+      middleware: [
+        {
+          beforeToolCall: async ({ tool }) => {
+            await this.addRuntimeEvent(
+              input.taskId,
+              "step",
+              `Tool started: ${tool.id} (${tool.source})`,
+            );
+          },
+          afterToolCall: async ({ tool }) => {
+            await this.addRuntimeEvent(
+              input.taskId,
+              "step",
+              `Tool finished: ${tool.id}`,
+            );
+          },
+        },
+      ],
     });
 
     const runRequest: AgentRunRequest = {
@@ -140,6 +167,23 @@ export class AgentRuntimeService {
       useResponses: resolveCreationRuntimeUseResponses({ provider: config.provider, baseUrl: config.baseUrl }),
       executorKind: resolveCreationRuntimeExecutorKind({ provider: config.provider, baseUrl: config.baseUrl }),
     };
+  }
+
+  private async addRuntimeEvent(
+    taskId: string,
+    type: string,
+    message: string,
+    stepId?: string,
+  ): Promise<void> {
+    await this.prisma.creationEvent.create({
+      data: {
+        id: `event_${taskId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        taskId,
+        type,
+        stepId,
+        message,
+      },
+    });
   }
 
   private async timeoutFailure(ms: number, stage: RuntimeStage, sessionId: string): Promise<RunCreationStageResult> {

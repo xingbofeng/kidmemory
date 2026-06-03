@@ -24,8 +24,18 @@ export function resolveWritableWorkspacePath(workspaceDir: string, inputPath: st
 }
 
 export function resolveWorkspacePath(workspaceDir: string, inputPath: string): ResolvedWorkspacePath {
-  const relativePath = normalizeRelativePath(inputPath);
   const absoluteWorkspaceDir = path.resolve(workspaceDir);
+  const trimmed = inputPath.trim();
+  if (path.isAbsolute(trimmed)) {
+    const absolutePath = path.resolve(trimmed);
+    if (absolutePath !== absoluteWorkspaceDir && !absolutePath.startsWith(`${absoluteWorkspaceDir}${path.sep}`)) {
+      throw new Error("Path must stay inside workspace.");
+    }
+    const relativePath = normalizeRelativePath(path.relative(absoluteWorkspaceDir, absolutePath));
+    return { relativePath, absolutePath };
+  }
+
+  const relativePath = normalizeRelativePath(inputPath);
   const absolutePath = path.resolve(absoluteWorkspaceDir, relativePath);
   if (absolutePath !== absoluteWorkspaceDir && !absolutePath.startsWith(`${absoluteWorkspaceDir}${path.sep}`)) {
     throw new Error("Path must stay inside workspace.");

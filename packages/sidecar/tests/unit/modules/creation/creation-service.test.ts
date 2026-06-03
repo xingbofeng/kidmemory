@@ -286,7 +286,11 @@ test("createTask passes creation settings into the request file and plan prompt"
 
   assert.equal(result.status, 201);
   assert.equal(prompts.length, 1);
-  assert.deepEqual(JSON.parse(prompts[0]), {
+  assert.match(prompts[0] ?? "", /Treat input\/ as read-only/);
+  assert.match(prompts[0] ?? "", /output\/plan\.json/);
+  const promptJsonStart = prompts[0]?.indexOf("{") ?? -1;
+  assert.notEqual(promptJsonStart, -1);
+  assert.deepEqual(JSON.parse((prompts[0] ?? "").slice(promptJsonStart)), {
     goal: "make a dinosaur story",
     creationType: "storybook",
     assetIds: ["asset-1"],
@@ -296,7 +300,8 @@ test("createTask passes creation settings into the request file and plan prompt"
       style: "warm",
     },
     constraints: {
-      output: "PDF",
+      planOutputPath: "output/plan.json",
+      finalOutput: "output/book.json and output/book.html",
       mainStages: ["compose", "plan", "generate", "review", "publish"],
     },
   });
@@ -369,6 +374,46 @@ test("exportTask renders a generated book HTML task to a real PDF file", async (
   assert.equal(bytes.subarray(0, 5).toString("utf8"), "%PDF-");
 });
 
+test("exportTask rejects invalid memoir video artifacts", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-creation-export-video-"),
+  );
+  const workspacePath = path.join(dir, "workspace", "task-1");
+  await fs.mkdir(path.join(workspacePath, "output"), { recursive: true });
+  await fs.writeFile(
+    path.join(workspacePath, "output", "video.mp4"),
+    "This is a placeholder for video.",
+  );
+
+  const { prisma } = createPrismaStub([
+    {
+      id: "task-1",
+      creationType: "memoir_video",
+      goal: "make a video",
+      assetIds: ["asset-1"],
+      status: "succeeded",
+      workspacePath,
+      steps: JSON.stringify([]),
+    },
+  ]);
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+  });
+
+  const result = await service.exportTask("task-1", {
+    target: "mp4",
+    targetPath: path.join(dir, "exports", "task-1.mp4"),
+  });
+
+  assert.equal(result.status, 409);
+  assert.deepEqual(result.data, {
+    message:
+      "MP4 artifact is not available or invalid. Re-run generation with a real video renderer first.",
+  });
+});
+
 test("generateTask persists generated book artifacts from the task workspace", async () => {
   const dir = await fs.mkdtemp(
     path.join(os.tmpdir(), "kidmemory-creation-generate-"),
@@ -385,16 +430,25 @@ test("generateTask persists generated book artifacts from the task workspace", a
       steps: JSON.stringify([]),
     },
   ]);
-  const stageCalls: Array<{ stage: string; workspacePath: string }> = [];
+  const stageCalls: Array<{
+    stage: string;
+    workspacePath: string;
+    prompt?: string;
+  }> = [];
   const service = createService({
     workspaceDir: path.join(dir, "workspace"),
     exportDir: path.join(dir, "exports"),
     prisma,
     agentRuntime: {
-      async runCreationStage(input: { stage: string; workspacePath: string }) {
+      async runCreationStage(input: {
+        stage: string;
+        workspacePath: string;
+        prompt?: string;
+      }) {
         stageCalls.push({
           stage: input.stage,
           workspacePath: input.workspacePath,
+          prompt: input.prompt,
         });
         await fs.mkdir(path.join(input.workspacePath, "output"), {
           recursive: true,
@@ -428,7 +482,12 @@ test("generateTask persists generated book artifacts from the task workspace", a
   const detail = await service.getTask("task-1");
 
   assert.equal(result.status, 200);
-  assert.deepEqual(stageCalls, [{ stage: "generate_book", workspacePath }]);
+  assert.equal(stageCalls.length, 1);
+  assert.equal(stageCalls[0]?.stage, "generate_book");
+  assert.equal(stageCalls[0]?.workspacePath, workspacePath);
+  assert.match(stageCalls[0]?.prompt ?? "", /run_skill_shell/);
+  assert.match(stageCalls[0]?.prompt ?? "", /output\/book\.json/);
+  assert.match(stageCalls[0]?.prompt ?? "", /output\/book\.html/);
   assert.equal(stores.artifacts.length, 2);
   assert.deepEqual(
     stores.artifacts.map((artifact) => artifact.localPath).sort(),
@@ -439,4 +498,55 @@ test("generateTask persists generated book artifacts from the task workspace", a
   );
   assert.equal(detail.status, 200);
   assert.equal("artifacts" in detail.data && detail.data.artifacts.length, 2);
+});
+
+test("generateTask rejects placeholder memoir video output", async () => {
+  const dir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "kidmemory-creation-video-"),
+  );
+  const workspacePath = path.join(dir, "workspace", "task-1");
+
+  const { prisma, stores } = createPrismaStub([
+    {
+      id: "task-1",
+      creationType: "memoir_video",
+      goal: "make a video",
+      assetIds: ["asset-1"],
+      status: "ready",
+      workspacePath,
+      steps: JSON.stringify([]),
+    },
+  ]);
+  const service = createService({
+    workspaceDir: path.join(dir, "workspace"),
+    exportDir: path.join(dir, "exports"),
+    prisma,
+    agentRuntime: {
+      async runCreationStage(input: { workspacePath: string }) {
+        await fs.mkdir(path.join(input.workspacePath, "output"), {
+          recursive: true,
+        });
+        await fs.writeFile(
+          path.join(input.workspacePath, "output", "video.mp4"),
+          "This is a placeholder for video.",
+        );
+        return { ok: true };
+      },
+    },
+  });
+
+  const result = await service.generateTask("task-1");
+  const detail = await service.getTask("task-1");
+
+  assert.equal(result.status, 500);
+  assert.equal(stores.artifacts.length, 0);
+  assert.equal(stores.tasks.get("task-1")?.status, "failed");
+  assert.deepEqual(stores.tasks.get("task-1")?.error, {
+    category: "hyperframes",
+    message:
+      "Agent runtime did not produce a valid MP4 at output/video.mp4. The task is failed instead of replacing the artifact.",
+    code: "INVALID_MP4_ARTIFACT",
+  });
+  assert.equal(detail.status, 200);
+  assert.equal("artifacts" in detail.data && detail.data.artifacts.length, 0);
 });

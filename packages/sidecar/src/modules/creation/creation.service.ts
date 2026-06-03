@@ -64,6 +64,7 @@ export class CreationService {
     @Inject(DatasetService)
     private readonly datasetService?: Pick<
       DatasetService,
+      | "getAsset"
       | "recordExportArtifact"
       | "enqueueExportArtifactStorageSync"
       | "runStorageSyncWorker"
@@ -89,6 +90,16 @@ export class CreationService {
       stage: "plan",
     });
     await writeTaskRequestJson(workspacePath, { taskId, ...dto });
+    await this.writeCreationSkillFiles(workspacePath);
+    await this.writeCreationInputManifest(
+      {
+        id: taskId,
+        goal: dto.goal,
+        assetIds: dto.assetIds,
+      } as PrismaCreationTask,
+      workspacePath,
+      { recordEvent: false },
+    );
 
     const task = await this.prisma.creationTask.create({
       data: {
@@ -214,12 +225,13 @@ export class CreationService {
         "creation-tasks",
         taskId,
       );
+    await this.writeCreationInputManifest(task, workspacePath);
     const generateResult = await this.agentRuntime.runCreationStage({
       taskId,
       workspacePath,
       stage,
       creationType,
-      prompt: task.goal,
+      prompt: this.buildGeneratePrompt(task, creationType, stage),
       traceId: `creation_${taskId}_${stage}`,
     });
 
@@ -243,6 +255,29 @@ export class CreationService {
         generateResult.error?.message ?? "Generation stage failed.",
       );
       return { status: 500, data: this.mapTask(failed) };
+    }
+
+    if (creationType === "memoir_video") {
+      const videoReady = await this.ensureMemoirVideoArtifact(
+        taskId,
+        workspacePath,
+      );
+      if (videoReady.ok !== true) {
+        const failed = await this.prisma.creationTask.update({
+          where: { id: taskId },
+          data: {
+            status: "failed",
+            currentStepId: "generate",
+            error: {
+              category: "hyperframes",
+              message: videoReady.message,
+              code: "INVALID_MP4_ARTIFACT",
+            },
+          },
+        });
+        await this.addEvent(taskId, "error", videoReady.message);
+        return { status: 500, data: this.mapTask(failed) };
+      }
     }
 
     await this.persistGeneratedArtifacts(taskId, creationType, workspacePath);
@@ -309,6 +344,362 @@ export class CreationService {
           localPath: output.localPath,
         },
       });
+    }
+  }
+
+  private async writeCreationInputManifest(
+    task: PrismaCreationTask,
+    workspacePath: string,
+    options: { recordEvent?: boolean } = {},
+  ): Promise<void> {
+    const assets = [];
+    for (const assetId of task.assetIds) {
+      const asset = await this.datasetService
+        ?.getAsset(assetId)
+        .then((result) => result.asset)
+        .catch(() => null);
+      if (!asset) continue;
+      assets.push({
+        id: asset.id,
+        type: asset.type,
+        title: asset.title,
+        description: asset.description,
+        imagePath: asset.imagePath,
+        thumbnailPath: asset.thumbnailPath,
+        storagePath: asset.storagePath,
+        capturedAt: asset.capturedAt,
+      });
+    }
+
+    await fs.mkdir(path.join(workspacePath, "input"), { recursive: true });
+    await fs.writeFile(
+      path.join(workspacePath, "input", "assets.json"),
+      `${JSON.stringify(
+        {
+          taskId: task.id,
+          goal: task.goal,
+          assetIds: task.assetIds,
+          assets,
+          settings: await this.readTaskSettings(workspacePath),
+        },
+        null,
+        2,
+      )}\n`,
+    );
+    await this.writeCreationSkillFiles(workspacePath);
+    if (options.recordEvent ?? true) {
+      await this.addEvent(
+        task.id,
+        "step",
+        `Prepared ${assets.length} selected assets and KidMemory skills for generation.`,
+      );
+    }
+  }
+
+  private async readTaskSettings(
+    workspacePath: string,
+  ): Promise<Record<string, unknown>> {
+    try {
+      const content = await fs.readFile(
+        path.join(workspacePath, "input", "task-request.json"),
+        "utf8",
+      );
+      const parsed = JSON.parse(content) as { settings?: unknown };
+      if (
+        parsed.settings &&
+        typeof parsed.settings === "object" &&
+        !Array.isArray(parsed.settings)
+      ) {
+        return parsed.settings as Record<string, unknown>;
+      }
+    } catch {
+      // Older tasks may not have request settings; renderer defaults are fine.
+    }
+    return {};
+  }
+
+  private async writeCreationSkillFiles(workspacePath: string): Promise<void> {
+    await this.writePicturebookSkillFiles(workspacePath);
+    await this.writeMemoirVideoSkillFiles(workspacePath);
+  }
+
+  private async writePicturebookSkillFiles(workspacePath: string): Promise<void> {
+    const skillDir = path.join(
+      workspacePath,
+      ".kidmemory",
+      "skills",
+      "kidmemory-picturebook",
+    );
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(skillDir, "SKILL.md"),
+      [
+        "---",
+        "name: kidmemory-picturebook",
+        "description: Render KidMemory picture books and memory books from selected asset manifests into output/book.json and output/book.html.",
+        "---",
+        "",
+        "# KidMemory Picturebook",
+        "",
+        "Use this skill when the task requires a storybook, memory_book, or picture book artifact.",
+        "",
+        "## Contract",
+        "",
+        "- Read the selected asset manifest from `input/assets.json`.",
+        "- Render structured JSON to `output/book.json`.",
+        "- Render complete HTML to `output/book.html`.",
+        "- Run from the workspace root: `node .kidmemory/skills/kidmemory-picturebook/render-picturebook.mjs`.",
+        "",
+      ].join("\n"),
+    );
+    await fs.writeFile(
+      path.join(skillDir, "render-picturebook.mjs"),
+      this.picturebookSkillScript(),
+    );
+  }
+
+  private async writeMemoirVideoSkillFiles(workspacePath: string): Promise<void> {
+    const skillDir = path.join(
+      workspacePath,
+      ".kidmemory",
+      "skills",
+      "kidmemory-memoir-video",
+    );
+    await fs.mkdir(skillDir, { recursive: true });
+    await fs.writeFile(
+      path.join(skillDir, "SKILL.md"),
+      [
+        "---",
+        "name: kidmemory-memoir-video",
+        "description: Render KidMemory memoir videos from selected asset manifests into output/video.mp4.",
+        "---",
+        "",
+        "# KidMemory Memoir Video",
+        "",
+        "Use this skill when the task requires a memoir_video MP4 artifact.",
+        "",
+        "## Contract",
+        "",
+        "- Read the selected asset manifest from `input/assets.json`.",
+        "- Render a real MP4 to `output/video.mp4`.",
+        "- Do not write placeholder text as a video artifact.",
+        "- Run from the workspace root: `node .kidmemory/skills/kidmemory-memoir-video/render-memoir-video.mjs`.",
+        "",
+      ].join("\n"),
+    );
+    await fs.writeFile(
+      path.join(skillDir, "render-memoir-video.mjs"),
+      this.memoirVideoSkillScript(),
+    );
+  }
+
+  private picturebookSkillScript(): string {
+    return String.raw`import fs from "node:fs/promises";
+import path from "node:path";
+
+const workspaceDir = process.cwd();
+const inputPath = path.join(workspaceDir, "input", "assets.json");
+const bookJsonPath = path.join(workspaceDir, "output", "book.json");
+const bookHtmlPath = path.join(workspaceDir, "output", "book.html");
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function pageForAsset(asset, index) {
+  const title = typeof asset?.title === "string" && asset.title.trim()
+    ? asset.title.trim()
+    : "Memory " + (index + 1);
+  const description = typeof asset?.description === "string" && asset.description.trim()
+    ? asset.description.trim()
+    : "A warm KidMemory moment.";
+  return {
+    kind: "artwork",
+    title,
+    text: description,
+    assetId: typeof asset?.id === "string" ? asset.id : undefined,
+    imagePath: typeof asset?.imagePath === "string" ? asset.imagePath : undefined,
+  };
+}
+
+async function main() {
+  const input = JSON.parse(await fs.readFile(inputPath, "utf8"));
+  const assets = Array.isArray(input.assets) ? input.assets : [];
+  const title = input.goal || "KidMemory Picture Book";
+  const pages = [
+    {
+      kind: "cover",
+      title,
+      text: "A warm story made from selected childhood memories.",
+    },
+    ...assets.slice(0, 6).map(pageForAsset),
+    {
+      kind: "closing",
+      title: "The End",
+      text: "Every little moment is worth keeping.",
+    },
+  ];
+  const book = {
+    metadata: {
+      title,
+      childName: input.settings?.childName || "KidMemory Child",
+    },
+    pages,
+  };
+  const htmlPages = pages.map((page) => {
+    const image = page.imagePath
+      ? '<img src="file://' + escapeHtml(page.imagePath) + '" alt="" />'
+      : "";
+    return '<section class="page"><h1>' + escapeHtml(page.title) + '</h1>' + image + '<p>' + escapeHtml(page.text) + '</p></section>';
+  }).join("\n");
+  const html = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:0;background:#fffaf5;color:#3f3328}.page{min-height:900px;padding:64px;page-break-after:always}h1{font-size:42px;margin:0 0 24px}p{font-size:24px;line-height:1.5}img{max-width:100%;max-height:560px;display:block;margin:24px 0;border-radius:8px;object-fit:contain}</style></head><body>' + htmlPages + '</body></html>';
+  await fs.mkdir(path.join(workspaceDir, "output"), { recursive: true });
+  await fs.writeFile(bookJsonPath, JSON.stringify(book, null, 2) + "\n");
+  await fs.writeFile(bookHtmlPath, html);
+  console.log(JSON.stringify({ ok: true, outputs: ["output/book.json", "output/book.html"], pageCount: pages.length }));
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});
+`;
+  }
+
+  private memoirVideoSkillScript(): string {
+    return String.raw`import { execFile } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+const workspaceDir = process.cwd();
+const inputPath = path.join(workspaceDir, "input", "assets.json");
+const outputPath = path.join(workspaceDir, "output", "video.mp4");
+const concatPath = path.join(workspaceDir, "work", "memoir-video-concat.txt");
+
+function assetImagePath(asset) {
+  for (const value of [asset?.imagePath, asset?.storagePath, asset?.thumbnailPath]) {
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return undefined;
+}
+
+function escapeConcatPath(filePath) {
+  return filePath.replaceAll("'", "'\\''");
+}
+
+async function readableImages(assets) {
+  const result = [];
+  for (const asset of Array.isArray(assets) ? assets : []) {
+    const candidate = assetImagePath(asset);
+    if (!candidate) continue;
+    const exists = await fs.stat(candidate).then((stat) => stat.isFile()).catch(() => false);
+    if (exists) result.push(candidate);
+  }
+  return result;
+}
+
+function durationPerImage(settings, imageCount) {
+  const requested = settings?.targetDurationSeconds;
+  const totalDuration = typeof requested === "number" && Number.isFinite(requested)
+    ? Math.min(Math.max(requested, 2), 120)
+    : Math.max(imageCount * 2, 4);
+  return Math.max(totalDuration / imageCount, 0.5);
+}
+
+function concatFileContent(imagePaths, duration) {
+  const lines = [];
+  for (const imagePath of imagePaths) {
+    lines.push("file '" + escapeConcatPath(imagePath) + "'");
+    lines.push("duration " + duration.toFixed(3));
+  }
+  lines.push("file '" + escapeConcatPath(imagePaths[imagePaths.length - 1]) + "'");
+  return lines.join("\n") + "\n";
+}
+
+async function main() {
+  const input = JSON.parse(await fs.readFile(inputPath, "utf8"));
+  const imagePaths = await readableImages(input.assets);
+  if (imagePaths.length === 0) {
+    throw new Error("No readable image assets were provided for memoir video rendering.");
+  }
+
+  await fs.mkdir(path.join(workspaceDir, "work"), { recursive: true });
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(concatPath, concatFileContent(imagePaths, durationPerImage(input.settings, imagePaths.length)));
+
+  const tempPath = outputPath + ".tmp-" + Date.now() + ".mp4";
+  await fs.rm(tempPath, { force: true }).catch(() => undefined);
+  try {
+    await execFileAsync(process.env.KIDMEMORY_FFMPEG_PATH || "ffmpeg", [
+      "-y",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      concatPath,
+      "-vf",
+      "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=0xf9e7c8,format=yuv420p",
+      "-r",
+      "24",
+      "-c:v",
+      "libx264",
+      "-pix_fmt",
+      "yuv420p",
+      "-movflags",
+      "+faststart",
+      tempPath,
+    ]);
+    await fs.rename(tempPath, outputPath);
+  } catch (error) {
+    await fs.rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+
+  console.log(JSON.stringify({ ok: true, outputPath, imageCount: imagePaths.length }));
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});
+`;
+  }
+
+  private async ensureMemoirVideoArtifact(
+    taskId: string,
+    workspacePath: string,
+  ): Promise<{ ok: true } | { ok: false; message: string }> {
+    const mp4Path = path.join(workspacePath, "output", "video.mp4");
+    if (await this.isMp4File(mp4Path)) return { ok: true };
+
+    const message =
+      "Agent runtime did not produce a valid MP4 at output/video.mp4. The task is failed instead of replacing the artifact.";
+    await this.addEvent(taskId, "step", message);
+    return { ok: false, message };
+  }
+
+  private async isMp4File(filePath: string): Promise<boolean> {
+    try {
+      const handle = await fs.open(filePath, "r");
+      try {
+        const buffer = Buffer.alloc(12);
+        const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
+        return bytesRead >= 12 && buffer.subarray(4, 8).toString("ascii") === "ftyp";
+      } finally {
+        await handle.close();
+      }
+    } catch {
+      return false;
     }
   }
 
@@ -474,15 +865,12 @@ export class CreationService {
 
     if (dto.target === "mp4") {
       const mp4Path = path.join(workspacePath, "output", "video.mp4");
-      const mp4Exists = await fs
-        .stat(mp4Path)
-        .then((s) => s.isFile())
-        .catch(() => false);
-      if (!mp4Exists) {
+      if (!(await this.isMp4File(mp4Path))) {
         return {
           status: 409,
           data: {
-            message: "MP4 artifact is not available. Re-run generation first.",
+            message:
+              "MP4 artifact is not available or invalid. Re-run generation with a real video renderer first.",
           },
         };
       }
@@ -677,16 +1065,67 @@ export class CreationService {
   }
 
   private buildPlanPrompt(dto: CreateCreationTaskDto): string {
-    return JSON.stringify({
-      goal: dto.goal,
-      creationType: dto.creationType,
-      assetIds: dto.assetIds,
-      settings: dto.settings ?? {},
-      constraints: {
-        output: dto.creationType === "memoir_video" ? "MP4 video" : "PDF",
-        mainStages: ["compose", "plan", "generate", "review", "publish"],
-      },
-    });
+    return [
+      "Create the KidMemory plan for this creation task.",
+      "You must use skill-deck to inspect the relevant KidMemory creation skill before writing the plan.",
+      "Treat input/ as read-only. Do not write plan files to the workspace root or input/.",
+      "Write exactly one plan artifact to output/plan.json using the write_file tool.",
+      "The JSON must contain summary, skillName, steps, and requirements.",
+      "",
+      JSON.stringify(
+        {
+          goal: dto.goal,
+          creationType: dto.creationType,
+          assetIds: dto.assetIds,
+          settings: dto.settings ?? {},
+          constraints: {
+            planOutputPath: "output/plan.json",
+            finalOutput:
+              dto.creationType === "memoir_video"
+                ? "output/video.mp4"
+                : "output/book.json and output/book.html",
+            mainStages: ["compose", "plan", "generate", "review", "publish"],
+          },
+        },
+        null,
+        2,
+      ),
+    ].join("\n");
+  }
+
+  private buildGeneratePrompt(
+    task: PrismaCreationTask,
+    creationType: CreationType,
+    stage: RuntimeStage,
+  ): string {
+    return [
+      `Generate the KidMemory artifact for stage ${stage}.`,
+      "Treat input/ as read-only and read input/assets.json before rendering.",
+      "Use skill-deck to inspect the relevant KidMemory creation skill.",
+      task.skillName
+        ? `The confirmed plan selected skillName: ${task.skillName}. Use that skill unless it is unavailable.`
+        : "Choose the relevant KidMemory skill from the available skill-deck skills.",
+      "Execute the skill's documented shell command through run_skill_shell. Do not stop after reading the skill.",
+      creationType === "memoir_video"
+        ? "Required final artifact: output/video.mp4."
+        : "Required final artifacts: output/book.json and output/book.html.",
+      "Before final, verify the required output files exist and are non-empty.",
+      "",
+      JSON.stringify(
+        {
+          goal: task.goal,
+          creationType,
+          assetIds: task.assetIds,
+          selectedSkillName: task.skillName,
+          requiredOutputs:
+            creationType === "memoir_video"
+              ? ["output/video.mp4"]
+              : ["output/book.json", "output/book.html"],
+        },
+        null,
+        2,
+      ),
+    ].join("\n");
   }
 
   private skillNameFor(creationType: CreationType): string {

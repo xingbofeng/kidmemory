@@ -71,6 +71,39 @@ test("workspace tools write and read output files", async () => {
   });
 });
 
+test("workspace tools accept absolute paths inside the workspace", async () => {
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-workspace-tools-"));
+  const outputPath = path.join(workspaceDir, "output/book.html");
+  const tools = createWorkspaceAgentTools({ workspaceDir, command: { enabled: false } });
+  const writeFile = tools.find((tool) => tool.id === "write_file");
+  const readFile = tools.find((tool) => tool.id === "read_file");
+
+  assert.ok(writeFile);
+  assert.ok(readFile);
+  await writeFile.execute({ path: outputPath, content: "<h1>ok</h1>" }, { workspaceDir });
+
+  assert.deepEqual(await readFile.execute({ path: outputPath }, { workspaceDir }), {
+    path: "output/book.html",
+    offset: 0,
+    limit: 2_000,
+    totalLines: 1,
+    truncated: false,
+    content: "1\t<h1>ok</h1>",
+  });
+});
+
+test("workspace tools reject absolute paths outside the workspace", async () => {
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-workspace-tools-"));
+  const readFile = createWorkspaceAgentTools({ workspaceDir, command: { enabled: false } })
+    .find((tool) => tool.id === "read_file");
+
+  assert.ok(readFile);
+  await assert.rejects(
+    () => readFile.execute({ path: "/etc/passwd" }, { workspaceDir }),
+    /Path must stay inside workspace/,
+  );
+});
+
 test("workspace tools reject writes outside work and output", async () => {
   const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-workspace-tools-"));
   const writeFile = createWorkspaceAgentTools({ workspaceDir, command: { enabled: false } })

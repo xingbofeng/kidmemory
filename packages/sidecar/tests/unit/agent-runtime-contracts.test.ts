@@ -81,4 +81,11 @@ describe("Agent runtime adapter module contracts", () => {
     assert.equal(mod.resolveCreationRuntimeUseResponses({ provider: "custom", baseUrl: "https://api.deepseek.com" }), false);
     assert.equal(mod.resolveCreationRuntimeUseResponses({ provider: "openai", baseUrl: undefined }), true);
   });
+
+  it("uses the generic OpenAI-compatible agent loop for custom provider skill orchestration", () => {
+    const source = readFileSync(path.join(moduleDir, "agent-runtime.service.ts"), "utf8");
+    assert.match(source, /new OpenAICompatibleAgentLoopExecutor\(\)/);
+    assert.doesNotMatch(source, /new MemoirVideoSkillExecutor\(\)/);
+    assert.doesNotMatch(source, /input\.stage === "generate_video"/);
+  });
 });

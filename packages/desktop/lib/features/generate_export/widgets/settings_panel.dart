@@ -18,6 +18,7 @@ class GenerateSettingsPanel extends StatelessWidget {
     required this.selectedCount,
     required this.templateText,
     required this.creationTypeText,
+    required this.creationGoal,
     required this.sizeText,
     required this.styleText,
     required this.exportText,
@@ -38,6 +39,7 @@ class GenerateSettingsPanel extends StatelessWidget {
   final int selectedCount;
   final String templateText;
   final String creationTypeText;
+  final String creationGoal;
   final String sizeText;
   final String styleText;
   final String exportText;
@@ -54,7 +56,11 @@ class GenerateSettingsPanel extends StatelessWidget {
     if (!generated &&
         !exported &&
         creationPhase == CreationWorkflowPhase.preparing) {
-      return _CreationSidebarSummary(selectedCount: selectedCount);
+      return _CreationSidebarSummary(
+        selectedCount: selectedCount,
+        creationTypeText: creationTypeText,
+        creationGoal: creationGoal,
+      );
     }
     final exportLabel = exportDisplayName(context, exportText);
     final hasAssets = selectedCount > 0;
@@ -191,9 +197,15 @@ class GenerateSettingsPanel extends StatelessWidget {
 }
 
 class _CreationSidebarSummary extends StatelessWidget {
-  const _CreationSidebarSummary({required this.selectedCount});
+  const _CreationSidebarSummary({
+    required this.selectedCount,
+    required this.creationTypeText,
+    required this.creationGoal,
+  });
 
   final int selectedCount;
+  final String creationTypeText;
+  final String creationGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -226,14 +238,18 @@ class _CreationSidebarSummary extends StatelessWidget {
             iconAsset: bookIconAsset,
             tint: const Color(0xffe8f4ea),
             label: l10n.generateExportS279,
-            value: l10n.generateExportSummaryTypeEmpty,
+            value: creationTypeText.trim().isEmpty
+                ? l10n.generateExportSummaryTypeEmpty
+                : creationTypeText.trim(),
           ),
           const SizedBox(height: 6),
           _SummaryStateTile(
             iconAsset: starIconAsset,
             tint: const Color(0xfffff4d8),
             label: l10n.generateExportSummaryGoalLabel,
-            value: l10n.generateExportSummaryGoalEmpty,
+            value: creationGoal.trim().isEmpty
+                ? l10n.generateExportSummaryGoalEmpty
+                : creationGoal.trim(),
           ),
           const SizedBox(height: 6),
           _SummaryStateTile(

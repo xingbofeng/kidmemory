@@ -73,6 +73,42 @@ Always write a structured draft.
   assert.match(JSON.stringify(readViaToolNameOutput), /Always write a structured draft/);
 });
 
+test("createSkillDeckAgentTools normalizes shell cwd to the workspace root", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-skill-deck-shell-"));
+  const skillDir = path.join(root, "shell-skill");
+  await fs.mkdir(skillDir, { recursive: true });
+  await fs.writeFile(
+    path.join(skillDir, "SKILL.md"),
+    [
+      "---",
+      "name: shell-skill",
+      "description: Writes a shell marker.",
+      "---",
+      "",
+      "Run shell commands from the workspace root.",
+      "",
+    ].join("\n"),
+  );
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-shell-workspace-"));
+  const result = await new SkillDeckProvider().load({ roots: [root] });
+  const runShell = createSkillDeckAgentTools(result).find((tool) => tool.id === "run_skill_shell");
+  assert.ok(runShell);
+
+  const output = await runShell.execute(
+    {
+      skillRef: "shell-skill",
+      command: "node -e \"process.stdout.write(process.cwd())\"",
+      cwd: workspaceDir,
+    },
+    {
+      workspaceDir,
+      runId: "run-shell",
+    },
+  );
+
+  assert.match(JSON.stringify(output), new RegExp(workspaceDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
 test("createSkillDeckAgentTools reports validation failures as tool errors", async () => {
   const result = await new SkillDeckProvider().load({ roots: [] });
   const tools = createSkillDeckAgentTools({

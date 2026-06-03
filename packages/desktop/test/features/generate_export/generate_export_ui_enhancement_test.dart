@@ -52,6 +52,50 @@ void main() {
     expect(find.textContaining('生成完成后，可以导出 PDF、长图或创建分享链接'), findsNothing);
   });
 
+  testWidgets('prepare sidebar summarizes selected type and goal', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 980));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: Scaffold(
+          body: GenerateExportPage(
+            selectedCount: 12,
+            generated: false,
+            generating: false,
+            exported: false,
+            creationPhase: CreationWorkflowPhase.preparing,
+            statusMessage: '等待生成',
+            requestId: '',
+            logLines: const [],
+            templateOptions: const ['温暖童趣'],
+            pageSizeOptions: const ['A4 竖版  210 × 297 mm'],
+            styleOptions: const ['温暖童趣  亲切温暖，适合儿童阅读'],
+            exportTargetOptions: const ['PDF 文件  高质量 PDF（打印级别）'],
+            selectedTemplate: '温暖童趣',
+            selectedPageSize: 'A4 竖版  210 × 297 mm',
+            selectedStyle: '温暖童趣  亲切温暖，适合儿童阅读',
+            selectedExportTarget: 'PDF 文件  高质量 PDF（打印级别）',
+            selectedCreationType: 'memory_book',
+            creationGoal: '做一本成长纪念册',
+            onGenerate: () {},
+            onConfirmPlan: () {},
+            onExport: () {},
+            onExportTargetChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('本次创作摘要'), findsOneWidget);
+    expect(find.text('生成成长纪念册'), findsWidgets);
+    expect(find.text('做一本成长纪念册'), findsWidgets);
+    expect(find.text('尚未选择'), findsNothing);
+    expect(find.text('未填写目标'), findsNothing);
+  });
+
   testWidgets('prepare stage disables planning when assets are missing', (
     tester,
   ) async {
@@ -683,6 +727,10 @@ void main() {
     );
 
     await tester.tap(find.text('生成儿童绘本').first);
+    await tester.pumpAndSettle();
+
+    expect(generateCalls, 0);
+    await tester.tap(find.text('开始规划'));
     await tester.pumpAndSettle();
 
     expect(generateCalls, 1);

@@ -216,6 +216,7 @@ class GenerateExportPage extends StatelessWidget {
             selectedCount: selectedCount,
             templateText: templateText,
             creationTypeText: creationTypeLabel(context, selectedCreationType),
+            creationGoal: creationGoal,
             sizeText: sizeText,
             styleText: styleText,
             exportText: exportText,
