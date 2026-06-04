@@ -28,14 +28,69 @@ jobs:
             DEPLOY_ENV_DIR="$PROJECT_PATH/.deploy"
             DEPLOY_ENV_FILE="$DEPLOY_ENV_DIR/cloud-api.env"
 
-            if ! command -v docker >/dev/null 2>&1; then
-              echo "docker not found; install Docker Engine on the Tencent Cloud host before deployment"
-              exit 127
+            run_as_root() {
+              if [ "$(id -u)" -eq 0 ]; then
+                "$@"
+              elif command -v sudo >/dev/null 2>&1; then
+                sudo "$@"
+              else
+                echo "root privileges are required to bootstrap Docker Engine"
+                exit 127
+              fi
+            }
+
+            install_docker_engine() {
+              echo "Docker Engine or Compose plugin is missing; bootstrapping Docker packages"
+              if command -v apt-get >/dev/null 2>&1; then
+                . /etc/os-release
+                if [ "${ID:-}" != "ubuntu" ] && [ "${ID:-}" != "debian" ]; then
+                  echo "apt-get host is not Ubuntu/Debian; unsupported Docker bootstrap target: ${ID:-unknown}"
+                  exit 127
+                fi
+                docker_codename="${VERSION_CODENAME:-${UBUNTU_CODENAME:-}}"
+                if [ -z "$docker_codename" ]; then
+                  echo "cannot detect Ubuntu/Debian codename for Docker apt repository"
+                  exit 127
+                fi
+                run_as_root apt-get update
+                run_as_root apt-get install -y ca-certificates curl
+                run_as_root install -m 0755 -d /etc/apt/keyrings
+                curl -fsSL "https://download.docker.com/linux/${ID}/gpg" -o /tmp/docker.asc
+                run_as_root install -m 0644 /tmp/docker.asc /etc/apt/keyrings/docker.asc
+                echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} ${docker_codename} stable" \
+                  | run_as_root tee /etc/apt/sources.list.d/docker.list >/dev/null
+                run_as_root apt-get update
+                run_as_root apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              elif command -v dnf >/dev/null 2>&1; then
+                run_as_root dnf install -y dnf-plugins-core
+                run_as_root dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                run_as_root dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              elif command -v yum >/dev/null 2>&1; then
+                run_as_root yum install -y yum-utils
+                run_as_root yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                run_as_root yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              else
+                echo "no supported package manager found for Docker Engine bootstrap"
+                exit 127
+              fi
+
+              if command -v systemctl >/dev/null 2>&1; then
+                run_as_root systemctl enable --now docker
+              elif command -v service >/dev/null 2>&1; then
+                run_as_root service docker start
+              fi
+            }
+
+            if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
+              install_docker_engine
             fi
+
+            docker --version
             if ! docker compose version >/dev/null 2>&1; then
               echo "docker compose plugin not found; install Docker Compose v2 on the Tencent Cloud host before deployment"
               exit 127
             fi
+            docker compose version
 
             cd "$PROJECT_PATH"
             git fetch origin main && git reset --hard origin/main

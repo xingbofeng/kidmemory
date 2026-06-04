@@ -42,6 +42,7 @@ jobs:
       - name: Build desktop app
         working-directory: packages/desktop
         run: |
+          flutter config --no-enable-swift-package-manager
           flutter pub get
           flutter build macos --release
 

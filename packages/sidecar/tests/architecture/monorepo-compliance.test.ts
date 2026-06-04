@@ -77,6 +77,9 @@ test("deploy workflow uses Docker Compose instead of PM2 for cloud-api", () => {
   assert.match(deployWorkflow, /docker compose[\s\S]*run --rm cloud-api npx prisma migrate deploy/);
   assert.match(deployWorkflow, /docker compose[\s\S]*up -d --remove-orphans cloud-api/);
   assert.match(deployWorkflow, /command -v docker/);
+  assert.match(deployWorkflow, /install_docker_engine\(\)/);
+  assert.match(deployWorkflow, /docker-ce docker-ce-cli containerd\.io docker-buildx-plugin docker-compose-plugin/);
+  assert.match(deployWorkflow, /systemctl enable --now docker/);
   assert.doesNotMatch(deployWorkflow, /pm2/);
   assert.match(deployWorkflow, /source "\$PROJECT_PATH\/\.env"/);
   assert.match(deployWorkflow, /source "\$PROJECT_PATH\/packages\/cloud-api\/\.env"/);
@@ -110,6 +113,7 @@ test("desktop release builds a CI-gated macOS artifact for landing downloads", (
   const releaseWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "desktop-release.yml"), "utf8");
   assert.match(releaseWorkflow, /workflow_run:[\s\S]*workflows:\s+\["CI"\][\s\S]*branches:[\s\S]*main/);
   assert.match(releaseWorkflow, /github\.event\.workflow_run\.conclusion == 'success'/);
+  assert.match(releaseWorkflow, /flutter config --no-enable-swift-package-manager/);
   assert.match(releaseWorkflow, /KidMemory-macos-arm64-unsigned\.tar\.gz/);
   assert.match(releaseWorkflow, /softprops\/action-gh-release@v2/);
   assert.match(releaseWorkflow, /tag_name:\s+desktop-alpha-latest/);
