@@ -87,7 +87,10 @@ test("deploy workflow uses Docker Compose instead of PM2 for cloud-api", () => {
   assert.match(deployWorkflow, /open_public_port\(\)/);
   assert.match(deployWorkflow, /ufw allow "\$TENCENT_PUBLIC_PORT\/tcp"/);
   assert.match(deployWorkflow, /firewall-cmd --permanent --add-port="\$TENCENT_PUBLIC_PORT\/tcp"/);
-  assert.match(deployWorkflow, /curl[\s\S]*"http:\/\/127\.0\.0\.1:\$TENCENT_PUBLIC_PORT\/health"/);
+  assert.match(deployWorkflow, /verify_local_health\(\)/);
+  assert.match(deployWorkflow, /curl --retry 30 --retry-all-errors --retry-delay 2[\s\S]*"http:\/\/127\.0\.0\.1:\$TENCENT_PUBLIC_PORT\/health"/);
+  assert.match(deployWorkflow, /docker compose -f "\$COMPOSE_FILE" ps/);
+  assert.match(deployWorkflow, /docker compose -f "\$COMPOSE_FILE" logs --tail=200 cloud-api/);
   assert.match(deployWorkflow, /name:\s+Public smoke from GitHub runner/);
   assert.match(deployWorkflow, /public_smoke_base_url="http:\/\/\$\{TENCENT_HOST\}:\$\{TENCENT_PUBLIC_PORT\}"/);
   assert.match(deployWorkflow, /curl[\s\S]*"\$public_smoke_base_url\/health"/);
