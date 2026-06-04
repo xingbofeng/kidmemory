@@ -111,7 +111,8 @@ test("cloud-api Docker deployment assets build from the monorepo context", () =>
   assert.match(compose, /cloud-api:/);
   assert.match(compose, /dockerfile: packages\/cloud-api\/Dockerfile/);
   assert.match(compose, /env_file:[\s\S]*\.deploy\/cloud-api\.env/);
-  assert.match(compose, /ports:[\s\S]*"\$\{CLOUD_API_PORT:-3000\}:3000"/);
+  assert.match(compose, /network_mode:\s+"host"/);
+  assert.doesNotMatch(compose, /ports:/);
 });
 
 test("desktop release builds a CI-gated macOS artifact for landing downloads", () => {
