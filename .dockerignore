@@ -1,0 +1,10 @@
+.git
+.github
+**/node_modules
+**/dist
+**/build
+**/.dart_tool
+**/.next
+**/coverage
+packages/desktop/macos/Flutter/ephemeral
+pre-release-check-*.md

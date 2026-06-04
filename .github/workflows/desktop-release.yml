@@ -1,9 +1,12 @@
 name: Desktop Release
 
 on:
-  push:
-    tags:
-      - "v*-alpha"
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -13,6 +16,7 @@ jobs:
   release:
     name: build macOS artifact and prerelease
     runs-on: macos-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -60,19 +64,21 @@ jobs:
           mkdir -p dist
           APP_PATH="$(find packages/desktop/build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -n 1)"
           APP_NAME="$(basename "${APP_PATH}")"
-          tar -czf "dist/${APP_NAME}.tar.gz" -C "$(dirname "${APP_PATH}")" "${APP_NAME}"
+          tar -czf "dist/KidMemory-macos-arm64-unsigned.tar.gz" -C "$(dirname "${APP_PATH}")" "${APP_NAME}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: desktop-macos-unsigned
-          path: dist/*.tar.gz
+          path: dist/KidMemory-macos-arm64-unsigned.tar.gz
 
       - name: Create GitHub prerelease
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: desktop-alpha-latest
+          name: KidMemory Desktop Alpha
           prerelease: true
-          files: dist/*.tar.gz
+          files: dist/KidMemory-macos-arm64-unsigned.tar.gz
           body: |
             Unsigned macOS alpha artifact built by CI.
             Use for internal validation only.

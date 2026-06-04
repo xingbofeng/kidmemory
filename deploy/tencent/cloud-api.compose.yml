@@ -1,0 +1,11 @@
+services:
+  cloud-api:
+    build:
+      context: ../..
+      dockerfile: packages/cloud-api/Dockerfile
+    image: kidmemory/cloud-api:latest
+    restart: unless-stopped
+    env_file:
+      - ../../.deploy/cloud-api.env
+    ports:
+      - "${CLOUD_API_PORT:-3000}:3000"

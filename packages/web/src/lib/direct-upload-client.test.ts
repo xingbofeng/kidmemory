@@ -4,24 +4,18 @@ import {
   startDirectUpload,
   validateAddFiles,
   createDirectUploadClient,
-  type DirectUploadCreateClient,
-  type DirectUploadStorageBucket,
-  type DirectUploadSupabaseClient,
 } from './direct-upload-client'
 import type { DirectUploadConfig } from './direct-upload-types'
 
 /**
- * Web Companion Supabase Direct Upload — client 单元测试。
- *
- * 对照 spec/web-companion-supabase-direct/spec.md「拍照或选择图片直传 Supabase Storage」、
- * 「文件类型与单次张数体验约束」与「文件名清洗」三个 Scenario。
+ * Web Companion provider-neutral Direct Upload — client 单元测试。
  *
  * 关键约束（必须由测试守住）：
- *   - 真正调用的是注入的 fake Supabase client；测试不发起任何网络请求。
+ *   - 真正调用的是注入的 signed URL helper；测试不发起任何网络请求。
  *   - object key 必须经 buildDirectUploadObjectKey 生成（含 sessionId/前缀清洗后的文件名）。
  *   - 单张失败不阻塞其它文件继续上传。
- *   - 超过 recommendedClientLimit 必须以结构化错误（含 code）拒绝，并且不调用 storage.from(...).upload。
- *   - 非图片 MIME 必须以 unsupported_mime 拒绝，并且不调用 storage.from(...).upload。
+ *   - 超过 recommendedClientLimit 必须以结构化错误（含 code）拒绝，并且不请求签名上传目标。
+ *   - 非图片 MIME 必须以 unsupported_mime 拒绝，并且不请求签名上传目标。
  *   - onProgress 必须为每个文件至少触发一次。
  */
 
@@ -29,37 +23,35 @@ function makeFile(name: string, type = 'image/jpeg', size = 16): File {
   return new File([new Uint8Array(size)], name, { type })
 }
 
-interface FakeSupabase {
-  client: DirectUploadSupabaseClient
-  createClient: ReturnType<typeof vi.fn<DirectUploadCreateClient>>
-  from: ReturnType<typeof vi.fn>
-  upload: ReturnType<typeof vi.fn<DirectUploadStorageBucket['upload']>>
-}
-
-function makeFakeSupabase(
-  uploadImpl?: (
-    objectKey: string,
+function makeSignedUploadDeps(options?: { failAt?: number }) {
+  let uploadIndex = 0
+  const signUpload = vi.fn(async (input: { objectKey: string; contentType: string }) => ({
+    method: 'PUT' as const,
+    url: `https://cos.ap-guangzhou.myqcloud.com/counter-1252496948/${input.objectKey}?X-Amz-Signature=test`,
+    headers: { 'content-type': input.contentType },
+  }))
+  const uploadWithSignedUrl = vi.fn(async (
     file: File,
-    options: { contentType: string; upsert?: boolean },
-  ) => Promise<{ data: { path: string } | null; error: { message: string } | null }>,
-): FakeSupabase {
-  const defaultImpl = async (objectKey: string) => ({
-    data: { path: objectKey },
-    error: null,
+    signedUpload: { method?: string; url: string; headers?: Record<string, string> },
+    onProgress: (progress: number) => void,
+  ) => {
+    uploadIndex += 1
+    if (options?.failAt === uploadIndex) {
+      throw new Error('simulated network failure')
+    }
+    expect(signedUpload.url).toContain('X-Amz-Signature=test')
+    expect(signedUpload.headers?.['content-type']).toBe(file.type)
+    onProgress(1)
   })
-  const upload = vi.fn<DirectUploadStorageBucket['upload']>(uploadImpl ?? defaultImpl)
-  const from = vi.fn((() => ({ upload })) as DirectUploadSupabaseClient['storage']['from'])
-  const client = { storage: { from } }
-  const createClient = vi.fn<DirectUploadCreateClient>(() => client)
-  return { client, createClient, from, upload }
+  return { signUpload, uploadWithSignedUrl }
 }
 
 const baseConfig: DirectUploadConfig = {
   sessionId: 'wcs_direct_abc',
   bucket: 'web-companion-uploads',
   sessionPath: 'web-companion-uploads/wcs_direct_abc',
-  supabaseUrl: 'https://example.supabase.co',
-  anonKey: 'anon-key',
+  provider: 'cos',
+  uploadMode: 'signed-url',
   publicUrl: 'https://example.com',
   recommendedClientLimit: 200,
   expiresAtHintSeconds: 3 * 60 * 60,
@@ -74,6 +66,15 @@ describe('direct upload type boundaries', () => {
 
     expect(source).not.toContain(doubleCast)
     expect(testSource).not.toContain(doubleCast)
+  })
+
+  it('does not keep the browser Supabase SDK direct-upload path', () => {
+    const clientSource = readFileSync('src/lib/direct-upload-client.ts', 'utf8')
+    const typeSource = readFileSync('src/lib/direct-upload-types.ts', 'utf8')
+
+    expect(clientSource).not.toContain('@supabase/supabase-js')
+    expect(typeSource).not.toContain("'supabase'")
+    expect(typeSource).not.toContain("'supabase-js'")
   })
 })
 
@@ -134,65 +135,39 @@ describe('validateAddFiles', () => {
 })
 
 describe('createDirectUploadClient', () => {
-  it('uploadFile delegates to storage.from(bucket).upload(objectKey, file, { contentType })', async () => {
-    const { createClient, from, upload } = makeFakeSupabase()
-    const client = createDirectUploadClient(baseConfig, {
-      createClient,
-    })
+  it('uploadFile requests a signed PUT target and uploads the file through it', async () => {
+    const deps = makeSignedUploadDeps()
+    const client = createDirectUploadClient(baseConfig, deps)
     const file = makeFile('hello.jpg', 'image/jpeg')
+
     const result = await client.uploadFile(file, {})
+
     expect(result.ok).toBe(true)
-    expect(from).toHaveBeenCalledWith(baseConfig.bucket)
-    expect(upload).toHaveBeenCalledTimes(1)
-    const [objectKey, uploadedFile, options] = upload.mock.calls[0] as [
-      string,
-      File,
-      { contentType: string; upsert?: boolean },
-    ]
-    expect(objectKey.startsWith(`${baseConfig.sessionId}/`)).toBe(true)
-    expect(objectKey.endsWith('__hello.jpg')).toBe(true)
-    expect(uploadedFile).toBe(file)
-    expect(options.contentType).toBe('image/jpeg')
-    expect(options.upsert).toBe(false)
+    expect(deps.signUpload).toHaveBeenCalledTimes(1)
+    const [signedInput] = deps.signUpload.mock.calls[0]
+    expect(signedInput.objectKey.startsWith(`${baseConfig.sessionId}/`)).toBe(true)
+    expect(signedInput.objectKey.endsWith('__hello.jpg')).toBe(true)
+    expect(signedInput.contentType).toBe('image/jpeg')
+    expect(deps.uploadWithSignedUrl).toHaveBeenCalledTimes(1)
+    expect(deps.uploadWithSignedUrl.mock.calls[0][0]).toBe(file)
   })
 
-  it('uses provider-neutral signed URL upload when the sidecar exposes a signer', async () => {
-    const createClient = vi.fn<DirectUploadCreateClient>(() => {
-      throw new Error('Supabase SDK should not be used for signed-url direct upload')
-    })
-    const signUpload = vi.fn(async (input: { objectKey: string; contentType: string }) => ({
-      method: 'PUT' as const,
-      url: `https://cos.ap-guangzhou.myqcloud.com/counter-1252496948/${input.objectKey}?X-Amz-Signature=test`,
-      headers: { 'content-type': input.contentType },
-    }))
-    const uploadWithSignedUrl = vi.fn(async (
-      file: File,
-      signedUpload: { method?: string; url: string; headers?: Record<string, string> },
-      onProgress: (progress: number) => void,
-    ) => {
-      expect(file.name).toBe('hello.jpg')
-      expect(signedUpload.url).toContain('X-Amz-Signature=test')
-      onProgress(1)
-    })
-    const client = createDirectUploadClient(
-      { ...baseConfig, provider: 'cos', uploadMode: 'signed-url', anonKey: '', supabaseUrl: '' },
-      { createClient, signUpload, uploadWithSignedUrl },
-    )
+  it('returns a structured failure when the signer is missing', async () => {
+    const client = createDirectUploadClient(baseConfig)
     const file = makeFile('hello.jpg', 'image/jpeg')
 
     const result = await client.uploadFile(file, {})
 
-    expect(result.ok).toBe(true)
-    expect(createClient).not.toHaveBeenCalled()
-    expect(signUpload).toHaveBeenCalledTimes(1)
-    expect(signUpload.mock.calls[0][0]).toMatchObject({ contentType: 'image/jpeg' })
-    expect(uploadWithSignedUrl).toHaveBeenCalledTimes(1)
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.errorMessage).toMatch(/Missing signed upload target signer/)
+    }
   })
 })
 
 describe('startDirectUpload', () => {
-  it('uploads each file via storage.from(bucket).upload(objectKey, file, { contentType, upsert:false })', async () => {
-    const { createClient, from, upload } = makeFakeSupabase()
+  it('uploads each file via a signed PUT target', async () => {
+    const deps = makeSignedUploadDeps()
     const files = [
       makeFile('alpha.jpg', 'image/jpeg'),
       makeFile('beta.png', 'image/png'),
@@ -201,30 +176,22 @@ describe('startDirectUpload', () => {
     const results = await startDirectUpload({
       files,
       config: baseConfig,
-      deps: { createClient },
+      deps,
     })
 
-    expect(from).toHaveBeenCalledWith(baseConfig.bucket)
-    expect(upload).toHaveBeenCalledTimes(2)
+    expect(deps.signUpload).toHaveBeenCalledTimes(2)
+    expect(deps.uploadWithSignedUrl).toHaveBeenCalledTimes(2)
     expect(results).toHaveLength(2)
 
-    const firstCall = upload.mock.calls[0] as [
-      string,
-      File,
-      { contentType: string; upsert?: boolean },
-    ]
-    expect(firstCall[0]).toMatch(new RegExp(`^${baseConfig.sessionId}/.+__alpha\\.jpg$`))
-    expect(firstCall[1]).toBe(files[0])
-    expect(firstCall[2]).toMatchObject({ contentType: 'image/jpeg', upsert: false })
+    const firstSignedInput = deps.signUpload.mock.calls[0][0]
+    expect(firstSignedInput.objectKey).toMatch(new RegExp(`^${baseConfig.sessionId}/.+__alpha\\.jpg$`))
+    expect(firstSignedInput.contentType).toBe('image/jpeg')
+    expect(deps.uploadWithSignedUrl.mock.calls[0][0]).toBe(files[0])
 
-    const secondCall = upload.mock.calls[1] as [
-      string,
-      File,
-      { contentType: string; upsert?: boolean },
-    ]
-    expect(secondCall[0]).toMatch(new RegExp(`^${baseConfig.sessionId}/.+__beta\\.png$`))
-    expect(secondCall[1]).toBe(files[1])
-    expect(secondCall[2]).toMatchObject({ contentType: 'image/png', upsert: false })
+    const secondSignedInput = deps.signUpload.mock.calls[1][0]
+    expect(secondSignedInput.objectKey).toMatch(new RegExp(`^${baseConfig.sessionId}/.+__beta\\.png$`))
+    expect(secondSignedInput.contentType).toBe('image/png')
+    expect(deps.uploadWithSignedUrl.mock.calls[1][0]).toBe(files[1])
 
     for (const r of results) {
       expect(r.ok).toBe(true)
@@ -235,15 +202,7 @@ describe('startDirectUpload', () => {
   })
 
   it('continues uploading remaining files when a single file fails', async () => {
-    let callIndex = 0
-    const { createClient, upload } = makeFakeSupabase(async (objectKey) => {
-      const isFirst = callIndex === 0
-      callIndex += 1
-      if (isFirst) {
-        return { data: null, error: { message: 'simulated network failure' } }
-      }
-      return { data: { path: objectKey }, error: null }
-    })
+    const deps = makeSignedUploadDeps({ failAt: 1 })
 
     const files = [
       makeFile('first.jpg', 'image/jpeg'),
@@ -253,10 +212,10 @@ describe('startDirectUpload', () => {
     const results = await startDirectUpload({
       files,
       config: baseConfig,
-      deps: { createClient },
+      deps,
     })
 
-    expect(upload).toHaveBeenCalledTimes(2)
+    expect(deps.uploadWithSignedUrl).toHaveBeenCalledTimes(2)
     expect(results).toHaveLength(2)
     expect(results[0].ok).toBe(false)
     if (!results[0].ok) {
@@ -266,7 +225,7 @@ describe('startDirectUpload', () => {
   })
 
   it('throws limit_exceeded when files exceed recommendedClientLimit and does NOT call upload', async () => {
-    const { createClient, upload } = makeFakeSupabase()
+    const deps = makeSignedUploadDeps()
     const files = [
       makeFile('a.jpg'),
       makeFile('b.jpg'),
@@ -277,37 +236,39 @@ describe('startDirectUpload', () => {
       startDirectUpload({
         files,
         config: { ...baseConfig, recommendedClientLimit: 2 },
-        deps: { createClient },
+        deps,
       }),
     ).rejects.toMatchObject({ code: 'limit_exceeded', limit: 2 })
 
-    expect(upload).not.toHaveBeenCalled()
+    expect(deps.signUpload).not.toHaveBeenCalled()
+    expect(deps.uploadWithSignedUrl).not.toHaveBeenCalled()
   })
 
   it('throws unsupported_mime when a non-image file is passed and does NOT call upload', async () => {
-    const { createClient, upload } = makeFakeSupabase()
+    const deps = makeSignedUploadDeps()
 
     await expect(
       startDirectUpload({
         files: [makeFile('doc.pdf', 'application/pdf')],
         config: baseConfig,
-        deps: { createClient },
+        deps,
       }),
     ).rejects.toMatchObject({ code: 'unsupported_mime' })
 
-    expect(upload).not.toHaveBeenCalled()
+    expect(deps.signUpload).not.toHaveBeenCalled()
+    expect(deps.uploadWithSignedUrl).not.toHaveBeenCalled()
 
     await expect(
       startDirectUpload({
         files: [makeFile('note.txt', 'text/plain')],
         config: baseConfig,
-        deps: { createClient },
+        deps,
       }),
     ).rejects.toMatchObject({ code: 'unsupported_mime' })
   })
 
   it('invokes onProgress at least once for each file', async () => {
-    const { createClient } = makeFakeSupabase()
+    const deps = makeSignedUploadDeps()
     const files = [makeFile('one.jpg'), makeFile('two.jpg')]
     const onProgress = vi.fn()
 
@@ -315,7 +276,7 @@ describe('startDirectUpload', () => {
       files,
       config: baseConfig,
       onProgress,
-      deps: { createClient },
+      deps,
     })
 
     expect(onProgress).toHaveBeenCalled()

@@ -584,6 +584,12 @@ abstract class AppLocalizations {
   /// **'OpenAI 配置更新失败'**
   String get setupOpenAiConfigUpdateFailed;
 
+  /// Log entry when loading the default model configuration fails.
+  ///
+  /// In zh, this message translates to:
+  /// **'读取大模型默认配置失败，将打开空配置表单: {error}'**
+  String setupOpenAiDefaultConfigLoadFailed(Object error);
+
   /// No description provided for @setupPostgresNotReadyNeedConfig.
   ///
   /// In zh, this message translates to:
@@ -631,6 +637,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'S3 方式（推荐）'**
   String get setupStorageS3ModeLabel;
+
+  /// No description provided for @setupStorageCosS3ModeLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'COS / S3 兼容方式'**
+  String get setupStorageCosS3ModeLabel;
+
+  /// No description provided for @setupStorageProviderLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'存储服务商'**
+  String get setupStorageProviderLabel;
+
+  /// No description provided for @setupStorageProviderCosLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'腾讯云 COS'**
+  String get setupStorageProviderCosLabel;
 
   /// No description provided for @setupSidecarStarted.
   ///

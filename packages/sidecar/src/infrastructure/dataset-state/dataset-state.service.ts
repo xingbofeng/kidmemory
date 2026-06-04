@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { MemoryDatasetDb, type SampleDb } from "./memory-dataset-db.ts";
 import { PrismaDatasetDbService } from "./prisma-dataset-db.service.ts";
+import { allowInMemoryDatasetFallback } from "./fallback-policy.ts";
 
 export class DatasetState<T> {
   private activeDb: T;
@@ -26,6 +27,7 @@ export class DatasetState<T> {
       this.persistentDb ||= await this.connectPersistentDb();
       this.activeDb = this.persistentDb;
     } catch (error) {
+      if (!allowInMemoryDatasetFallback()) throw error;
       this.logger.warn(
         `Persistent dataset activation failed. Falling back to current dataset backend: ${error instanceof Error ? error.message : String(error)}`,
       );

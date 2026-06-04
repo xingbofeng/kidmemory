@@ -441,10 +441,17 @@ components:
     DirectUploadConfigResponseDto:
       type: object
       required:
-        - anonKey
+        - provider
+        - uploadMode
       properties:
-        anonKey:
+        provider:
           type: string
+          enum:
+            - cos
+        uploadMode:
+          type: string
+          enum:
+            - signed-url
     TrustedUploadSessionChildDto:
       type: object
       required:
@@ -466,11 +473,11 @@ components:
       type: object
       required:
         - lan
-        - supabase
+        - cos
       properties:
         lan:
           $ref: "#/components/schemas/ProviderAvailabilityDto"
-        supabase:
+        cos:
           $ref: "#/components/schemas/ProviderAvailabilityDto"
     SessionSummaryResponseDto:
       type: object
@@ -525,7 +532,7 @@ components:
           type: string
           enum:
             - lan
-            - supabase
+            - cos
         files:
           type: array
           items:

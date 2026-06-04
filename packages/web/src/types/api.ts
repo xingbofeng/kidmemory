@@ -25,7 +25,7 @@ export type UploadSession = Omit<SessionSummaryDto, 'child' | 'providers'> & {
   isValid?: boolean
   providers?: {
     lan?: { available: boolean }
-    supabase?: { available: boolean }
+    cos?: { available: boolean }
   }
 }
 

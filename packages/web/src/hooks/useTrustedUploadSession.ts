@@ -20,7 +20,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
   const [tasks, setTasks] = useState<FileTask[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedProvider, setSelectedProvider] = useState<UploadProvider>('supabase')
+  const [selectedProvider, setSelectedProvider] = useState<UploadProvider>('cos')
 
   useEffect(() => {
     let cancelled = false
@@ -32,7 +32,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
         if (cancelled) return
         setSession(data)
         const providers = sessionProvidersOf(data)
-        setSelectedProvider(providers.lan?.available ? 'lan' : 'supabase')
+        setSelectedProvider(providers.lan?.available ? 'lan' : 'cos')
         setLoading(false)
       })
       .catch((err) => {
@@ -77,7 +77,7 @@ export function useTrustedUploadSession({ sessionId, token }: UseTrustedUploadSe
 
       try {
         const providers = sessionProvidersOf(session)
-        const provider = selectedProvider === 'lan' && providers.lan?.available ? 'lan' : 'supabase'
+        const provider = selectedProvider === 'lan' && providers.lan?.available ? 'lan' : 'cos'
         const data = await createUploadItems(sessionId, {
           token,
           provider,

@@ -10,11 +10,12 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
 
   Future<void> _configureOpenAI() async {
     final agentConfigApi = AgentConfigApi(api);
+    final shellL10n = AppLocalizations.of(context)!;
     AgentConfigResponseDto? currentConfig;
     try {
       currentConfig = await agentConfigApi.getDefaultAgentConfig();
     } catch (error) {
-      _appendLog('读取大模型默认配置失败，将打开空配置表单: $error');
+      _appendLog(shellL10n.setupOpenAiDefaultConfigLoadFailed(error));
     }
     if (!mounted) return;
 
@@ -29,7 +30,6 @@ extension _DesktopShellSetupDialogOpenAi on _DesktopShellState {
     );
 
     var showApiKey = false;
-    final shellL10n = AppLocalizations.of(context)!;
 
     final shouldSave = await showDialog<bool>(
       context: context,

@@ -26,6 +26,7 @@ import { LanReceiverController } from "./lan-receiver.controller.ts";
 import { LanReceiverService } from "./lan-receiver.service.ts";
 import { PrismaLanReceiverRepository } from "./prisma-lan-receiver.repository.ts";
 import { PrismaService } from "../../infrastructure/database/prisma.service.ts";
+import { allowInMemoryDatasetFallback } from "../../infrastructure/dataset-state/fallback-policy.ts";
 
 const logger = new Logger("WebCompanionModule");
 
@@ -57,6 +58,7 @@ const logger = new Logger("WebCompanionModule");
           await prisma.$queryRaw`SELECT 1`;
           repository = new PrismaWebCompanionRepository(prisma);
         } catch (error) {
+          if (!allowInMemoryDatasetFallback()) throw error;
           logger.warn(
             `WebCompanionService falling back to in-memory repository: ${error instanceof Error ? error.message : String(error)}`,
           );

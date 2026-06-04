@@ -23,10 +23,10 @@ export function RouteSelector({ selectedProvider, providers, onSelect }: RouteSe
       description: providers.lan.available ? t('upload.lanFast') : t('upload.routeUnavailable'),
     },
     {
-      provider: 'supabase',
+      provider: 'cos',
       icon: 'cloud-upload',
       title: t('upload.publicDirect'),
-      description: providers.supabase.available ? t('upload.backupAvailable') : t('upload.routeUnavailable'),
+      description: providers.cos.available ? t('upload.backupAvailable') : t('upload.routeUnavailable'),
     },
   ]
 

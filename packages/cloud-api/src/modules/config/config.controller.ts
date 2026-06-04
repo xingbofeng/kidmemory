@@ -24,13 +24,16 @@ export class ConfigController {
   }
 
   private checkStorage() {
-    const hasSupabase = !!(
-      process.env.SUPABASE_URL &&
-      process.env.SUPABASE_ANON_KEY
+    const hasCos = !!(
+      process.env.COS_BUCKET &&
+      process.env.COS_REGION &&
+      process.env.COS_SECRET_ID &&
+      process.env.COS_SECRET_KEY
     );
     return {
-      configured: hasSupabase,
-      status: hasSupabase ? 'configured' : 'missing',
+      provider: 'cos',
+      configured: hasCos,
+      status: hasCos ? 'configured' : 'missing',
     };
   }
 }

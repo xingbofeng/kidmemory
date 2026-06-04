@@ -23,7 +23,7 @@ class DirectUploadProvidersDto {
 
     required  this.lan,
 
-    required  this.supabase,
+    required  this.cos,
   });
 
   @JsonKey(
@@ -40,13 +40,13 @@ class DirectUploadProvidersDto {
 
   @JsonKey(
 
-    name: r'supabase',
+    name: r'cos',
     required: true,
     includeIfNull: false,
   )
 
 
-  final ProviderAvailabilityDto supabase;
+  final ProviderAvailabilityDto cos;
 
 
 
@@ -55,12 +55,12 @@ class DirectUploadProvidersDto {
     @override
     bool operator ==(Object other) => identical(this, other) || other is DirectUploadProvidersDto &&
       other.lan == lan &&
-      other.supabase == supabase;
+      other.cos == cos;
 
     @override
     int get hashCode =>
         lan.hashCode +
-        supabase.hashCode;
+        cos.hashCode;
 
   factory DirectUploadProvidersDto.fromJson(Map<String, dynamic> json) => _$DirectUploadProvidersDtoFromJson(json);
 

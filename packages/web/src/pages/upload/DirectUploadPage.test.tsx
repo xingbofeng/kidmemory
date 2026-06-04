@@ -13,12 +13,12 @@ vi.mock('../../api/uploadApi', () => ({
  * Web Companion Direct Upload Page — 组件契约测试。
  *
  * 对照 spec：
- *   - 「扫码进入上传页并展示会话信息」: 必须显示 child、`{bucket}/{sessionId}` 路径与「Supabase 直传验证版」横幅。
+ *   - 「扫码进入上传页并展示会话信息」: 必须显示 child、`{bucket}/{sessionId}` 路径与「腾讯云 COS 直传验证版」横幅。
  *   - 「文件类型与单次张数体验约束」: 必须展示「体验约束」提示。
- *   - 缺失必需 query 参数（sessionId/childId/bucket/supabaseUrl/token）时显示错误横幅；不渲染上传 UI。
+ *   - 缺失必需 query 参数（sessionId/childId/bucket/token）时显示错误横幅；不渲染上传 UI。
  *   - 默认计数 `0 / 200`，初始无进度行。
  *
- * 真实 Supabase 调用通过 `clientFactory` prop 注入 fake，避免任何网络。
+ * 真实对象存储调用通过 `clientFactory` prop 注入 fake，避免任何网络。
  */
 
 function makeSearchParams(overrides: Partial<Record<string, string>> = {}): URLSearchParams {
@@ -26,7 +26,8 @@ function makeSearchParams(overrides: Partial<Record<string, string>> = {}): URLS
     sessionId: 'wcs_direct_abc',
     childId: 'child-123',
     bucket: 'web-companion-uploads',
-    supabaseUrl: 'https://example.supabase.co',
+    provider: 'cos',
+    uploadMode: 'signed-url',
     token: 'session-token',
   }
   const merged: Record<string, string> = { ...base }
@@ -54,10 +55,8 @@ describe('DirectUploadPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(getDirectUploadConfig).mockResolvedValue({
-      anonKey: 'anon-public-key',
-      bucket: 'web-companion-uploads',
-      supabaseUrl: 'https://example.supabase.co',
-      recommendedClientLimit: 200,
+      provider: 'cos',
+      uploadMode: 'signed-url',
     })
     vi.mocked(pullbackDirectUpload).mockResolvedValue({ sessionId: 'wcs_direct_abc', results: [] })
   })
@@ -76,7 +75,7 @@ describe('DirectUploadPage', () => {
     // {bucket}/{sessionId} session path
     expect(screen.getByText(/web-companion-uploads\/wcs_direct_abc/)).toBeInTheDocument()
     // risk banner
-    expect(screen.getByText(/Supabase 直传验证版/)).toBeInTheDocument()
+    expect(screen.getByText(/腾讯云 COS 直传验证版/)).toBeInTheDocument()
     expect(screen.getByText(/自动通知电脑端入库/)).toBeInTheDocument()
     expect(getDirectUploadConfig).toHaveBeenCalledWith('wcs_direct_abc', 'session-token')
   })

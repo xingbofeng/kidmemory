@@ -1,5 +1,5 @@
 /**
- * Web Companion Supabase Direct Upload — 共享类型。
+ * Web Companion provider-neutral Direct Upload — 共享类型。
  *
  * 这些类型描述：
  *   - 从 sidecar `POST /web-companion/direct-upload/sessions` 获得的非敏感配置子集；
@@ -10,20 +10,16 @@
  */
 
 export interface DirectUploadConfig {
-  /** 对象存储 provider。旧链接缺省为 supabase。 */
-  provider?: 'supabase' | 'cos' | 's3'
+  /** 对象存储 provider。 */
+  provider?: 'cos' | 's3'
   /** 上传模式。signed-url 是跨 provider 的安全默认。 */
-  uploadMode?: 'supabase-js' | 'signed-url'
+  uploadMode?: 'signed-url'
   /** sidecar 分配的会话 ID，做 storage path 隔离用，非可信会话。 */
   sessionId: string
-  /** Supabase Storage bucket 名称。 */
+  /** 对象存储 bucket 名称。 */
   bucket: string
   /** `{bucket}/{sessionId}` 形式的展示用 path（仅展示，不参与 upload 调用）。 */
   sessionPath: string
-  /** 公开的 Supabase 项目 URL（非敏感）。 */
-  supabaseUrl: string
-  /** 公开 anon key（受 bucket policy 约束）。 */
-  anonKey: string
   /** Web Companion 静态部署对外公开 URL（用于二维码或回链）。 */
   publicUrl: string
   /** sidecar 生成的会话 token；config、pullback 和状态查询都必须携带。 */
@@ -49,7 +45,7 @@ export interface DirectUploadFileTask {
   status: DirectUploadFileStatus
   errorMessage?: string
   objectKey?: string
-  /** 0..1 进度。Supabase JS v2 暂不暴露字节级进度，这里以 0/1 切换。 */
+  /** 0..1 进度。 */
   progress: number
 }
 

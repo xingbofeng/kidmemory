@@ -1,16 +1,13 @@
 /**
- * Web Companion Supabase Direct Upload browser client.
+ * Web Companion provider-neutral direct upload browser client.
  *
  * 安全约束（必须由本模块守住）：
- *   - 永远只接收非敏感配置（bucket、sessionPath、supabaseUrl、anonKey、recommendedClientLimit）。
+ *   - 永远只接收非敏感配置（bucket、sessionPath、recommendedClientLimit）。
  *   - object key 必须经 buildDirectUploadObjectKey 生成，文件名必须经 cleanDirectUploadFilename 清洗。
+ *   - 浏览器只拿后端签出的 PUT URL，不接触 COS/S3 secret。
  *   - 单张失败不阻塞队列其他文件（per-file try/catch，结果以 discriminated union 返回）。
  *   - 超过 recommendedClientLimit 时拒绝继续添加（体验约束，可被绕过，但 UI 必须提示）。
  *   - 非图片 MIME 拒绝继续添加。
- *
- * 实现说明：
- *   - 真实生产路径下使用 `@supabase/supabase-js` 的 createClient(...).storage.from(bucket).upload(...)。
- *   - 测试通过 deps.createClient 注入 fake；默认实现使用 dynamic import，避免在 SSR/未配置环境下提前抓取。
  */
 
 import { buildDirectUploadObjectKey } from './direct-upload-naming'
@@ -31,34 +28,7 @@ const ALLOWED_IMAGE_MIMES = new Set<string>([
   'image/gif',
 ])
 
-/**
- * 注入式 createClient 类型，匹配 `@supabase/supabase-js` 的 minimal shape。
- * 测试可以传入 vi.fn() 实现，避免引入真正的 SDK。
- */
-export type DirectUploadCreateClient = (
-  url: string,
-  key: string,
-) => DirectUploadSupabaseClient | Promise<DirectUploadSupabaseClient>
-
-export interface DirectUploadSupabaseClient {
-  storage: {
-    from: (bucket: string) => DirectUploadStorageBucket
-  }
-}
-
-export interface DirectUploadStorageBucket {
-  upload: (
-    objectKey: string,
-    file: File,
-    options: { contentType: string; upsert?: boolean },
-  ) => Promise<{
-    data: { path: string } | null
-    error: { message: string } | null
-  }>
-}
-
 export interface DirectUploadDeps {
-  createClient?: DirectUploadCreateClient
   signUpload?: (input: {
     objectKey: string
     contentType: string
@@ -104,35 +74,6 @@ export function validateAddFiles({
   return { ok: true, files: newFiles }
 }
 
-/**
- * 默认 createClient 实现：dynamic import @supabase/supabase-js。
- * 使用 dynamic import 是为了让测试可以完全跳过 SDK 加载（通过 deps.createClient 覆盖）。
- */
-async function defaultCreateClient(
-  url: string,
-  key: string,
-): Promise<DirectUploadSupabaseClient> {
-  const mod = await import('@supabase/supabase-js')
-  const client = mod.createClient(url, key)
-
-  return {
-    storage: {
-      from(bucket) {
-        const storageBucket = client.storage.from(bucket)
-        return {
-          async upload(objectKey, file, options) {
-            const { data, error } = await storageBucket.upload(objectKey, file, options)
-            return {
-              data: data ? { path: data.path } : null,
-              error: error ? { message: error.message } : null,
-            }
-          },
-        }
-      },
-    },
-  }
-}
-
 export interface DirectUploadClient {
   uploadFile: (
     file: File,
@@ -143,34 +84,10 @@ export interface DirectUploadClient {
   >
 }
 
-/**
- * 创建一个绑定到具体 DirectUploadConfig 的 client；内部维护 supabase client 引用。
- * 当 deps.createClient 为同步函数（测试场景）时，立即解析；否则首次调用 uploadFile 时 lazy 解析。
- */
 export function createDirectUploadClient(
   config: DirectUploadConfig,
   deps?: DirectUploadDeps,
 ): DirectUploadClient {
-  let supabaseClient: DirectUploadSupabaseClient | null = null
-  let pending: Promise<DirectUploadSupabaseClient> | null = null
-
-  const ensureClient = (): Promise<DirectUploadSupabaseClient> => {
-    if (supabaseClient) return Promise.resolve(supabaseClient)
-    if (pending) return pending
-
-    pending = (async () => {
-      if (deps?.createClient) {
-        const resolved = await deps.createClient(config.supabaseUrl, config.anonKey)
-        supabaseClient = resolved
-        return resolved
-      }
-      const resolved = await defaultCreateClient(config.supabaseUrl, config.anonKey)
-      supabaseClient = resolved
-      return resolved
-    })()
-    return pending
-  }
-
   return {
     async uploadFile(file, callbacks) {
       const objectKey = buildDirectUploadObjectKey({
@@ -179,40 +96,22 @@ export function createDirectUploadClient(
       })
       try {
         callbacks.onProgress?.(0)
-        if (config.uploadMode === 'signed-url' || deps?.signUpload) {
-          if (!deps?.signUpload) {
-            throw new Error('Missing signed upload target signer')
-          }
-          const signedUpload = await deps.signUpload({
-            objectKey,
-            contentType: file.type || 'application/octet-stream',
-            sizeBytes: file.size,
-          })
-          await (deps.uploadWithSignedUrl ?? uploadFileWithSignedUrl)(
-            file,
-            signedUpload,
-            (progress) => {
-              callbacks.onProgress?.(progress > 1 ? progress / 100 : progress)
-            },
-          )
-          callbacks.onProgress?.(1)
-          return { ok: true, objectKey }
+        if (!deps?.signUpload) {
+          throw new Error('Missing signed upload target signer')
         }
-
-        const client = await ensureClient()
-        const { data, error } = await client.storage
-          .from(config.bucket)
-          .upload(objectKey, file, {
-            contentType: file.type || 'application/octet-stream',
-            upsert: false,
-          })
+        const signedUpload = await deps.signUpload({
+          objectKey,
+          contentType: file.type || 'application/octet-stream',
+          sizeBytes: file.size,
+        })
+        await (deps.uploadWithSignedUrl ?? uploadFileWithSignedUrl)(
+          file,
+          signedUpload,
+          (progress) => {
+            callbacks.onProgress?.(progress > 1 ? progress / 100 : progress)
+          },
+        )
         callbacks.onProgress?.(1)
-        if (error || !data) {
-          return {
-            ok: false,
-            errorMessage: error?.message ?? i18n.t('directUpload.uploadUnknownError'),
-          }
-        }
         return { ok: true, objectKey }
       } catch (err) {
         return {
@@ -253,7 +152,7 @@ export class DirectUploadValidationError extends Error {
 }
 
 /**
- * 串行上传一组文件到 Supabase Storage。
+ * 串行上传一组文件到后端签出的对象存储 PUT URL。
  *
  * - 调用前先用 validateAddFiles 检查；不通过则抛 {@link DirectUploadValidationError}。
  * - 每个文件独立 try/catch；任意单张失败不影响其它。

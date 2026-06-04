@@ -13,6 +13,12 @@ export default function HeroSection() {
         <div className="cta">
           <a className="btn primary" href="#vision">{t('landing.cta1')}</a>
           <a className="btn secondary" href="/app">{t('landing.cta2')}</a>
+          <a
+            className="btn download"
+            href="https://github.com/xingbofeng/kidmemory/releases/download/desktop-alpha-latest/KidMemory-macos-arm64-unsigned.tar.gz"
+          >
+            {t('landing.downloadMac')}
+          </a>
         </div>
         <div className="tags">
           <span className="tag">{t('landing.tag1')}</span>

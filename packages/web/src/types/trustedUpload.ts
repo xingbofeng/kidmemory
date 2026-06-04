@@ -13,7 +13,7 @@ export type RecentUpload = JsonResponse<'WebCompanionController_getRecentUploads
 export type SessionProviderAvailability = { available?: boolean }
 export type SessionProviders = {
   lan?: SessionProviderAvailability
-  supabase?: SessionProviderAvailability
+  cos?: SessionProviderAvailability
 }
 export type SessionChild = { id?: string; displayName?: string }
 
@@ -25,7 +25,7 @@ export function sessionChildOf(session: SessionSummary): SessionChild {
   return (session.child ?? {}) as SessionChild
 }
 
-export type UploadProvider = 'lan' | 'supabase'
+export type UploadProvider = 'lan' | 'cos'
 
 export type UploadItem = JsonResponse<'WebCompanionController_createUploadItems', 201>['items'][number]
 

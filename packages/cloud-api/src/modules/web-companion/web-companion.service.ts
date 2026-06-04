@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { createRequire } from 'node:module';
 
 import { PrismaService } from '../../infrastructure/database/prisma.service.ts';
 import {
@@ -7,6 +8,7 @@ import {
   CreateUploadItemsRequestDto,
   CreateUploadItemsResponseDto,
   DirectUploadConfigResponseDto,
+  SignedUploadTargetDto,
   SessionSummaryResponseDto,
   ShareTokenValidationResponseDto,
   SharedAssetDto,
@@ -26,7 +28,8 @@ export class WebCompanionService {
   async getDirectUploadConfig(sessionId: string): Promise<DirectUploadConfigResponseDto> {
     await this.requireSession(sessionId);
     return {
-      anonKey: process.env.SUPABASE_ANON_KEY || 'dev-anon-key',
+      provider: 'cos',
+      uploadMode: 'signed-url',
     };
   }
 
@@ -49,7 +52,7 @@ export class WebCompanionService {
       usedItems,
       providers: {
         lan: { available: false },
-        supabase: { available: true },
+        cos: { available: isCosConfigured() },
       },
     };
   }
@@ -88,12 +91,18 @@ export class WebCompanionService {
           },
         });
 
+        const signedUpload = createCosSignedUploadTarget({
+          objectKey: created.objectKey,
+          contentType: file.contentType,
+        });
+
         return {
           clientFileId: file.clientFileId,
           uploadItemId: created.id,
           assetId: created.id,
           objectKey: created.objectKey,
           status: created.status,
+          signedUpload,
         };
       }),
     );
@@ -253,4 +262,70 @@ function sanitizeFileName(filename: string): string {
 
 function invalidShareToken(error: string): ShareTokenValidationResponseDto {
   return { isValid: false, error };
+}
+
+function isCosConfigured() {
+  return Boolean(
+    process.env.COS_BUCKET?.trim() &&
+    process.env.COS_REGION?.trim() &&
+    process.env.COS_SECRET_ID?.trim() &&
+    process.env.COS_SECRET_KEY?.trim(),
+  );
+}
+
+type CosClient = {
+  getObjectUrl?: (
+    params: Record<string, unknown>,
+    callback?: (error: Error | null, data?: { Url?: string }) => void,
+  ) => string | undefined;
+};
+
+function createCosSignedUploadTarget(input: {
+  objectKey: string;
+  contentType: string;
+}): SignedUploadTargetDto {
+  if (!isCosConfigured()) {
+    throw new BadRequestException('Tencent COS direct upload is not configured');
+  }
+
+  const require = createRequire(import.meta.url);
+  const COS = require('cos-nodejs-sdk-v5') as new (options: {
+    SecretId: string;
+    SecretKey: string;
+  }) => CosClient;
+  const bucket = process.env.COS_BUCKET?.trim() ?? '';
+  const region = process.env.COS_REGION?.trim() ?? 'ap-guangzhou';
+  const ttlSeconds = Number(process.env.COS_SIGNED_URL_TTL_SECONDS ?? '900') || 900;
+  const cos = new COS({
+    SecretId: process.env.COS_SECRET_ID?.trim() ?? '',
+    SecretKey: process.env.COS_SECRET_KEY?.trim() ?? '',
+  });
+  if (!cos.getObjectUrl) {
+    throw new BadRequestException('Tencent COS SDK cannot create signed upload URLs');
+  }
+
+  const url = cos.getObjectUrl({
+    Bucket: bucket,
+    Region: region,
+    Key: normalizeObjectKey(input.objectKey),
+    Sign: true,
+    Method: 'PUT',
+    Expires: ttlSeconds,
+  });
+  if (!url) {
+    throw new BadRequestException('Tencent COS SDK returned an empty signed upload URL');
+  }
+
+  return {
+    method: 'PUT',
+    url,
+    headers: {
+      'content-type': input.contentType || 'application/octet-stream',
+    },
+    expiresAt: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
+  };
+}
+
+function normalizeObjectKey(objectKey: string): string {
+  return objectKey.split('/').filter(Boolean).join('/');
 }

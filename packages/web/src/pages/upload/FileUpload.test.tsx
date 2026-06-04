@@ -207,7 +207,7 @@ describe('FileUpload', () => {
   })
 
   it('disables upload when no provider is available', async () => {
-    render(<FileUpload session={{ ...mockSession, providers: { lan: { available: false }, supabase: { available: false } } }} />)
+    render(<FileUpload session={{ ...mockSession, providers: { lan: { available: false }, cos: { available: false } } }} />)
 
     const fileInput = screen.getByLabelText(/选择图片/)
     const file = new File(['image'], 'blocked.jpg', { type: 'image/jpeg' })

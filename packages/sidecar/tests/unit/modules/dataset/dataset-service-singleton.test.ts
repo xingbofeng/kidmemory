@@ -105,6 +105,33 @@ test("DatasetService composes a fresh storage provider for each new instance", a
   assert.equal(calls.sync, 2, `each new DatasetService instance should rebuild the sync service, got ${calls.sync}`);
 });
 
+test("DatasetService rejects persistent activation failures in production instead of serving in-memory data", async () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
+  const memoryDb = new MemoryDatasetDb();
+  await memoryDb.upsertChild({ id: "child-memory", name: "Memory Only" });
+  const datasetState = new DatasetState(
+    memoryDb,
+    async () => {
+      throw new Error("persistent database unavailable");
+    },
+  ) as unknown as DatasetStateService;
+  const service = new DatasetService(datasetState, new AppConfigService(loadConfigFromEnv({})));
+
+  try {
+    await assert.rejects(
+      service.listChildren(),
+      /persistent database unavailable/,
+    );
+  } finally {
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  }
+});
+
 test("DatasetService uses configured OpenAI-compatible endpoint to infer imported asset metadata", async () => {
   const db = new MemoryDatasetDb();
   const config = new AppConfigService(loadConfigFromEnv({}));

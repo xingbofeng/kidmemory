@@ -207,6 +207,15 @@
   "setupOpenAiConfigSaved": "OpenAI 配置已保存",
   "setupOpenAiConfigUpdated": "OpenAI 配置已更新",
   "setupOpenAiConfigUpdateFailed": "OpenAI 配置更新失败",
+  "setupOpenAiDefaultConfigLoadFailed": "读取大模型默认配置失败，将打开空配置表单: {error}",
+  "@setupOpenAiDefaultConfigLoadFailed": {
+    "description": "Log entry when loading the default model configuration fails.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
   "setupPostgresNotReadyNeedConfig": "PostgreSQL 仍未就绪，安装 pgvector 前请先完成数据库配置",
   "setupPostgresHandledButSidecarNotStarted": "PostgreSQL 已处理，但 Sidecar 未能启动",
   "setupPostgresConfigured": "PostgreSQL 已配置完成",
@@ -215,6 +224,9 @@
   "setupPostgresNotReadyStartLocalService": "PostgreSQL 还未就绪，请启动本机服务后重试",
   "setupStorageRestModeLabel": "REST 方式（可选）",
   "setupStorageS3ModeLabel": "S3 方式（推荐）",
+  "setupStorageCosS3ModeLabel": "COS / S3 兼容方式",
+  "setupStorageProviderLabel": "存储服务商",
+  "setupStorageProviderCosLabel": "腾讯云 COS",
   "setupSidecarStarted": "本地服务已启动",
   "setupSidecarStartedSchemaNotReady": "本地服务已启动，资料库初始化未完成",
   "setupSidecarConnected": "本地服务已连接",

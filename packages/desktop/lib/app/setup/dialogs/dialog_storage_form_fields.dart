@@ -184,11 +184,18 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       ),
       _storageDialogGap(14),
       DropdownButtonFormField<String>(
-        value: provider,
-        decoration: _storageDialogDecoration('存储服务商'),
-        items: const [
+        initialValue: provider,
+        decoration: _storageDialogDecoration(
+          AppLocalizations.of(context)!.setupStorageProviderLabel,
+        ),
+        items: [
           DropdownMenuItem(value: 'supabase', child: Text('Supabase')),
-          DropdownMenuItem(value: 'cos', child: Text('腾讯云 COS')),
+          DropdownMenuItem(
+            value: 'cos',
+            child: Text(
+              AppLocalizations.of(context)!.setupStorageProviderCosLabel,
+            ),
+          ),
         ],
         onChanged: (value) {
           if (value == null) return;
@@ -198,7 +205,7 @@ extension _DesktopShellSetupDialogStorageFormFields on _DesktopShellState {
       _storageDialogGap(14),
       _storageDialogSectionTitle(
         provider == 'cos'
-            ? 'COS / S3 兼容方式'
+            ? AppLocalizations.of(context)!.setupStorageCosS3ModeLabel
             : AppLocalizations.of(context)!.setupStorageS3ModeLabel,
         helpTooltip: AppLocalizations.of(context)!.setupOpenSupabaseS3Docs,
         helpUrl: _supabaseStorageS3AuthDocsUrl,
