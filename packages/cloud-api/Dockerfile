@@ -2,7 +2,13 @@ FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY tsconfig.nest.json ./
+COPY tsconfig.node.json ./
+COPY tsconfig.base.json ./
 COPY packages/protocol/package*.json packages/protocol/
 COPY packages/cloud-api/package*.json packages/cloud-api/
 
@@ -22,6 +28,10 @@ ENV CLOUD_API_HOST=0.0.0.0
 ENV CLOUD_API_PORT=3000
 
 WORKDIR /app/packages/cloud-api
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/packages/protocol /app/packages/protocol
 COPY --from=builder /app/packages/cloud-api/package*.json ./

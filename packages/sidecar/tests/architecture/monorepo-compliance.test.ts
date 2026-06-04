@@ -97,6 +97,9 @@ test("cloud-api Docker deployment assets build from the monorepo context", () =>
   const dockerfile = fs.readFileSync(path.join(repoRoot, "packages", "cloud-api", "Dockerfile"), "utf8");
   assert.match(dockerfile, /FROM node:22/);
   assert.match(dockerfile, /COPY tsconfig\.nest\.json \.\//);
+  assert.match(dockerfile, /COPY tsconfig\.node\.json \.\//);
+  assert.match(dockerfile, /COPY tsconfig\.base\.json \.\//);
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends[\s\S]*openssl/);
   assert.match(dockerfile, /packages\/protocol/);
   assert.match(dockerfile, /packages\/cloud-api/);
   assert.match(dockerfile, /npm run build:prod/);
@@ -118,6 +121,7 @@ test("desktop release builds a CI-gated macOS artifact for landing downloads", (
   assert.match(releaseWorkflow, /brew install postgresql@16 pgvector/);
   assert.match(releaseWorkflow, /third_party\/postgres\/macos/);
   assert.match(releaseWorkflow, /vector\.control/);
+  assert.match(releaseWorkflow, /find -L "\$PGVECTOR_PREFIX" "\$PG_PREFIX"/);
   assert.match(releaseWorkflow, /flutter config --no-enable-swift-package-manager/);
   assert.match(releaseWorkflow, /KidMemory-macos-arm64-unsigned\.tar\.gz/);
   assert.match(releaseWorkflow, /softprops\/action-gh-release@v2/);
