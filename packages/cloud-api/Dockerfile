@@ -35,6 +35,7 @@ RUN apt-get update \
 
 COPY --from=builder /app/packages/protocol /app/packages/protocol
 COPY --from=builder /app/packages/cloud-api/package*.json ./
+COPY --from=builder /app/packages/cloud-api/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/packages/cloud-api/prisma ./prisma
 COPY --from=builder /app/packages/cloud-api/dist ./dist
 
