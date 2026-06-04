@@ -133,8 +133,18 @@ jobs:
             docker compose -f "$COMPOSE_FILE" run --rm cloud-api npx prisma migrate deploy
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans cloud-api
 
-            # Optional smoke test
-            if [ -n "${{ secrets.TENCENT_SMOKE_BASE_URL }}" ]; then
-              curl -fsS "${{ secrets.TENCENT_SMOKE_BASE_URL }}/health" >/dev/null
-              curl -fsS "${{ secrets.TENCENT_SMOKE_BASE_URL }}/docs/openapi.json" >/dev/null
-            fi
+      - name: Public smoke from GitHub runner
+        env:
+          TENCENT_SMOKE_BASE_URL: ${{ secrets.TENCENT_SMOKE_BASE_URL }}
+          TENCENT_HOST: ${{ secrets.TENCENT_HOST }}
+          TENCENT_PUBLIC_PORT: ${{ secrets.TENCENT_PUBLIC_PORT || 3000 }}
+        run: |
+          set -euo pipefail
+          if [ -n "$TENCENT_SMOKE_BASE_URL" ]; then
+            public_smoke_base_url="${TENCENT_SMOKE_BASE_URL%/}"
+          else
+            public_smoke_base_url="http://${TENCENT_HOST}:${TENCENT_PUBLIC_PORT}"
+          fi
+
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsS "$public_smoke_base_url/health" >/dev/null
+          curl --retry 5 --retry-all-errors --retry-delay 2 -fsS "$public_smoke_base_url/docs/openapi.json" >/dev/null

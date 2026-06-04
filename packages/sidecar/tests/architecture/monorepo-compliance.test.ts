@@ -83,6 +83,10 @@ test("deploy workflow uses Docker Compose instead of PM2 for cloud-api", () => {
   assert.doesNotMatch(deployWorkflow, /pm2/);
   assert.match(deployWorkflow, /source "\$PROJECT_PATH\/\.env"/);
   assert.match(deployWorkflow, /source "\$PROJECT_PATH\/packages\/cloud-api\/\.env"/);
+  assert.match(deployWorkflow, /name:\s+Public smoke from GitHub runner/);
+  assert.match(deployWorkflow, /public_smoke_base_url="http:\/\/\$\{TENCENT_HOST\}:\$\{TENCENT_PUBLIC_PORT\}"/);
+  assert.match(deployWorkflow, /curl[\s\S]*"\$public_smoke_base_url\/health"/);
+  assert.match(deployWorkflow, /curl[\s\S]*"\$public_smoke_base_url\/docs\/openapi\.json"/);
   assert.doesNotMatch(deployWorkflow, /packages\/web|VERCEL|landing/i);
 });
 
