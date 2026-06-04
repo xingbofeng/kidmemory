@@ -39,7 +39,9 @@ COPY --from=builder /app/packages/cloud-api/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/packages/cloud-api/prisma ./prisma
 COPY --from=builder /app/packages/cloud-api/dist ./dist
 
-RUN npm ci --include=dev && npm cache clean --force
+RUN npm ci --include=dev \
+  && npm run prisma:generate \
+  && npm cache clean --force
 
 EXPOSE 3000
 

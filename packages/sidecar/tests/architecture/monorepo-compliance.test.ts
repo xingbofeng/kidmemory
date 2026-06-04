@@ -116,6 +116,7 @@ test("cloud-api Docker deployment assets build from the monorepo context", () =>
   assert.match(dockerfile, /packages\/cloud-api/);
   assert.match(dockerfile, /npm run build:prod/);
   assert.match(dockerfile, /npm ci --include=dev/);
+  assert.match(dockerfile, /npm ci --include=dev[\s\S]*npm run prisma:generate[\s\S]*npm cache clean --force/);
   assert.match(dockerfile, /COPY --from=builder \/app\/packages\/cloud-api\/prisma\.config\.ts \.\/prisma\.config\.ts/);
   assert.match(dockerfile, /CMD \["node", "dist\/main\.js"\]/);
 
