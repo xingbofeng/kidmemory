@@ -96,6 +96,7 @@ test("landing page deploy stays on Vercel and waits for CI success", () => {
 test("cloud-api Docker deployment assets build from the monorepo context", () => {
   const dockerfile = fs.readFileSync(path.join(repoRoot, "packages", "cloud-api", "Dockerfile"), "utf8");
   assert.match(dockerfile, /FROM node:22/);
+  assert.match(dockerfile, /COPY tsconfig\.nest\.json \.\//);
   assert.match(dockerfile, /packages\/protocol/);
   assert.match(dockerfile, /packages\/cloud-api/);
   assert.match(dockerfile, /npm run build:prod/);

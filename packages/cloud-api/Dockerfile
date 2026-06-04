@@ -2,6 +2,7 @@ FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
+COPY tsconfig.nest.json ./
 COPY packages/protocol/package*.json packages/protocol/
 COPY packages/cloud-api/package*.json packages/cloud-api/
 
