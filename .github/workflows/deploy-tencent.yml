@@ -27,6 +27,7 @@ jobs:
             COMPOSE_FILE="$PROJECT_PATH/deploy/tencent/cloud-api.compose.yml"
             DEPLOY_ENV_DIR="$PROJECT_PATH/.deploy"
             DEPLOY_ENV_FILE="$DEPLOY_ENV_DIR/cloud-api.env"
+            TENCENT_PUBLIC_PORT="${{ secrets.TENCENT_PUBLIC_PORT || 3000 }}"
 
             run_as_root() {
               if [ "$(id -u)" -eq 0 ]; then
@@ -81,6 +82,17 @@ jobs:
               fi
             }
 
+            open_public_port() {
+              if command -v ufw >/dev/null 2>&1 && ufw status | grep -qi active; then
+                run_as_root ufw allow "$TENCENT_PUBLIC_PORT/tcp"
+              fi
+
+              if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then
+                run_as_root firewall-cmd --permanent --add-port="$TENCENT_PUBLIC_PORT/tcp"
+                run_as_root firewall-cmd --reload
+              fi
+            }
+
             if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
               install_docker_engine
             fi
@@ -111,7 +123,7 @@ jobs:
             {
               printf 'NODE_ENV=production\n'
               printf 'CLOUD_API_HOST=0.0.0.0\n'
-              printf 'CLOUD_API_PORT=3000\n'
+              printf 'CLOUD_API_PORT=%s\n' "$TENCENT_PUBLIC_PORT"
               for key in \
                 DATABASE_URL \
                 ALLOWED_ORIGINS \
@@ -132,6 +144,8 @@ jobs:
             docker compose -f "$COMPOSE_FILE" build cloud-api
             docker compose -f "$COMPOSE_FILE" run --rm cloud-api npx prisma migrate deploy
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans cloud-api
+            open_public_port
+            curl --retry 10 --retry-all-errors --retry-delay 2 -fsS "http://127.0.0.1:$TENCENT_PUBLIC_PORT/health" >/dev/null
 
       - name: Public smoke from GitHub runner
         env:
