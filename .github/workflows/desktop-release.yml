@@ -32,6 +32,56 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare bundled PostgreSQL runtime
+        run: |
+          set -euo pipefail
+          if ! brew list --versions postgresql@16 >/dev/null 2>&1 || ! brew list --versions pgvector >/dev/null 2>&1; then
+            brew install postgresql@16 pgvector
+          fi
+
+          PG_PREFIX="$(brew --prefix postgresql@16)"
+          PGVECTOR_PREFIX="$(brew --prefix pgvector)"
+          RUNTIME_DIR="third_party/postgres/macos"
+
+          rm -rf "$RUNTIME_DIR"
+          mkdir -p "$RUNTIME_DIR/bin" "$RUNTIME_DIR/lib" "$RUNTIME_DIR/share"
+          rsync -a "$PG_PREFIX/bin/" "$RUNTIME_DIR/bin/"
+          rsync -a "$PG_PREFIX/lib/" "$RUNTIME_DIR/lib/"
+          rsync -a "$PG_PREFIX/share/" "$RUNTIME_DIR/share/"
+
+          mkdir -p "$RUNTIME_DIR/share/extension" "$RUNTIME_DIR/share/postgresql@16/extension"
+          for extension_dir in \
+            "$PGVECTOR_PREFIX/share/postgresql@16/extension" \
+            "$PGVECTOR_PREFIX/share/postgresql/extension" \
+            "$PG_PREFIX/share/postgresql@16/extension" \
+            "$PG_PREFIX/share/extension"; do
+            if [ -d "$extension_dir" ]; then
+              rsync -a "$extension_dir"/vector*.sql "$RUNTIME_DIR/share/extension/" 2>/dev/null || true
+              rsync -a "$extension_dir"/vector.control "$RUNTIME_DIR/share/extension/" 2>/dev/null || true
+            fi
+          done
+          rsync -a "$RUNTIME_DIR/share/extension/" "$RUNTIME_DIR/share/postgresql@16/extension/"
+
+          mkdir -p "$RUNTIME_DIR/lib/postgresql" "$RUNTIME_DIR/lib/postgresql@16"
+          for vector_lib in \
+            "$PGVECTOR_PREFIX/lib/vector.dylib" \
+            "$PGVECTOR_PREFIX/lib/postgresql/vector.dylib" \
+            "$PGVECTOR_PREFIX/lib/postgresql@16/vector.dylib" \
+            "$PG_PREFIX/lib/vector.dylib" \
+            "$PG_PREFIX/lib/postgresql/vector.dylib" \
+            "$PG_PREFIX/lib/postgresql@16/vector.dylib"; do
+            if [ -f "$vector_lib" ]; then
+              cp "$vector_lib" "$RUNTIME_DIR/lib/vector.dylib"
+              cp "$vector_lib" "$RUNTIME_DIR/lib/postgresql/vector.dylib"
+              cp "$vector_lib" "$RUNTIME_DIR/lib/postgresql@16/vector.dylib"
+              break
+            fi
+          done
+
+          test -x "$RUNTIME_DIR/bin/postgres"
+          test -f "$RUNTIME_DIR/lib/vector.dylib"
+          test -f "$RUNTIME_DIR/share/extension/vector.control"
+
       - name: Build sidecar dist
         working-directory: packages/sidecar
         run: |

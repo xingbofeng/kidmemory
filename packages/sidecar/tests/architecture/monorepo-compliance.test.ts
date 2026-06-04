@@ -114,6 +114,10 @@ test("desktop release builds a CI-gated macOS artifact for landing downloads", (
   const releaseWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "desktop-release.yml"), "utf8");
   assert.match(releaseWorkflow, /workflow_run:[\s\S]*workflows:\s+\["CI"\][\s\S]*branches:[\s\S]*main/);
   assert.match(releaseWorkflow, /github\.event\.workflow_run\.conclusion == 'success'/);
+  assert.match(releaseWorkflow, /Prepare bundled PostgreSQL runtime/);
+  assert.match(releaseWorkflow, /brew install postgresql@16 pgvector/);
+  assert.match(releaseWorkflow, /third_party\/postgres\/macos/);
+  assert.match(releaseWorkflow, /vector\.control/);
   assert.match(releaseWorkflow, /flutter config --no-enable-swift-package-manager/);
   assert.match(releaseWorkflow, /KidMemory-macos-arm64-unsigned\.tar\.gz/);
   assert.match(releaseWorkflow, /softprops\/action-gh-release@v2/);
