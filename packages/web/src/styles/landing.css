@@ -266,6 +266,12 @@
   box-shadow: 0 12px 30px rgba(88, 54, 20, .1);
 }
 
+.landing-page .download {
+  background: #17324d;
+  color: #fffdf7;
+  box-shadow: 0 14px 32px rgba(23, 50, 77, .2);
+}
+
 .landing-page .tags {
   display: flex;
   flex-wrap: wrap;

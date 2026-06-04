@@ -47,6 +47,8 @@ local-data/
 !packages/agent-runtime/src/workspace/**
 !packages/agent-runtime/examples/
 !packages/agent-runtime/examples/**
+!packages/agent-runtime/examples/**/.kidmemory/
+!packages/agent-runtime/examples/**/.kidmemory/**
 
 # Bundled third-party binaries generated/downloaded locally
 third_party/

@@ -20,18 +20,32 @@ class DirectUploadConfigResponseDto {
   /// Returns a new [DirectUploadConfigResponseDto] instance.
   DirectUploadConfigResponseDto({
 
-    required  this.anonKey,
+    required  this.provider,
+
+    required  this.uploadMode,
   });
 
   @JsonKey(
 
-    name: r'anonKey',
+    name: r'provider',
     required: true,
     includeIfNull: false,
   )
 
 
-  final String anonKey;
+  final DirectUploadConfigResponseDtoProviderEnum provider;
+
+
+
+  @JsonKey(
+
+    name: r'uploadMode',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final DirectUploadConfigResponseDtoUploadModeEnum uploadMode;
 
 
 
@@ -39,11 +53,13 @@ class DirectUploadConfigResponseDto {
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is DirectUploadConfigResponseDto &&
-      other.anonKey == anonKey;
+      other.provider == provider &&
+      other.uploadMode == uploadMode;
 
     @override
     int get hashCode =>
-        anonKey.hashCode;
+        provider.hashCode +
+        uploadMode.hashCode;
 
   factory DirectUploadConfigResponseDto.fromJson(Map<String, dynamic> json) => _$DirectUploadConfigResponseDtoFromJson(json);
 
@@ -54,4 +70,31 @@ class DirectUploadConfigResponseDto {
     return toJson().toString();
   }
 
+}
+
+
+enum DirectUploadConfigResponseDtoProviderEnum {
+@JsonValue(r'cos')
+cos(r'cos');
+
+const DirectUploadConfigResponseDtoProviderEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
+
+
+enum DirectUploadConfigResponseDtoUploadModeEnum {
+@JsonValue(r'signed-url')
+signedUrl(r'signed-url');
+
+const DirectUploadConfigResponseDtoUploadModeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }

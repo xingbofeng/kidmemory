@@ -62,13 +62,15 @@ export class CreationService {
     @Inject(AppConfigService) private readonly config: AppConfigService,
     @Optional()
     @Inject(DatasetService)
-    private readonly datasetService?: Pick<
-      DatasetService,
-      | "getAsset"
-      | "recordExportArtifact"
-      | "enqueueExportArtifactStorageSync"
-      | "runStorageSyncWorker"
-      | "getExportArtifactShareMetadata"
+    private readonly datasetService?: Partial<
+      Pick<
+        DatasetService,
+        | "getAsset"
+        | "recordExportArtifact"
+        | "enqueueExportArtifactStorageSync"
+        | "runStorageSyncWorker"
+        | "getExportArtifactShareMetadata"
+      >
     >,
   ) {}
 
@@ -376,10 +378,9 @@ export class CreationService {
   ): Promise<void> {
     const assets = [];
     for (const assetId of task.assetIds) {
-      const asset = await this.datasetService
-        ?.getAsset(assetId)
-        .then((result) => result.asset)
-        .catch(() => null);
+      const asset = await (typeof this.datasetService?.getAsset === "function"
+        ? this.datasetService.getAsset(assetId).then((result) => result.asset).catch(() => null)
+        : null);
       if (!asset) continue;
       assets.push({
         id: asset.id,
@@ -615,11 +616,11 @@ async function main() {
   await fs.mkdir(path.join(workspaceDir, "output"), { recursive: true });
   await fs.writeFile(bookJsonPath, JSON.stringify(book, null, 2) + "\n");
   await fs.writeFile(bookHtmlPath, html);
-  console.log(JSON.stringify({ ok: true, inputs: ["work/curation.json"], outputs: ["output/book.json", "output/book.html"], pageCount: pages.length }));
+  process.stdout.write(JSON.stringify({ ok: true, inputs: ["work/curation.json"], outputs: ["output/book.json", "output/book.html"], pageCount: pages.length }) + "\n");
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
   process.exit(1);
 });
 `;
@@ -720,11 +721,11 @@ async function main() {
     throw error;
   }
 
-  console.log(JSON.stringify({ ok: true, outputPath, imageCount: imagePaths.length }));
+  process.stdout.write(JSON.stringify({ ok: true, outputPath, imageCount: imagePaths.length }) + "\n");
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
   process.exit(1);
 });
 `;

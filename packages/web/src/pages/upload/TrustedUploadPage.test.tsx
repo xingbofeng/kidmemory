@@ -23,7 +23,7 @@ function createSessionSummary(overrides?: Partial<SessionSummary>): SessionSumma
     usedItems: 5,
     providers: {
       lan: { available: true },
-      supabase: { available: true },
+      cos: { available: true },
     },
     ...overrides,
   }
@@ -42,7 +42,7 @@ function createHookState(overrides?: {
   const tasks = overrides?.tasks ?? []
   const loading = overrides?.loading ?? false
   const error = overrides?.error ?? null
-  const selectedProvider = overrides?.selectedProvider ?? 'supabase'
+  const selectedProvider = overrides?.selectedProvider ?? 'cos'
   const usedCount = overrides?.usedCount ?? session?.usedItems ?? 0
 
   mockedUseTrustedUploadSession.mockReturnValue({
@@ -101,7 +101,7 @@ describe('TrustedUploadPage', () => {
     expect(screen.getByText('📶 局域网直传')).toBeInTheDocument()
     expect(screen.getByText('☁ 公网直传')).toBeInTheDocument()
     expect(screen.getByText('优先使用，速度更快')).toBeInTheDocument()
-    expect(screen.getByText('Supabase 兜底')).toBeInTheDocument()
+    expect(screen.getByText('腾讯云 COS 直传')).toBeInTheDocument()
   })
 
   it('shows file picker options', () => {
@@ -139,7 +139,7 @@ describe('TrustedUploadPage', () => {
       session: createSessionSummary({
         providers: {
           lan: { available: false },
-          supabase: { available: true },
+          cos: { available: true },
         },
       }),
     })

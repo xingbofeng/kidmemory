@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { AppConfigService } from "../../infrastructure/config/app-config.service.ts";
+import { allowInMemoryDatasetFallback } from "../../infrastructure/dataset-state/fallback-policy.ts";
 import { DatasetStateService } from "../../infrastructure/dataset-state/dataset-state.service.ts";
 import type { ExportArtifact, SampleDb } from "../../infrastructure/dataset-state/memory-dataset-db.ts";
 import {
@@ -70,6 +71,7 @@ export class DatasetService {
     try {
       return await this.datasetState.activatePersistent();
     } catch (error) {
+      if (!allowInMemoryDatasetFallback()) throw error;
       this.logger.warn(
         `Falling back to in-memory dataset after persistent dataset activation failed: ${error instanceof Error ? error.message : String(error)}`,
       );

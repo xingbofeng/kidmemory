@@ -79,9 +79,10 @@ const CLOUD_API_SCHEMAS: Record<string, OpenApiSchema> = {
   },
   DirectUploadConfigResponseDto: {
     type: "object",
-    required: ["anonKey"],
+    required: ["provider", "uploadMode"],
     properties: {
-      anonKey: { type: "string" },
+      provider: { type: "string", enum: ["cos"] },
+      uploadMode: { type: "string", enum: ["signed-url"] },
     },
   },
   TrustedUploadSessionChildDto: {
@@ -101,10 +102,10 @@ const CLOUD_API_SCHEMAS: Record<string, OpenApiSchema> = {
   },
   DirectUploadProvidersDto: {
     type: "object",
-    required: ["lan", "supabase"],
+    required: ["lan", "cos"],
     properties: {
       lan: { $ref: "#/components/schemas/ProviderAvailabilityDto" },
-      supabase: { $ref: "#/components/schemas/ProviderAvailabilityDto" },
+      cos: { $ref: "#/components/schemas/ProviderAvailabilityDto" },
     },
   },
   SessionSummaryResponseDto: {
@@ -135,7 +136,7 @@ const CLOUD_API_SCHEMAS: Record<string, OpenApiSchema> = {
     required: ["token", "files"],
     properties: {
       token: { type: "string" },
-      provider: { type: "string", enum: ["lan", "supabase"] },
+      provider: { type: "string", enum: ["lan", "cos"] },
       files: { type: "array", items: { $ref: "#/components/schemas/CreateUploadFileDto" } },
     },
   },

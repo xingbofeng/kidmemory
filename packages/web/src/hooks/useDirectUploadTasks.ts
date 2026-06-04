@@ -22,7 +22,7 @@ interface UseDirectUploadTasksProps {
 
 interface ParsedPartialConfig {
   ok: true
-  partial: Omit<DirectUploadConfig, 'anonKey'>
+  partial: DirectUploadConfig
 }
 
 interface ParsedConfigError {
@@ -34,24 +34,22 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
   const sessionId = params.get('sessionId') ?? ''
   const childId = params.get('childId') ?? ''
   const bucket = params.get('bucket') ?? ''
-  const supabaseUrl = params.get('supabaseUrl') ?? ''
   const token = params.get('token') ?? ''
-  const uploadMode = params.get('uploadMode') === 'signed-url' ? 'signed-url' : 'supabase-js'
+  const uploadMode = 'signed-url'
   const providerParam = params.get('provider')
-  const provider = providerParam === 'cos' || providerParam === 's3' ? providerParam : 'supabase'
+  const provider = providerParam === 's3' ? 's3' : 'cos'
 
   const missing: string[] = []
   if (!sessionId) missing.push('sessionId')
   if (!childId) missing.push('childId')
   if (!bucket) missing.push('bucket')
-  if (!supabaseUrl && uploadMode !== 'signed-url') missing.push('supabaseUrl')
   if (!token) missing.push('token')
   if (missing.length > 0) {
     return { ok: false, missing }
   }
 
   const publicUrl = params.get('publicUrl') ?? ''
-  const limitParam = params.get('supabaseDirectUploadLimit')
+  const limitParam = params.get('directUploadLimit')
   const recommendedClientLimit = (() => {
     const parsed = limitParam != null ? Number(limitParam) : Number.NaN
     if (Number.isFinite(parsed) && parsed > 0) return Math.floor(parsed)
@@ -64,7 +62,6 @@ function parseConfigFromQuery(params: URLSearchParams): ParsedPartialConfig | Pa
       sessionId,
       childId,
       bucket,
-      supabaseUrl,
       provider,
       uploadMode,
       publicUrl,
@@ -83,6 +80,15 @@ function nextTaskId(): string {
   return `task-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+function resolveObjectStorageProvider(provider: unknown): DirectUploadConfig['provider'] {
+  return provider === 's3' ? 's3' : 'cos'
+}
+
+function resolveUploadMode(uploadMode: unknown): DirectUploadConfig['uploadMode'] {
+  void uploadMode
+  return 'signed-url'
+}
+
 export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectUploadTasksProps) {
   const { t } = useTranslation()
   const params = useMemo(
@@ -94,9 +100,8 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
 
   const parsed = useMemo(() => parseConfigFromQuery(params), [params])
 
-  const [anonKey, setAnonKey] = useState<string | null>(null)
   const [serverConfig, setServerConfig] = useState<Awaited<ReturnType<typeof getDirectUploadConfig>> | null>(null)
-  const [anonKeyError, setAnonKeyError] = useState<string | null>(null)
+  const [configError, setConfigError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!parsed.ok) return
@@ -106,13 +111,12 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
       .then((data) => {
         if (!cancelled) {
           setServerConfig(data)
-          setAnonKey(data.anonKey ?? '')
         }
       })
       .catch((err) => {
         if (!cancelled) {
           const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : String(err)
-          setAnonKeyError(message)
+          setConfigError(message)
         }
       })
     return () => {
@@ -121,26 +125,31 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
   }, [parsed])
 
   const fullConfig = useMemo((): DirectUploadConfig | null => {
-    if (!parsed.ok || anonKey == null) return null
+    if (!parsed.ok || !serverConfig) return null
     return {
       ...parsed.partial,
-      anonKey,
-      provider: serverConfig?.provider ?? parsed.partial.provider,
-      uploadMode: serverConfig?.uploadMode ?? parsed.partial.uploadMode,
+      provider: resolveObjectStorageProvider(serverConfig.provider),
+      uploadMode: resolveUploadMode(serverConfig.uploadMode),
     }
-  }, [parsed, anonKey, serverConfig])
+  }, [parsed, serverConfig])
 
   const [tasks, setTasks] = useState<DirectUploadFileTask[]>([])
   const [validationError, setValidationError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
-  const factory = clientFactory ?? ((config: DirectUploadConfig) =>
-    createDirectUploadClient(config, {
-      signUpload: (input) => signDirectUploadObject(config.sessionId, {
-        token: config.token,
-        ...input,
-      }),
-    }))
+  const factory = useMemo(
+    () =>
+      clientFactory ??
+      ((config: DirectUploadConfig) =>
+        createDirectUploadClient(config, {
+          signUpload: (input) =>
+            signDirectUploadObject(config.sessionId, {
+              token: config.token,
+              ...input,
+            }),
+        })),
+    [clientFactory],
+  )
 
   const handleFiles = useCallback(
     async (incoming: File[]) => {
@@ -260,8 +269,8 @@ export function useDirectUploadTasks({ searchParams, clientFactory }: UseDirectU
 
   return {
     parsed,
-    anonKey,
-    anonKeyError,
+    anonKey: '',
+    anonKeyError: configError,
     fullConfig,
     tasks,
     validationError,

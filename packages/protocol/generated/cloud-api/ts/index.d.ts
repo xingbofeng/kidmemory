@@ -317,7 +317,10 @@ export interface components {
             errorMessage?: string;
         };
         DirectUploadConfigResponseDto: {
-            anonKey: string;
+            /** @enum {string} */
+            provider: "cos";
+            /** @enum {string} */
+            uploadMode: "signed-url";
         };
         TrustedUploadSessionChildDto: {
             id: string;
@@ -328,7 +331,7 @@ export interface components {
         };
         DirectUploadProvidersDto: {
             lan: components["schemas"]["ProviderAvailabilityDto"];
-            supabase: components["schemas"]["ProviderAvailabilityDto"];
+            cos: components["schemas"]["ProviderAvailabilityDto"];
         };
         SessionSummaryResponseDto: {
             sessionId: string;
@@ -348,7 +351,7 @@ export interface components {
         CreateUploadItemsRequestDto: {
             token: string;
             /** @enum {string} */
-            provider?: "lan" | "supabase";
+            provider?: "lan" | "cos";
             files: components["schemas"]["CreateUploadFileDto"][];
         };
         SignedUploadTargetDto: {

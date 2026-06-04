@@ -8,7 +8,7 @@ import {
 /**
  * Direct Upload — 文件名清洗与 object key 生成。
  *
- * 守住的安全/正确性约束（见 spec/web-companion-supabase-direct/spec.md「文件名清洗」Scenario）：
+ * 守住的安全/正确性约束：
  *   - 移除控制字符（0x00-0x1f, 0x7f）。
  *   - 保留有效扩展名（小写化，剥离不安全字符）。
  *   - 不直接使用未经清洗的原始文件名。

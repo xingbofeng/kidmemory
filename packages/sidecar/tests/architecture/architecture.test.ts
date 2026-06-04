@@ -534,8 +534,8 @@ test("direct upload URL trimming is shared instead of copied", () => {
   const helperSource = fs.readFileSync(helperPath, "utf8");
   const consumers = [
     "src/modules/storage/providers/supabase-storage.ts",
+    "src/modules/storage/providers/object-storage.ts",
     "src/modules/web-companion/direct-upload.service.ts",
-    "src/modules/web-companion/direct-upload.providers.ts",
   ];
 
   assert.match(helperSource, /export function trimTrailingSlash\(value: string\)/);
@@ -1111,6 +1111,21 @@ test("persistent dataset state uses the Prisma ORM adapter", () => {
   assert.match(source, /this\.prisma\.storageSyncJob\.create/);
   assert.doesNotMatch(source, /\.\s*(?:query|executeRaw|queryRaw|queryRawUnsafe)\s*\(/);
   assert.doesNotMatch(source, /`[^`]*(?:select|insert|update|delete)\s+/i);
+});
+
+test("production repository fallbacks are guarded by the shared in-memory fallback policy", () => {
+  const webCompanionModule = fs.readFileSync(
+    path.join(root, "src", "modules", "web-companion", "web-companion.module.ts"),
+    "utf8",
+  );
+  const datasetService = fs.readFileSync(
+    path.join(root, "src", "modules", "dataset", "dataset.service.ts"),
+    "utf8",
+  );
+
+  assert.match(webCompanionModule, /allowInMemoryDatasetFallback/);
+  assert.match(webCompanionModule, /if \(!allowInMemoryDatasetFallback\(\)\) throw error;/);
+  assert.match(datasetService, /if \(!allowInMemoryDatasetFallback\(\)\) throw error;/);
 });
 
 test("prisma dataset semantic search stores and scores ORM-managed embeddings", () => {

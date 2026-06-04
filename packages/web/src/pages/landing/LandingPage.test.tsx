@@ -51,6 +51,16 @@ describe('LandingPage', () => {
     })
   })
 
+  it('offers a macOS download from the GitHub release asset', () => {
+    renderWithRouter(<LandingPage />)
+
+    const downloadLink = screen.getByRole('link', { name: /下载 macos 版/i })
+    expect(downloadLink).toHaveAttribute(
+      'href',
+      'https://github.com/xingbofeng/kidmemory/releases/download/desktop-alpha-latest/KidMemory-macos-arm64-unsigned.tar.gz',
+    )
+  })
+
   it('shows product tags', () => {
     renderWithRouter(<LandingPage />)
 

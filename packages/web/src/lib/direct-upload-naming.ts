@@ -1,5 +1,5 @@
 /**
- * Web Companion Supabase Direct Upload filename cleaning and object key generation.
+ * Web Companion Direct Upload filename cleaning and object key generation.
  *
  * 安全约束：
  *   - 浏览器侧不能信任原始文件名作为完整路径或对象 key 的一部分。
@@ -91,7 +91,7 @@ export interface BuildDirectUploadObjectKeyInput {
 }
 
 /**
- * 构造 Supabase Storage 内的 object key：`{sessionId}/{uuid}-{cleanedName}`。
+ * 构造对象存储内的 object key：`{sessionId}/{uuid}-{cleanedName}`。
  *
  * sessionId 由 sidecar 分配；调用方不允许传入含 `/` 的 sessionId（避免污染前缀）。
  */

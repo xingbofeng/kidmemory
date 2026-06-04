@@ -10,6 +10,7 @@ import {
   type SupabaseStorageConfig,
   type StorageActionResult,
 } from "./supabase-storage.ts";
+import { trimTrailingSlash } from "../../../infrastructure/url/trailing-slash.ts";
 
 export type ObjectStorageProviderType = "supabase" | "cos" | "s3";
 
@@ -271,8 +272,4 @@ function normalizeObjectPath(value: string) {
     .split("/")
     .map((part) => encodeURIComponent(part))
     .join("/");
-}
-
-function trimTrailingSlash(value: string) {
-  return value.replace(/\/+$/, "");
 }

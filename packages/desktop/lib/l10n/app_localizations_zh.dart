@@ -253,6 +253,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setupOpenAiConfigUpdateFailed => 'OpenAI 配置更新失败';
 
   @override
+  String setupOpenAiDefaultConfigLoadFailed(Object error) {
+    return '读取大模型默认配置失败，将打开空配置表单: $error';
+  }
+
+  @override
   String get setupPostgresNotReadyNeedConfig =>
       'PostgreSQL 仍未就绪，安装 pgvector 前请先完成数据库配置';
 
@@ -280,6 +285,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get setupStorageS3ModeLabel => 'S3 方式（推荐）';
+
+  @override
+  String get setupStorageCosS3ModeLabel => 'COS / S3 兼容方式';
+
+  @override
+  String get setupStorageProviderLabel => '存储服务商';
+
+  @override
+  String get setupStorageProviderCosLabel => '腾讯云 COS';
 
   @override
   String get setupSidecarStarted => '本地服务已启动';

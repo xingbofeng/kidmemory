@@ -14,6 +14,50 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  agent_runtime:
+    name: agent-runtime lint/test/build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/agent-runtime
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/agent-runtime/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+      - run: npm run test
+      - run: npm run build
+
+  protocol:
+    name: protocol check/build/test/codegen
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/protocol
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/protocol/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - run: npm test
+      - run: npm run gen:ts
+      - run: npm run gen:dart
+      - run: git diff --exit-code -- generated
+
   sidecar:
     name: sidecar build and test
     runs-on: ubuntu-latest
@@ -155,6 +199,85 @@ jobs:
       - name: Run unit and widget tests (excluding visual goldens)
         run: |
           set -euo pipefail
-          mapfile -t TEST_FILES < <(find test -name '*_test.dart' -not -name 'visual_golden_test.dart')
-          flutter test "${TEST_FILES[@]}"
+          find test -name '*_test.dart' -not -name 'visual_golden_test.dart' -print0 | xargs -0 flutter test
         shell: bash
+
+  acceptance:
+    name: acceptance contract/integration/smoke
+    runs-on: ubuntu-latest
+    needs:
+      - agent_runtime
+      - protocol
+      - sidecar
+      - cloud_api
+      - web_companion
+      - desktop_flutter
+    defaults:
+      run:
+        working-directory: packages/sidecar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            packages/sidecar/package-lock.json
+            packages/protocol/package-lock.json
+
+      - name: Build protocol runtime artifacts
+        run: |
+          npm ci
+          npm run build
+        working-directory: packages/protocol
+
+      - name: Start PostgreSQL with pgvector
+        run: |
+          docker run -d \
+            --name postgres-acceptance \
+            -e POSTGRES_PASSWORD=postgres \
+            -e POSTGRES_DB=kidmemory_test \
+            -p 5432:5432 \
+            pgvector/pgvector:pg16
+          timeout 30 bash -c 'until docker exec postgres-acceptance pg_isready -U postgres; do sleep 1; done'
+
+      - run: npm ci
+      - run: npm run prisma:generate
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - name: Contract tests
+        run: npm run test:contracts
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_DATABASE: kidmemory_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - name: Integration tests
+        run: npm run test:integration
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_DATABASE: kidmemory_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - name: Smoke tests
+        run: npx tsx --test tests/http/router.smoke.test.ts
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_DATABASE: kidmemory_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/kidmemory_test
+
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker stop postgres-acceptance && docker rm postgres-acceptance

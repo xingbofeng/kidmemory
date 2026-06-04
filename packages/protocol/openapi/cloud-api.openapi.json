@@ -706,11 +706,21 @@
       "DirectUploadConfigResponseDto": {
         "type": "object",
         "required": [
-          "anonKey"
+          "provider",
+          "uploadMode"
         ],
         "properties": {
-          "anonKey": {
-            "type": "string"
+          "provider": {
+            "type": "string",
+            "enum": [
+              "cos"
+            ]
+          },
+          "uploadMode": {
+            "type": "string",
+            "enum": [
+              "signed-url"
+            ]
           }
         }
       },
@@ -744,13 +754,13 @@
         "type": "object",
         "required": [
           "lan",
-          "supabase"
+          "cos"
         ],
         "properties": {
           "lan": {
             "$ref": "#/components/schemas/ProviderAvailabilityDto"
           },
-          "supabase": {
+          "cos": {
             "$ref": "#/components/schemas/ProviderAvailabilityDto"
           }
         }
@@ -827,7 +837,7 @@
             "type": "string",
             "enum": [
               "lan",
-              "supabase"
+              "cos"
             ]
           },
           "files": {

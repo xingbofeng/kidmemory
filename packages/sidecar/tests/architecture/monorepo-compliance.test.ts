@@ -53,9 +53,14 @@ test("sidecar integration script covers contracts, http and integration director
   assert.match(integrationScript, /tests\/integration\//);
 });
 
-test("acceptance workflow runs smoke tests via npx tsx", () => {
-  const acceptanceWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "acceptance.yml"), "utf8");
-  assert.match(acceptanceWorkflow, /run:\s+npx tsx --test tests\/http\/router\.smoke\.test\.ts/);
+test("acceptance gate is folded into the main CI workflow", () => {
+  const acceptanceWorkflowPath = path.join(repoRoot, ".github", "workflows", "acceptance.yml");
+  assert.equal(fs.existsSync(acceptanceWorkflowPath), false);
+
+  const ciWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8");
+  assert.match(ciWorkflow, /name:\s+acceptance contract\/integration\/smoke/);
+  assert.match(ciWorkflow, /needs:[\s\S]*agent_runtime[\s\S]*protocol[\s\S]*sidecar[\s\S]*cloud_api[\s\S]*web_companion[\s\S]*desktop_flutter/);
+  assert.match(ciWorkflow, /run:\s+npx tsx --test tests\/http\/router\.smoke\.test\.ts/);
 });
 
 test("production pm2 ecosystem targets cloud-api runtime after service split", () => {
@@ -65,17 +70,47 @@ test("production pm2 ecosystem targets cloud-api runtime after service split", (
   assert.doesNotMatch(ecosystemConfig, /name:\s*['"]kidmemory-web['"]/);
 });
 
-test("deploy workflow bootstraps node runtime before cloud-api npm commands", () => {
+test("deploy workflow uses Docker Compose instead of PM2 for cloud-api", () => {
   const deployWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "deploy-tencent.yml"), "utf8");
-  assert.match(deployWorkflow, /command -v npm/);
-  assert.match(deployWorkflow, /command -v node/);
-  assert.match(
-    deployWorkflow,
-    /apt-get install -y nodejs|yum install -y nodejs|dnf install -y nodejs|apk add --no-cache nodejs npm/,
-  );
+  assert.match(deployWorkflow, /docker compose/);
+  assert.match(deployWorkflow, /deploy\/tencent\/cloud-api\.compose\.yml/);
+  assert.match(deployWorkflow, /docker compose[\s\S]*run --rm cloud-api npx prisma migrate deploy/);
+  assert.match(deployWorkflow, /docker compose[\s\S]*up -d --remove-orphans cloud-api/);
+  assert.match(deployWorkflow, /command -v docker/);
+  assert.doesNotMatch(deployWorkflow, /pm2/);
   assert.match(deployWorkflow, /source "\$PROJECT_PATH\/\.env"/);
-  assert.match(deployWorkflow, /source "\.env"/);
-  assert.match(deployWorkflow, /envs:\s+TENCENT_DATABASE_URL,DATABASE_URL,CLOUD_API_DATABASE_URL/);
-  assert.match(deployWorkflow, /DATABASE_URL="\$\{DATABASE_URL:-\$TENCENT_DATABASE_URL\}"/);
-  assert.match(deployWorkflow, /DATABASE_URL="\$\{DATABASE_URL:-\$CLOUD_API_DATABASE_URL\}"/);
+  assert.match(deployWorkflow, /source "\$PROJECT_PATH\/packages\/cloud-api\/\.env"/);
+  assert.doesNotMatch(deployWorkflow, /packages\/web|VERCEL|landing/i);
+});
+
+test("landing page deploy stays on Vercel and waits for CI success", () => {
+  const vercelWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "deploy-vercel.yml"), "utf8");
+  assert.match(vercelWorkflow, /workflow_run:[\s\S]*workflows:\s+\["CI"\][\s\S]*branches:[\s\S]*main/);
+  assert.match(vercelWorkflow, /github\.event\.workflow_run\.conclusion == 'success'/);
+  assert.match(vercelWorkflow, /VERCEL_DEPLOY_HOOK_URL/);
+});
+
+test("cloud-api Docker deployment assets build from the monorepo context", () => {
+  const dockerfile = fs.readFileSync(path.join(repoRoot, "packages", "cloud-api", "Dockerfile"), "utf8");
+  assert.match(dockerfile, /FROM node:22/);
+  assert.match(dockerfile, /packages\/protocol/);
+  assert.match(dockerfile, /packages\/cloud-api/);
+  assert.match(dockerfile, /npm run build:prod/);
+  assert.match(dockerfile, /npm ci --include=dev/);
+  assert.match(dockerfile, /CMD \["node", "dist\/main\.js"\]/);
+
+  const compose = fs.readFileSync(path.join(repoRoot, "deploy", "tencent", "cloud-api.compose.yml"), "utf8");
+  assert.match(compose, /cloud-api:/);
+  assert.match(compose, /dockerfile: packages\/cloud-api\/Dockerfile/);
+  assert.match(compose, /env_file:[\s\S]*\.deploy\/cloud-api\.env/);
+  assert.match(compose, /ports:[\s\S]*"\$\{CLOUD_API_PORT:-3000\}:3000"/);
+});
+
+test("desktop release builds a CI-gated macOS artifact for landing downloads", () => {
+  const releaseWorkflow = fs.readFileSync(path.join(repoRoot, ".github", "workflows", "desktop-release.yml"), "utf8");
+  assert.match(releaseWorkflow, /workflow_run:[\s\S]*workflows:\s+\["CI"\][\s\S]*branches:[\s\S]*main/);
+  assert.match(releaseWorkflow, /github\.event\.workflow_run\.conclusion == 'success'/);
+  assert.match(releaseWorkflow, /KidMemory-macos-arm64-unsigned\.tar\.gz/);
+  assert.match(releaseWorkflow, /softprops\/action-gh-release@v2/);
+  assert.match(releaseWorkflow, /tag_name:\s+desktop-alpha-latest/);
 });

@@ -93,8 +93,8 @@ class CreateUploadItemsRequestDto {
 enum CreateUploadItemsRequestDtoProviderEnum {
 @JsonValue(r'lan')
 lan(r'lan'),
-@JsonValue(r'supabase')
-supabase(r'supabase');
+@JsonValue(r'cos')
+cos(r'cos');
 
 const CreateUploadItemsRequestDtoProviderEnum(this.value);
 

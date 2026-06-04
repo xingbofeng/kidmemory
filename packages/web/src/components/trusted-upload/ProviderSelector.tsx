@@ -23,13 +23,13 @@ export function ProviderSelector({ selectedProvider, session, onProviderChange }
         <span>{providers.lan?.available ? t('trustedUpload.lanFast') : t('trustedUpload.lanUnavailable')}</span>
       </button>
       <button
-        className={selectedProvider === 'supabase' ? 'selected' : ''}
+        className={selectedProvider === 'cos' ? 'selected' : ''}
         type="button"
-        disabled={providers.supabase?.available === false}
-        onClick={() => onProviderChange('supabase')}
+        disabled={providers.cos?.available === false}
+        onClick={() => onProviderChange('cos')}
       >
         <strong>{t('trustedUpload.cloudTitle')}</strong>
-        <span>{providers.supabase?.available === false ? t('trustedUpload.cloudUnavailable') : t('trustedUpload.cloudFallback')}</span>
+        <span>{providers.cos?.available === false ? t('trustedUpload.cloudUnavailable') : t('trustedUpload.cloudFallback')}</span>
       </button>
     </div>
   )

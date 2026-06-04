@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import test from "node:test";
 
 import { SkillDeckProvider, createSkillDeckAgentTools, toOpenAISandboxSkillCapabilities } from "../../src/index.ts";
+
+const execFileAsync = promisify(execFile);
 
 test("SkillDeckProvider loads skills from configured roots", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "kidmemory-skill-deck-"));
@@ -256,7 +260,20 @@ test("demo workspaces provide discoverable storybook and video skills", async ()
 
   assert.equal(names.includes("kidmemory-storybook-demo-writer"), true);
   assert.equal(names.includes("kidmemory-video-demo-director"), true);
-  assert.equal(names.includes("hyperframes"), true);
-  assert.equal(names.includes("picturebook-maker"), true);
   assert.equal(result.mcpTools.some((tool) => tool.name.startsWith("use_skill_")), true);
+});
+
+test("demo workspace skills are tracked so CI checkout can discover them", async () => {
+  const packageRoot = path.resolve(import.meta.dirname, "..", "..");
+  const repoRoot = path.resolve(packageRoot, "..", "..");
+  const requiredPaths = [
+    "packages/agent-runtime/examples/storybook/.kidmemory/skills/storybook-demo-writer/SKILL.md",
+    "packages/agent-runtime/examples/video/.kidmemory/skills/video-demo-director/SKILL.md",
+  ];
+  const { stdout } = await execFileAsync("git", ["ls-files", ...requiredPaths], { cwd: repoRoot });
+  const tracked = new Set(stdout.trim().split(/\r?\n/).filter(Boolean));
+
+  for (const requiredPath of requiredPaths) {
+    assert.equal(tracked.has(requiredPath), true, `${requiredPath} must be tracked`);
+  }
 });

@@ -161,6 +161,31 @@ function createService() {
   return { service, items, shares, shareLogs };
 }
 
+async function withCosEnv<T>(fn: () => Promise<T> | T): Promise<T> {
+  const previousEnv = {
+    COS_BUCKET: process.env.COS_BUCKET,
+    COS_REGION: process.env.COS_REGION,
+    COS_SECRET_ID: process.env.COS_SECRET_ID,
+    COS_SECRET_KEY: process.env.COS_SECRET_KEY,
+    COS_SIGNED_URL_TTL_SECONDS: process.env.COS_SIGNED_URL_TTL_SECONDS,
+  };
+  process.env.COS_BUCKET = "counter-1252496948";
+  process.env.COS_REGION = "ap-guangzhou";
+  process.env.COS_SECRET_ID = "cos-secret-id";
+  process.env.COS_SECRET_KEY = "cos-secret-key";
+  process.env.COS_SIGNED_URL_TTL_SECONDS = "300";
+
+  try {
+    return await fn();
+  } finally {
+    process.env.COS_BUCKET = previousEnv.COS_BUCKET;
+    process.env.COS_REGION = previousEnv.COS_REGION;
+    process.env.COS_SECRET_ID = previousEnv.COS_SECRET_ID;
+    process.env.COS_SECRET_KEY = previousEnv.COS_SECRET_KEY;
+    process.env.COS_SIGNED_URL_TTL_SECONDS = previousEnv.COS_SIGNED_URL_TTL_SECONDS;
+  }
+}
+
 describe("Web Companion service contract", () => {
   let fixture: ReturnType<typeof createService>;
 
@@ -179,46 +204,58 @@ describe("Web Companion service contract", () => {
   });
 
   it("returns trusted upload session summary shape used by web", async () => {
-    const data = await fixture.service.getSessionSummary("session-1", "valid-token");
+    const data = await withCosEnv(() => fixture.service.getSessionSummary("session-1", "valid-token"));
     assert.equal(data.sessionId, "session-1");
     assert.equal(data.child.id, "child-1");
     assert.equal(data.status, "active");
     assert.equal(typeof data.maxItems, "number");
     assert.equal(typeof data.usedItems, "number");
+    assert.deepEqual(data.providers, {
+      lan: { available: false },
+      cos: { available: true },
+    });
   });
 
   it("creates upload items for trusted upload session", async () => {
-    const data = await fixture.service.createUploadItems("session-1", {
-      token: "ignored-for-now",
-      provider: "supabase",
-      files: [
-        {
-          clientFileId: "client-1",
-          filename: "photo-1.jpg",
-          contentType: "image/jpeg",
-          sizeBytes: 1024,
-        },
-      ],
-    });
+    const data = await withCosEnv(() =>
+      fixture.service.createUploadItems("session-1", {
+        token: "ignored-for-now",
+        provider: "cos",
+        files: [
+          {
+            clientFileId: "client-1",
+            filename: "photo-1.jpg",
+            contentType: "image/jpeg",
+            sizeBytes: 1024,
+          },
+        ],
+      })
+    );
 
     assert.equal(data.items.length, 1);
     assert.equal(data.items[0].clientFileId, "client-1");
     assert.equal(data.items[0].status, "pending");
+    assert.equal(data.items[0].signedUpload?.method, "PUT");
+    assert.match(data.items[0].signedUpload?.url ?? "", /^https:\/\/counter-1252496948\.cos\.ap-guangzhou\.myqcloud\.com\/session-1\//);
+    assert.equal((data.items[0].signedUpload?.headers ?? {})["content-type"], "image/jpeg");
+    assert.equal((data.items[0].signedUpload?.url ?? "").includes("cos-secret-key"), false);
   });
 
   it("commits an upload item and marks it uploaded", async () => {
-    const created = await fixture.service.createUploadItems("session-1", {
-      token: "ignored-for-now",
-      provider: "supabase",
-      files: [
-        {
-          clientFileId: "client-2",
-          filename: "photo-2.jpg",
-          contentType: "image/jpeg",
-          sizeBytes: 2048,
-        },
-      ],
-    });
+    const created = await withCosEnv(() =>
+      fixture.service.createUploadItems("session-1", {
+        token: "ignored-for-now",
+        provider: "cos",
+        files: [
+          {
+            clientFileId: "client-2",
+            filename: "photo-2.jpg",
+            contentType: "image/jpeg",
+            sizeBytes: 2048,
+          },
+        ],
+      })
+    );
 
     const target = created.items[0];
     const committed = await fixture.service.commitUploadItem("session-1", target.uploadItemId, {
@@ -261,7 +298,7 @@ describe("Web Companion service contract", () => {
       () =>
         fixture.service.createUploadItems("session-1", {
           token: "",
-          provider: "supabase",
+          provider: "cos",
           files: [
             {
               clientFileId: "client-3",
@@ -276,18 +313,20 @@ describe("Web Companion service contract", () => {
   });
 
   it("rejects commit upload item without token", async () => {
-    const created = await fixture.service.createUploadItems("session-1", {
-      token: "token-ok",
-      provider: "supabase",
-      files: [
-        {
-          clientFileId: "client-4",
-          filename: "photo-4.jpg",
-          contentType: "image/jpeg",
-          sizeBytes: 2048,
-        },
-      ],
-    });
+    const created = await withCosEnv(() =>
+      fixture.service.createUploadItems("session-1", {
+        token: "token-ok",
+        provider: "cos",
+        files: [
+          {
+            clientFileId: "client-4",
+            filename: "photo-4.jpg",
+            contentType: "image/jpeg",
+            sizeBytes: 2048,
+          },
+        ],
+      })
+    );
 
     const target = created.items[0];
     await assert.rejects(
@@ -300,5 +339,13 @@ describe("Web Companion service contract", () => {
         }),
       /Trusted upload token required/
     );
+  });
+
+  it("documents COS as the only cloud object storage provider", () => {
+    const envExample = fs.readFileSync(".env.example", "utf8");
+
+    assert.match(envExample, /COS_BUCKET=/);
+    assert.match(envExample, /COS_REGION=/);
+    assert.doesNotMatch(envExample, /SUPABASE_/);
   });
 });

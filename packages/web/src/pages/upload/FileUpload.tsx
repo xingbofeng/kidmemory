@@ -32,17 +32,17 @@ export function FileUpload({ session, sessionToken }: FileUploadProps) {
     lan: {
       available: Boolean((session.providers as { lan?: { available?: boolean } } | undefined)?.lan?.available),
     },
-    supabase: {
-      available: (session.providers as { supabase?: { available?: boolean } } | undefined)?.supabase?.available !== false,
+    cos: {
+      available: (session.providers as { cos?: { available?: boolean } } | undefined)?.cos?.available !== false,
     },
   }), [session.providers])
-  const [selectedProvider, setSelectedProvider] = useState<UploadProvider>(providers.lan.available ? 'lan' : 'supabase')
-  const hasAvailableProvider = providers.lan.available || providers.supabase.available
+  const [selectedProvider, setSelectedProvider] = useState<UploadProvider>(providers.lan.available ? 'lan' : 'cos')
+  const hasAvailableProvider = providers.lan.available || providers.cos.available
 
   useEffect(() => {
     setSelectedProvider((current) => {
       if (providers[current].available) return current
-      return providers.lan.available ? 'lan' : 'supabase'
+      return providers.lan.available ? 'lan' : 'cos'
     })
   }, [providers])
 

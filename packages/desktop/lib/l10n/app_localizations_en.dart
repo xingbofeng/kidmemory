@@ -254,6 +254,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setupOpenAiConfigUpdateFailed => 'OpenAI 配置更新失败';
 
   @override
+  String setupOpenAiDefaultConfigLoadFailed(Object error) {
+    return 'Failed to read the default model configuration. Opening an empty form: $error';
+  }
+
+  @override
   String get setupPostgresNotReadyNeedConfig =>
       'PostgreSQL 仍未就绪，安装 pgvector 前请先完成数据库配置';
 
@@ -281,6 +286,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setupStorageS3ModeLabel => 'S3 方式（推荐）';
+
+  @override
+  String get setupStorageCosS3ModeLabel => 'COS / S3 compatible mode';
+
+  @override
+  String get setupStorageProviderLabel => 'Storage provider';
+
+  @override
+  String get setupStorageProviderCosLabel => 'Tencent Cloud COS';
 
   @override
   String get setupSidecarStarted => '本地服务已启动';

@@ -15,7 +15,7 @@ interface DirectUploadPageProps {
 
 export function DirectUploadPage({ searchParams, clientFactory }: DirectUploadPageProps) {
   const { t } = useTranslation()
-  const { parsed, anonKey, anonKeyError, fullConfig, tasks, validationError, isUploading, handleFiles } = useDirectUploadTasks({
+  const { parsed, anonKeyError, fullConfig, tasks, validationError, isUploading, handleFiles } = useDirectUploadTasks({
     searchParams,
     clientFactory,
   })
@@ -30,7 +30,7 @@ export function DirectUploadPage({ searchParams, clientFactory }: DirectUploadPa
     )
   }
 
-  if (!anonKey) {
+  if (!fullConfig) {
     if (anonKeyError) {
       return (
         <DirectUploadError

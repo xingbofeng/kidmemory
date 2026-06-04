@@ -24,7 +24,7 @@ const session = {
   usedItems: 0,
   providers: {
     lan: { available: false },
-    supabase: { available: true },
+    cos: { available: true },
   },
 }
 
@@ -57,7 +57,7 @@ describe('useTrustedUploadSession', () => {
           assetId: 'asset-1',
           filename: 'photo.jpg',
           status: 'uploaded_remote',
-          provider: 'supabase',
+          provider: 'cos',
           objectKey: 'object-1',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -70,7 +70,7 @@ describe('useTrustedUploadSession', () => {
           assetId: 'asset-1',
           filename: 'photo.jpg',
           status: 'ready',
-          provider: 'supabase',
+          provider: 'cos',
           objectKey: 'object-1',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
